@@ -29,11 +29,22 @@ export namespace lysa {
 
         auto getConfig() const { return surfaceConfig; }
 
-        virtual ~Surface() = default;
+        virtual ~Surface();
+
     private:
+        struct FrameData {
+            std::shared_ptr<vireo::Fence> inFlightFence;
+            std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+            std::shared_ptr<vireo::CommandList> commandList;
+        };
+
         void* windowHandle;
         SurfaceConfig& surfaceConfig;
+
         std::shared_ptr<vireo::Vireo> vireo;
+        std::shared_ptr<vireo::SwapChain> swapChain;
+        std::shared_ptr<vireo::SubmitQueue> presentQueue;
+        std::vector<FrameData> framesData;
 
         // Fixed delta time for the physics
         static constexpr float dt{1.0f/60.0f};

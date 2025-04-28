@@ -12,23 +12,37 @@ namespace lysa {
         windowHandle{windowHandle},
         surfaceConfig{surfaceConfig} {
         vireo = vireo::Vireo::create(surfaceConfig.backend);
+        presentQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"PresentQueue");
+        swapChain = vireo->createSwapChain(
+            surfaceConfig.swapChainFormat,
+            presentQueue,
+            windowHandle,
+            surfaceConfig.presentMode,
+            surfaceConfig.framesInFlight);
+        framesData.resize(surfaceConfig.framesInFlight);
+        for (auto& frameData : framesData) {
+            frameData.inFlightFence = vireo->createFence();
+            frameData.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+            frameData.commandList = frameData.commandAllocator->createCommandList();
+        }
     }
 
     void Surface::drawFrame() {
-        // https://gafferongames.com/post/fix_your_timestep/
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count();
         double frameTime = newTime - currentTime;
 
         // Calculate the FPS
         elapsedSeconds += static_cast<float>(frameTime);
         frameCount++;
         if (elapsedSeconds >= 1.0) {
-            fps            = static_cast<uint32_t>(frameCount / elapsedSeconds);
-            frameCount     = 0;
+            fps = static_cast<uint32_t>(frameCount / elapsedSeconds);
+            frameCount = 0;
             elapsedSeconds = 0;
         }
 
+        // https://gafferongames.com/post/fix_your_timestep/
         if (frameTime > 0.25) {
             frameTime = 0.25; // Note: Max frame time to avoid spiral of death
         }
@@ -41,7 +55,22 @@ namespace lysa {
             }
             // Process nodes here
         }
-        // Render frame here
+
+        auto& frame = framesData[swapChain->getCurrentFrameIndex()];
+        if (!swapChain->acquire(frame.inFlightFence)) { return; }
+        frame.commandAllocator->reset();
+        frame.commandList->begin();
+        frame.commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::RENDER_TARGET_COLOR);
+        frame.commandList->barrier(swapChain, vireo::ResourceState::RENDER_TARGET_COLOR, vireo::ResourceState::PRESENT);
+        frame.commandList->end();
+        presentQueue->submit(frame.inFlightFence, swapChain, {frame.commandList});
+        swapChain->present();
+        swapChain->nextFrameIndex();
     }
+
+    Surface::~Surface() {
+        swapChain->waitIdle();
+    }
+
 
 }
