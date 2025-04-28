@@ -6,11 +6,7 @@
 */
 export module lysa;
 
-export namespace lysa {
-
-    class Lysa {
-    public:
-        static void setHello();
-    };
-
-};
+export import lysa.application;
+export import lysa.application_config;
+export import lysa.constants;
+export import lysa.enums;

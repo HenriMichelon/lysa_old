@@ -50,13 +50,20 @@ set(ENGINE_SRC_DIR ${SRC_DIR}/${LYSA_TARGET})
 
 #######################################################
 add_library(${LYSA_TARGET} STATIC
-        ${ENGINE_SRC_DIR}/Lysa.cpp
+        ${ENGINE_SRC_DIR}/Application.cpp
+        ${ENGINE_SRC_DIR}/Object.cpp
+        ${ENGINE_SRC_DIR}/Signal.cpp
 )
 target_sources(${LYSA_TARGET}
     PUBLIC
     FILE_SET CXX_MODULES
     FILES
+        ${ENGINE_SRC_DIR}/Application.ixx
+        ${ENGINE_SRC_DIR}/ApplicationConfig.ixx
+        ${ENGINE_SRC_DIR}/Constants.ixx
+        ${ENGINE_SRC_DIR}/Enums.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
+        ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
 )
 compile_options(${LYSA_TARGET})
