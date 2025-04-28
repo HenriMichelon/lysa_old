@@ -7,9 +7,6 @@
 export module lysa.application_config;
 
 import std;
-import glm;
-import vireo;
-import lysa.constants;
 import lysa.enums;
 
 export namespace lysa {
@@ -21,26 +18,6 @@ export namespace lysa {
     struct LayerCollisionTable {
         uint32_t layersCount;
         std::vector<LayerCollideWith> layersCollideWith;
-    };
-
-    /**
-     * Rendering surface configuration
-     */
-    struct SurfaceConfig {
-        //! Graphic API
-        vireo::Backend backend{vireo::Backend::VULKAN};
-        //! MSAA samples count
-        vireo::MSAA msaa{vireo::MSAA::NONE};
-        //! Presentation mode
-        vireo::PresentMode presentMode = {vireo::PresentMode::IMMEDIATE};
-        //! Window & frame buffers clear color
-        glm::vec3 clearColor{DEFAULT_CLEAR_COLOR};
-        //! Number of simultaneous frames during rendering
-        uint32_t framesInFlight{2};
-        //! Name for the default vertex shader for the scene renderer
-        std::string sceneVertexShader{"default"};
-        //! Name for the default fragment shader for the scene renderer
-        std::string sceneFragmentShader{"default"};
     };
 
     /**

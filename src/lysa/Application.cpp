@@ -6,11 +6,18 @@
 */
 module lysa.application;
 
+import lysa.windows.surface;
+
 namespace lysa {
 
-    std::shared_ptr<Application> Application::createApplication(ApplicationConfig& applicationConfig) {
-        std::cout << "Hello App!" << std::endl;
-        return nullptr;
+    Application::Application(ApplicationConfig& applicationConfig):
+        applicationConfig{applicationConfig} {
+    }
+
+    std::shared_ptr<Surface> Application::createSurface(SurfaceConfig& surfaceConfig, void* windowHandle) const {
+#ifdef _WIN32
+        return std::make_shared<WindowsSurface>(surfaceConfig, windowHandle);
+#endif
     }
 
 }

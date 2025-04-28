@@ -49,10 +49,19 @@ set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_SRC_DIR ${SRC_DIR}/${LYSA_TARGET})
 
 #######################################################
+if(WIN32)
+    set(WIN32_SRC
+            ${ENGINE_SRC_DIR}/os/windows/WindowsSurface.cpp
+    )
+    set(WIN32_MODULES
+            ${ENGINE_SRC_DIR}/os/windows/WindowsSurface.ixx
+    )
+endif ()
 add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
+        ${WIN32_SRC}
 )
 target_sources(${LYSA_TARGET}
     PUBLIC
@@ -65,6 +74,9 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
+        ${ENGINE_SRC_DIR}/Surface.ixx
+        ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
+        ${WIN32_MODULES}
 )
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
