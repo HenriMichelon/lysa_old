@@ -61,6 +61,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
+        ${ENGINE_SRC_DIR}/Surface.cpp
         ${WIN32_SRC}
 )
 target_sources(${LYSA_TARGET}

@@ -5,7 +5,6 @@
 * https://opensource.org/licenses/MIT
 */
 module;
-#include "lysa/os/windows/Libraries.h"
 export module lysa.windows.surface;
 
 import std;
@@ -20,8 +19,6 @@ export namespace lysa {
     class WindowsSurface : public Surface {
     public:
         WindowsSurface(SurfaceConfig&, void* windowHandle);
-    private:
-        HWND hWnd;
     };
 
 }

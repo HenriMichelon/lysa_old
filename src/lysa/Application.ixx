@@ -19,9 +19,10 @@ export namespace lysa {
 
         std::shared_ptr<Surface> createSurface(SurfaceConfig& surfaceConfig, void* windowHandle) const;
 
+        auto getConfig() const { return applicationConfig; }
+
     private:
         ApplicationConfig& applicationConfig;
-
     };
 
 };

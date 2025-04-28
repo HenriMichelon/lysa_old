@@ -8,12 +8,12 @@ export module lysa.signal;
 
 import std;
 
-namespace lysa {
+export namespace lysa {
 
     /**
      * %A signal of an Object
      */
-    export class Signal {
+    class Signal {
     public:
         /**
         * Name of a signal
@@ -39,7 +39,7 @@ namespace lysa {
         void emit(void* params) const;
 
     private:
-        std::list<Handler> handlers;
+        std::list<Handler> handlers{};
     };
 
 }
