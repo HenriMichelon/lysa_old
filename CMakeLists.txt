@@ -46,26 +46,18 @@ set(VIREO_TARGET "vireo_rhi")
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(SHADERS_SRC_DIR ${SRC_DIR}/shaders)
-set(SHADERS_INCLUDE_DIR ${SRC_DIR}/shaders/include)
-set(SHADERS_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
-
-#######################################################
-# Slang shaders
-file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
-file(GLOB_RECURSE SHADERS_SOURCE_FILES
-        "${SHADERS_SRC_DIR}/*.slang"
-)
-add_shaders(shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
-#add_dependencies(target_shaders ${VIREO_TARGET})
+set(ENGINE_SRC_DIR ${SRC_DIR}/${LYSA_TARGET})
 
 #######################################################
 add_library(${LYSA_TARGET} STATIC
+        ${ENGINE_SRC_DIR}/Lysa.cpp
 )
 target_sources(${LYSA_TARGET}
     PUBLIC
     FILE_SET CXX_MODULES
     FILES
+        ${ENGINE_SRC_DIR}/Lysa.ixx
+        ${ENGINE_SRC_DIR}/Signal.ixx
 )
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
@@ -75,6 +67,7 @@ if(WIN32)
     target_precompile_headers(${LYSA_TARGET} PRIVATE
             "<windows.h>"
             "<cstdint>"
+            "<cstddef>"
     )
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} Xinput dinput8 dxguid dxgi d3d12 d3dcompiler)
