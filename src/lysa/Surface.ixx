@@ -9,6 +9,7 @@ export module lysa.surface;
 import std;
 import vireo;
 import lysa.surface_config;
+import lysa.renderers.renderer;
 
 export namespace lysa {
 
@@ -45,6 +46,7 @@ export namespace lysa {
         std::shared_ptr<vireo::SwapChain> swapChain;
         std::shared_ptr<vireo::SubmitQueue> presentQueue;
         std::vector<FrameData> framesData;
+        std::vector<std::shared_ptr<Renderer>> renderers;
 
         // Fixed delta time for the physics
         static constexpr float dt{1.0f/60.0f};

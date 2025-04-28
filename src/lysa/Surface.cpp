@@ -60,8 +60,8 @@ namespace lysa {
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
         frame.commandAllocator->reset();
         frame.commandList->begin();
-        frame.commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::RENDER_TARGET_COLOR);
-        frame.commandList->barrier(swapChain, vireo::ResourceState::RENDER_TARGET_COLOR, vireo::ResourceState::PRESENT);
+        frame.commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
+        frame.commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
         frame.commandList->end();
         presentQueue->submit(frame.inFlightFence, swapChain, {frame.commandList});
         swapChain->present();
@@ -71,6 +71,5 @@ namespace lysa {
     Surface::~Surface() {
         swapChain->waitIdle();
     }
-
 
 }

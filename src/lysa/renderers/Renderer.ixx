@@ -4,13 +4,18 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-export module lysa.renderers.scene_renderer;
+export module lysa.renderers.renderer;
 
-import lysa.renderers.renderer;
+import std;
+import vireo;
 
 export namespace lysa {
-    class SceneRenderer : public Renderer {
+    class Renderer {
     public:
+        Renderer();
 
+        virtual ~Renderer() = default;
+
+    private:
     };
 }

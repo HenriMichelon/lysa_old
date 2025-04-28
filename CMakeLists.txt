@@ -62,6 +62,8 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Surface.cpp
+        ${ENGINE_SRC_DIR}/renderers/Renderpass.cpp
+        ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${WIN32_SRC}
 )
 target_sources(${LYSA_TARGET}
@@ -77,6 +79,8 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Surface.ixx
         ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
+        ${ENGINE_SRC_DIR}/renderers/Renderpass.ixx
+        ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
         ${WIN32_MODULES}
 )
 compile_options(${LYSA_TARGET})
