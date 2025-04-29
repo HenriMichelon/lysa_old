@@ -21,7 +21,7 @@ namespace lysa {
             surfaceConfig.framesInFlight);
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frameData : framesData) {
-            frameData.inFlightFence = vireo->createFence();
+            frameData.inFlightFence = vireo->createFence(true);
             frameData.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
             frameData.commandList = frameData.commandAllocator->createCommandList();
         }
