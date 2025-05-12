@@ -21,6 +21,7 @@ namespace lysa {
     }
 
     void ForwardRenderer::update(uint32_t frameIndex) {
+        forwardColorPass.update(frameIndex);
         gammaCorrectionPass.update(frameIndex);
     }
 
