@@ -15,8 +15,13 @@ namespace lysa {
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
         MeshesRenderer{surfaceConfig, vireo, name},
-        forwardColorPass{surfaceConfig} {
+        forwardColorPass{surfaceConfig, vireo, samplers},
+        gammaCorrectionPass{surfaceConfig, vireo, samplers} {
         framesData.resize(surfaceConfig.framesInFlight);
+    }
+
+    void ForwardRenderer::update(uint32_t frameIndex) {
+        gammaCorrectionPass.update(frameIndex);
     }
 
     void ForwardRenderer::render(
@@ -32,9 +37,17 @@ namespace lysa {
         commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
 
         forwardColorPass.render(frameIndex, extent, frame.colorAttachment, commandList);
+        commandList->barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::RENDER_TARGET_COLOR,
+            vireo::ResourceState::SHADER_READ);
+        gammaCorrectionPass.render(frameIndex, extent, frame.colorAttachment, commandList);
+        commandList->barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::SHADER_READ,
+            vireo::ResourceState::UNDEFINED);
 
         commandList->end();
-
         submitQueue->submit(vireo::WaitStage::COLOR_OUTPUT, renderingFinishedSemaphore, {commandList});
     }
 
@@ -44,7 +57,11 @@ namespace lysa {
                 surfaceConfig.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
-                {surfaceConfig.clearColor.r, surfaceConfig.clearColor.g, surfaceConfig.clearColor.b, 1.0f});
+                {surfaceConfig.clearColor.r, surfaceConfig.clearColor.g, surfaceConfig.clearColor.b, 1.0f},
+                surfaceConfig.msaa,
+                name);
         }
+        forwardColorPass.resize(extent);
+        gammaCorrectionPass.resize(extent);
     }
 }

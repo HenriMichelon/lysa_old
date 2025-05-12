@@ -47,6 +47,17 @@ set(VIREO_TARGET "vireo_rhi")
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_SRC_DIR ${SRC_DIR}/${LYSA_TARGET})
+set(SHADERS_SRC_DIR ${ENGINE_SRC_DIR}/shaders)
+set(SHADERS_INCLUDE_DIR ${ENGINE_SRC_DIR}/shaders/include)
+set(SHADERS_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
+
+#######################################################
+# Slang shaders
+file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
+file(GLOB_RECURSE SHADERS_SOURCE_FILES
+        "${SHADERS_SRC_DIR}/*.slang"
+)
+add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 
 #######################################################
 if(WIN32)
@@ -62,10 +73,14 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Surface.cpp
+        ${ENGINE_SRC_DIR}/Tools.cpp
         ${ENGINE_SRC_DIR}/renderer/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderer/MeshesRenderer.cpp
         ${ENGINE_SRC_DIR}/renderer/Renderer.cpp
-        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColorPass.cpp
+        ${ENGINE_SRC_DIR}/renderer/Samplers.cpp
+        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColor.cpp
+        ${ENGINE_SRC_DIR}/renderer/renderpass/GammaCorrection.cpp
+        ${ENGINE_SRC_DIR}/renderer/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderer/renderpass/Renderpass.cpp
         ${WIN32_SRC}
 )
@@ -86,7 +101,10 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderer/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderer/MeshesRenderer.ixx
         ${ENGINE_SRC_DIR}/renderer/Renderer.ixx
-        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColorPass.ixx
+        ${ENGINE_SRC_DIR}/renderer/Samplers.ixx
+        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColor.ixx
+        ${ENGINE_SRC_DIR}/renderer/renderpass/GammaCorrection.ixx
+        ${ENGINE_SRC_DIR}/renderer/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderer/renderpass/Renderpass.ixx
         ${WIN32_MODULES}
 )

@@ -13,7 +13,8 @@ namespace lysa {
         const std::wstring& name) :
         surfaceConfig{surfaceConfig},
         name{name},
-        vireo{vireo} {
-        submitQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC);
+        samplers{vireo},
+        vireo{vireo},
+        submitQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, name)} {
     }
 }

@@ -10,11 +10,15 @@ import std;
 import vireo;
 import lysa.surface_config;
 import lysa.renderers.renderpass;
+import lysa.renderers.samplers;
 
 export namespace lysa {
-    class ForwardColorPass : public Renderpass {
+    class ForwardColor : public Renderpass {
     public:
-        ForwardColorPass(const SurfaceConfig& surfaceConfig);
+        ForwardColor(
+            const SurfaceConfig& surfaceConfig,
+            const std::shared_ptr<vireo::Vireo>& vireo,
+            const Samplers& samplers);
 
         void render(
             uint32_t frameIndex,

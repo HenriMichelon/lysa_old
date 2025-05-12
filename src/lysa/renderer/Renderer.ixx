@@ -9,6 +9,7 @@ export module lysa.renderers.renderer;
 import std;
 import vireo;
 import lysa.surface_config;
+import lysa.renderers.samplers;
 
 export namespace lysa {
     class Renderer {
@@ -18,7 +19,10 @@ export namespace lysa {
             std::shared_ptr<vireo::CommandList>      commandList;
         };
 
-        Renderer(const SurfaceConfig& surfaceConfig, const std::shared_ptr<vireo::Vireo>& vireo, const std::wstring& name);
+        Renderer(
+            const SurfaceConfig& surfaceConfig,
+            const std::shared_ptr<vireo::Vireo>& vireo,
+            const std::wstring& name);
 
         virtual void resize(const vireo::Extent& extent) { }
 
@@ -34,9 +38,10 @@ export namespace lysa {
         virtual ~Renderer() = default;
 
     protected:
-        const SurfaceConfig& surfaceConfig;
-        const std::wstring name;
-        std::shared_ptr<vireo::Vireo> vireo;
+        const SurfaceConfig&                surfaceConfig;
+        const std::wstring                  name;
+        const Samplers                      samplers;
+        std::shared_ptr<vireo::Vireo>       vireo;
         std::shared_ptr<vireo::SubmitQueue> submitQueue;
     };
 }

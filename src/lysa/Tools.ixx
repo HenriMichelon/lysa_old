@@ -6,10 +6,8 @@
 */
 export module lysa.tools;
 
-import std;
-import glm;
-import vireo;
-
 export namespace lysa {
+
+     float getCurrentTimeMilliseconds();
 
 }

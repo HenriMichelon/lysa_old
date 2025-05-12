@@ -7,8 +7,11 @@
 module lysa.renderers.renderpass.forward_color;
 
 namespace lysa {
-    ForwardColorPass::ForwardColorPass(const SurfaceConfig& surfaceConfig):
-        Renderpass{surfaceConfig} {
+    ForwardColor::ForwardColor(
+        const SurfaceConfig& surfaceConfig,
+        const std::shared_ptr<vireo::Vireo>& vireo,
+        const Samplers& samplers):
+        Renderpass{surfaceConfig, vireo, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
         renderingConfig.colorRenderTargets[0].clearValue = {
             surfaceConfig.clearColor.r,
@@ -17,7 +20,7 @@ namespace lysa {
             1.0f};
     }
 
-    void ForwardColorPass::render(
+    void ForwardColor::render(
         const uint32_t frameIndex,
         const vireo::Extent& extent,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,

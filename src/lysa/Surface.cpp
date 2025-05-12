@@ -27,7 +27,7 @@ namespace lysa {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
             frame.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
-            frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY);
+            frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY, L"Present Semaphore");
         }
         renderer->resize(swapChain->getExtent());
     }
@@ -37,6 +37,7 @@ namespace lysa {
             std::chrono::steady_clock::now().time_since_epoch())
             .count();
         double frameTime = newTime - currentTime;
+        const auto frameIndex = swapChain->getCurrentFrameIndex();
 
         // Calculate the FPS
         elapsedSeconds += static_cast<float>(frameTime);
@@ -58,10 +59,9 @@ namespace lysa {
                 // Update physics here
                 accumulator -= FIXED_DELTA_TIME;
             }
-            // Process nodes here
+            renderer->update(frameIndex);
         }
 
-        const auto frameIndex = swapChain->getCurrentFrameIndex();
         auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 
@@ -75,7 +75,7 @@ namespace lysa {
         const auto commandList = frame.commandList;
 
         commandList->begin();
-        commandList->barrier(colorAttachment, vireo::ResourceState::RENDER_TARGET_COLOR,vireo::ResourceState::COPY_SRC);
+        commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
         commandList->copy(colorAttachment, swapChain);
         commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
