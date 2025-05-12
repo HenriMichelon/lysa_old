@@ -6,7 +6,9 @@
 */
 module lysa.application;
 
-import lysa.windows.surface;
+#ifdef _WIN32
+import lysa.os.windows.surface;
+#endif
 
 namespace lysa {
 

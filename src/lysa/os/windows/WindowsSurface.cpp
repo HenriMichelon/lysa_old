@@ -5,7 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 module;
-module lysa.windows.surface;
+module lysa.os.windows.surface;
 
 namespace lysa {
 

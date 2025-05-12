@@ -14,8 +14,12 @@ export namespace lysa {
     public:
         Renderer();
 
-        virtual ~Renderer() = default;
+        virtual void update() { }
 
+
+
+
+        virtual ~Renderer() = default;
     private:
     };
 }

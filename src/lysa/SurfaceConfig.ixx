@@ -26,7 +26,7 @@ export namespace lysa {
         vireo::MSAA msaa{vireo::MSAA::NONE};
         //! Presentation mode
         vireo::PresentMode presentMode = {vireo::PresentMode::IMMEDIATE};
-        //! Window & frame buffers clear color
+        //! Frame buffer clear color
         glm::vec3 clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32_t framesInFlight{2};

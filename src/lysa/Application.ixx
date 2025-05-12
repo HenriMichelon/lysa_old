@@ -15,13 +15,26 @@ export namespace lysa {
 
     class Application {
     public:
+        /**
+         * Creates a Lysa application
+         * @param applicationConfig global application configuration
+         */
         Application(ApplicationConfig& applicationConfig);
 
+        /**
+         * Creates a rendering surface for a window
+         * @param surfaceConfig The configuration parameter for this surface
+         * @param windowHandle The opaque, os-specific, window handle
+         */
         std::shared_ptr<Surface> createSurface(SurfaceConfig& surfaceConfig, void* windowHandle) const;
 
+        /**
+         * Return the global application configuration
+         */
         auto getConfig() const { return applicationConfig; }
 
     private:
+        // Global application configuration
         ApplicationConfig& applicationConfig;
     };
 

@@ -12,7 +12,7 @@ namespace lysa {
         windowHandle{windowHandle},
         surfaceConfig{surfaceConfig} {
         vireo = vireo::Vireo::create(surfaceConfig.backend);
-        presentQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"PresentQueue");
+        presentQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue");
         swapChain = vireo->createSwapChain(
             surfaceConfig.swapChainFormat,
             presentQueue,
@@ -21,7 +21,7 @@ namespace lysa {
             surfaceConfig.framesInFlight);
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frameData : framesData) {
-            frameData.inFlightFence = vireo->createFence(true);
+            frameData.inFlightFence = vireo->createFence(true, L"Present Fence");
             frameData.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
             frameData.commandList = frameData.commandAllocator->createCommandList();
         }
@@ -49,9 +49,9 @@ namespace lysa {
         currentTime = newTime;
         accumulator += frameTime;
         {
-            while (accumulator >= dt) {
+            while (accumulator >= FIXED_DELTA_TIME) {
                 // Update physics here
-                accumulator -= dt;
+                accumulator -= FIXED_DELTA_TIME;
             }
             // Process nodes here
         }
@@ -69,6 +69,7 @@ namespace lysa {
     }
 
     Surface::~Surface() {
+        presentQueue->waitIdle();
         swapChain->waitIdle();
     }
 

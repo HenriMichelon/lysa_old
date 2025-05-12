@@ -5,7 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 module;
-export module lysa.windows.surface;
+export module lysa.os.windows.surface;
 
 import std;
 import lysa.surface;
