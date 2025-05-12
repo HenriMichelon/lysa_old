@@ -23,6 +23,8 @@ export namespace lysa {
         */
         Surface(SurfaceConfig& surfaceConfig, void* windowHandle);
 
+        void resize();
+
         /**
          * Prepare and draw a frame
          */
@@ -57,12 +59,16 @@ export namespace lysa {
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             // Command allocator for the main thread, used for the swap chain barriers
             std::shared_ptr<vireo::CommandList> commandList;
+            //
+            std::shared_ptr<vireo::Semaphore> renderingFinishedSemaphore;
         };
 
         // Opaque window handle for presenting
         void*          windowHandle;
         // Surface configuration
         SurfaceConfig& surfaceConfig;
+        //
+        std::shared_ptr<Renderer> renderer;
 
         ////// Frame drawing loop parameters
         // Last drawFrame() start time

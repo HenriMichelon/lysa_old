@@ -6,6 +6,8 @@
 */
 module lysa.surface;
 
+import lysa.renderers.forward_renderer;
+
 namespace lysa {
 
     Surface::Surface(SurfaceConfig& surfaceConfig, void* windowHandle):
@@ -20,11 +22,14 @@ namespace lysa {
             surfaceConfig.presentMode,
             surfaceConfig.framesInFlight);
         framesData.resize(surfaceConfig.framesInFlight);
-        for (auto& frameData : framesData) {
-            frameData.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frameData.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
-            frameData.commandList = frameData.commandAllocator->createCommandList();
+        for (auto& frame : framesData) {
+            frame.inFlightFence = vireo->createFence(true, L"Present Fence");
+            frame.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+            frame.commandList = frame.commandAllocator->createCommandList();
+            frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY);
         }
+        renderer = std::make_shared<ForwardRenderer>(surfaceConfig, vireo, L"Main Renderer");
+        renderer->resize(swapChain->getExtent());
     }
 
     void Surface::drawFrame() {
@@ -56,16 +61,43 @@ namespace lysa {
             // Process nodes here
         }
 
-        auto& frame = framesData[swapChain->getCurrentFrameIndex()];
+        const auto frameIndex = swapChain->getCurrentFrameIndex();
+        auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
+
+        renderer->render(
+            swapChain->getCurrentFrameIndex(),
+            swapChain->getExtent(),
+            frame.renderingFinishedSemaphore);
+
+        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
         frame.commandAllocator->reset();
-        frame.commandList->begin();
-        frame.commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
-        frame.commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
-        frame.commandList->end();
-        presentQueue->submit(frame.inFlightFence, swapChain, {frame.commandList});
+        const auto commandList = frame.commandList;
+
+        commandList->begin();
+        commandList->barrier(colorAttachment, vireo::ResourceState::RENDER_TARGET_COLOR,vireo::ResourceState::COPY_SRC);
+        commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
+        commandList->copy(colorAttachment, swapChain);
+        commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
+        commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
+        commandList->end();
+        presentQueue->submit(
+            frame.renderingFinishedSemaphore,
+            vireo::WaitStage::TRANSFER,
+            frame.inFlightFence,
+            swapChain,
+            {frame.commandList});
         swapChain->present();
         swapChain->nextFrameIndex();
+    }
+
+    void Surface::resize() {
+        const auto oldExtent = swapChain->getExtent();
+        swapChain->recreate();
+        const auto newExtent = swapChain->getExtent();
+        if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
+            renderer->resize(newExtent);
+        }
     }
 
     Surface::~Surface() {

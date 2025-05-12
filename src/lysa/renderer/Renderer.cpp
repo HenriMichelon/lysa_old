@@ -8,8 +8,10 @@ module lysa.renderers.renderer;
 
 namespace lysa {
     Renderer::Renderer(
+        const SurfaceConfig& surfaceConfig,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
+        surfaceConfig{surfaceConfig},
         name{name},
         vireo{vireo} {
         submitQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC);
