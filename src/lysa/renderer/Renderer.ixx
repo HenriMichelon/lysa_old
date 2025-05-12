@@ -29,7 +29,7 @@ export namespace lysa {
         virtual void render(
             uint32_t frameIndex,
             const vireo::Extent& extent,
-            const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) { }
+            const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) = 0;
 
         virtual ~Renderer() = default;
 

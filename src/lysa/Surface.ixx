@@ -67,8 +67,6 @@ export namespace lysa {
         void*          windowHandle;
         // Surface configuration
         SurfaceConfig& surfaceConfig;
-        //
-        std::shared_ptr<Renderer> renderer;
 
         ////// Frame drawing loop parameters
         // Last drawFrame() start time
@@ -84,13 +82,16 @@ export namespace lysa {
 
         ////// Vireo objects. Keep them in order for a proper destruction order
         // Associated Vireo object
-        std::shared_ptr<vireo::Vireo>      vireo;
-        // Swap chain for this surface
-        std::shared_ptr<vireo::SwapChain>  swapChain;
+        std::shared_ptr<vireo::Vireo>       vireo;
         // Submission queue used to present the swap chain
         std::shared_ptr<vireo::SubmitQueue> presentQueue;
+        // Swap chain for this surface
+        std::shared_ptr<vireo::SwapChain>   swapChain;
         // Per frame data
-        std::vector<FrameData>             framesData;
+        std::vector<FrameData>              framesData;
+
+        std::unique_ptr<Renderer>           renderer;
+
     };
 
 }

@@ -7,7 +7,7 @@
 module lysa.renderers.renderpass;
 
 namespace lysa {
-    Renderpass::Renderpass() {
-
+    Renderpass::Renderpass(const SurfaceConfig& surfaceConfig):
+        surfaceConfig{surfaceConfig} {
     }
 }

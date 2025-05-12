@@ -10,6 +10,7 @@ import std;
 import vireo;
 import lysa.surface_config;
 import lysa.renderers.meshes_renderer;
+import lysa.renderers.renderpass.forward_color;
 
 export namespace lysa {
     class ForwardRenderer : public MeshesRenderer {
@@ -32,19 +33,6 @@ export namespace lysa {
             std::shared_ptr<vireo::RenderTarget> colorAttachment;
         };
         std::vector<FrameData> framesData;
-
-        vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc   = { { .blendEnable = true } },
-            .depthTestEnable  = false,
-            .depthWriteEnable = false,
-        };
-
-        vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{
-                .clear = true,
-            }},
-            .depthTestEnable = pipelineConfig.depthTestEnable,
-            .discardDepthStencilAfterRender = true,
-        };
+        ForwardColorPass       forwardColorPass;
     };
 }

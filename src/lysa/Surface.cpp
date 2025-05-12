@@ -12,15 +12,16 @@ namespace lysa {
 
     Surface::Surface(SurfaceConfig& surfaceConfig, void* windowHandle):
         windowHandle{windowHandle},
-        surfaceConfig{surfaceConfig} {
-        vireo = vireo::Vireo::create(surfaceConfig.backend);
-        presentQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue");
-        swapChain = vireo->createSwapChain(
+        surfaceConfig{surfaceConfig},
+        vireo{vireo::Vireo::create(surfaceConfig.backend)},
+        presentQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue")},
+        swapChain{vireo->createSwapChain(
             surfaceConfig.renderingFormat,
             presentQueue,
             windowHandle,
             surfaceConfig.presentMode,
-            surfaceConfig.framesInFlight);
+            surfaceConfig.framesInFlight)},
+        renderer{std::make_unique<ForwardRenderer>(surfaceConfig, vireo, L"Main Renderer")} {
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
@@ -28,7 +29,6 @@ namespace lysa {
             frame.commandList = frame.commandAllocator->createCommandList();
             frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY);
         }
-        renderer = std::make_shared<ForwardRenderer>(surfaceConfig, vireo, L"Main Renderer");
         renderer->resize(swapChain->getExtent());
     }
 
