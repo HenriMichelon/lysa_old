@@ -14,7 +14,7 @@ namespace lysa {
         vireo = vireo::Vireo::create(surfaceConfig.backend);
         presentQueue = vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue");
         swapChain = vireo->createSwapChain(
-            surfaceConfig.swapChainFormat,
+            surfaceConfig.renderingFormat,
             presentQueue,
             windowHandle,
             surfaceConfig.presentMode,

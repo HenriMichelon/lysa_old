@@ -4,12 +4,12 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-export module lysa.renderers.scene_renderer;
+export module lysa.renderers.deferred_scene_renderer;
 
 import lysa.renderers.renderer;
 
 export namespace lysa {
-    class SceneRenderer : public Renderer {
+    class DeferredSceneRenderer : public Renderer {
     public:
 
     };

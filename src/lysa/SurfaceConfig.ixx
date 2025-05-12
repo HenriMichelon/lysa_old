@@ -21,7 +21,7 @@ export namespace lysa {
         //! Graphic API
         vireo::Backend backend{vireo::Backend::VULKAN};
         //! Swap chain image format
-        vireo::ImageFormat swapChainFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
+        vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
         //! MSAA samples count
         vireo::MSAA msaa{vireo::MSAA::NONE};
         //! Presentation mode
