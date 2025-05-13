@@ -111,7 +111,7 @@ target_sources(${LYSA_TARGET}
 )
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} glm::glm glm-modules std-cxx-modules)
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules Eigen3::Eigen)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 if(WIN32)
     target_precompile_headers(${LYSA_TARGET} PRIVATE

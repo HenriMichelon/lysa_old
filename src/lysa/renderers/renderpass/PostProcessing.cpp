@@ -40,13 +40,13 @@ namespace lysa {
             name);
         pipelineConfig.vertexShader = vireo->createShaderModule("shaders/quad.vert");
         pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
-        pipeline = vireo->createGraphicPipeline(pipelineConfig);
+        pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.paramsUniform = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
-            frame.descriptorSet = vireo->createDescriptorSet(descriptorLayout);
+            frame.descriptorSet = vireo->createDescriptorSet(descriptorLayout, name);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);
@@ -56,7 +56,6 @@ namespace lysa {
 
     void PostProcessing::update(const uint32_t frameIndex) {
         auto& frame = framesData[frameIndex];
-
         frame.params.time = Tools::getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
     }

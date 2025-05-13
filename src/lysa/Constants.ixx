@@ -6,73 +6,74 @@
 */
 export module lysa.constants;
 
-import glm;
+#include <Eigen/Dense>
+using namespace Eigen;
 
 export namespace lysa {
     /**
     * Default clear color for windows and color frame buffers
     */
-    constexpr glm::vec3 DEFAULT_CLEAR_COLOR{0.0f, 0.0f, 0.0f};
+    const Vector3f DEFAULT_CLEAR_COLOR{0.0f, 0.0f, 0.0f};
 
     /**
     * X Axis
     */
-    constexpr glm::vec3 AXIS_X{1.0, 0.0f, 0.0f};
+    const Vector3f AXIS_X{1.0, 0.0f, 0.0f};
 
     /**
     * Y Axis
     */
-    constexpr glm::vec3 AXIS_Y{0.0, 1.0f, 0.0f};
+    const Vector3f AXIS_Y{0.0, 1.0f, 0.0f};
 
     /**
     * Z Axis
     */
-    constexpr glm::vec3 AXIS_Z{0.0, 0.0f, 1.0f};
+    const Vector3f AXIS_Z{0.0, 0.0f, 1.0f};
 
     /**
     * UP Axis
     */
-    constexpr glm::vec3 AXIS_UP = AXIS_Y;
+    const Vector3f AXIS_UP = AXIS_Y;
 
     /**
     * DOWN Axis
     */
-    constexpr glm::vec3 AXIS_DOWN = -AXIS_Y;
+    const Vector3f AXIS_DOWN = -AXIS_Y;
 
     /**
     * FRONT Axis
     */
-    constexpr glm::vec3 AXIS_FRONT = -AXIS_Z;
+    const Vector3f AXIS_FRONT = -AXIS_Z;
 
     /**
     * BACK Axis
     */
-    constexpr glm::vec3 AXIS_BACK = AXIS_Z;
+    const Vector3f AXIS_BACK = AXIS_Z;
 
     /**
     * RIGHT Axis
     */
-    constexpr glm::vec3 AXIS_RIGHT = AXIS_X;
+    const Vector3f AXIS_RIGHT = AXIS_X;
 
     /**
     * LEFT Axis
     */
-    constexpr glm::vec3 AXIS_LEFT = -AXIS_X;
+    const Vector3f AXIS_LEFT = -AXIS_X;
 
     /**
     * 2D zero initialized vector
     */
-    constexpr glm::vec2 VEC2ZERO{0.0};
+    const Vector2f VEC2ZERO{0.0};
 
     /**
     * 3D zero initialized vector
     */
-    constexpr glm::vec3 VEC3ZERO{0.0};
+    const Vector3f VEC3ZERO{0.0};
 
     /**
     * Unit quaternion with no rotation
     */
-    constexpr glm::quat QUATERNION_IDENTITY{1.0f, 0.0f, 0.0f, 0.0f};
+    const Quaternion QUATERNION_IDENTITY{1.0f, 0.0f, 0.0f, 0.0f};
 
     /**
     * The Basis of 3D transform.

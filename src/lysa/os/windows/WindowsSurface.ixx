@@ -13,9 +13,6 @@ import lysa.surface_config;
 
 export namespace lysa {
 
-    /*
-     * %A Rendering surface
-     */
     class WindowsSurface : public Surface {
     public:
         WindowsSurface(SurfaceConfig&, void* windowHandle);

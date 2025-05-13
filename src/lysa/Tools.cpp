@@ -7,7 +7,6 @@
 module lysa.tools;
 
 import std;
-import glm;
 import vireo;
 
 namespace lysa {
