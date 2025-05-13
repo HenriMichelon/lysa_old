@@ -19,9 +19,17 @@ namespace lysa {
         const std::wstring& name):
         Renderpass{surfaceConfig, vireo, samplers, name},
         fragShaderName{fragShaderName},
+        data{data},
         descriptorLayout{vireo->createDescriptorLayout(name)} {
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
+        if (data) {
+            descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
+            dataUniform = vireo->createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
+            dataUniform->map();
+            dataUniform->write(data, dataSize);
+            dataUniform->unmap();
+        }
         descriptorLayout->build();
 
         pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
@@ -40,6 +48,9 @@ namespace lysa {
             frame.paramsUniform->map();
             frame.descriptorSet = vireo->createDescriptorSet(descriptorLayout);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
+            if (data) {
+                frame.descriptorSet->update(BINDING_DATA, dataUniform);
+            }
         }
     }
 

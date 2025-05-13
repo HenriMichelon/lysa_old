@@ -6,19 +6,33 @@
 */
 #include "postprocess.inc.slang"
 
+
+struct Data {
+    float gamma;
+};
+
+
 ConstantBuffer<Params> params : register(b0);
+ConstantBuffer<Data> data     : register(b2);
 Texture2D inputImage          : register(t1);
 SamplerState sampler          : register(SAMPLER_NEAREST_NEAREST_BORDER_LINEAR, space1);
 
-float3 linearToSrgb(float3 c) {
+float3 linearToSrgb(
+    float3 c,
+    float gamma = 2.4,
+    float threshold = 0.0031308,
+    float scaleLow = 12.92,
+    float scaleHigh = 1.055,
+    float offsetHigh = 0.055) {
     return select(
-        c <= 0.0031308,
-        c * 12.92,
-        1.055 * pow(c, 1.0 / 2.4) - 0.055
+        c <= threshold,
+        c * scaleLow,
+        scaleHigh * pow(c, 1.0 / gamma) - offsetHigh
     );
 }
 
+
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
     float4 color = inputImage.Sample(sampler, input.uv);
-    return float4(linearToSrgb(color.rgb), color.a);
+    return float4(linearToSrgb(color.rgb, data.gamma), color.a);
 }

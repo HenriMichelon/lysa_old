@@ -45,6 +45,7 @@ export namespace lysa {
     protected:
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
         static constexpr vireo::DescriptorIndex BINDING_INPUT{1};
+        static constexpr vireo::DescriptorIndex BINDING_DATA{2};
         static constexpr vireo::DescriptorIndex BINDING_SAMPLERS{0};
 
         struct PostProcessingParams {
@@ -67,9 +68,11 @@ export namespace lysa {
             .colorRenderTargets = {{}}
         };
 
-        const std::wstring                       fragShaderName;
-        std::vector<FrameData>                   framesData;
-        std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
+        const std::wstring                          fragShaderName;
+        void*                                       data{nullptr};
+        std::shared_ptr<vireo::Buffer>              dataUniform{nullptr};
+        std::vector<FrameData>                      framesData;
+        std::shared_ptr<vireo::DescriptorLayout>    descriptorLayout;
 
     };
 }
