@@ -12,3 +12,4 @@ export import lysa.constants;
 export import lysa.enums;
 export import lysa.surface;
 export import lysa.surface_config;
+export import lysa.nodes.node;

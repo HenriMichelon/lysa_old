@@ -8,6 +8,7 @@ export module lysa.renderers.renderpass;
 
 import std;
 import vireo;
+import lysa.types;
 import lysa.surface_config;
 import lysa.renderers.samplers;
 

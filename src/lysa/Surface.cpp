@@ -5,6 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 module lysa.surface;
+#include <cassert>
 
 import lysa.renderers.forward_renderer;
 
@@ -22,6 +23,7 @@ namespace lysa {
             surfaceConfig.presentMode,
             surfaceConfig.framesInFlight)},
         renderer{std::make_unique<ForwardRenderer>(surfaceConfig, vireo, L"Main Renderer")} {
+        assert(surfaceConfig.framesInFlight > 0);
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
@@ -30,6 +32,12 @@ namespace lysa {
             frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY, L"Present Semaphore");
         }
         renderer->resize(swapChain->getExtent());
+        setRootNode(surfaceConfig.rootNode);
+    }
+
+    Surface::~Surface() {
+        presentQueue->waitIdle();
+        swapChain->waitIdle();
     }
 
     void Surface::drawFrame() {
@@ -91,7 +99,7 @@ namespace lysa {
         swapChain->nextFrameIndex();
     }
 
-    void Surface::resize() {
+    void Surface::resize() const {
         const auto oldExtent = swapChain->getExtent();
         swapChain->recreate();
         const auto newExtent = swapChain->getExtent();
@@ -100,9 +108,11 @@ namespace lysa {
         }
     }
 
-    Surface::~Surface() {
-        presentQueue->waitIdle();
-        swapChain->waitIdle();
+    void Surface::setRootNode(const std::shared_ptr<Node> &node) {
+        rootNode = node;
+        if (rootNode) {
+            rootNode->ready();
+        }
     }
 
 }

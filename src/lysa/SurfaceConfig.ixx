@@ -11,6 +11,7 @@ import glm;
 import vireo;
 import lysa.constants;
 import lysa.enums;
+import lysa.nodes.node;
 
 export namespace lysa {
 
@@ -18,21 +19,23 @@ export namespace lysa {
      * Rendering surface configuration
      */
     struct SurfaceConfig {
+        //! Startup Scene
+        std::shared_ptr<Node>   rootNode;
         //! Graphic API
-        vireo::Backend backend{vireo::Backend::VULKAN};
+        vireo::Backend          backend{vireo::Backend::VULKAN};
         //! Swap chain image format
-        vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
+        vireo::ImageFormat      renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
         //! MSAA samples count
-        vireo::MSAA msaa{vireo::MSAA::NONE};
+        vireo::MSAA             msaa{vireo::MSAA::NONE};
         //! Presentation mode
-        vireo::PresentMode presentMode = {vireo::PresentMode::IMMEDIATE};
+        vireo::PresentMode      presentMode = {vireo::PresentMode::IMMEDIATE};
         //! Frame buffer clear color
-        glm::vec3 clearColor{DEFAULT_CLEAR_COLOR};
+        glm::vec3               clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
-        uint32_t framesInFlight{2};
+        uint32_t                framesInFlight{2};
         //! Name for the default vertex shader for the scene renderer
-        std::string sceneVertexShader{"default"};
+        // std::string          sceneVertexShader{"default"};
         //! Name for the default fragment shader for the scene renderer
-        std::string sceneFragmentShader{"default"};
+        // std::string          sceneFragmentShader{"default"};
     };
 }

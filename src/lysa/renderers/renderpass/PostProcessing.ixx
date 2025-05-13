@@ -9,6 +9,7 @@ export module lysa.renderers.renderpass.post_processing;
 import std;
 import glm;
 import vireo;
+import lysa.types;
 import lysa.surface_config;
 import lysa.renderers.renderpass;
 import lysa.renderers.samplers;

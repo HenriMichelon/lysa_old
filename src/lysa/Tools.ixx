@@ -8,6 +8,9 @@ export module lysa.tools;
 
 export namespace lysa {
 
-     float getCurrentTimeMilliseconds();
+    class Tools {
+    public:
+        static float getCurrentTimeMilliseconds();
+    };
 
 }

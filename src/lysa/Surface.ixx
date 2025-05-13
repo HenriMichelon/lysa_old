@@ -9,6 +9,7 @@ export module lysa.surface;
 import std;
 import vireo;
 import lysa.surface_config;
+import lysa.nodes.node;
 import lysa.renderers.renderer;
 
 export namespace lysa {
@@ -23,7 +24,7 @@ export namespace lysa {
         */
         Surface(SurfaceConfig& surfaceConfig, void* windowHandle);
 
-        void resize();
+        void resize() const;
 
         /**
          * Prepare and draw a frame
@@ -45,6 +46,12 @@ export namespace lysa {
          */
         auto getConfig() const { return surfaceConfig; }
 
+        /**
+        * Changes the current scene
+        * @param node The new scene. Must not have a parent
+        */
+        void setRootNode(const std::shared_ptr<Node> &node);
+
         virtual ~Surface();
 
     private:
@@ -64,9 +71,11 @@ export namespace lysa {
         };
 
         // Opaque window handle for presenting
-        void*          windowHandle;
+        void*                 windowHandle;
         // Surface configuration
-        SurfaceConfig& surfaceConfig;
+        SurfaceConfig&        surfaceConfig;
+        // Surface scene
+        std::shared_ptr<Node> rootNode;
 
         ////// Frame drawing loop parameters
         // Last drawFrame() start time

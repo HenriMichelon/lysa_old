@@ -12,7 +12,7 @@ import vireo;
 
 namespace lysa {
 
-    float getCurrentTimeMilliseconds() {
+    float Tools::getCurrentTimeMilliseconds() {
         using namespace std::chrono;
         return static_cast<float>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
     }

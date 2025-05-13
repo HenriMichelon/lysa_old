@@ -74,14 +74,15 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Surface.cpp
         ${ENGINE_SRC_DIR}/Tools.cpp
-        ${ENGINE_SRC_DIR}/renderer/ForwardRenderer.cpp
-        ${ENGINE_SRC_DIR}/renderer/MeshesRenderer.cpp
-        ${ENGINE_SRC_DIR}/renderer/Renderer.cpp
-        ${ENGINE_SRC_DIR}/renderer/Samplers.cpp
-        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColor.cpp
-        ${ENGINE_SRC_DIR}/renderer/renderpass/GammaCorrection.cpp
-        ${ENGINE_SRC_DIR}/renderer/renderpass/PostProcessing.cpp
-        ${ENGINE_SRC_DIR}/renderer/renderpass/Renderpass.cpp
+        ${ENGINE_SRC_DIR}/nodes/Node.cpp
+        ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
+        ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.cpp
+        ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
+        ${ENGINE_SRC_DIR}/renderers/Samplers.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/GammaCorrection.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
         ${WIN32_SRC}
 )
 target_sources(${LYSA_TARGET}
@@ -98,14 +99,16 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Surface.ixx
         ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
         ${ENGINE_SRC_DIR}/Tools.ixx
-        ${ENGINE_SRC_DIR}/renderer/ForwardRenderer.ixx
-        ${ENGINE_SRC_DIR}/renderer/MeshesRenderer.ixx
-        ${ENGINE_SRC_DIR}/renderer/Renderer.ixx
-        ${ENGINE_SRC_DIR}/renderer/Samplers.ixx
-        ${ENGINE_SRC_DIR}/renderer/renderpass/ForwardColor.ixx
-        ${ENGINE_SRC_DIR}/renderer/renderpass/GammaCorrection.ixx
-        ${ENGINE_SRC_DIR}/renderer/renderpass/PostProcessing.ixx
-        ${ENGINE_SRC_DIR}/renderer/renderpass/Renderpass.ixx
+        ${ENGINE_SRC_DIR}/Types.ixx
+        ${ENGINE_SRC_DIR}/nodes/Node.ixx
+        ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
+        ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.ixx
+        ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
+        ${ENGINE_SRC_DIR}/renderers/Samplers.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/GammaCorrection.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${WIN32_MODULES}
 )
 compile_options(${LYSA_TARGET})
