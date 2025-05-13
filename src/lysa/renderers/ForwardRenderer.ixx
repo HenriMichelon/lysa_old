@@ -11,7 +11,6 @@ import vireo;
 import lysa.surface_config;
 import lysa.renderers.meshes_renderer;
 import lysa.renderers.renderpass.forward_color;
-import lysa.renderers.renderpass.gamma_correction;
 
 export namespace lysa {
     class ForwardRenderer : public MeshesRenderer {
@@ -30,16 +29,14 @@ export namespace lysa {
             const vireo::Extent& extent,
             const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) override;
 
-        std::shared_ptr<vireo::Image> getColorAttachment(const uint32_t frameIndex) override {
-            return gammaCorrectionPass.getColorAttachment(frameIndex);
-        }
+        std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const override;
 
     private:
         struct FrameData {
             std::shared_ptr<vireo::RenderTarget> colorAttachment;
         };
+
         std::vector<FrameData> framesData;
         ForwardColor           forwardColorPass;
-        GammaCorrection        gammaCorrectionPass;
     };
 }

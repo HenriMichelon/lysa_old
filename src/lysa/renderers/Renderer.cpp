@@ -5,6 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 module lysa.renderers.renderer;
+#include <cassert>
 
 namespace lysa {
     Renderer::Renderer(
@@ -17,4 +18,30 @@ namespace lysa {
         vireo{vireo},
         submitQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, name)} {
     }
+
+    void Renderer::waitIdle() const {
+        submitQueue->waitIdle();
+    }
+
+    void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32_t dataSize) {
+        waitIdle();
+        const auto postProcessingPass = std::make_shared<PostProcessing>(
+            surfaceConfig,
+            vireo,
+            samplers,
+            fragShaderName,
+            data,
+            dataSize,
+            fragShaderName);
+        postProcessingPass->resize(currentExtent);
+        postProcessingPasses.push_back(postProcessingPass);
+    }
+
+    void Renderer::removePostprocessing(const std::wstring& fragShaderName) {
+        waitIdle();
+        std::erase_if(postProcessingPasses, [&fragShaderName](const std::shared_ptr<PostProcessing>& item) {
+            return item->getFragShaderName() == fragShaderName;
+        });
+    }
+
 }

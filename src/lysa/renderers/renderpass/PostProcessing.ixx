@@ -21,6 +21,9 @@ export namespace lysa {
             const SurfaceConfig& surfaceConfig,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
+            const std::wstring& fragShaderName,
+            void* data,
+            uint32_t dataSize,
             const std::wstring& name);
 
         void update(uint32_t frameIndex) override;
@@ -36,6 +39,8 @@ export namespace lysa {
         virtual std::shared_ptr<vireo::Image> getColorAttachment(const uint32_t frameIndex) {
             return framesData[frameIndex].colorAttachment->getImage();
         }
+
+        const auto& getFragShaderName() const { return fragShaderName; }
 
     protected:
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
@@ -62,6 +67,7 @@ export namespace lysa {
             .colorRenderTargets = {{}}
         };
 
+        const std::wstring                       fragShaderName;
         std::vector<FrameData>                   framesData;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
 

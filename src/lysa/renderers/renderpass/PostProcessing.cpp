@@ -13,10 +13,13 @@ namespace lysa {
         const SurfaceConfig& surfaceConfig,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers,
+        const std::wstring& fragShaderName,
+        void* data,
+        const uint32_t dataSize,
         const std::wstring& name):
         Renderpass{surfaceConfig, vireo, samplers, name},
-
-    descriptorLayout{vireo->createDescriptorLayout(name)} {
+        fragShaderName{fragShaderName},
+        descriptorLayout{vireo->createDescriptorLayout(name)} {
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayout->build();
@@ -28,6 +31,8 @@ namespace lysa {
             {},
             name);
         pipelineConfig.vertexShader = vireo->createShaderModule("shaders/quad.vert");
+        pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
+        pipeline = vireo->createGraphicPipeline(pipelineConfig);
 
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {

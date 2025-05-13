@@ -13,5 +13,4 @@ namespace lysa {
         Surface{surfaceConfig, windowHandle} {
     }
 
-
 }

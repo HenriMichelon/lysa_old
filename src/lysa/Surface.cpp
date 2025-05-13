@@ -111,8 +111,24 @@ namespace lysa {
     void Surface::setRootNode(const std::shared_ptr<Node> &node) {
         rootNode = node;
         if (rootNode) {
-            rootNode->ready();
+            rootNode->ready(this);
         }
+    }
+
+    void Surface::waitIdle() const {
+        renderer->waitIdle();
+        presentQueue->waitIdle();
+        swapChain->waitIdle();
+    }
+
+    void Surface::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32_t dataSize) const {
+        waitIdle();
+        renderer->addPostprocessing(fragShaderName, data, dataSize);
+    }
+
+    void Surface::removePostprocessing(const std::wstring& fragShaderName) const {
+        waitIdle();
+        renderer->removePostprocessing(fragShaderName);
     }
 
 }

@@ -10,6 +10,7 @@ import std;
 import vireo;
 import lysa.surface_config;
 import lysa.renderers.samplers;
+import lysa.renderers.renderpass.post_processing;
 
 export namespace lysa {
     class Renderer {
@@ -24,16 +25,22 @@ export namespace lysa {
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
-        virtual void resize(const vireo::Extent& extent) { }
+        virtual void resize(const vireo::Extent& extent) { currentExtent = extent; }
 
         virtual void update(uint32_t frameIndex) { }
 
-        virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) = 0;
+        virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const = 0;
 
         virtual void render(
             uint32_t frameIndex,
             const vireo::Extent& extent,
             const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) = 0;
+
+        void waitIdle() const;
+
+        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0);
+
+        void removePostprocessing(const std::wstring& fragShaderName);
 
         virtual ~Renderer() = default;
 
@@ -43,5 +50,7 @@ export namespace lysa {
         const Samplers                      samplers;
         std::shared_ptr<vireo::Vireo>       vireo;
         std::shared_ptr<vireo::SubmitQueue> submitQueue;
+        vireo::Extent                       currentExtent;
+        std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };
 }

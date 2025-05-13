@@ -62,19 +62,26 @@ export namespace lysa {
          */
         // virtual void onPhysicsProcess(const float delta) {}
 
+        /**
+         * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
+         */
+        auto getSurface() const { return surface; }
+
         ~Node() override = default;
 
     private:
-        static  id_t            currentId;
-        id_t                    id;
-        Type                    type;
-        std::wstring            name;
+        friend class Surface;
+
+        static  id_t                currentId;
+        id_t                        id;
+        Type                        type;
+        std::wstring                name;
+        const Surface*              surface{nullptr};
 
         static std::wstring sanitizeName(const std::wstring &name);
 
-        virtual void ready();
+        virtual void ready(const Surface* surface);
 
-        friend class Surface;
     };
 
 }

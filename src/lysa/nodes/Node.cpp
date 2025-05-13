@@ -14,7 +14,6 @@ namespace lysa {
         id{++currentId},
         type{type},
         name{name} {
-
     }
 
     std::wstring Node::sanitizeName(const std::wstring &name) {
@@ -24,7 +23,8 @@ namespace lysa {
         return newName;
     }
 
-    void Node::ready() {
+    void Node::ready(const Surface* surface) {
+        this->surface = surface;
         onReady();
     }
 

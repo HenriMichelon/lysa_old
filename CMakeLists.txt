@@ -80,7 +80,6 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Samplers.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
-        ${ENGINE_SRC_DIR}/renderers/renderpass/GammaCorrection.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
         ${WIN32_SRC}
@@ -106,7 +105,6 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Samplers.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.ixx
-        ${ENGINE_SRC_DIR}/renderers/renderpass/GammaCorrection.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${WIN32_MODULES}

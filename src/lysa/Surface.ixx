@@ -34,17 +34,17 @@ export namespace lysa {
         /**
          * Returns the opaque, os-specific, window handle
          */
-        auto getWindowHandle() const { return windowHandle; }
+        // auto getWindowHandle() const { return windowHandle; }
 
         /**
          * Returns the associated Vireo object
          */
-        auto getVireo() const { return vireo; }
+        // auto getVireo() const { return vireo; }
 
         /**
          * Returns the surface configuration
          */
-        auto getConfig() const { return surfaceConfig; }
+        // auto getConfig() const { return surfaceConfig; }
 
         /**
         * Changes the current scene
@@ -52,7 +52,15 @@ export namespace lysa {
         */
         void setRootNode(const std::shared_ptr<Node> &node);
 
+        void waitIdle() const;
+
+        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0) const;
+
+        void removePostprocessing(const std::wstring& fragShaderName) const;
+
         virtual ~Surface();
+
+    protected:
 
     private:
         // Fixed delta time for the physics
@@ -100,7 +108,6 @@ export namespace lysa {
         std::vector<FrameData>              framesData;
 
         std::unique_ptr<Renderer>           renderer;
-
     };
 
 }
