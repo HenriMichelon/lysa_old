@@ -6,11 +6,11 @@
 */
 export module lysa.tools;
 
+import lysa.math;
+
 export namespace lysa {
 
-    class Tools {
-    public:
-        static float getCurrentTimeMilliseconds();
-    };
+    float3 eulerAngles(quaternion q);
+    float getCurrentTimeMilliseconds();
 
 }

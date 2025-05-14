@@ -7,6 +7,7 @@
 export module lysa.nodes.node;
 
 import std;
+import lysa.math;
 import lysa.object;
 import lysa.types;
 
@@ -61,179 +62,179 @@ export namespace lysa {
          */
         // virtual void onPhysicsProcess(const float delta) {}
 
-    //     /**
-    //      * Returns the local space transformation matrix
-    //      */
-    //     const glm::mat4 &getTransformLocal() const { return localTransform; }
-    //
-    //     /**
-    //      * Returns the world space transformation matrix
-    //      */
-    //     const glm::mat4& getTransformGlobal() const { return globalTransform; }
-    //
-    //     /**
-    //      * Transforms a local vector from this node's local space to world space.
-    //      */
-    //     glm::vec3 toGlobal(const glm::vec3& local) const;
-    //
-    //     /**
-    //      * Transforms a world space vector to this node's local space.
-    //      */
-    //     glm::vec3 toLocal(const glm::vec3& global) const;
-    //
-    //     /**
-    //     * Sets the local space position (relative to parent)
-    //     */
-    //     virtual void setPosition(const glm::vec3& position);
-    //
-    //     /**
-    //     * Returns the local space position (relative to parent)
-    //     */
-    //     glm::vec3 getPosition() const { return localTransform[3]; }
-    //
-    //     /**
-    //      * Changes the node's position by the given offset vector in local space.
-    //      */
-    //     void translate(const glm::vec3& localOffset);
-    //
-    //     /**
-    //      * Sets the world space position
-    //      */
-    //     virtual void setPositionGlobal(const glm::vec3& position);
-    //
-    //     /**
-    //      * Returns the world space position
-    //      */
-    //     glm::vec3 getPositionGlobal() const { return globalTransform[3]; }
-    //
-    //     /**
-    //      * Rotates the local transformation
-    //      */
-    //     void rotate(const glm::quat& quaternion);
-    //
-    //     /**
-    //      * Interpolate the local transformation
-    //      */
-    //     void rotateTowards(const glm::quat& targetRotation, float maxAngle);
-    //
-    //     /**
-    //      * Rotates the local transformation around the X axis by angle in radians.
-    //      */
-    //     void rotateX(float angle);
-    //
-    //     /**
-    //      * Rotates the local transformation around the Y axis by angle in radians.
-    //      */
-    //     void rotateY(float angle);
-    //
-    //     /**
-    //      * Rotates the local transformation around the Z axis by angle in radians.
-    //      */
-    //     void rotateZ(float angle);
-    //
-    //     /**
-    //      * Rotates the local transformation
-    //      */
-    //     // void rotate(quat quater);
-    //
-    //     /**
-    //      * Sets the local transformation
-    //      */
-    //     void setRotation(const glm::quat& quater);
-    //
-    //     /**
-    //      * Sets the world transformation
-    //      */
-    //     void setRotationGlobal(const glm::quat& quater);
-    //
-    //     /**
-    //      * Sets the local transformation
-    //      */
-    //     void setRotation(const glm::vec3& rot);
-    //
-    //     /**
-    //      * Sets the X axis rotation of the local transformation by angle in radians.
-    //      */
-    //     void setRotationX(float angle);
-    //
-    //     /**
-    //      * Sets the Y axis rotation of the local transformation by angle in radians.
-    //      */
-    //     void setRotationY(float angle);
-    //
-    //     /**
-    //      * Sets the Z axis rotation of the local transformation by angle in radians.
-    //      */
-    //     void setRotationZ(float angle);
-    //
-    //     /**
-    //      * Returns the rotation of the local transformation, in euler angles in radians
-    //      */
-    //     glm::vec3 getRotation() const;
-    //
-    //     /**
-    //      * Returns the rotation of the world transformation, in euler angles in radians
-    //      */
-    //     glm::vec3 getRotationGlobal() const;
-    //
-    //     /**
-    //      * Returns the rotation of the local transformation
-    //      */
-    //     glm::quat getRotationQuaternion() const;
-    //
-    //     /**
-    //      * Returns the rotation of the world transformation
-    //      */
-    //     glm::quat getRotationQuaternionGlobal() const;
-    //
-    //     /**
-    //      * Returns the X axis rotation of the local transformation
-    //      */
-    //     float getRotationX() const { return getRotation().x; }
-    //
-    //     /**
-    //      * Returns the Y axis rotation of the local transformation
-    //      */
-    //     float getRotationY() const { return getRotation().y; }
-    //
-    //     /**
-    //      * Returns the Z axis rotation of the local transformation
-    //      */
-    //     float getRotationZ() const { return getRotation().z; }
-    //
-    //     /**
-    //      * Scales part of the local transformation.
-    //      */
-    //     virtual void setScale(const glm::vec3& scale);
-    //
-    //     /**
-    //      * Scales part of the local transformation with the same value on each axis
-    //      */
-    //     void setScale(float scale);
-    //
-    //     /**
-    //      * Returns the scale part of the local transformation.
-    //      */
-    //     glm::vec3 getScale() const;
-    //
-    //     /**
-    //      * Returns the scale part of the global transformation.
-    //      */
-    //     glm::vec3 getScaleGlobal() const;
-    //
-    //
-    //     /**
-    //      * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
-    //      */
-    //     auto getSurface() const { return surface; }
-    //
-    //     ~Node() override = default;
-    //
-    // protected:
-    //     glm::mat4 localTransform{};
-    //     glm::mat4 globalTransform{};
-    //
-    //     virtual void updateGlobalTransform();
+        /**
+         * Returns the local space transformation matrix
+         */
+        const float4x4 &getTransformLocal() const { return localTransform; }
+    
+        /**
+         * Returns the world space transformation matrix
+         */
+        const float4x4& getTransformGlobal() const { return globalTransform; }
+    
+        /**
+         * Transforms a local vector from this node's local space to world space.
+         */
+        // float3 toGlobal(const float3& local) const;
+    
+        /**
+         * Transforms a world space vector to this node's local space.
+         */
+        // float3 toLocal(const float3& global) const;
+    
+        /**
+        * Sets the local space position (relative to parent)
+        */
+        // virtual void setPosition(const float3& position);
+    
+        /**
+        * Returns the local space position (relative to parent)
+        */
+        // float3 getPosition() const { return localTransform[3].xyz; }
+    
+        /**
+         * Changes the node's position by the given offset vector in local space.
+         */
+        // void translate(const float3& localOffset);
+    
+        /**
+         * Sets the world space position
+         */
+        // virtual void setPositionGlobal(const float3& position);
+    
+        /**
+         * Returns the world space position
+         */
+        // float3 getPositionGlobal() const { return globalTransform[3].xyz; }
+    
+        /**
+         * Rotates the local transformation
+         */
+        // void rotate(const quaternion& quaternion);
+    
+        /**
+         * Interpolate the local transformation
+         */
+        // void rotateTowards(const quaternion& targetRotation, float maxAngle);
+    
+        /**
+         * Rotates the local transformation around the X axis by angle in radians.
+         */
+        // void rotateX(float angle);
+    
+        /**
+         * Rotates the local transformation around the Y axis by angle in radians.
+         */
+        // void rotateY(float angle);
+    
+        /**
+         * Rotates the local transformation around the Z axis by angle in radians.
+         */
+        // void rotateZ(float angle);
+    
+        /**
+         * Rotates the local transformation
+         */
+        // void rotate(quat quater);
+    
+        /**
+         * Sets the local transformation
+         */
+        // void setRotation(const quaternion& quat);
+    
+        /**
+         * Sets the world transformation
+         */
+        // void setRotationGlobal(const quaternion& quat);
+    
+        /**
+         * Sets the local transformation
+         */
+        // void setRotation(const float3& rot);
+    
+        /**
+         * Sets the X axis rotation of the local transformation by angle in radians.
+         */
+        // void setRotationX(float angle);
+    
+        /**
+         * Sets the Y axis rotation of the local transformation by angle in radians.
+         */
+        // void setRotationY(float angle);
+    
+        /**
+         * Sets the Z axis rotation of the local transformation by angle in radians.
+         */
+        // void setRotationZ(float angle);
+    
+        /**
+         * Returns the rotation of the local transformation, in euler angles in radians
+         */
+        // float3 getRotation() const;
+    
+        /**
+         * Returns the rotation of the world transformation, in euler angles in radians
+         */
+        // float3 getRotationGlobal() const;
+    
+        /**
+         * Returns the rotation of the local transformation
+         */
+        // quaternion getRotationQuaternion() const;
+    
+        /**
+         * Returns the rotation of the world transformation
+         */
+        // quaternion getRotationQuaternionGlobal() const;
+    
+        /**
+         * Returns the X axis rotation of the local transformation
+         */
+        // float getRotationX() const { return getRotation().x; }
+    
+        /**
+         * Returns the Y axis rotation of the local transformation
+         */
+        // float getRotationY() const { return getRotation().y; }
+    
+        /**
+         * Returns the Z axis rotation of the local transformation
+         */
+        // float getRotationZ() const { return getRotation().z; }
+    
+        /**
+         * Scales part of the local transformation.
+         */
+        // virtual void setScale(const float3& scale);
+    
+        /**
+         * Scales part of the local transformation with the same value on each axis
+         */
+        // void setScale(float scale);
+    
+        /**
+         * Returns the scale part of the local transformation.
+         */
+        // float3 getScale() const;
+    
+        /**
+         * Returns the scale part of the global transformation.
+         */
+        // float3 getScaleGlobal() const;
+    
+    
+        /**
+         * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
+         */
+        auto getSurface() const { return surface; }
+    
+        ~Node() override = default;
+    
+    protected:
+        float4x4 localTransform{};
+        float4x4 globalTransform{};
+    
+        virtual void updateGlobalTransform();
 
     private:
         friend class Surface;

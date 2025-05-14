@@ -7,8 +7,8 @@
 export module lysa.renderers.renderpass.post_processing;
 
 import std;
-import glm;
 import vireo;
+import lysa.math;
 import lysa.types;
 import lysa.surface_config;
 import lysa.renderers.renderpass;
@@ -49,8 +49,8 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_SAMPLERS{0};
 
         struct PostProcessingParams {
-            glm::ivec2  imageSize{};
-            float       time;
+            uint2  imageSize;
+            float  time;
         };
 
         struct FrameData {

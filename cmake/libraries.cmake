@@ -5,15 +5,6 @@
 # https://opensource.org/licenses/MIT
 #
 ########################################################################################################################
-message(NOTICE "Fetching Eigen from https://gitlab.com/libeigen/eigen.gits ...")
-FetchContent_Declare(
-        eigen
-        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG        3.4.0  # Ou "master"
-)
-FetchContent_MakeAvailable(eigen)
-
-########################################################################################################################
 message(NOTICE "Fetching Jolt Physics from https://github.com/jrouwe/JoltPhysics ...")
 # https://github.com/jrouwe/JoltPhysicsHelloWorld/blob/main/Build/CMakeLists.txt
 # When turning this option on, the library will be compiled using doubles for positions. This allows for much bigger worlds.

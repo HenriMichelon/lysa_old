@@ -51,6 +51,9 @@ set(SHADERS_SRC_DIR ${ENGINE_SRC_DIR}/shaders)
 set(SHADERS_INCLUDE_DIR ${ENGINE_SRC_DIR}/shaders/include)
 set(SHADERS_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 
+set(HLSLPP_TARGET hlslpp)
+set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
+
 #######################################################
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
@@ -58,6 +61,19 @@ file(GLOB_RECURSE SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/*.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
+
+#######################################################
+# HLSL++ math library
+add_library(${HLSLPP_TARGET})
+target_sources(${HLSLPP_TARGET}
+        PUBLIC
+        FILE_SET CXX_MODULES
+        FILES
+        ${HLSLPP_SRC_DIR}/module/hlsl++.ixx
+)
+compile_options(${HLSLPP_TARGET})
+target_include_directories(${HLSLPP_TARGET} PUBLIC ${HLSLPP_SRC_DIR}/include)
+target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
 
 #######################################################
 if(WIN32)
@@ -68,6 +84,7 @@ if(WIN32)
             ${ENGINE_SRC_DIR}/os/windows/WindowsSurface.ixx
     )
 endif ()
+
 add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
@@ -109,10 +126,11 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${WIN32_MODULES}
 )
+
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules Eigen3::Eigen)
-add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET})
+add_dependencies(${LYSA_TARGET} ${VIREO_TARGET} )
 if(WIN32)
     target_precompile_headers(${LYSA_TARGET} PRIVATE
             "<windows.h>"

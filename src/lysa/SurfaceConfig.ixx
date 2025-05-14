@@ -7,8 +7,8 @@
 export module lysa.surface_config;
 
 import std;
-import glm;
 import vireo;
+import lysa.math;
 import lysa.constants;
 import lysa.enums;
 import lysa.nodes.node;
@@ -30,7 +30,7 @@ export namespace lysa {
         //! Presentation mode
         vireo::PresentMode      presentMode = {vireo::PresentMode::IMMEDIATE};
         //! Frame buffer clear color
-        glm::vec3               clearColor{DEFAULT_CLEAR_COLOR};
+        float3                  clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32_t                framesInFlight{2};
         //! Name for the default vertex shader for the scene renderer

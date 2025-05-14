@@ -56,7 +56,7 @@ namespace lysa {
 
     void PostProcessing::update(const uint32_t frameIndex) {
         auto& frame = framesData[frameIndex];
-        frame.params.time = Tools::getCurrentTimeMilliseconds();
+        frame.params.time = getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
     }
 
