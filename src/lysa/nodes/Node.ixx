@@ -19,17 +19,53 @@ export namespace lysa {
     public:
         //! Node type
         enum Type {
-            NODE,
+           ANIMATION_PLAYER,
+           CAMERA,
+           CHARACTER,
+           COLLISION_AREA,
+           COLLISION_OBJECT,
+           DIRECTIONAL_LIGHT,
+           ENVIRONMENT,
+           KINEMATIC_BODY,
+           LIGHT,
+           MESH_INSTANCE,
+           NODE,
+           OMNI_LIGHT,
+           PHYSICS_BODY,
+           RAYCAST,
+           RIGID_BODY,
+           SKYBOX,
+           SPOT_LIGHT,
+           STATIC_BODY,
+           VIEWPORT
         };
 
         static constexpr auto TypeNames = std::array {
+            L"AnimationPlayer",
+            L"Camera",
+            L"Character",
+            L"CollisionArea",
+            L"CollisionObject",
+            L"DirectionalLight",
+            L"Environment",
+            L"KinematicBody",
+            L"Light",
+            L"MeshInstance",
             L"Node",
+            L"OmniLight",
+            L"PhysicsBody",
+            L"RayCast",
+            L"RigidBody",
+            L"Skybox",
+            L"SpotLight",
+            L"StaticBody",
+            L"Viewport"
         };
 
         /**
          * Creates a node by copying the transforms, process mode, type and name
          */
-        // Node(const Node &node);
+        Node(const Node &node);
 
         /**
          * Creates a new node at (0.0, 0.0, 0.0) without a parent
@@ -84,12 +120,17 @@ export namespace lysa {
         /**
         * Sets the local space position (relative to parent)
         */
-        // virtual void setPosition(const float3& position);
-    
+        virtual void setPosition(const float3& position);
+
+        /**
+        * Sets the local space position (relative to parent)
+        */
+        virtual void setPosition(const float x, const float y, const float z) { setPosition(float3{x, y, z}); }
+
         /**
         * Returns the local space position (relative to parent)
         */
-        // float3 getPosition() const { return localTransform[3].xyz; }
+        float3 getPosition() const { return localTransform[3].xyz; }
     
         /**
          * Changes the node's position by the given offset vector in local space.
@@ -220,8 +261,151 @@ export namespace lysa {
          * Returns the scale part of the global transformation.
          */
         // float3 getScaleGlobal() const;
-    
-    
+
+
+        /**
+         * Returns the node's parent in the scene tree
+         */
+        auto* getParent() const { return parent; }
+
+        /**
+         * Adds a child node.<br>
+         * Nodes can have any number of children, but a child can have only one parent.<br>
+         * The node will be added to the scene at the start of the next frame.
+         * @param child the node to add
+         * @param async if `true` and the node have children all the nodes will be added in batch mode.
+         * Be careful to set the visibility of the nodes to `false`or they will appear slowly in the scene.
+         */
+        bool addChild(std::shared_ptr<Node> child, bool async = false);
+
+        /**
+         * Removes a child node. The node, along with its children **can** be deleted depending on their reference counter.<br>
+         * Use the iterator version in a for-each loop.<br>
+         * The node will be removed from the scene at the start of the next frame.
+         * @param child the node to remove
+         * @param async if `true` and the node have children all the nodes will be removed in batch mode.
+         * Be careful to set the visibility of the nodes to `false` or they will disappear slowly from the scene.
+         */
+        bool removeChild(const std::shared_ptr<Node>& child, bool async = false);
+
+        /**
+         * Removes all children nodes. The nodes, along with their children **can** be deleted depending on their reference counters.
+         * The nodes will be removed from the scene at the start of the next frame.
+         * @param async if `true` and the nodes will be removed in batch mode.
+         * Be careful to set the visibility of the nodes to `false` or they will disappear slowly from the scene.
+         */
+        void removeAllChildren(bool async = false);
+
+        /**
+         * Returns true if the node have this child
+         */
+        bool haveChild(const std:: shared_ptr<Node>& child, bool recursive) const;
+
+        /**
+        * Returns the child node by is name. Not recursive
+        */
+        template <typename T = Node>
+        std::shared_ptr<T> getChild(const std::wstring& name) const {
+            const auto it = std::find_if(children.begin(),
+                                         children.end(),
+                                         [name](const std::shared_ptr<Node>& elem) {
+                                             return elem->name == name;
+                                         });
+            return it == children.end() ? nullptr : dynamic_pointer_cast<T>(*it);
+        }
+
+        /**
+        * Returns the child node by its relative path (does not start with '/')
+        */
+        template <typename T = Node>
+        std::shared_ptr<T> getChildByPath(const std::wstring& path) const {
+            const size_t pos = path.find('/');
+            if (pos != std::string::npos) {
+                const auto child = getChild<Node>(path.substr(0, pos));
+                if (child != nullptr) {
+                    return child->template getChildByPath<T>(path.substr(pos + 1));
+                }
+                return nullptr;
+            }
+            return getChild<T>(path);
+        }
+
+        /**
+        * Finds the first child by is name.
+        */
+        template<typename T = Node>
+        std::shared_ptr<T> findFirstChild(const std::wstring& name) const {
+            for (const auto &node : children) {
+                if (node->name == name) {
+                    return dynamic_pointer_cast<T>(node);
+                }
+                if (const auto& found = node->template findFirstChild<T>(name)) {
+                    return found;
+                }
+            }
+            return nullptr;
+        }
+
+
+        /**
+         * Finds the first child by is type.
+         */
+        template <typename T>
+        std::shared_ptr<T> findFirstChild(const bool recursive = true) const {
+            for (const auto &node : children) {
+                if (const auto& found = dynamic_pointer_cast<T>(node)) {
+                    return found;
+                }
+                if (recursive) {
+                    const auto result = node->template findFirstChild<T>(true);
+                    if (result) {
+                        return result;
+                    }
+                }
+            }
+            return nullptr;
+        }
+
+        /**
+         * Finds all children by type
+         */
+        template <typename T>
+        std::list<std::shared_ptr<T>> findAllChildren(const bool recursive = true) const {
+            std::list<std::shared_ptr<T>> result;
+            for (const auto &node : children) {
+                if (const auto& found = dynamic_pointer_cast<T>(node)) {
+                    result.push_back(found);
+                }
+                if (recursive) {
+                    result.append_range(node->template findAllChildren<T>(true));
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Finds all children by group
+         */
+        template <typename T = Node>
+        std::list<std::shared_ptr<T>> findAllChildrenByGroup(const std::wstring& groupName, const bool recursive = true) const {
+            std::list<std::shared_ptr<T>> result;
+            for (const auto &node : children) {
+                if (isInGroup(groupName)) {
+                    result.push_back(dynamic_pointer_cast<T>(node));
+                }
+                if (recursive) {
+                    result.append_range(node->template findAllChildrenByGroup<T>(groupName, true));
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Returns true if this node has been added to the given group
+         */
+        inline bool isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
+
+
         /**
          * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
          */
@@ -236,19 +420,22 @@ export namespace lysa {
     protected:
         float4x4 localTransform{};
         float4x4 globalTransform{};
-    
+
+        virtual std::shared_ptr<Node> duplicateInstance() const;
+
         virtual void updateGlobalTransform();
 
     private:
         friend class Surface;
 
-        static  unique_id           currentId;
-        unique_id                   id;
-        Type                        type;
-        std::wstring                name;
-        const Surface*              surface{nullptr};
-        Node*                       parent{nullptr};
-        std::vector<std::shared_ptr<Node>>  children;
+        static  unique_id                currentId;
+        unique_id                        id;
+        Type                             type;
+        std::wstring                     name;
+        const Surface*                   surface{nullptr};
+        Node*                            parent{nullptr};
+        std::list<std::shared_ptr<Node>> children;
+        std::list<std::wstring>          groups;
 
         virtual void ready(const Surface* surface);
 

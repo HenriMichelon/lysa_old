@@ -9,7 +9,7 @@ export module lysa.global;
 #include <windows.h>
 #endif
 
-import std;
+export import std;
 export import lysa.constants;
 export import lysa.enums;
 export import lysa.math;
@@ -19,7 +19,9 @@ export import lysa.types;
 export namespace lysa {
 
     float3 eulerAngles(quaternion q);
+
     float getCurrentTimeMilliseconds();
+
     std::wstring sanitizeName(const std::wstring &name);
 
     class Exception : public std::exception {
@@ -65,7 +67,7 @@ export namespace lysa {
         const std::string expr,
         const std::source_location& loc = std::source_location::current()) {
         if (!expression()) {
-            throw Exception("Assertion failed: ", expr, loc.file_name(), loc.line());
+            throw Exception("Assertion failed: ", expr, ", file ", loc.file_name(), ", line ", loc.line());
         }
     }
 

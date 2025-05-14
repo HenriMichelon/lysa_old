@@ -6,9 +6,6 @@
 */
 export module lysa.application_config;
 
-import std;
-import lysa.enums;
-
 export namespace lysa {
 
     /**

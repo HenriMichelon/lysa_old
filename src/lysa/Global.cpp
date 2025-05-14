@@ -6,11 +6,7 @@
 */
 module lysa.global;
 
-import std;
-import lysa.constants;
-
 namespace lysa {
-
 
     std::wstring sanitizeName(const std::wstring &name) {
         auto newName = name;

@@ -6,12 +6,16 @@
 */
 export module lysa;
 
+export import std;
+export import vireo;
+
 export import lysa.application;
 export import lysa.application_config;
 export import lysa.global;
 export import lysa.surface;
 export import lysa.surface_config;
 
+export import lysa.nodes.mesh_instance;
 export import lysa.nodes.node;
 
 export import lysa.resources.image;

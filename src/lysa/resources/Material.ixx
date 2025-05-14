@@ -46,7 +46,7 @@ export namespace lysa {
 
         /**
          * Sets the alpha scissor threshold value
-         * Threshold at which the alpha scissor will discard values.
+         * Threshold at which the alpha scissors will discard values.
          * Higher values will result in more pixels being discarded.
          * If the material becomes too opaque at a distance, try increasing this value.
          * If the material disappears at a distance, try decreasing this value.
@@ -60,13 +60,6 @@ export namespace lysa {
         vireo::CullMode  cullMode{vireo::CullMode::NONE};
         Transparency     transparency{Transparency::DISABLED};
         float            alphaScissor{0.1f};
-        // The material parameters will be written in GPU memory next frame
-        uint32_t         dirty;
-
-    public:
-        void _setDirty();
-        inline auto _isDirty() const { return dirty > 0; }
-        inline auto _clearDirty() { this->dirty--; }
     };
 
     /**

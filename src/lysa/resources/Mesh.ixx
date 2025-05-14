@@ -149,26 +149,26 @@ export namespace lysa {
 
         void buildAABB();
 
-    private:
-        uint32_t                       firstIndex{0};
-        uint32_t                       vertexOffset{0};
-        std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
-        std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
-
-        Mesh(const std::vector<Vertex>& vertices,
-            const std::vector<uint32_t>& indices,
-            const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-            uint32_t firstIndex,
-            uint32_t vertexOffset,
-            std::shared_ptr<vireo::Buffer> vertexBuffer,
-            std::shared_ptr<vireo::Buffer> indexBuffer,
-            const std::wstring &name = L"Mesh");
-
-        auto& getMaterials() { return materials; }
-
-        auto getVertexBuffer() { return vertexBuffer; }
-
-        auto getIndexBuffer() { return indexBuffer; }
+    // private:
+    //     uint32_t                       firstIndex{0};
+    //     uint32_t                       vertexOffset{0};
+    //     std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
+    //     std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
+    //
+    //     Mesh(const std::vector<Vertex>& vertices,
+    //         const std::vector<uint32_t>& indices,
+    //         const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
+    //         uint32_t firstIndex,
+    //         uint32_t vertexOffset,
+    //         std::shared_ptr<vireo::Buffer> vertexBuffer,
+    //         std::shared_ptr<vireo::Buffer> indexBuffer,
+    //         const std::wstring &name = L"Mesh");
+    //
+    //     auto& getMaterials() { return materials; }
+    //
+    //     auto getVertexBuffer() { return vertexBuffer; }
+    //
+    //     auto getIndexBuffer() { return indexBuffer; }
     };
 }
 

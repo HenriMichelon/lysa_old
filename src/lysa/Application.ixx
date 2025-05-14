@@ -6,7 +6,7 @@
 */
 export module lysa.application;
 
-import std;
+import lysa.global;
 import lysa.application_config;
 import lysa.surface;
 import lysa.surface_config;

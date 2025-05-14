@@ -93,6 +93,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Surface.cpp
 
+        ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
 
         ${ENGINE_SRC_DIR}/resources/Image.cpp
@@ -127,6 +128,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
 
+        ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
 
         ${ENGINE_SRC_DIR}/resources/Image.ixx

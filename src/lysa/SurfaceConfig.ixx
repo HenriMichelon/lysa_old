@@ -6,20 +6,17 @@
 */
 export module lysa.surface_config;
 
-import std;
 import vireo;
-import lysa.math;
-import lysa.constants;
-import lysa.enums;
+import lysa.global;
 
 export namespace lysa {
 
-    class Node;
 
     /**
      * Rendering surface configuration
      */
     struct SurfaceConfig {
+        friend class Node;
         //! Startup Scene
         std::shared_ptr<Node>   rootNode;
         //! Graphic API

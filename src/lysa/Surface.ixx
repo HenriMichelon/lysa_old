@@ -13,13 +13,14 @@ import lysa.renderers.renderer;
 
 export namespace lysa {
 
-    class Node;
 
     /*
      * %A Rendering surface
      */
     class Surface {
     public:
+        friend class Node;
+
         /**
         * Creates a rendering surface
         */
@@ -64,6 +65,7 @@ export namespace lysa {
     protected:
 
     private:
+
         // Fixed delta time for the physics
         static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
 

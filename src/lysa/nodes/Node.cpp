@@ -12,12 +12,22 @@ namespace lysa {
 
     unique_id Node::currentId{INVALID_ID};
 
+
+    Node::Node(const Node &node):
+        id{currentId++} {
+        name            = node.name;
+        localTransform  = node.localTransform;
+        globalTransform = node.globalTransform;
+        // processMode     = orig.processMode;
+        type            = node.type;
+    }
+
     Node::Node(const std::wstring &name, const Type type):
-        // localTransform{float4x4{1.0f}},
+        localTransform{float4x4{1.0f}},
         id{++currentId},
         type{type},
         name{sanitizeName(name)} {
-        // Node::updateGlobalTransform();
+        Node::updateGlobalTransform();
     }
 
     void Node::ready(const Surface* surface) {
@@ -37,33 +47,75 @@ namespace lysa {
         }
     }
 
-    // float3 Node::toGlobal(const float3& local) const {
-    //     return mul(globalTransform, float4{local, 1.0f}).xyz;
-    // }
+    std::shared_ptr<Node> Node::duplicateInstance() const {
+        return std::make_shared<Node>(*this);
+    }
 
-    // float3 Node::toLocal(const float3& global) const {
-    //     return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
-    // }
+    void Node::setPosition(const float3& position) {
+        if (all(position != getPosition())) {
+            localTransform[3] = float4{position, 1.0f};
+            updateGlobalTransform();
+        }
+    }
 
-    // void Node::setPosition(const float3& position) {
-    //     if (all(position == getPosition())) {
-    //         localTransform[3] = float4{position, 1.0f};
-    //         updateGlobalTransform();
-    //     }
-    // }
+    bool Node::addChild(const std::shared_ptr<Node> child, const bool async) {
+        if (haveChild(child, false)) { return false; }
+        assert([&]{return child->parent == nullptr; }, "Remove child from parent first");
+        child->parent = this;
+        children.push_back(child);
+        child->updateGlobalTransform();
+        child->ready(surface);
+        // child->visible = visible && child->visible;
+        // child->castShadows = castShadows;
+        // child->dontDrawEdges = dontDrawEdges;
+        // if (addedToScene) { app()._addNode(child, async); }
+        return true;
+    }
 
-    // void Node::setPositionGlobal(const float3& position) {
-    //     if (all(position != getPositionGlobal())) {
-    //         if (parent == nullptr) {
-    //             setPosition(position);
-    //             return;
-    //         }
-    //         localTransform[3] = mul(inverse(parent->globalTransform), float4{position, 1.0});
-    //         updateGlobalTransform();
-    //     }
-    // }
+    bool Node::removeChild(const std::shared_ptr<Node>& node, const bool async) {
+        if (!haveChild(node, false)) { return false; }
+        node->parent = nullptr;
+        // if (node->addedToScene) { app()._removeNode(node, async); }
+        children.remove(node);
+        return true;
+    }
 
-/*    float3 Node::getRotation() const {
+    bool Node::haveChild(const std::shared_ptr<Node>& child, const bool recursive) const {
+        if (!child) { return false;}
+        if (recursive) {
+            if (haveChild(child, false)) {
+                return true;
+            }
+            for (const auto &node : children) {
+                if (node->haveChild(child, true))
+                    return true;
+            }
+            return false;
+        }
+        return std::ranges::find(children, child) != children.end();
+    }
+
+    /*
+    float3 Node::toGlobal(const float3& local) const {
+        return mul(globalTransform, float4{local, 1.0f}).xyz;
+    }
+
+    float3 Node::toLocal(const float3& global) const {
+        return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
+    }
+
+    void Node::setPositionGlobal(const float3& position) {
+        if (all(position != getPositionGlobal())) {
+            if (parent == nullptr) {
+                setPosition(position);
+                return;
+            }
+            localTransform[3] = mul(inverse(parent->globalTransform), float4{position, 1.0});
+            updateGlobalTransform();
+        }
+    }
+
+    float3 Node::getRotation() const {
     }
     
     float3 Node::getRotationGlobal() const {
