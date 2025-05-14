@@ -31,12 +31,9 @@ export namespace lysa {
 
         virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const = 0;
 
-        virtual void render(
+        virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32_t frameIndex,
-            const vireo::Extent& extent,
-            const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) = 0;
-
-        void waitIdle() const;
+            const vireo::Extent& extent) = 0;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0);
 
@@ -49,7 +46,6 @@ export namespace lysa {
         const std::wstring                  name;
         const Samplers                      samplers;
         std::shared_ptr<vireo::Vireo>       vireo;
-        std::shared_ptr<vireo::SubmitQueue> submitQueue;
         vireo::Extent                       currentExtent;
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };

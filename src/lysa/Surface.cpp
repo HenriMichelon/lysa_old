@@ -16,10 +16,10 @@ namespace lysa {
         windowHandle{windowHandle},
         surfaceConfig{surfaceConfig},
         vireo{vireo::Vireo::create(surfaceConfig.backend)},
-        presentQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue")},
+        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue")},
         swapChain{vireo->createSwapChain(
             surfaceConfig.renderingFormat,
-            presentQueue,
+            graphicQueue,
             windowHandle,
             surfaceConfig.presentMode,
             surfaceConfig.framesInFlight)},
@@ -28,16 +28,13 @@ namespace lysa {
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
-            frame.commandList = frame.commandAllocator->createCommandList();
-            frame.renderingFinishedSemaphore = vireo->createSemaphore(vireo::SemaphoreType::BINARY, L"Present Semaphore");
         }
         renderer->resize(swapChain->getExtent());
         setRootNode(surfaceConfig.rootNode);
     }
 
     Surface::~Surface() {
-        presentQueue->waitIdle();
+        graphicQueue->waitIdle();
         swapChain->waitIdle();
     }
 
@@ -70,32 +67,30 @@ namespace lysa {
             }
             renderer->update(frameIndex);
         }
+        render(frameIndex);
+    }
 
-        auto& frame = framesData[frameIndex];
+    void Surface::render(const uint32 frameIndex) {
+        const auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 
-        renderer->render(
+        const auto commandLists = renderer->render(
             swapChain->getCurrentFrameIndex(),
-            swapChain->getExtent(),
-            frame.renderingFinishedSemaphore);
+            swapChain->getExtent());
 
+        const auto commandList = commandLists.back();
         const auto colorAttachment = renderer->getColorAttachment(frameIndex);
-        frame.commandAllocator->reset();
-        const auto commandList = frame.commandList;
-
-        commandList->begin();
-        commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
+        commandList->barrier(colorAttachment, vireo::ResourceState::RENDER_TARGET_COLOR,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
         commandList->copy(colorAttachment, swapChain);
         commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
-        presentQueue->submit(
-            frame.renderingFinishedSemaphore,
-            vireo::WaitStage::TRANSFER,
+        // commandLists.push_back(commandList);
+        graphicQueue->submit(
             frame.inFlightFence,
             swapChain,
-            {frame.commandList});
+            commandLists);
         swapChain->present();
         swapChain->nextFrameIndex();
     }
@@ -117,8 +112,7 @@ namespace lysa {
     }
 
     void Surface::waitIdle() const {
-        renderer->waitIdle();
-        presentQueue->waitIdle();
+        graphicQueue->waitIdle();
         swapChain->waitIdle();
     }
 

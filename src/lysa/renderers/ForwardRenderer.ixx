@@ -24,10 +24,9 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent) override;
 
-        void render(
+        std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32_t frameIndex,
-            const vireo::Extent& extent,
-            const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) override;
+            const vireo::Extent& extent) override;
 
         std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const override;
 

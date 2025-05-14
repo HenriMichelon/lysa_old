@@ -6,8 +6,8 @@
 */
 export module lysa.surface;
 
-import std;
 import vireo;
+import lysa.global;
 import lysa.surface_config;
 import lysa.renderers.renderer;
 
@@ -71,12 +71,6 @@ export namespace lysa {
         struct FrameData {
             // frames rendering & presenting synchronization
             std::shared_ptr<vireo::Fence> inFlightFence;
-            // Command allocator for the main thread
-            std::shared_ptr<vireo::CommandAllocator> commandAllocator;
-            // Command allocator for the main thread, used for the swap chain barriers
-            std::shared_ptr<vireo::CommandList> commandList;
-            //
-            std::shared_ptr<vireo::Semaphore> renderingFinishedSemaphore;
         };
 
         // Opaque window handle for presenting
@@ -102,13 +96,16 @@ export namespace lysa {
         // Associated Vireo object
         std::shared_ptr<vireo::Vireo>       vireo;
         // Submission queue used to present the swap chain
-        std::shared_ptr<vireo::SubmitQueue> presentQueue;
+        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         // Swap chain for this surface
         std::shared_ptr<vireo::SwapChain>   swapChain;
         // Per frame data
         std::vector<FrameData>              framesData;
 
         std::unique_ptr<Renderer>           renderer;
+
+        void render(uint32 frameIndex);
+
     };
 
 }

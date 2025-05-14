@@ -26,41 +26,37 @@ namespace lysa {
         });
     }
 
-    void ForwardRenderer::render(
+    std::vector<std::shared_ptr<const vireo::CommandList>> ForwardRenderer::render(
         const uint32_t frameIndex,
-        const vireo::Extent& extent,
-        const std::shared_ptr<vireo::Semaphore>& renderingFinishedSemaphore) {
+        const vireo::Extent& extent) {
         const auto& frame = framesData[frameIndex];
         const auto& frameMeshes = MeshesRenderer::framesData[frameIndex];
 
         frameMeshes.commandAllocator->reset();
-        const auto commandList = frameMeshes.commandList;
+        auto commandList = frameMeshes.commandList;
         commandList->begin();
         commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
+        forwardColorPass.render(frameIndex, extent, frame.colorAttachment, commandList, false);
 
-        forwardColorPass.render(frameIndex, extent, frame.colorAttachment, commandList);
-
-        if (postProcessingPasses.empty()) {
-            commandList->barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::RENDER_TARGET_COLOR,
-                vireo::ResourceState::UNDEFINED);
-        } else {
+        if (!postProcessingPasses.empty()) {
             commandList->barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::RENDER_TARGET_COLOR,
                 vireo::ResourceState::SHADER_READ);
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
-                postProcessingPass->render(frameIndex, extent, frame.colorAttachment, commandList);
+                postProcessingPass->render(
+                    frameIndex,
+                    extent,
+                    frame.colorAttachment,
+                    commandList,
+                    postProcessingPass != postProcessingPasses.back());
             });
             commandList->barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::UNDEFINED);
         }
-
-        commandList->end();
-        submitQueue->submit(vireo::WaitStage::COLOR_OUTPUT, renderingFinishedSemaphore, {commandList});
+        return {commandList};
     }
 
     void ForwardRenderer::resize(const vireo::Extent& extent) {

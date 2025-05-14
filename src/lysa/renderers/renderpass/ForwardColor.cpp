@@ -24,7 +24,8 @@ namespace lysa {
         const uint32_t frameIndex,
         const vireo::Extent& extent,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-        const std::shared_ptr<vireo::CommandList>& commandList) {
+        const std::shared_ptr<vireo::CommandList>& commandList,
+        const bool recordLastBarrier) {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         commandList->beginRendering(renderingConfig);
         commandList->setViewport(extent);

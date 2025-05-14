@@ -29,7 +29,8 @@ export namespace lysa {
             uint32_t frameIndex,
             const vireo::Extent& extent,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::CommandList>& commandList) = 0;
+            const std::shared_ptr<vireo::CommandList>& commandList,
+            bool recordLastBarrier = true) = 0;
 
         virtual ~Renderpass() = default;
 

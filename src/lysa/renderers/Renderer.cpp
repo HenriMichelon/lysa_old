@@ -14,16 +14,10 @@ namespace lysa {
         surfaceConfig{surfaceConfig},
         name{name},
         samplers{vireo},
-        vireo{vireo},
-        submitQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, name)} {
-    }
-
-    void Renderer::waitIdle() const {
-        submitQueue->waitIdle();
+        vireo{vireo}{
     }
 
     void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32_t dataSize) {
-        waitIdle();
         const auto postProcessingPass = std::make_shared<PostProcessing>(
             surfaceConfig,
             vireo,
@@ -37,7 +31,6 @@ namespace lysa {
     }
 
     void Renderer::removePostprocessing(const std::wstring& fragShaderName) {
-        waitIdle();
         std::erase_if(postProcessingPasses, [&fragShaderName](const std::shared_ptr<PostProcessing>& item) {
             return item->getFragShaderName() == fragShaderName;
         });
