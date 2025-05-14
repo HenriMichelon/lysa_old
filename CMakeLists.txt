@@ -148,15 +148,17 @@ compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET})
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET} )
+target_precompile_headers(${LYSA_TARGET} PRIVATE
+        "<cstdint>"
+        "<cstddef>"
+        "<cassert>"
+)
 if(WIN32)
     target_precompile_headers(${LYSA_TARGET} PRIVATE
             "<windows.h>"
-            "<cstdint>"
-            "<cstddef>"
-            "<cassert>"
     )
     if (DIRECTX_BACKEND)
-        target_link_libraries(${LYSA_TARGET} Xinput dinput8 dxguid dxgi d3d12 d3dcompiler)
+        target_link_libraries(${LYSA_TARGET} d3d12)
     endif ()
     if(MINGW)
         target_link_options(${LYSA_TARGET} PRIVATE "-mwindows")

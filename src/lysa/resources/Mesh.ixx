@@ -6,7 +6,9 @@
 */
 export module lysa.resources.mesh;
 #include <cassert>
+
 import std;
+import vireo;
 import lysa.aabb;
 import lysa.global;
 import lysa.resources.material;
@@ -19,13 +21,13 @@ export namespace lysa {
      */
     struct Vertex {
         //! local position
-        float3             position;
+        float3 position;
         //! surface normal
-        float3             normal;
+        float3 normal;
         //! UV coordinates in the surface
-        alignas(16) float2 uv;
+        float2 uv;
         //! UV-based tangents
-        float3             tangent;
+        float3 tangent;
 
         inline bool operator==(const Vertex &other) const {
             return all(position == other.position) &&
@@ -62,37 +64,43 @@ export namespace lysa {
      */
     class Mesh : public Resource {
     public:
+        inline static const std::vector<vireo::VertexAttributeDesc> vertexAttributes{
+            {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position) },
+            {"NORMAL",   vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, normal)},
+            {"UV",       vireo::AttributeFormat::R32G32_FLOAT,   offsetof(Vertex, uv)},
+            {"TANGENT",  vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, tangent)},
+        };
+
         /**
          * Creates an empty Mesh
-         * @param meshName node name
+         * @param name resource name
          */
-        static std::shared_ptr<Mesh> create(const std::wstring &meshName = L"Mesh");
+        Mesh(const std::wstring &name = L"Mesh");
 
         /**
          * Creates a Mesh from vertices
          * @param vertices Vertices
          * @param indices Indexes of vertices
          * @param surfaces Surfaces
-         * @param meshName Node name
+         * @param name Node name
          */
-        static std::shared_ptr<Mesh> create(
-            const std::vector<Vertex> &             vertices,
-            const std::vector<uint32_t> &           indices,
-            const std::vector<std::shared_ptr<MeshSurface>> &surfaces,
-            const std::wstring &                     meshName = L"Mesh");
+        Mesh(const std::vector<Vertex>& vertices,
+             const std::vector<uint32_t>& indices,
+             const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
+             const std::wstring& name = L"Mesh");
 
          /**
          * Returns the material for a given surface
-         * @param surfaceIndex Zero based index of the surface
+         * @param surfaceIndex Zero-based index of the surface
          */
-        const std::shared_ptr<Material> &getSurfaceMaterial(const uint32_t surfaceIndex) const {
+        const std::shared_ptr<Material>& getSurfaceMaterial(const uint32_t surfaceIndex) const {
             assert(surfaceIndex < surfaces.size());
             return surfaces[surfaceIndex]->material;
         }
 
         /**
          * Changes the material of a given surface
-         * @param surfaceIndex Zero based index of the Surface
+         * @param surfaceIndex Zero-based index of the Surface
          * @param material New material for the Surface
          */
         void setSurfaceMaterial(uint32_t surfaceIndex, const std::shared_ptr<Material>& material);
@@ -100,27 +108,27 @@ export namespace lysa {
         /**
          * Returns all the Surfaces
          */
-        std::vector<std::shared_ptr<MeshSurface>> &getSurfaces() { return surfaces; }
+        std::vector<std::shared_ptr<MeshSurface>>& getSurfaces() { return surfaces; }
 
         /**
          * Returns all the vertices
          */
-        std::vector<Vertex> &getVertices() { return vertices; }
+        std::vector<Vertex>& getVertices() { return vertices; }
 
         /**
          * Return all the vertices indexes
          */
-        std::vector<uint32_t> &getIndices() { return indices; }
+        std::vector<uint32_t>& getIndices() { return indices; }
 
         /**
          * Returns all the vertices
          */
-        const std::vector<Vertex> &getVertices() const { return vertices; }
+        const std::vector<Vertex>& getVertices() const { return vertices; }
 
         /**
          * Return all the vertices indexes
          */
-        const std::vector<uint32_t> &getIndices() const { return indices; }
+        const std::vector<uint32_t>& getIndices() const { return indices; }
 
         /**
          * Returns the local space axis aligned bounding box
@@ -137,25 +145,25 @@ export namespace lysa {
             return *a < *b;
         }
 
-        std::unordered_set<std::shared_ptr<Material>> &_getMaterials() { return materials; }
-
     protected:
-        AABB                                          localAABB;
-        std::vector<Vertex>                           vertices;
-        std::vector<uint32_t>                         indices;
-        std::vector<std::shared_ptr<MeshSurface>>         surfaces{};
+        AABB                  localAABB;
+        std::vector<Vertex>   vertices;
+        std::vector<uint32_t> indices;
+
+        std::vector<std::shared_ptr<MeshSurface>>     surfaces{};
         std::unordered_set<std::shared_ptr<Material>> materials{};
+
+        std::shared_ptr<vireo::Buffer> vertexBuffer;
+        std::shared_ptr<vireo::Buffer> indexBuffer;
 
         void buildAABB();
 
-        void optimize();
+    private:
+        void upload();
 
-        explicit Mesh(const std::wstring &meshName = L"Mesh");
+        void bind(const vireo::CommandList& commandList) const;
 
-        Mesh(const std::vector<Vertex> &                vertices,
-             const std::vector<uint32_t> &              indices,
-             const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-             const std::wstring &                       meshName = L"Mesh");
+        std::unordered_set<std::shared_ptr<Material>>& getMaterials() { return materials; }
     };
 }
 

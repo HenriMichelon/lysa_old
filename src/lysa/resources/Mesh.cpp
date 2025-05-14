@@ -62,4 +62,15 @@ namespace lysa {
         localAABB = {min, max};
     }
 
+    void Mesh::upload() {
+
+    }
+
+    void Mesh::bind(const vireo::CommandList& commandList) const {
+        assert(vertexBuffer != nullptr && indexBuffer != nullptr);
+        commandList.bindVertexBuffer(vertexBuffer);
+        commandList.bindIndexBuffer(indexBuffer);
+    }
+
+
 }
