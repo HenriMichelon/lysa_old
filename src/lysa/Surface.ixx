@@ -12,8 +12,6 @@ import lysa.surface_config;
 import lysa.renderers.renderer;
 
 export namespace lysa {
-
-
     /*
      * %A Rendering surface
      */
@@ -54,6 +52,8 @@ export namespace lysa {
         */
         void setRootNode(const std::shared_ptr<Node> &node);
 
+        auto getAspectRatio() const { return swapChain->getAspectRatio(); }
+
         void waitIdle() const;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0) const;
@@ -61,8 +61,6 @@ export namespace lysa {
         void removePostprocessing(const std::wstring& fragShaderName) const;
 
         virtual ~Surface();
-
-    protected:
 
     private:
 

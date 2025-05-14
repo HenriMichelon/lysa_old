@@ -145,7 +145,7 @@ export namespace lysa {
         /**
          * Returns the world space position
          */
-        // float3 getPositionGlobal() const { return globalTransform[3].xyz; }
+        float3 getPositionGlobal() const { return globalTransform[3].xyz; }
     
         /**
          * Rotates the local transformation

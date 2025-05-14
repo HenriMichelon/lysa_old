@@ -15,6 +15,7 @@ export import lysa.global;
 export import lysa.surface;
 export import lysa.surface_config;
 
+export import lysa.nodes.camera;
 export import lysa.nodes.mesh_instance;
 export import lysa.nodes.node;
 
