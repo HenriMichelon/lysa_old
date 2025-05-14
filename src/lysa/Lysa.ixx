@@ -8,9 +8,14 @@ export module lysa;
 
 export import lysa.application;
 export import lysa.application_config;
-export import lysa.constants;
-export import lysa.enums;
-export import lysa.math;
+export import lysa.global;
 export import lysa.surface;
 export import lysa.surface_config;
+
 export import lysa.nodes.node;
+
+export import lysa.resources.image;
+export import lysa.resources.material;
+export import lysa.resources.mesh;
+export import lysa.resources.texture;
+

@@ -7,9 +7,8 @@
 export module lysa.nodes.node;
 
 import std;
-import lysa.math;
-import lysa.object;
-import lysa.types;
+import lysa.global;
+import lysa.surface;
 
 export namespace lysa {
 
@@ -246,8 +245,6 @@ export namespace lysa {
         const Surface*              surface{nullptr};
         Node*                       parent{nullptr};
         std::vector<std::shared_ptr<Node>>  children;
-
-        static std::wstring sanitizeName(const std::wstring &name);
 
         virtual void ready(const Surface* surface);
 

@@ -11,9 +11,10 @@ import vireo;
 import lysa.math;
 import lysa.constants;
 import lysa.enums;
-import lysa.nodes.node;
 
 export namespace lysa {
+
+    class Node;
 
     /**
      * Rendering surface configuration

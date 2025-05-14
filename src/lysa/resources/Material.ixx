@@ -1,0 +1,267 @@
+/*
+ * Copyright (c) 2025-present Henri Michelon
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+*/
+export module lysa.resources.material;
+
+import std;
+import vireo;
+import lysa.global;
+import lysa.resources.resource;
+import lysa.resources.texture;
+
+export namespace lysa {
+    /**
+     * Base class for all materials of models surfaces
+     */
+    class Material : public Resource {
+    public:
+        /**
+         * Returns the cull mode.
+         */
+        auto getCullMode() const { return cullMode; }
+
+        /**
+         * Sets the CullMode.
+         * Determines which side of the triangle to cull depending on whether the triangle faces towards or away from the camera.
+         */
+        void setCullMode(const vireo::CullMode mode) { cullMode = mode; }
+
+        /**
+         * Returns the transparency mode
+         */
+        auto getTransparency() const { return transparency; }
+
+        /**
+         * Sets the transparency mode
+         */
+        void setTransparency(const Transparency transparencyMode) { transparency = transparencyMode; }
+
+        /**
+         * Returns the alpha scissor threshold value
+         */
+        auto getAlphaScissor() const { return alphaScissor; }
+
+        /**
+         * Sets the alpha scissor threshold value
+         * Threshold at which the alpha scissor will discard values.
+         * Higher values will result in more pixels being discarded.
+         * If the material becomes too opaque at a distance, try increasing this value.
+         * If the material disappears at a distance, try decreasing this value.
+         */
+        void setAlphaScissor(const float scissor) { alphaScissor = scissor; }
+
+    protected:
+        Material(const std::wstring &name);
+
+    private:
+        vireo::CullMode  cullMode{vireo::CullMode::NONE};
+        Transparency     transparency{Transparency::DISABLED};
+        float            alphaScissor{0.1f};
+        // The material parameters will be written in GPU memory next frame
+        uint32_t         dirty;
+
+    public:
+        void _setDirty();
+        inline auto _isDirty() const { return dirty > 0; }
+        inline auto _clearDirty() { this->dirty--; }
+    };
+
+    /**
+     * Simple albedo/specular/normal material
+     */
+    class StandardMaterial : public Material {
+    public:
+        /**
+         * References and properties of a texture
+         */
+        struct TextureInfo {
+            std::shared_ptr<ImageTexture> texture{nullptr};
+            float3x3                      transform{float3x3::identity()};
+        };
+
+        /**
+         * Creates a StandardMaterial with default parameters
+         */
+        StandardMaterial(const std::wstring &name = L"StandardMaterial");
+
+        /**
+         * Returns the material's base color.
+         */
+        const auto& getAlbedoColor() const { return albedoColor; }
+
+        /**
+         * Sets the material's base color.
+         */
+        void setAlbedoColor(const float4 &color) { albedoColor = color; }
+
+        /**
+         * Returns the albedo texture (texture to multiply by albedo color. Used for basic texturing of objects).
+         */
+        const auto& getAlbedoTexture() const { return albedoTexture; }
+
+        /**
+         * Sets the albedo texture (texture to multiply by albedo color. Used for basic texturing of objects).
+         */
+        void setAlbedoTexture(const TextureInfo &texture);
+
+        /**
+         * Returns the normal texture
+         */
+        const auto &getNormalTexture() const { return normalTexture; }
+
+        /**
+         * Sets the normal texture
+         */
+        void setNormalTexture(const TextureInfo &texture);
+
+        /**
+         * Returns the metallic factor
+         */
+        auto getMetallicFactor() const { return metallicFactor; }
+
+        /**
+         * Sets the metallic factor
+         */
+        void setMetallicFactor(float metallic);
+
+        /**
+         * Return the metallic image texture. Only the BLUE channel is used by the default shader.
+         */
+        const auto& getMetallicTexture() const { return metallicTexture; }
+
+        /**
+         * Sets the metallic image texture. Only the BLUE channel is used by the default shader.
+         */
+        void setMetallicTexture(const TextureInfo &texture);
+
+        /**
+         * Returns the roughness factor
+         */
+        float getRoughnessFactor() const { return roughnessFactor; }
+
+        /**
+         * Sets the roughness factor
+         */
+        void setRoughnessFactor(float roughness);
+
+        /**
+         * Returns the roughness image texture. Only the RED channel is used by the default shader.
+         */
+        const auto& getRoughnessTexture() const { return roughnessTexture; }
+
+        /**
+         * Sets the roughness image texture. Only the RED channel is used by the default shader.
+         */
+        void setRoughnessTexture(const TextureInfo &texture);
+
+        /**
+         * Returns the emmisive colors image texture
+         */
+        const auto& getEmissiveTexture() const { return emissiveTexture; }
+
+        /**
+         * Return the emmisive colors factor
+         */
+        float3 getEmissiveFactor() const { return emissiveFactor; }
+
+        /**
+         * Sets the emmisive colors factore
+         */
+        void setEmissiveFactor(const float3& emissive);
+
+        /**
+         * Sets the emmisive colors image texture. Used as a linear RGB texture by the default shader.
+         */
+        void setEmissiveTexture(const TextureInfo& texture);
+
+        /**
+         * Returns the emmisibe colors strength
+         */
+        auto getEmissiveStrength() const { return emissiveStrength; }
+
+        /**
+         * Sets the emmisibe colors strength
+         */
+        void setEmissiveStrength(float emissive);
+
+        /**
+         * Returns the scale applied to the normal image texture.
+         * See https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_normaltextureinfo_scale
+         */
+        auto getNormalScale() const { return normalScale; }
+
+        /**
+         * Sets the scale applied to the normal image texture.
+         * See https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_normaltextureinfo_scale
+         */
+        void setNormalScale(float scale);
+
+    private:
+        float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
+        TextureInfo  albedoTexture{};
+        float        metallicFactor{-1.0f}; // -1 -> non PBR material
+        TextureInfo  metallicTexture{};
+        float        roughnessFactor{1.0f};
+        TextureInfo  roughnessTexture{};
+        float3       emissiveFactor{0.0f};
+        float        emissiveStrength{1.0f};
+        TextureInfo  emissiveTexture;
+        TextureInfo  normalTexture{};
+        float        normalScale{1.0f};
+    };
+
+    /**
+     * Shader-based material
+     */
+    class ShaderMaterial : public Material {
+    public:
+        /**
+         * Maximum number of parameters of a ShaderMaterial
+         */
+        static constexpr int MAX_PARAMETERS{4};
+
+        /**
+         * Creates a ShaderMaterial by copy
+         */
+        ShaderMaterial(const std::shared_ptr<ShaderMaterial> &orig);
+
+        /**
+         * Creates a ShaderMaterial
+         * @param fragShaderFileName fragment shader file path, relative to the application directory
+         * @param vertShaderFileName vertex shader file path, relative to the application directory
+         * @param name Resource name
+         */
+        ShaderMaterial(const std::wstring &fragShaderFileName,
+                       const std::wstring &vertShaderFileName = L"",
+                       const std::wstring &name               = L"ShaderMaterial");
+
+        /**
+         * Returns the fragment shader file path, relative to the application directory
+         */
+        const auto& getFragFileName() const { return fragFileName; }
+
+        /**
+         * Returns the vertex shader file path, relative to the application directory
+         */
+        const auto& getVertFileName() const { return vertFileName; }
+
+        /**
+         * Sets a parameter value
+         */
+        void setParameter(int index, const float4& value);
+
+        /**
+         * Returns a parameter value
+         */
+        auto getParameter(const int index) const { return parameters[index]; }
+
+    private:
+        const std::wstring fragFileName;
+        const std::wstring vertFileName;
+        float4             parameters[MAX_PARAMETERS]{};
+    };
+
+}

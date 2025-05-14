@@ -9,10 +9,11 @@ export module lysa.surface;
 import std;
 import vireo;
 import lysa.surface_config;
-import lysa.nodes.node;
 import lysa.renderers.renderer;
 
 export namespace lysa {
+
+    class Node;
 
     /*
      * %A Rendering surface

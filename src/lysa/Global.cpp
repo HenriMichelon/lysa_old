@@ -4,12 +4,20 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-module lysa.tools;
+module lysa.global;
 
 import std;
 import lysa.constants;
 
 namespace lysa {
+
+
+    std::wstring sanitizeName(const std::wstring &name) {
+        auto newName = name;
+        std::ranges::replace(newName, '/', '_');
+        std::ranges::replace(newName, ':', '_');
+        return newName;
+    }
 
     float3 eulerAngles(quaternion q) {
         q = normalize(q);

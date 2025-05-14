@@ -7,27 +7,18 @@
 module lysa.nodes.node;
 #include <cassert>
 
-import lysa.math;
-import lysa.tools;
-import lysa.constants;
+import lysa.global;
 
 namespace lysa {
 
-    id_t Node::currentId = 0;
+    id_t Node::currentId{INVALID_ID};
 
     Node::Node(const std::wstring &name, const Type type):
         // localTransform{float4x4{1.0f}},
         id{++currentId},
         type{type},
-        name{name} {
+        name{sanitizeName(name)} {
         // Node::updateGlobalTransform();
-    }
-
-    std::wstring Node::sanitizeName(const std::wstring &name) {
-        auto newName = name;
-        std::ranges::replace(newName, '/', '_');
-        std::ranges::replace(newName, ':', '_');
-        return newName;
     }
 
     void Node::ready(const Surface* surface) {

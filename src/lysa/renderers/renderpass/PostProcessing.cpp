@@ -6,7 +6,7 @@
 */
 module lysa.renderers.renderpass.post_processing;
 
-import lysa.tools;
+import lysa.global;
 
 namespace lysa {
     PostProcessing::PostProcessing(

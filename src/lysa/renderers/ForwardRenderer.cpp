@@ -7,7 +7,7 @@
 module lysa.renderers.forward_renderer;
 
 import vireo;
-import lysa.tools;
+import lysa.global;
 
 namespace lysa {
     ForwardRenderer::ForwardRenderer(

@@ -7,6 +7,7 @@
 module lysa.surface;
 #include <cassert>
 
+import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
 
 namespace lysa {

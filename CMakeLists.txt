@@ -86,12 +86,21 @@ if(WIN32)
 endif ()
 
 add_library(${LYSA_TARGET} STATIC
+        ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
+        ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Surface.cpp
-        ${ENGINE_SRC_DIR}/Tools.cpp
+
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
+
+        ${ENGINE_SRC_DIR}/resources/Image.cpp
+        ${ENGINE_SRC_DIR}/resources/Material.cpp
+        ${ENGINE_SRC_DIR}/resources/Mesh.cpp
+        ${ENGINE_SRC_DIR}/resources/Resource.cpp
+        ${ENGINE_SRC_DIR}/resources/Texture.cpp
+
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
@@ -105,18 +114,26 @@ target_sources(${LYSA_TARGET}
     PUBLIC
     FILE_SET CXX_MODULES
     FILES
+        ${ENGINE_SRC_DIR}/AABB.ixx
         ${ENGINE_SRC_DIR}/Application.ixx
         ${ENGINE_SRC_DIR}/ApplicationConfig.ixx
         ${ENGINE_SRC_DIR}/Constants.ixx
         ${ENGINE_SRC_DIR}/Enums.ixx
+        ${ENGINE_SRC_DIR}/Global.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Surface.ixx
         ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
-        ${ENGINE_SRC_DIR}/Tools.ixx
-        ${ENGINE_SRC_DIR}/Types.ixx
+
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
+
+        ${ENGINE_SRC_DIR}/resources/Image.ixx
+        ${ENGINE_SRC_DIR}/resources/Material.ixx
+        ${ENGINE_SRC_DIR}/resources/Mesh.ixx
+        ${ENGINE_SRC_DIR}/resources/Resource.ixx
+        ${ENGINE_SRC_DIR}/resources/Texture.ixx
+
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
@@ -136,6 +153,7 @@ if(WIN32)
             "<windows.h>"
             "<cstdint>"
             "<cstddef>"
+            "<cassert>"
     )
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} Xinput dinput8 dxguid dxgi d3d12 d3dcompiler)

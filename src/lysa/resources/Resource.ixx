@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2025-present Henri Michelon
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+*/
+export module lysa.resources.resource;
+
+import std;
+import lysa.global;
+
+export namespace lysa {
+
+    /**
+     * Base class for resources.
+     */
+    class Resource : public Object {
+    public:
+
+        Resource(const std::wstring& name);
+
+        /**
+         * Returns the unique id of the resource
+         */
+        auto getId() const { return id; }
+
+        /**
+         * Return the name of the resource
+         */
+        const auto& getName() const { return name; }
+
+        bool operator==(const Resource &other) const { return id == other.id; }
+
+        bool operator<(const Resource &other) const { return id < other.id; }
+
+        bool operator>(const Resource &other) const { return id > other.id; }
+
+        /**
+         * Duplicates a resource. Warning: not implemented on all resource types, check documentation for the resource type before using it.
+         */
+        virtual std::shared_ptr<Resource> duplicate() const;
+
+    private:
+        id_t               id;
+        static id_t        currentId;
+        const std::wstring name;
+    };
+
+}
