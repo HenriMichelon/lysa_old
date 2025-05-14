@@ -4,14 +4,15 @@ A 3D game engine.
 
 ## Features
 
-- Node-based (heavily inspired by [Godot](https://godotengine.org/) 
+- Node-based (heavily inspired by [Godot](https://godotengine.org/))
 - Vulkan 1.3 & DirectX 12 support
 - Selectable forward and deferred renderers
 - Physics support
-- PBR shader
+- Bundled PBR shader
 - Bundled post-processing shaders
 - Written in and for modern C++
-- Slang-like math syntax
+- [Slang shader language](https://shader-slang.org/) support for CMake
+- Math library with Slang-like syntax
 
 ## Third party dependencies used
 
