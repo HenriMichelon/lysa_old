@@ -10,7 +10,7 @@ import lysa.global;
 
 namespace lysa {
 
-    id_t Resource::currentId{INVALID_ID};
+    unique_id Resource::currentId{INVALID_ID};
 
     Resource::Resource(const std::wstring& name):
         id{++currentId},

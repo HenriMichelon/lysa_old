@@ -125,6 +125,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Surface.ixx
         ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
+        ${ENGINE_SRC_DIR}/Types.ixx
 
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
 
@@ -150,13 +151,8 @@ target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TA
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET} )
 target_precompile_headers(${LYSA_TARGET} PRIVATE
         "<cstdint>"
-        "<cstddef>"
-        "<cassert>"
 )
 if(WIN32)
-    target_precompile_headers(${LYSA_TARGET} PRIVATE
-            "<windows.h>"
-    )
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)
     endif ()

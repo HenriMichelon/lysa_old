@@ -5,12 +5,16 @@
  * https://opensource.org/licenses/MIT
 */
 export module lysa.global;
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 import std;
 export import lysa.constants;
 export import lysa.enums;
 export import lysa.math;
 export import lysa.object;
+export import lysa.types;
 
 export namespace lysa {
 
@@ -51,4 +55,27 @@ export namespace lysa {
     private:
         std::string message;
     };
+
+
+#ifdef _DEBUG
+
+    template<typename Expr>
+    constexpr void assert(
+        Expr&& expression,
+        const std::string expr,
+        const std::source_location& loc = std::source_location::current()) {
+        if (!expression()) {
+            throw Exception("Assertion failed: ", expr, loc.file_name(), loc.line());
+        }
+    }
+
+#else
+
+    template<typename Expr>
+    constexpr void assert_expr(
+        Expr&&,
+        const std::string_view,
+        const std::source_location& = std::source_location::current()) noexcept { }
+
+#endif
 }

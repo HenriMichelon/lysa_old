@@ -5,13 +5,12 @@
  * https://opensource.org/licenses/MIT
 */
 module lysa.nodes.node;
-#include <cassert>
 
 import lysa.global;
 
 namespace lysa {
 
-    id_t Node::currentId{INVALID_ID};
+    unique_id Node::currentId{INVALID_ID};
 
     Node::Node(const std::wstring &name, const Type type):
         // localTransform{float4x4{1.0f}},
@@ -22,7 +21,7 @@ namespace lysa {
     }
 
     void Node::ready(const Surface* surface) {
-        assert(surface != nullptr);
+        assert([&]{return surface != nullptr; }, "Invalid surface");
         this->surface = surface;
         onReady();
     }

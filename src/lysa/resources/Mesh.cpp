@@ -5,9 +5,8 @@
  * https://opensource.org/licenses/MIT
 */
 module lysa.resources.mesh;
-#include <cassert>
-#undef max
-#undef min
+
+import lysa.global;
 
 namespace lysa {
 
@@ -17,15 +16,11 @@ namespace lysa {
         material{nullptr} {
     }
 
-    Mesh::Mesh(const std::wstring &meshName):
-        Resource{meshName} {
-    }
-
-    Mesh::Mesh(const std::vector<Vertex> &             vertices,
-               const std::vector<uint32_t> &           indices,
+    Mesh::Mesh(const std::vector<Vertex>& vertices,
+               const std::vector<uint32_t>& indices,
                const std::vector<std::shared_ptr<MeshSurface>> &surfaces,
-               const std::wstring &                     meshName):
-        Resource{meshName},
+               const std::wstring& name):
+        Resource{name},
         vertices{vertices},
         indices{indices},
         surfaces{surfaces} {
@@ -33,7 +28,7 @@ namespace lysa {
     }
 
     void Mesh::setSurfaceMaterial(const uint32_t surfaceIndex, const std::shared_ptr<Material>& material) {
-        assert(surfaceIndex < surfaces.size());
+        assert([&]{return surfaceIndex < surfaces.size();}, "Invalid surface index");
         surfaces[surfaceIndex]->material = material;
         materials.insert(surfaces[surfaceIndex]->material);
     }
@@ -61,16 +56,5 @@ namespace lysa {
         }
         localAABB = {min, max};
     }
-
-    void Mesh::upload() {
-
-    }
-
-    void Mesh::bind(const vireo::CommandList& commandList) const {
-        assert(vertexBuffer != nullptr && indexBuffer != nullptr);
-        commandList.bindVertexBuffer(vertexBuffer);
-        commandList.bindIndexBuffer(indexBuffer);
-    }
-
 
 }

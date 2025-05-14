@@ -41,8 +41,8 @@ export namespace lysa {
         virtual std::shared_ptr<Resource> duplicate() const;
 
     private:
-        id_t               id;
-        static id_t        currentId;
+        unique_id          id;
+        static unique_id   currentId;
         const std::wstring name;
     };
 

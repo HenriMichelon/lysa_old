@@ -8,11 +8,11 @@ export module lysa.constants;
 
 import std;
 import lysa.math;
+import lysa.types;
 
 export namespace lysa {
 
-    using id_t = uint64_t;
-    constexpr id_t INVALID_ID{0};
+    constexpr unique_id INVALID_ID{0};
 
     /**
     * Default clear color for windows and color frame buffers
@@ -87,6 +87,5 @@ export namespace lysa {
     const float3x3 TRANSFORM_BASIS{1, 0, 0, 0, 1, 0, 0, 0, 1};
 
     constexpr float HALF_PI = std::numbers::pi_v<float> / 2.0f;
-
 
 }

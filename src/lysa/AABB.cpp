@@ -5,8 +5,6 @@
  * https://opensource.org/licenses/MIT
 */
 module lysa.aabb;
-#undef min
-#undef max
 
 import lysa.global;
 

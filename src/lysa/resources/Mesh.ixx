@@ -5,7 +5,7 @@
  * https://opensource.org/licenses/MIT
 */
 export module lysa.resources.mesh;
-#include <cassert>
+#include <cstddef>
 
 import std;
 import vireo;
@@ -72,12 +72,6 @@ export namespace lysa {
         };
 
         /**
-         * Creates an empty Mesh
-         * @param name resource name
-         */
-        Mesh(const std::wstring &name = L"Mesh");
-
-        /**
          * Creates a Mesh from vertices
          * @param vertices Vertices
          * @param indices Indexes of vertices
@@ -94,7 +88,7 @@ export namespace lysa {
          * @param surfaceIndex Zero-based index of the surface
          */
         const std::shared_ptr<Material>& getSurfaceMaterial(const uint32_t surfaceIndex) const {
-            assert(surfaceIndex < surfaces.size());
+            assert([&]{return surfaceIndex < surfaces.size(); }, "Invalid surface index");
             return surfaces[surfaceIndex]->material;
         }
 
@@ -153,17 +147,28 @@ export namespace lysa {
         std::vector<std::shared_ptr<MeshSurface>>     surfaces{};
         std::unordered_set<std::shared_ptr<Material>> materials{};
 
-        std::shared_ptr<vireo::Buffer> vertexBuffer;
-        std::shared_ptr<vireo::Buffer> indexBuffer;
-
         void buildAABB();
 
     private:
-        void upload();
+        uint32_t                       firstIndex{0};
+        uint32_t                       vertexOffset{0};
+        std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
+        std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
 
-        void bind(const vireo::CommandList& commandList) const;
+        Mesh(const std::vector<Vertex>& vertices,
+            const std::vector<uint32_t>& indices,
+            const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
+            uint32_t firstIndex,
+            uint32_t vertexOffset,
+            std::shared_ptr<vireo::Buffer> vertexBuffer,
+            std::shared_ptr<vireo::Buffer> indexBuffer,
+            const std::wstring &name = L"Mesh");
 
-        std::unordered_set<std::shared_ptr<Material>>& getMaterials() { return materials; }
+        auto& getMaterials() { return materials; }
+
+        auto getVertexBuffer() { return vertexBuffer; }
+
+        auto getIndexBuffer() { return indexBuffer; }
     };
 }
 

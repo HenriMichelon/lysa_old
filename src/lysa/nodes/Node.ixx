@@ -226,6 +226,10 @@ export namespace lysa {
          * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
          */
         auto getSurface() const { return surface; }
+
+        auto getVireo() const {
+            assert([this]{ return surface != nullptr; }, "Node is not attached to a surface");
+        }
     
         ~Node() override = default;
     
@@ -238,8 +242,8 @@ export namespace lysa {
     private:
         friend class Surface;
 
-        static  id_t                currentId;
-        id_t                        id;
+        static  unique_id           currentId;
+        unique_id                   id;
         Type                        type;
         std::wstring                name;
         const Surface*              surface{nullptr};

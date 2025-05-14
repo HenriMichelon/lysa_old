@@ -5,7 +5,6 @@
 * https://opensource.org/licenses/MIT
 */
 module lysa.renderers.renderer;
-#include <cassert>
 
 namespace lysa {
     Renderer::Renderer(

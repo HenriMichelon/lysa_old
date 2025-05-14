@@ -5,8 +5,8 @@
 * https://opensource.org/licenses/MIT
 */
 module lysa.surface;
-#include <cassert>
 
+import lysa.global;
 import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
 
@@ -24,7 +24,7 @@ namespace lysa {
             surfaceConfig.presentMode,
             surfaceConfig.framesInFlight)},
         renderer{std::make_unique<ForwardRenderer>(surfaceConfig, vireo, L"Main Renderer")} {
-        assert(surfaceConfig.framesInFlight > 0);
+        assert([&]{return surfaceConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(surfaceConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
