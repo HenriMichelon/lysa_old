@@ -70,7 +70,7 @@ namespace lysa {
         render(frameIndex);
     }
 
-    void Surface::render(const uint32 frameIndex) {
+    void Surface::render(const uint32 frameIndex) const {
         const auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 

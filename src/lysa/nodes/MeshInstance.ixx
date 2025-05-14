@@ -15,7 +15,7 @@ import lysa.resources.mesh;
 export namespace lysa {
 
     /**
-     * Node that hold a Mesh.
+     * Node that holds a Mesh.
      */
     class MeshInstance : public Node {
     public:
@@ -32,22 +32,22 @@ export namespace lysa {
         /**
          * Set to `true` to have the Mesh outlined starting to the next frame
          */
-        void setOutlined(const bool o) { outlined = o; }
+        // void setOutlined(const bool o) { outlined = o; }
 
-        /**st
-         * Returns `true` if the Mesh will be outlined during the next frame
+        /**
+         * Returns `true` if the Mesh is outlined during the next frame
          */
-        auto isOutlined() const { return outlined; }
+        // auto isOutlined() const { return outlined; }
 
         /**
          * Sets the outline material. The material **must** belong to the OutlineMaterials collection.
          */
-        void setOutlineMaterial(const std::shared_ptr<ShaderMaterial> &material) { outlineMaterial = material; }
+        // void setOutlineMaterial(const std::shared_ptr<ShaderMaterial> &material) { outlineMaterial = material; }
 
         /**
          * Returns the current outlining material
          */
-        auto& getOutlineMaterial() { return outlineMaterial; }
+        // auto& getOutlineMaterial() { return outlineMaterial; }
 
         /**
          * Returns the world space axis aligned bounding box
@@ -62,10 +62,11 @@ export namespace lysa {
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
-        AABB                            worldAABB;
-        bool                            outlined{false};
-        std::shared_ptr<Mesh>           mesh;
-        std::shared_ptr<ShaderMaterial> outlineMaterial;
+        AABB                  worldAABB;
+        std::shared_ptr<Mesh> mesh;
+
+        // bool                            outlined{false};
+        // std::shared_ptr<ShaderMaterial> outlineMaterial;
         
         void updateGlobalTransform() override;
     };

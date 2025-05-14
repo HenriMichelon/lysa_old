@@ -104,7 +104,7 @@ export namespace lysa {
 
         std::unique_ptr<Renderer>           renderer;
 
-        void render(uint32 frameIndex);
+        void render(uint32 frameIndex) const;
 
     };
 

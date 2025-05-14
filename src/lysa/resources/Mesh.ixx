@@ -37,6 +37,8 @@ export namespace lysa {
         }
     };
 
+    class Mesh;
+
     /**
      * %A Mesh surface, with counterclockwise triangles
      */
