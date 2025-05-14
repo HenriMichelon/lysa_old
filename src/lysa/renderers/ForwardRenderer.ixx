@@ -8,7 +8,7 @@ export module lysa.renderers.forward_renderer;
 
 import std;
 import vireo;
-import lysa.surface_config;
+import lysa.window_config;
 import lysa.renderers.meshes_renderer;
 import lysa.renderers.renderpass.forward_color;
 
@@ -16,7 +16,7 @@ export namespace lysa {
     class ForwardRenderer : public MeshesRenderer {
     public:
         ForwardRenderer(
-            const SurfaceConfig& surfaceConfig,
+            const WindowConfig& surfaceConfig,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 

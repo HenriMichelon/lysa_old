@@ -10,6 +10,7 @@ import vireo;
 import lysa.global;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
+import lysa.nodes.node;
 
 export namespace lysa {
 
@@ -33,12 +34,23 @@ export namespace lysa {
     struct SceneData {
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
+        // All the models of the scene
+        std::list<std::shared_ptr<MeshInstance>> models{};
         // All models containing opaque surfaces
-        std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaquesModels{};
+        std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
         // Data for all the models of the scene, one array and one buffer for all the models
+        bool modelsUpdated{false};
         std::unique_ptr<ModelUniform[]> modelUniforms;
-        std::unique_ptr<vireo::Buffer>  modelUniformBuffer;
+        std::unique_ptr<vireo::Buffer> modelUniformsBuffer;
 
+        // Add a model to the scene
+        virtual void addNode(const std::shared_ptr<Node> &node);
+
+        // Remove a model from the scene
+        virtual void removeNode(const std::shared_ptr<Node> &node);
+
+        // Change the active camera, disabling the previous camera
+        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
     };
 
 }

@@ -8,7 +8,6 @@ export module lysa.nodes.node;
 
 import std;
 import lysa.global;
-import lysa.surface;
 
 export namespace lysa {
 
@@ -17,6 +16,8 @@ export namespace lysa {
      */
     class Node : public Object {
     public:
+        friend class Window;
+
         //! Node type
         enum Type {
            ANIMATION_PLAYER,
@@ -80,12 +81,12 @@ export namespace lysa {
         /**
          * Called when a node is added to the scene
          */
-        // virtual void onEnterScene() {}
+        virtual void onEnterScene() {}
 
         /**
          * Called when a node is removed from the scene
          */
-        // virtual void onExitScene() {}
+        virtual void onExitScene() {}
 
         /**
          * Called each frame after the physics have been updated and just before drawing the frame
@@ -401,19 +402,33 @@ export namespace lysa {
         }
 
         /**
-         * Returns true if this node has been added to the given group
-         */
-        inline bool isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
-
+        * Returns the immutable list of children nodes
+        */
+        const std::list<std::shared_ptr<Node>> &getChildren() const { return children; }
 
         /**
-         * Returns the attached surface or `nullptr` if the node is not rendered in a surface.
+         * Returns true if this node has been added to the given group
          */
-        auto getSurface() const { return surface; }
+        auto isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
 
-        auto getVireo() const {
-            assert([this]{ return surface != nullptr; }, "Node is not attached to a surface");
-        }
+        /**
+         * Returns true if the node is processed and receive input callbacks
+         */
+        bool isProcessed() const;
+
+        /**
+         * Returns the node type
+         */
+        auto getType() const { return type; }
+
+        /**
+         * Returns the attached rendering window or `nullptr` if the node is not attached to a window.
+         */
+        auto getWindow() const { return window; }
+
+        // auto getVireo() const {
+            // assert([this]{ return window != nullptr; }, "Node is not attached to a window");
+        // }
     
         ~Node() override = default;
     
@@ -426,18 +441,24 @@ export namespace lysa {
         virtual void updateGlobalTransform();
 
     private:
-        friend class Surface;
+        friend class Window;
 
         static  unique_id                currentId;
         unique_id                        id;
         Type                             type;
         std::wstring                     name;
-        const Surface*                   surface{nullptr};
+        const Window*                    window{nullptr};
         Node*                            parent{nullptr};
         std::list<std::shared_ptr<Node>> children;
         std::list<std::wstring>          groups;
+        ProcessMode                      processMode{ProcessMode::INHERIT};
 
-        virtual void ready(const Surface* surface);
+        virtual void ready(const Window* surface);
+
+        virtual void enterScene() { onEnterScene(); }
+
+        virtual void exitScene() { onExitScene(); }
+
 
     };
 

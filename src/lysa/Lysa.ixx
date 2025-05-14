@@ -12,8 +12,8 @@ export import vireo;
 export import lysa.application;
 export import lysa.application_config;
 export import lysa.global;
-export import lysa.surface;
-export import lysa.surface_config;
+export import lysa.window;
+export import lysa.window_config;
 
 export import lysa.nodes.camera;
 export import lysa.nodes.mesh_instance;

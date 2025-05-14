@@ -11,7 +11,7 @@ import lysa.global;
 
 namespace lysa {
     ForwardRenderer::ForwardRenderer(
-        const SurfaceConfig& surfaceConfig,
+        const WindowConfig& surfaceConfig,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
         MeshesRenderer{surfaceConfig, vireo, name},

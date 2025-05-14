@@ -151,7 +151,8 @@ export namespace lysa {
 
         void buildAABB();
 
-    // private:
+    private:
+        friend class SceneData;
     //     uint32_t                       firstIndex{0};
     //     uint32_t                       vertexOffset{0};
     //     std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
@@ -166,7 +167,7 @@ export namespace lysa {
     //         std::shared_ptr<vireo::Buffer> indexBuffer,
     //         const std::wstring &name = L"Mesh");
     //
-    //     auto& getMaterials() { return materials; }
+        auto& getMaterials() { return materials; }
     //
     //     auto getVertexBuffer() { return vertexBuffer; }
     //

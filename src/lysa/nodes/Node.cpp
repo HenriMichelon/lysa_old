@@ -7,6 +7,7 @@
 module lysa.nodes.node;
 
 import lysa.global;
+import lysa.window;
 
 namespace lysa {
 
@@ -18,7 +19,7 @@ namespace lysa {
         name            = node.name;
         localTransform  = node.localTransform;
         globalTransform = node.globalTransform;
-        // processMode     = orig.processMode;
+        processMode     = node.processMode;
         type            = node.type;
     }
 
@@ -30,9 +31,9 @@ namespace lysa {
         Node::updateGlobalTransform();
     }
 
-    void Node::ready(const Surface* surface) {
+    void Node::ready(const Window* surface) {
         assert([&]{return surface != nullptr; }, "Invalid surface");
-        this->surface = surface;
+        this->window = surface;
         onReady();
     }
 
@@ -64,7 +65,7 @@ namespace lysa {
         child->parent = this;
         children.push_back(child);
         child->updateGlobalTransform();
-        child->ready(surface);
+        child->ready(window);
         // child->visible = visible && child->visible;
         // child->castShadows = castShadows;
         // child->dontDrawEdges = dontDrawEdges;
@@ -94,6 +95,18 @@ namespace lysa {
         }
         return std::ranges::find(children, child) != children.end();
     }
+
+    bool Node::isProcessed() const {
+        const auto paused = window == nullptr || window->isPaused();
+        auto       mode   = processMode;
+        if ((parent == nullptr) && (mode == ProcessMode::INHERIT))
+            mode = ProcessMode::PAUSABLE;
+        return ((mode == ProcessMode::INHERIT) && (parent->isProcessed())) ||
+                (!paused && (mode == ProcessMode::PAUSABLE)) ||
+                (paused && (mode == ProcessMode::WHEN_PAUSED)) ||
+                (mode == ProcessMode::ALWAYS);
+    }
+
 
     /*
     float3 Node::toGlobal(const float3& local) const {

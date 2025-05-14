@@ -4,25 +4,26 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-export module lysa.surface;
+export module lysa.window;
 
 import vireo;
 import lysa.global;
-import lysa.surface_config;
+import lysa.window_config;
+import lysa.nodes.camera;
+import lysa.nodes.node;
 import lysa.renderers.renderer;
+import lysa.renderers.scene_data;
 
 export namespace lysa {
     /*
      * %A Rendering surface
      */
-    class Surface {
+    class Window {
     public:
-        friend class Node;
-
         /**
         * Creates a rendering surface
         */
-        Surface(SurfaceConfig& surfaceConfig, void* windowHandle);
+        Window(WindowConfig& config, void* windowHandle);
 
         void resize() const;
 
@@ -52,6 +53,20 @@ export namespace lysa {
         */
         void setRootNode(const std::shared_ptr<Node> &node);
 
+        /**
+         * Checks if the scene is paused, in respect for z0::ProcessMode
+         * @return  true if the current scene is paused
+         */
+        auto isPaused() const { return paused; }
+
+        /**
+         * Pause or resume the current scene
+         * @param pause the new state
+         *  - true pause the scene
+         *  - false resume the scene
+         */
+        void setPaused(bool pause);
+
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
         void waitIdle() const;
@@ -60,7 +75,7 @@ export namespace lysa {
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
 
-        virtual ~Surface();
+        virtual ~Window();
 
     private:
 
@@ -71,28 +86,42 @@ export namespace lysa {
         struct FrameData {
             // frames rendering & presenting synchronization
             std::shared_ptr<vireo::Fence> inFlightFence;
+            // Deferred list of nodes added to the current scene, processed before each frame
+            std::list<std::shared_ptr<Node>> addedNodes;
+            std::list<std::shared_ptr<Node>> addedNodesAsync;
+            // Deferred list of nodes removed from the current scene, processed before each frame
+            std::list<std::shared_ptr<Node>> removedNodes;
+            std::list<std::shared_ptr<Node>> removedNodesAsync;
+            // Camera to activate next frame
+            bool cameraChanged{false};
+            SceneData sceneData;
+            std::shared_ptr<Camera> activeCamera;
         };
 
         // Opaque window handle for presenting
         void*                 windowHandle;
         // Surface configuration
-        SurfaceConfig&        surfaceConfig;
-        // Surface scene
+        WindowConfig&         config;
+        // Node tree
         std::shared_ptr<Node> rootNode;
+        // State of the current scene
+        bool                  paused{false};
+        //
+        bool                  lockDeferredUpdates{false};
 
         ////// Frame drawing loop parameters
         // Last drawFrame() start time
-        double         currentTime{0.0};
+        double          currentTime{0.0};
         // Time accumulator to calculate the process delta time
-        double         accumulator{0.0};
+        double          accumulator{0.0};
         // Number of frames in the last second
-        uint32_t       frameCount{0};
+        uint32_t        frameCount{0};
         // Number of seconds since the last FPS update
-        float          elapsedSeconds{0.0f};
+        float           elapsedSeconds{0.0f};
         // Average calculated FPS
-        uint32_t       fps{0};
+        uint32_t        fps{0};
 
-        ////// Vireo objects. Keep them in order for a proper destruction order
+        ////// Vireo & Frame objects. Keep them in order for a proper destruction order
         // Associated Vireo object
         std::shared_ptr<vireo::Vireo>       vireo;
         // Submission queue used to present the swap chain
@@ -101,10 +130,21 @@ export namespace lysa {
         std::shared_ptr<vireo::SwapChain>   swapChain;
         // Per frame data
         std::vector<FrameData>              framesData;
+        std::mutex                          frameDataMutex;
 
+        // Scene renderer
         std::unique_ptr<Renderer>           renderer;
 
         void render(uint32 frameIndex) const;
+
+        // Process scene updates before drawing a frame
+        void processDeferredUpdates(uint32_t frameIndex);
+
+        // Add a node to the current scene
+        void addNode(const std::shared_ptr<Node> &node, bool async);
+
+        // Remove a node from the current scene
+        void removeNode(const std::shared_ptr<Node> &node, bool async);
 
     };
 

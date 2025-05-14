@@ -78,10 +78,10 @@ target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
 #######################################################
 if(WIN32)
     set(WIN32_SRC
-            ${ENGINE_SRC_DIR}/os/windows/WindowsSurface.cpp
+            ${ENGINE_SRC_DIR}/os/windows/Win32Window.cpp
     )
     set(WIN32_MODULES
-            ${ENGINE_SRC_DIR}/os/windows/WindowsSurface.ixx
+            ${ENGINE_SRC_DIR}/os/windows/Win32Window.ixx
     )
 endif ()
 
@@ -91,7 +91,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
-        ${ENGINE_SRC_DIR}/Surface.cpp
+        ${ENGINE_SRC_DIR}/Window.cpp
 
         ${ENGINE_SRC_DIR}/nodes/Camera.cpp
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
@@ -107,6 +107,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Samplers.cpp
+        ${ENGINE_SRC_DIR}/renderers/SceneData.cpp
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
@@ -126,8 +127,8 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
-        ${ENGINE_SRC_DIR}/Surface.ixx
-        ${ENGINE_SRC_DIR}/SurfaceConfig.ixx
+        ${ENGINE_SRC_DIR}/Window.ixx
+        ${ENGINE_SRC_DIR}/WindowConfig.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
 
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx

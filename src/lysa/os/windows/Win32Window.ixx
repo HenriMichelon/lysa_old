@@ -5,17 +5,17 @@
 * https://opensource.org/licenses/MIT
 */
 module;
-export module lysa.os.windows.surface;
+export module lysa.os.win32.surface;
 
 import std;
-import lysa.surface;
-import lysa.surface_config;
+import lysa.window;
+import lysa.window_config;
 
 export namespace lysa {
 
-    class WindowsSurface : public Surface {
+    class Win32Window : public Window {
     public:
-        WindowsSurface(SurfaceConfig&, void* windowHandle);
+        Win32Window(WindowConfig&, void* windowHandle);
     };
 
 }

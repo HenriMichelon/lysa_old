@@ -5,12 +5,12 @@
 * https://opensource.org/licenses/MIT
 */
 module;
-module lysa.os.windows.surface;
+module lysa.os.win32.surface;
 
 namespace lysa {
 
-    WindowsSurface::WindowsSurface(SurfaceConfig& surfaceConfig, void* windowHandle) :
-        Surface{surfaceConfig, windowHandle} {
+    Win32Window::Win32Window(WindowConfig& surfaceConfig, void* windowHandle) :
+        Window{surfaceConfig, windowHandle} {
     }
 
 }

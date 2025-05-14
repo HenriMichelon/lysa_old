@@ -8,7 +8,7 @@ module lysa.renderers.renderer;
 
 namespace lysa {
     Renderer::Renderer(
-        const SurfaceConfig& surfaceConfig,
+        const WindowConfig& surfaceConfig,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
         surfaceConfig{surfaceConfig},

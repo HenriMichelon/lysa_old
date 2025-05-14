@@ -4,18 +4,16 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-export module lysa.surface_config;
+export module lysa.window_config;
 
 import vireo;
 import lysa.global;
 
 export namespace lysa {
-
-
     /**
-     * Rendering surface configuration
+     * Rendering window configuration
      */
-    struct SurfaceConfig {
+    struct WindowConfig {
         friend class Node;
         //! Startup Scene
         std::shared_ptr<Node>   rootNode;
@@ -30,7 +28,9 @@ export namespace lysa {
         //! Frame buffer clear color
         float3                  clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
-        uint32_t                framesInFlight{2};
+        uint32                  framesInFlight{2};
+        //! Number of nodes updates per frame for asynchronous scene updates
+        uint32                  maxAsyncNodesUpdatedPerFrame{20};
         //! Name for the default vertex shader for the scene renderer
         // std::string          sceneVertexShader{"default"};
         //! Name for the default fragment shader for the scene renderer

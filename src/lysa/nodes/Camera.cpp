@@ -7,6 +7,7 @@
 module lysa.nodes.camera;
 
 import lysa.global;
+import lysa.window;
 
 namespace lysa {
 
@@ -59,7 +60,7 @@ namespace lysa {
         this->fov              = fov;
         nearDistance           = near;
         farDistance            = far;
-        const auto aspect      = getSurface()->getAspectRatio();
+        const auto aspect      = getWindow()->getAspectRatio();
         const auto tanHalfFovy = tan(radians(float1{fov}) / 2.f);
         projectionMatrix       = float4x4{0.0f};
         projectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);

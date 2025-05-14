@@ -9,14 +9,14 @@ export module lysa.renderers.renderpass;
 import std;
 import vireo;
 import lysa.global;
-import lysa.surface_config;
+import lysa.window_config;
 import lysa.renderers.samplers;
 
 export namespace lysa {
     class Renderpass {
     public:
         Renderpass(
-            const SurfaceConfig& surfaceConfig,
+            const WindowConfig& surfaceConfig,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
             const std::wstring& name);
@@ -36,7 +36,7 @@ export namespace lysa {
 
     protected:
         const std::wstring                      name;
-        const SurfaceConfig&                    surfaceConfig;
+        const WindowConfig&                    surfaceConfig;
         std::shared_ptr<vireo::Vireo>           vireo;
         const Samplers&                         samplers;
         std::shared_ptr<vireo::GraphicPipeline> pipeline;

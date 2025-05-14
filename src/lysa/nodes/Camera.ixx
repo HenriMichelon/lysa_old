@@ -7,7 +7,6 @@
 export module lysa.nodes.camera;
 
 import lysa.global;
-
 import lysa.nodes.node;
 
 export namespace lysa {
@@ -88,12 +87,13 @@ export namespace lysa {
         */
         void setFov(float fov);
 
-        void setActive(bool isActive);
 
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
+        friend class SceneData;
+
         // Field of view in degrees
         float fov{75.0};
         // Nearest clipping distance
@@ -111,7 +111,8 @@ export namespace lysa {
 
         void updateViewMatrix();
 
-    public:
+        void setActive(bool isActive);
+
         void updateGlobalTransform() override;
     };
 

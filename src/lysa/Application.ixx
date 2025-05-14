@@ -8,8 +8,8 @@ export module lysa.application;
 
 import lysa.global;
 import lysa.application_config;
-import lysa.surface;
-import lysa.surface_config;
+import lysa.window;
+import lysa.window_config;
 
 export namespace lysa {
 
@@ -26,7 +26,7 @@ export namespace lysa {
          * @param surfaceConfig The configuration parameter for this surface
          * @param windowHandle The opaque, os-specific, window handle
          */
-        std::shared_ptr<Surface> createSurface(SurfaceConfig& surfaceConfig, void* windowHandle) const;
+        std::shared_ptr<Window> createSurface(WindowConfig& surfaceConfig, void* windowHandle) const;
 
         /**
          * Return the global application configuration

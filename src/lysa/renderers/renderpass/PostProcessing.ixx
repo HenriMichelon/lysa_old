@@ -9,7 +9,7 @@ export module lysa.renderers.renderpass.post_processing;
 import std;
 import vireo;
 import lysa.global;
-import lysa.surface_config;
+import lysa.window_config;
 import lysa.renderers.renderpass;
 import lysa.renderers.samplers;
 
@@ -17,7 +17,7 @@ export namespace lysa {
     class PostProcessing : public Renderpass {
     public:
         PostProcessing(
-            const SurfaceConfig& surfaceConfig,
+            const WindowConfig& surfaceConfig,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
             const std::wstring& fragShaderName,

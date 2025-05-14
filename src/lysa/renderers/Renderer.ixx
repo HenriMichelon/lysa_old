@@ -8,7 +8,7 @@ export module lysa.renderers.renderer;
 
 import std;
 import vireo;
-import lysa.surface_config;
+import lysa.window_config;
 import lysa.renderers.samplers;
 import lysa.renderers.renderpass.post_processing;
 
@@ -21,7 +21,7 @@ export namespace lysa {
         };
 
         Renderer(
-            const SurfaceConfig& surfaceConfig,
+            const WindowConfig& surfaceConfig,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
@@ -42,7 +42,7 @@ export namespace lysa {
         virtual ~Renderer() = default;
 
     protected:
-        const SurfaceConfig&                surfaceConfig;
+        const WindowConfig&                surfaceConfig;
         const std::wstring                  name;
         const Samplers                      samplers;
         std::shared_ptr<vireo::Vireo>       vireo;
