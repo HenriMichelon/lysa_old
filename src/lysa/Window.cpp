@@ -27,7 +27,7 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<SceneData>(vireo, swapChain->getExtent());
+            frame.scene = std::make_shared<SceneData>(vireo, config.framesInFlight, swapChain->getExtent());
         }
         renderer = std::make_unique<ForwardRenderer>(config, vireo, L"Main Renderer"); // Must be instanciated after SceneData for the layout
         renderer->resize(swapChain->getExtent());

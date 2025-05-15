@@ -32,6 +32,17 @@ namespace lysa {
             assert([&]{return !meshInstance->getMesh()->getMaterials().empty(); }, "Models without materials are not supported");
             models.push_back(meshInstance);
             modelsUpdated = true;
+            for (const auto &material : meshInstance->getMesh()->getMaterials()) {
+                if (materialsRefCounter.contains(material->getId())) {
+                    materialsRefCounter[material->getId()]++;
+                    continue;
+                }
+                materialsIndices[material->getId()] = static_cast<int32_t>(materials.size());
+                materials.push_back(material);
+                materialsRefCounter[material->getId()]++;
+                // Force material data to be written to GPU memory
+                material->updated = framesInFlight;
+            }
             break;
         }
         case Node::VIEWPORT:
@@ -58,6 +69,26 @@ namespace lysa {
             if (it != models.end()) {
                 models.erase(it);
                 modelsUpdated = true;
+                for (const auto &material : meshInstance->getMesh()->getMaterials()) {
+                    if (materialsRefCounter.contains(material->getId())) {
+                        // Check if we need to remove the material from the scene
+                        if (--materialsRefCounter[material->getId()] == 0) {
+                            materialsRefCounter.erase(material->getId());
+                            // Try to remove the associated textures
+                            //...
+                            // Remove the material from the scene
+                            materials.remove(material);
+                            // Rebuild the material index
+                            materialsIndices.clear();
+                            uint32_t materialIndex = 0;
+                            for (const auto &mat : materials) {
+                                materialsIndices[mat->getId()] = static_cast<int32_t>(materialIndex);
+                                materialIndex += 1;
+                            }
+                            materialsUpdated = true;
+                        }
+                    }
+                }
             }
             break;
         }

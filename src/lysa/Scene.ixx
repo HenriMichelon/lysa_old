@@ -12,6 +12,7 @@ import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
 import lysa.nodes.viewport;
+import lysa.resources.material;
 
 export namespace lysa {
 
@@ -36,6 +37,8 @@ export namespace lysa {
         virtual ~Scene() = default;
 
     protected:
+        const uint32 framesInFlight;
+
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
         // Camera has been updated
@@ -45,11 +48,19 @@ export namespace lysa {
         std::list<std::shared_ptr<MeshInstance>> models{};
         // All models containing opaque surfaces
         //std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
-
         // Models have been updated
         bool modelsUpdated{false};
 
-        Scene(const vireo::Extent &extent) { resize(extent); }
+        // All materials used in the scene, used to update the buffer in GPU memory
+        std::list<std::shared_ptr<Material>> materials;
+        // Material reference counter, used to know of the material, can be removed from the scene
+        std::unordered_map<unique_id, uint32> materialsRefCounter;
+        // Indices of all materials & texture in the buffers
+        std::unordered_map<unique_id, int32> materialsIndices{};
+        // Materials have been updated
+        bool materialsUpdated{true};
+
+        Scene(const uint32 framesInFlight, const vireo::Extent &extent) : framesInFlight{framesInFlight} { resize(extent); }
 
     private:
         // Rendering window extent

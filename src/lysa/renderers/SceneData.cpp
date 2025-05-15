@@ -10,13 +10,14 @@ import lysa.nodes.node;
 
 namespace lysa {
 
-    SceneData::SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent):
-        Scene{extent},
+    SceneData::SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const uint32 framesInFlight, const vireo::Extent &extent):
+        Scene{framesInFlight, extent},
         vireo{vireo} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo->createDescriptorLayout();
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
             descriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::UNIFORM);
+            descriptorLayout->add(BINDING_MATERIALS, vireo::DescriptorType::UNIFORM);
             descriptorLayout->build();
         }
 
@@ -34,15 +35,14 @@ namespace lysa {
             sceneUniform.view = inverse(currentCamera->getTransformGlobal());
             sceneUniform.viewInverse = currentCamera->getTransformGlobal();
             sceneUniformBuffer->write(&sceneUniform);
-            std::cout << "---------------" << std::endl;
-            std::cout << "s " << sceneUniform.view[0][0] << ", " << sceneUniform.view[2][2] << std::endl;
             currentCamera->updated--;
         }
 
-        if (modelsUpdated && modelUniformSize < models.size()) {
-            modelUniformSize = models.size();
+         // Update in GPU memory only the models modified since the last frame
+        if (modelsUpdated && modelUniformsSize < models.size()) {
+            modelUniformsSize = models.size();
             modelUniforms = std::make_unique<ModelUniform[]>(models.size());
-            modelUniformBuffers = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(ModelUniform) * modelUniformSize, 1, L"Models Uniform");
+            modelUniformBuffers = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(ModelUniform) * modelUniformsSize, 1, L"Models Uniform");
             descriptorSet->update(BINDING_MODELS, modelUniformBuffers);
             modelUniformBuffers->map();
             uint32_t modelIndex = 0;
@@ -58,12 +58,36 @@ namespace lysa {
             for (const auto &meshInstance : models) {
                 if (meshInstance->isUpdated()) {
                     modelUniforms[modelIndex].transform = meshInstance->getTransformGlobal();
-                    modelUniformBuffers->write(&modelUniforms[modelIndex], sizeof(ModelUniform));
+                    modelUniformBuffers->write(&modelUniforms[modelIndex], sizeof(ModelUniform), sizeof(ModelUniform) * modelIndex);
                     meshInstance->updated--;
                 }
                 modelIndex++;
             }
         }
+
+         // Update in GPU memory only the materials modified since the last frame
+        if (materialsUpdated && materialUniformsSize < materials.size()) {
+            materialUniformsSize = materials.size();
+            materialUniformBuffers = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(MaterialUniform) * materialUniformsSize, 1, L"Materials Uniform");
+            descriptorSet->update(BINDING_MATERIALS, materialUniformBuffers);
+            materialUniformBuffers->map();
+        }
+        uint32_t materialIndex = 0;
+        for (const auto& material : materials) {
+            if (materialsUpdated || material->isUpdated()) {
+                auto materialUniform = MaterialUniform {};
+                if (const auto *standardMaterial = dynamic_cast<const StandardMaterial *>(material.get())) {
+                    materialUniform.albedoColor = standardMaterial->getAlbedoColor();
+                }
+                materialUniformBuffers->write(
+                    &materialUniform,
+                    sizeof(MaterialUniform),
+                    sizeof(MaterialUniform) * materialIndex);
+                material->updated--;
+            }
+            materialIndex++;
+        }
+        materialsUpdated = false;
 
     }
 

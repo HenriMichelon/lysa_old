@@ -40,10 +40,18 @@ export namespace lysa {
          */
         virtual std::shared_ptr<Resource> duplicate() const;
 
+    protected:
+        uint32 updated{0};
+
     private:
+        friend class Scene;
+        friend class SceneData;
+
         unique_id          id;
         static unique_id   currentId;
         const std::wstring name;
+
+        auto isUpdated() const { return updated > 0;}
     };
 
 }

@@ -43,7 +43,7 @@ export namespace lysa {
             .size = sizeof(PushConstants),
         };
 
-        SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
+        SceneData(const std::shared_ptr<vireo::Vireo>& vireo, uint32 framesInFlight, const vireo::Extent &extent);
 
         void update();
 
@@ -65,16 +65,16 @@ export namespace lysa {
         SceneUniform sceneUniform{};
         // Model shader data for all the models of the scene, one array all the models
         std::shared_ptr<ModelUniform[]> modelUniforms;
-        uint32 modelUniformSize{0};
-        // All materials used in the scene, used to update the buffer in GPU memory
-        // std::list<std::shared_ptr<Material>> materials;
+        uint32 modelUniformsSize{0};
 
         // Scene data buffer
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         // Data buffer for all the models of the scene, one buffer for all the models
         std::shared_ptr<vireo::Buffer> modelUniformBuffers{nullptr};
         // Data for all the materials of the scene, one buffer for all the materials
-        // std::shared_ptr<vireo::Buffer> materialUniformBuffers;
+        std::shared_ptr<vireo::Buffer> materialUniformBuffers;
+        uint32 materialUniformsSize{0};
+
 
     };
 
