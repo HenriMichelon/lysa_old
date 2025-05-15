@@ -62,7 +62,7 @@ namespace lysa {
             nearDistance           = near;
             farDistance            = far;
             const auto aspect      = getWindow()->getAspectRatio();
-            const float f = 1.0f / std::tan(fov * 0.5f);
+            const float f = 1.0f / std::tan(lysa::radians(lysa::float1{fov}) * 0.5f);
             const float zRange = near - far;
             projectionMatrix = float4x4{
                 f / aspect, 0.0f,  0.0f,                         0.0f,
