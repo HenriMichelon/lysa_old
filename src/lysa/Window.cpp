@@ -74,13 +74,20 @@ namespace lysa {
         currentTime = newTime;
         accumulator += frameTime;
         {
+            auto lock = std::lock_guard(rootNodeMutex);
             while (accumulator >= FIXED_DELTA_TIME) {
                 // Update physics here
+                if (rootNode) {
+                    rootNode->physicsProcess(FIXED_DELTA_TIME);
+                }
                 accumulator -= FIXED_DELTA_TIME;
             }
-            frame.scene->update();
-            renderer->update(frameIndex);
+            if (rootNode) {
+                rootNode->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
+            }
         }
+        frame.scene->update();
+        renderer->update(frameIndex);
         render(frameIndex);
     }
 
@@ -123,6 +130,7 @@ namespace lysa {
 
     void Window::setRootNode(const std::shared_ptr<Node> &node) {
         waitIdle();
+        auto lock = std::lock_guard(rootNodeMutex);
         if (rootNode) {
             removeNode(rootNode, false);
         }

@@ -91,12 +91,12 @@ export namespace lysa {
         /**
          * Called each frame after the physics have been updated and just before drawing the frame
          */
-        // virtual void onProcess(const float alpha) {}
+        virtual void onProcess(const float alpha) {}
 
         /**
          * Called just after the physics system has been updated (can be called multiple times if we have free time between frames)
          */
-        // virtual void onPhysicsProcess(const float delta) {}
+        virtual void onPhysicsProcess(const float delta) {}
 
         /**
          * Returns the local space transformation matrix
@@ -429,12 +429,13 @@ export namespace lysa {
         // auto getVireo() const {
             // assert([this]{ return window != nullptr; }, "Node is not attached to a window");
         // }
-    
+
         ~Node() override = default;
     
     protected:
         float4x4 localTransform{};
         float4x4 globalTransform{};
+        uint32   updated{0};
 
         virtual std::shared_ptr<Node> duplicateInstance() const;
 
@@ -442,12 +443,17 @@ export namespace lysa {
 
         virtual void ready(Window* window);
 
+        virtual void physicsProcess(float delta);
+
+        virtual void process(float alpha);
+
         virtual void enterScene() { onEnterScene(); }
 
         virtual void exitScene() { onExitScene(); }
 
     private:
         friend class Window;
+        friend class SceneData;
 
         static  unique_id                currentId;
         unique_id                        id;
@@ -458,6 +464,8 @@ export namespace lysa {
         std::list<std::shared_ptr<Node>> children;
         std::list<std::wstring>          groups;
         ProcessMode                      processMode{ProcessMode::INHERIT};
+
+        auto isUpdated() const { return updated > 0;}
     };
 
 }

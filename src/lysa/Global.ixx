@@ -18,7 +18,7 @@ export import lysa.types;
 
 export namespace lysa {
 
-    float3 eulerAngles(quaternion q);
+    float radians(const float angle) { return radians(float1{angle}); }
 
     float getCurrentTimeMilliseconds();
 

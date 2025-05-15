@@ -6,6 +6,8 @@
  */
 module lysa.renderers.scene_data;
 
+import lysa.nodes.node;
+
 namespace lysa {
 
     SceneData::SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent):
@@ -26,31 +28,43 @@ namespace lysa {
     }
 
     void SceneData::update() {
-        if (currentCamera) {
-            auto p1 = currentCamera->getPositionGlobal();
-            auto p2 = currentCamera->getPosition();
+        if (currentCamera && currentCamera->isUpdated()) {
             sceneUniform.cameraPosition = currentCamera->getPositionGlobal();
             sceneUniform.projection = currentCamera->getProjection();
-            sceneUniform.view = currentCamera->getView();
-            sceneUniform.viewInverse = inverse(currentCamera->getView());
+            sceneUniform.view = inverse(currentCamera->getTransformGlobal());
+            sceneUniform.viewInverse = currentCamera->getTransformGlobal();
             sceneUniformBuffer->write(&sceneUniform);
+            std::cout << "---------------" << std::endl;
+            std::cout << "s " << sceneUniform.view[0][0] << ", " << sceneUniform.view[2][2] << std::endl;
+            currentCamera->updated--;
         }
 
         if (modelsUpdated && modelUniformSize < models.size()) {
             modelUniformSize = models.size();
             modelUniforms = std::make_unique<ModelUniform[]>(models.size());
             modelUniformBuffers = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(ModelUniform) * modelUniformSize, 1, L"Models Uniform");
-            modelUniformBuffers->map();
             descriptorSet->update(BINDING_MODELS, modelUniformBuffers);
+            modelUniformBuffers->map();
+            uint32_t modelIndex = 0;
+            for (const auto &meshInstance : models) {
+                modelUniforms[modelIndex].transform = meshInstance->getTransformGlobal();
+                meshInstance->updated = 0;
+                modelIndex++;
+            }
+            modelUniformBuffers->write(modelUniforms.get());
+            modelsUpdated = false;
+        } else {
+            uint32_t modelIndex = 0;
+            for (const auto &meshInstance : models) {
+                if (meshInstance->isUpdated()) {
+                    modelUniforms[modelIndex].transform = meshInstance->getTransformGlobal();
+                    modelUniformBuffers->write(modelUniforms.get(), sizeof(ModelUniform),  sizeof(ModelUniform) * modelIndex);
+                    meshInstance->updated--;
+                }
+                modelIndex++;
+            }
         }
-        modelsUpdated = false;
 
-        uint32_t modelIndex = 0;
-        for (const auto &meshInstance : models) {
-            modelUniforms[modelIndex].transform = meshInstance->getTransformGlobal();
-            modelIndex++;
-        }
-        modelUniformBuffers->write(modelUniforms.get());
     }
 
 }

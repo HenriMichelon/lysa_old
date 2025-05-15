@@ -48,16 +48,6 @@ export namespace lysa {
         const auto& getProjection() const { return projectionMatrix; }
 
         /**
-         * Returns the view matrix
-         */
-        const auto& getView() const { return viewMatrix; }
-
-        /**
-         * Returns the 2D coordinates in the rendering Window that maps to the given 3D point in world space.
-         */
-        // [[nodiscard]] vec2 unproject(vec3 worldCoords);
-
-        /**
          * Returns the camera near clipping distance
          */
         auto getNearDistance() const { return nearDistance; }
@@ -104,16 +94,10 @@ export namespace lysa {
         bool active{false};
         // Is the projection perspective?
         bool perspectiveProjection{true};
-        // Projection matrix for the global UBO
+        // Projection matrix for the global
         float4x4 projectionMatrix{1.0f};
-        // View matrix for the global UBO
-        float4x4 viewMatrix{1.0f};
-
-        void updateViewMatrix();
 
         void setActive(bool isActive);
-
-        void updateGlobalTransform() override;
     };
 
 } // namespace z0

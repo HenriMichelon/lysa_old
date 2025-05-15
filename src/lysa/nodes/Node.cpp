@@ -41,11 +41,32 @@ namespace lysa {
         }
     }
 
+    void Node::physicsProcess(const float delta) {
+        for (const auto& child : children) {
+            child->physicsProcess(delta);
+        }
+        if (isProcessed()) {
+            onPhysicsProcess(delta);
+        }
+    }
+
+    void Node::process(const float alpha) {
+        for (const auto& child : children) {
+            child->process(alpha);
+        }
+        if (isProcessed()) {
+            onProcess(alpha);
+        }
+    }
+
     void Node::updateGlobalTransform() {
         if (parent) {
             globalTransform = mul(parent->globalTransform, localTransform);
         } else {
             globalTransform = localTransform;
+        }
+        if (window) {
+            updated = window->getFramesInFlight();
         }
         for (const auto& child : children) {
             child->updateGlobalTransform();
@@ -70,6 +91,7 @@ namespace lysa {
         children.push_back(child);
         child->updateGlobalTransform();
         if (window) {
+            updated = window->getFramesInFlight();
             window->addNode(child, false);
             child->ready(window);
         }

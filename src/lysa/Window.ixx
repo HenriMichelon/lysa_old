@@ -74,6 +74,8 @@ export namespace lysa {
 
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
+        auto getFramesInFlight() const { return config.framesInFlight; }
+
         void waitIdle() const;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;
@@ -117,6 +119,7 @@ export namespace lysa {
         WindowConfig&         config;
         // Node tree
         std::shared_ptr<Node> rootNode;
+        std::mutex            rootNodeMutex;
         // State of the current scene
         bool                  paused{false};
         //

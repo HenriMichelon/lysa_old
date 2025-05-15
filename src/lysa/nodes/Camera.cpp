@@ -16,6 +16,7 @@ namespace lysa {
     }
 
     void Camera::setActive(const bool isActive) {
+        assert([&]{return  getWindow() != nullptr; }, "Invalid window");
         active = isActive;
         if (active) {
             if (perspectiveProjection) {
@@ -23,7 +24,7 @@ namespace lysa {
             } else {
                 setOrthographicProjection(0.0f, 1.0f, 0.0f, 1.0f, nearDistance, farDistance);
             }
-            updateViewMatrix();
+            updated = getWindow()->getFramesInFlight();
         }
     }
 
@@ -70,44 +71,6 @@ namespace lysa {
                 0.0f,       0.0f,  (far + near) / zRange,        -1.0f,
                 0.0f,       0.0f,  (2.0f * far * near) / zRange, 0.0f};
         }
-    }
-
-    // vec2 Camera::unproject(const vec3 worldCoords) {
-    //     const vec4 clipCoords = getProjection() * getView() * vec4(worldCoords, 1.0f);
-    //     const vec3 ndcCoords  = vec3(clipCoords) / clipCoords.w;
-    //     return {
-    //             (VECTOR_SCALE.x * (ndcCoords.x + 1.0f) / 2.0f),
-    //             VECTOR_SCALE.y - (VECTOR_SCALE.y * (ndcCoords.y + 1.0f) / 2.0f)
-    //     };
-    // }
-
-    void Camera::updateViewMatrix() {
-        const auto  rotationQuaternion = quaternion{float3x3{globalTransform}};
-        const auto  newDirection = mul(rotationQuaternion, AXIS_FRONT);
-        const auto &position = getPositionGlobal();
-
-        const auto w{normalize(newDirection)};
-        const auto u{normalize(cross(w, AXIS_UP))};
-        const auto v{cross(w, u)};
-
-        viewMatrix       = float4x4::identity();
-        viewMatrix[0][0] = u.x;
-        viewMatrix[1][0] = u.y;
-        viewMatrix[2][0] = u.z;
-        viewMatrix[0][1] = v.x;
-        viewMatrix[1][1] = -v.y; // -Y up
-        viewMatrix[2][1] = v.z;
-        viewMatrix[0][2] = w.x;
-        viewMatrix[1][2] = w.y;
-        viewMatrix[2][2] = w.z;
-        viewMatrix[3][0] = -dot(u, position);
-        viewMatrix[3][1] = -dot(v, position);
-        viewMatrix[3][2] = -dot(w, position);
-    }
-
-    void Camera::updateGlobalTransform() {
-        Node::updateGlobalTransform();
-        updateViewMatrix();
     }
 
     std::shared_ptr<Node> Camera::duplicateInstance() const {
