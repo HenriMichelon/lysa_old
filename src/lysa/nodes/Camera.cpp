@@ -46,7 +46,7 @@ namespace lysa {
                                            const float top, const float  bottom,
                                            const float near, const float far) {
         perspectiveProjection  = false;
-        projectionMatrix       = float4x4{1.0f};
+        projectionMatrix       = float4x4::identity();
         projectionMatrix[0][0] = 2.f / (right - left);
         projectionMatrix[1][1] = 2.f / (bottom - top);
         projectionMatrix[2][2] = 1.f / (far - near);
@@ -56,18 +56,20 @@ namespace lysa {
     }
 
     void Camera::setPerspectiveProjection(const float fov, const float near, const float far) {
-        perspectiveProjection  = true;
-        this->fov              = fov;
-        nearDistance           = near;
-        farDistance            = far;
-        const auto aspect      = getWindow()->getAspectRatio();
-        const auto tanHalfFovy = tan(radians(float1{fov}) / 2.f);
-        projectionMatrix       = float4x4{0.0f};
-        projectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);
-        projectionMatrix[1][1] = 1.f / (tanHalfFovy);
-        projectionMatrix[2][2] = far / (far - near);
-        projectionMatrix[2][3] = 1.f;
-        projectionMatrix[3][2] = -(far * near) / (far - near);
+        if (getWindow()) {
+            perspectiveProjection  = true;
+            this->fov              = fov;
+            nearDistance           = near;
+            farDistance            = far;
+            const auto aspect      = getWindow()->getAspectRatio();
+            const float f = 1.0f / std::tan(fov * 0.5f);
+            const float zRange = near - far;
+            projectionMatrix = float4x4{
+                f / aspect, 0.0f,  0.0f,                         0.0f,
+                0.0f,       f,     0.0f,                         0.0f,
+                0.0f,       0.0f,  (far + near) / zRange,        -1.0f,
+                0.0f,       0.0f,  (2.0f * far * near) / zRange, 0.0f};
+        }
     }
 
     // vec2 Camera::unproject(const vec3 worldCoords) {
@@ -93,7 +95,7 @@ namespace lysa {
         viewMatrix[1][0] = u.y;
         viewMatrix[2][0] = u.z;
         viewMatrix[0][1] = v.x;
-        viewMatrix[1][1] = v.y;
+        viewMatrix[1][1] = -v.y; // -Y up
         viewMatrix[2][1] = v.z;
         viewMatrix[0][2] = w.x;
         viewMatrix[1][2] = w.y;

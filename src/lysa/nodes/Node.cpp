@@ -23,7 +23,7 @@ namespace lysa {
     }
 
     Node::Node(const std::wstring &name, const Type type):
-        localTransform{float4x4{1.0f}},
+        localTransform{float4x4::identity()},
         id{++currentId},
         type{type},
         name{sanitizeName(name)} {
@@ -43,7 +43,7 @@ namespace lysa {
 
     void Node::updateGlobalTransform() {
         if (parent) {
-            globalTransform = parent->globalTransform * localTransform;
+            globalTransform = mul(parent->globalTransform, localTransform);
         } else {
             globalTransform = localTransform;
         }
@@ -57,7 +57,7 @@ namespace lysa {
     }
 
     void Node::setPosition(const float3& position) {
-        if (all(position != getPosition())) {
+        if (any(position != getPosition())) {
             localTransform[3] = float4{position, 1.0f};
             updateGlobalTransform();
         }
@@ -125,7 +125,7 @@ namespace lysa {
     }
 
     void Node::setPositionGlobal(const float3& position) {
-        if (all(position != getPositionGlobal())) {
+        if (any(position != getPositionGlobal())) {
             if (parent == nullptr) {
                 setPosition(position);
                 return;
@@ -147,7 +147,7 @@ namespace lysa {
     }
     
     void Node::setScale(const float3& scale) {
-        if (all(scale != getScale())) {
+        if (any(scale != getScale())) {
             float3 x = normalize(localTransform[0].xyz);
             float3 y = normalize(localTransform[1].xyz);
             float3 z = normalize(localTransform[2].xyz);
@@ -200,7 +200,7 @@ namespace lysa {
     }
     
     void Node::setRotation(const float3& rot) {
-        if (all(rot != getRotation())) {
+        if (any(rot != getRotation())) {
             setRotation(quaternion(rot));
         }
     }

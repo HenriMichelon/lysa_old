@@ -99,7 +99,7 @@ export namespace lysa {
         // Nearest clipping distance
         float nearDistance{0.05f};
         // Furthest clipping distance
-        float farDistance{200.0f};
+        float farDistance{100.0f};
         // Is this the currently active camera?
         bool active{false};
         // Is the projection perspective?

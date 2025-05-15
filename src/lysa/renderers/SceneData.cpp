@@ -27,6 +27,8 @@ namespace lysa {
 
     void SceneData::update() {
         if (currentCamera) {
+            auto p1 = currentCamera->getPositionGlobal();
+            auto p2 = currentCamera->getPosition();
             sceneUniform.cameraPosition = currentCamera->getPositionGlobal();
             sceneUniform.projection = currentCamera->getProjection();
             sceneUniform.view = currentCamera->getView();
