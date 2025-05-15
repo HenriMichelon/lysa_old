@@ -22,7 +22,7 @@ export namespace lysa {
             const Samplers& samplers);
 
         void render(
-            uint32_t frameIndex,
+            uint32 frameIndex,
             Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList,

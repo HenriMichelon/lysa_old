@@ -17,17 +17,6 @@ export namespace lysa {
 
     class Scene {
     public:
-        void resize(const vireo::Extent &extent);
-
-        //! Adds a model to the scene
-        virtual void addNode(const std::shared_ptr<Node> &node);
-
-        //! Removes a model from the scene
-        virtual void removeNode(const std::shared_ptr<Node> &node);
-
-        //! Changes the active camera, disabling the previous camera
-        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
-
         //! Returns the list of all the models of the scene
         const auto& getModels() const { return models; }
 
@@ -38,15 +27,14 @@ export namespace lysa {
 
         auto isCameraUpdated() const { return cameraUpdated; }
 
-        void resetCameraUpdated() { cameraUpdated = false; }
-
-        void resetModelsUpdated() { modelsUpdated = false; }
-
         auto getViewport() const { return viewport; }
 
         auto getScissors() const { return scissors; }
 
         virtual ~Scene() = default;
+
+    protected:
+        Scene(const vireo::Extent &extent) { resize(extent); }
 
     private:
         // Rendering window extent
@@ -64,8 +52,27 @@ export namespace lysa {
         std::list<std::shared_ptr<MeshInstance>> models{};
         // All models containing opaque surfaces
         //std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
+
         // Models have been updates
         bool modelsUpdated{false};
+
+        friend class Window;
+
+        void resize(const vireo::Extent &extent);
+
+        //! Adds a model to the scene
+        virtual void addNode(const std::shared_ptr<Node> &node);
+
+        //! Removes a model from the scene
+        virtual void removeNode(const std::shared_ptr<Node> &node);
+
+        //! Changes the active camera, disabling the previous camera
+        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
+
+        void resetCameraUpdated() { cameraUpdated = false; }
+
+        void resetModelsUpdated() { modelsUpdated = false; }
+
     };
 
 }

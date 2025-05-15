@@ -28,12 +28,12 @@ export namespace lysa {
         /**
          * Returns the width in pixels on the texture
          */
-        virtual uint32_t getWidth() const = 0;
+        virtual uint32 getWidth() const = 0;
 
         /**
          * Returns the height in pixels on the texture
          */
-        virtual uint32_t getHeight() const = 0;
+        virtual uint32 getHeight() const = 0;
 
         /**
          * Returns the size in pixels on the texture
@@ -61,9 +61,9 @@ export namespace lysa {
          */
         const auto& getImage() const { return image; }
 
-        uint32_t getWidth() const override { return image->getWidth(); }
+        uint32 getWidth() const override { return image->getWidth(); }
 
-        uint32_t getHeight() const override { return image->getHeight(); }
+        uint32 getHeight() const override { return image->getHeight(); }
 
     protected:
         std::shared_ptr<Image> image{nullptr};

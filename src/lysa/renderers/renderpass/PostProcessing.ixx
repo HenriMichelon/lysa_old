@@ -23,13 +23,13 @@ export namespace lysa {
             const Samplers& samplers,
             const std::wstring& fragShaderName,
             void* data,
-            uint32_t dataSize,
+            uint32 dataSize,
             const std::wstring& name);
 
-        void update(uint32_t frameIndex) override;
+        void update(uint32 frameIndex) override;
 
         void render(
-           uint32_t frameIndex,
+           uint32 frameIndex,
            Scene& scene,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
            const std::shared_ptr<vireo::CommandList>& commandList,
@@ -37,7 +37,7 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent) override;
 
-        virtual std::shared_ptr<vireo::Image> getColorAttachment(const uint32_t frameIndex) {
+        virtual std::shared_ptr<vireo::Image> getColorAttachment(const uint32 frameIndex) {
             return framesData[frameIndex].colorAttachment->getImage();
         }
 

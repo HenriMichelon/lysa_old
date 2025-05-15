@@ -21,15 +21,15 @@ export namespace lysa {
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
-        void update(uint32_t frameIndex) override;
+        void update(uint32 frameIndex) override;
 
         void resize(const vireo::Extent& extent) override;
 
         std::vector<std::shared_ptr<const vireo::CommandList>> render(
-            uint32_t frameIndex,
+            uint32 frameIndex,
             Scene& scene) override;
 
-        std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const override;
+        std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const override;
 
     private:
         struct FrameData {

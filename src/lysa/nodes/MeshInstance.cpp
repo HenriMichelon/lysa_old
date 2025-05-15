@@ -6,6 +6,7 @@
 */
 module lysa.nodes.mesh_instance;
 
+import lysa.window;
 import lysa.nodes.node;
 import lysa.resources.mesh;
 
@@ -32,6 +33,13 @@ namespace lysa {
     void MeshInstance::updateGlobalTransform() {
         Node::updateGlobalTransform() ;
         worldAABB = mesh->getAABB().toGlobal(globalTransform) ;
+    }
+
+    void MeshInstance::ready(Window* window) {
+        Node::ready(window);
+        if (window && !mesh->isUploaded()) {
+            mesh->upload(window);
+        }
     }
 
 }

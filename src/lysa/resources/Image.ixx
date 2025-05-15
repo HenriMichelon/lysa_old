@@ -51,14 +51,14 @@ export namespace lysa {
 
         ~Image() override = default;
     protected:
-        uint32_t width;
-        uint32_t height;
+        uint32 width;
+        uint32 height;
 
-        Image(uint32_t width, uint32_t height, const std::wstring & name);
+        Image(uint32 width, uint32 height, const std::wstring & name);
 /*
         static shared_ptr<Image> create(const Device& device,
-                                    uint32_t width,
-                                    uint32_t height,
+                                    uint32 width,
+                                    uint32 height,
                                     uint64_t imageSize,
                                     const void *data,
                                     const string & name,

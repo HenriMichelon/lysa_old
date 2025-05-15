@@ -6,6 +6,8 @@
 */
 module lysa.renderers.renderpass.forward_color;
 
+import lysa.resources.mesh;
+
 namespace lysa {
     ForwardColor::ForwardColor(
         const WindowConfig& surfaceConfig,
@@ -13,6 +15,11 @@ namespace lysa {
         const Samplers& samplers):
         Renderpass{surfaceConfig, vireo, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
+        pipelineConfig.resources = vireo->createPipelineResources({});
+        pipelineConfig.vertexInputLayout = vireo->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
+        pipelineConfig.vertexShader = vireo->createShaderModule("shaders/default.vert");
+        pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/forward.frag");
+        pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             surfaceConfig.clearColor.r,
             surfaceConfig.clearColor.g,
@@ -21,7 +28,7 @@ namespace lysa {
     }
 
     void ForwardColor::render(
-        const uint32_t frameIndex,
+        const uint32 frameIndex,
         Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
@@ -30,6 +37,13 @@ namespace lysa {
         commandList->beginRendering(renderingConfig);
         commandList->setViewport(scene.getViewport());
         commandList->setScissors(scene.getScissors());
+        commandList->bindPipeline(pipeline);
+        for (const auto& meshInstance : scene.getModels()) {
+            const auto &mesh = meshInstance->getMesh();
+            commandList->bindVertexBuffer(mesh->getVertexBuffer());
+            commandList->bindIndexBuffer(mesh->getIndexBuffer());
+            commandList->drawIndexed(mesh->getIndices().size());
+        }
         commandList->endRendering();
     }
 }

@@ -15,7 +15,7 @@ namespace lysa {
         const Samplers& samplers,
         const std::wstring& fragShaderName,
         void* data,
-        const uint32_t dataSize,
+        const uint32 dataSize,
         const std::wstring& name):
         Renderpass{surfaceConfig, vireo, samplers, name},
         fragShaderName{fragShaderName},
@@ -54,14 +54,14 @@ namespace lysa {
         }
     }
 
-    void PostProcessing::update(const uint32_t frameIndex) {
+    void PostProcessing::update(const uint32 frameIndex) {
         auto& frame = framesData[frameIndex];
         frame.params.time = getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
     }
 
     void PostProcessing::render(
-        const uint32_t frameIndex,
+        const uint32 frameIndex,
         Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,

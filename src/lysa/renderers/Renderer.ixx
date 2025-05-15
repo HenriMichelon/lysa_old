@@ -8,8 +8,9 @@ export module lysa.renderers.renderer;
 
 import std;
 import vireo;
-import lysa.window_config;
+import lysa.global;
 import lysa.scene;
+import lysa.window_config;
 import lysa.renderers.samplers;
 import lysa.renderers.renderpass.post_processing;
 
@@ -28,15 +29,15 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent) { currentExtent = extent; }
 
-        virtual void update(uint32_t frameIndex) { }
+        virtual void update(uint32 frameIndex) { }
 
-        virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32_t frameIndex) const = 0;
+        virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const = 0;
 
         virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
-            uint32_t frameIndex,
+            uint32 frameIndex,
             Scene& scene) = 0;
 
-        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0);
+        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0);
 
         void removePostprocessing(const std::wstring& fragShaderName);
 

@@ -19,7 +19,7 @@ namespace lysa {
         framesData.resize(surfaceConfig.framesInFlight);
     }
 
-    void ForwardRenderer::update(uint32_t frameIndex) {
+    void ForwardRenderer::update(uint32 frameIndex) {
         forwardColorPass.update(frameIndex);
         std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
             postProcessingPass->update(frameIndex);
@@ -27,7 +27,7 @@ namespace lysa {
     }
 
     std::vector<std::shared_ptr<const vireo::CommandList>> ForwardRenderer::render(
-        const uint32_t frameIndex,
+        const uint32 frameIndex,
         Scene& scene) {
         const auto& frame = framesData[frameIndex];
         const auto& frameMeshes = MeshesRenderer::framesData[frameIndex];
@@ -77,7 +77,7 @@ namespace lysa {
     }
 
 
-    std::shared_ptr<vireo::Image> ForwardRenderer::getColorAttachment(const uint32_t frameIndex) const {
+    std::shared_ptr<vireo::Image> ForwardRenderer::getColorAttachment(const uint32 frameIndex) const {
         if (postProcessingPasses.empty()) {
             return framesData[frameIndex].colorAttachment->getImage();
         }

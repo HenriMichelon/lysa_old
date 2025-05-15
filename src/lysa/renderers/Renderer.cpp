@@ -17,7 +17,7 @@ namespace lysa {
         vireo{vireo}{
     }
 
-    void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32_t dataSize) {
+    void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) {
         const auto postProcessingPass = std::make_shared<PostProcessing>(
             surfaceConfig,
             vireo,

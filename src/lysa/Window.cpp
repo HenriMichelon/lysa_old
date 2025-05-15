@@ -9,6 +9,7 @@ module lysa.window;
 import lysa.global;
 import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
+import lysa.renderers.scene_data;
 
 namespace lysa {
 
@@ -28,8 +29,7 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<Scene>();
-            frame.scene->resize(swapChain->getExtent());
+            frame.scene = std::make_shared<SceneData>(swapChain->getExtent());
         }
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
@@ -38,6 +38,9 @@ namespace lysa {
     Window::~Window() {
         graphicQueue->waitIdle();
         swapChain->waitIdle();
+        framesData.clear();
+        rootNode.reset();
+        config.rootNode.reset();
     }
 
     void Window::drawFrame() {
@@ -57,7 +60,7 @@ namespace lysa {
         elapsedSeconds += static_cast<float>(frameTime);
         frameCount++;
         if (elapsedSeconds >= 1.0) {
-            fps = static_cast<uint32_t>(frameCount / elapsedSeconds);
+            fps = static_cast<uint32>(frameCount / elapsedSeconds);
             frameCount = 0;
             elapsedSeconds = 0;
         }
@@ -133,7 +136,7 @@ namespace lysa {
         swapChain->waitIdle();
     }
 
-    void Window::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32_t dataSize) const {
+    void Window::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) const {
         waitIdle();
         renderer->addPostprocessing(fragShaderName, data, dataSize);
     }
@@ -192,7 +195,7 @@ namespace lysa {
     }
 
 
-    void Window::processDeferredUpdates(const uint32_t frameIndex) {
+    void Window::processDeferredUpdates(const uint32 frameIndex) {
         // Update renderer resources
         // sceneRenderer->preUpdateScene(currentFrame);
         // Register UI drawing commands

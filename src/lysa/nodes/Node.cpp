@@ -13,7 +13,6 @@ namespace lysa {
 
     unique_id Node::currentId{INVALID_ID};
 
-
     Node::Node(const Node &node):
         id{currentId++} {
         name            = node.name;
@@ -31,10 +30,15 @@ namespace lysa {
         Node::updateGlobalTransform();
     }
 
-    void Node::ready(const Window* surface) {
-        assert([&]{return surface != nullptr; }, "Invalid surface");
-        this->window = surface;
-        onReady();
+    void Node::ready(Window* window) {
+        assert([&]{return window != nullptr; }, "Invalid window");
+        this->window = window;
+        for (const auto& child : children) {
+            child->ready(window);
+        }
+        if (isProcessed()) {
+            onReady();
+        }
     }
 
     void Node::updateGlobalTransform() {
@@ -65,7 +69,10 @@ namespace lysa {
         child->parent = this;
         children.push_back(child);
         child->updateGlobalTransform();
-        child->ready(window);
+        if (window) {
+            window->addNode(child, false);
+            child->ready(window);
+        }
         // child->visible = visible && child->visible;
         // child->castShadows = castShadows;
         // child->dontDrawEdges = dontDrawEdges;

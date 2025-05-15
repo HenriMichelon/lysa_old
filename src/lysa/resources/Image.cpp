@@ -8,8 +8,8 @@ module lysa.resources.image;
 
 namespace lysa {
     Image::Image(
-        const uint32_t width,
-        const uint32_t height,
+        const uint32 width,
+        const uint32 height,
         const std::wstring & name):
         Resource{name},
         width{width},

@@ -24,10 +24,10 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent) { }
 
-        virtual void update(uint32_t frameIndex) { }
+        virtual void update(uint32 frameIndex) { }
 
         virtual void render(
-            uint32_t frameIndex,
+            uint32 frameIndex,
             Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList,

@@ -64,10 +64,10 @@ export namespace lysa {
     template<typename Expr>
     constexpr void assert(
         Expr&& expression,
-        const std::string expr,
+        const std::string message,
         const std::source_location& loc = std::source_location::current()) {
         if (!expression()) {
-            throw Exception("Assertion failed: ", expr, ", file ", loc.file_name(), ", line ", loc.line());
+            throw Exception("Assertion failed: ", message, ", file ", loc.file_name(), ", line ", loc.line());
         }
     }
 

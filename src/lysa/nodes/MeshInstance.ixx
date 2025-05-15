@@ -59,7 +59,11 @@ export namespace lysa {
         }
 
     protected:
+        friend class Window;
+
         std::shared_ptr<Node> duplicateInstance() const override;
+
+        void ready(Window* window) override;
 
     private:
         AABB                  worldAABB;
@@ -67,6 +71,7 @@ export namespace lysa {
 
         // bool                            outlined{false};
         // std::shared_ptr<ShaderMaterial> outlineMaterial;
+
         
         void updateGlobalTransform() override;
     };

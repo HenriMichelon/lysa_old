@@ -440,6 +440,12 @@ export namespace lysa {
 
         virtual void updateGlobalTransform();
 
+        virtual void ready(Window* window);
+
+        virtual void enterScene() { onEnterScene(); }
+
+        virtual void exitScene() { onExitScene(); }
+
     private:
         friend class Window;
 
@@ -447,19 +453,11 @@ export namespace lysa {
         unique_id                        id;
         Type                             type;
         std::wstring                     name;
-        const Window*                    window{nullptr};
+        Window*                          window{nullptr};
         Node*                            parent{nullptr};
         std::list<std::shared_ptr<Node>> children;
         std::list<std::wstring>          groups;
         ProcessMode                      processMode{ProcessMode::INHERIT};
-
-        virtual void ready(const Window* surface);
-
-        virtual void enterScene() { onEnterScene(); }
-
-        virtual void exitScene() { onExitScene(); }
-
-
     };
 
 }

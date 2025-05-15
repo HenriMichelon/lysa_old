@@ -40,7 +40,12 @@ export namespace lysa {
         /**
          * Returns the associated Vireo object
          */
-        // auto getVireo() const { return vireo; }
+        auto getVireo() const { return vireo; }
+
+        /**
+         * Returns the graphic submission queue
+         */
+        auto getGraphicQueue() const { return graphicQueue; }
 
         /**
          * Returns the surface configuration
@@ -71,9 +76,15 @@ export namespace lysa {
 
         void waitIdle() const;
 
-        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0) const;
+        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
+
+        // Add a node to the current scene
+        void addNode(const std::shared_ptr<Node> &node, bool async);
+
+        // Remove a node from the current scene
+        void removeNode(const std::shared_ptr<Node> &node, bool async);
 
         virtual ~Window();
 
@@ -111,28 +122,26 @@ export namespace lysa {
         //
         bool                  lockDeferredUpdates{false};
 
-        ////// Frame drawing loop parameters
         // Last drawFrame() start time
         double          currentTime{0.0};
         // Time accumulator to calculate the process delta time
         double          accumulator{0.0};
         // Number of frames in the last second
-        uint32_t        frameCount{0};
+        uint32        frameCount{0};
         // Number of seconds since the last FPS update
         float           elapsedSeconds{0.0f};
         // Average calculated FPS
-        uint32_t        fps{0};
+        uint32        fps{0};
 
-        ////// Vireo & Frame objects. Keep them in order for a proper destruction order
+        // Per frame data
+        std::vector<FrameData>              framesData;
+        std::mutex                          frameDataMutex;
         // Associated Vireo object
         std::shared_ptr<vireo::Vireo>       vireo;
         // Submission queue used to present the swap chain
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         // Swap chain for this surface
         std::shared_ptr<vireo::SwapChain>   swapChain;
-        // Per frame data
-        std::vector<FrameData>              framesData;
-        std::mutex                          frameDataMutex;
 
         // Scene renderer
         std::unique_ptr<Renderer>           renderer;
@@ -140,13 +149,7 @@ export namespace lysa {
         void render(uint32 frameIndex) const;
 
         // Process scene updates before drawing a frame
-        void processDeferredUpdates(uint32_t frameIndex);
-
-        // Add a node to the current scene
-        void addNode(const std::shared_ptr<Node> &node, bool async);
-
-        // Remove a node from the current scene
-        void removeNode(const std::shared_ptr<Node> &node, bool async);
+        void processDeferredUpdates(uint32 frameIndex);
 
     };
 

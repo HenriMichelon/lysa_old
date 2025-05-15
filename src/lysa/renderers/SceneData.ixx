@@ -13,26 +13,27 @@ import lysa.resources.material;
 
 export namespace lysa {
 
-    // struct SceneUniform {
-        // float3      cameraPosition;
-        // alignas(16) float4x4 projection;
-        // float4x4    view;
-        // float4x4    viewInverse;
-        // float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
-    // };
+    struct SceneUniform {
+        float3      cameraPosition;
+        alignas(16) float4x4 projection;
+        float4x4    view;
+        float4x4    viewInverse;
+        float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
+    };
 
-    // struct ModelUniform {
-        // alignas(16) float4x4 transform;
-    // };
+    struct ModelUniform {
+        alignas(16) float4x4 transform;
+    };
 
-    // struct MaterialUniform {
-    //     alignas(16) float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
-    //     alignas(16) float shininess{128.f};
-    //     alignas(4)  int32 diffuseTextureIndex{-1};
-    // };
+    struct MaterialUniform {
+        alignas(16) float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
+        alignas(16) float shininess{128.f};
+        alignas(4)  int32 diffuseTextureIndex{-1};
+    };
 
     class SceneData : public Scene {
     public:
+        SceneData(const vireo::Extent &extent): Scene{extent} {}
 
     private:
         // Global shader data for the scene
@@ -48,6 +49,7 @@ export namespace lysa {
         // std::shared_ptr<vireo::Buffer> modelUniformBuffers;
         // Data for all the materials of the scene, one buffer for all the materials
         // std::shared_ptr<vireo::Buffer> materialUniformBuffers;
+
     };
 
 }
