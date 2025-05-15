@@ -20,8 +20,7 @@ export namespace lysa {
             const std::wstring& name);
 
     protected:
-        struct FrameData : FrameDataCommand {
-        };
+        struct FrameData : Renderer::FrameData {};
 
         std::vector<FrameData> framesData;
     };

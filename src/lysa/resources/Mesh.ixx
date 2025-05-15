@@ -37,8 +37,6 @@ export namespace lysa {
         }
     };
 
-    class Mesh;
-
     /**
      * %A Mesh surface, with counterclockwise triangles
      */
@@ -152,7 +150,7 @@ export namespace lysa {
         void buildAABB();
 
     private:
-        friend class SceneData;
+        friend class Scene;
     //     uint32_t                       firstIndex{0};
     //     uint32_t                       vertexOffset{0};
     //     std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};

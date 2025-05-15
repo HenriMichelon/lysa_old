@@ -62,10 +62,10 @@ namespace lysa {
 
     void PostProcessing::render(
         const uint32_t frameIndex,
-        const vireo::Extent& extent,
+        Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
-        bool recordLastBarrier) {
+        const bool recordLastBarrier) {
         auto& frame = framesData[frameIndex];
 
         frame.descriptorSet->update(BINDING_INPUT, colorAttachment->getImage());
@@ -76,6 +76,8 @@ namespace lysa {
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList->setDescriptors({frame.descriptorSet, samplers.getDescriptorSet()});
         commandList->beginRendering(renderingConfig);
+        commandList->setViewport(scene.getViewport());
+        commandList->setScissors(scene.getScissors());
         commandList->bindPipeline(pipeline);
         commandList->bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
         commandList->draw(3);

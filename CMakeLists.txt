@@ -90,6 +90,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
+        ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Window.cpp
 
@@ -107,7 +108,6 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/MeshesRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Samplers.cpp
-        ${ENGINE_SRC_DIR}/renderers/SceneData.cpp
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
@@ -126,6 +126,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Global.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
+        ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Window.ixx
         ${ENGINE_SRC_DIR}/WindowConfig.ixx
@@ -134,6 +135,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
+        ${ENGINE_SRC_DIR}/nodes/Viewport.ixx
 
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx

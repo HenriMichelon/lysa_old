@@ -92,7 +92,7 @@ export namespace lysa {
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
-        friend class SceneData;
+        friend class Scene;
 
         // Field of view in degrees
         float fov{75.0};

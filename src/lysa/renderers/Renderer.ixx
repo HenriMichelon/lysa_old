@@ -9,13 +9,14 @@ export module lysa.renderers.renderer;
 import std;
 import vireo;
 import lysa.window_config;
+import lysa.scene;
 import lysa.renderers.samplers;
 import lysa.renderers.renderpass.post_processing;
 
 export namespace lysa {
     class Renderer {
     public:
-        struct FrameDataCommand {
+        struct FrameData {
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             std::shared_ptr<vireo::CommandList>      commandList;
         };
@@ -33,7 +34,7 @@ export namespace lysa {
 
         virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32_t frameIndex,
-            const vireo::Extent& extent) = 0;
+            Scene& scene) = 0;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32_t dataSize = 0);
 

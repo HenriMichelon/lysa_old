@@ -8,49 +8,46 @@ export module lysa.renderers.scene_data;
 
 import vireo;
 import lysa.global;
-import lysa.nodes.camera;
-import lysa.nodes.mesh_instance;
-import lysa.nodes.node;
+import lysa.scene;
+import lysa.resources.material;
 
 export namespace lysa {
 
-    struct SceneUniform {
-        float3      cameraPosition;
-        alignas(16) float4x4 projection;
-        float4x4    view;
-        float4x4    viewInverse;
-        float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
-    };
+    // struct SceneUniform {
+        // float3      cameraPosition;
+        // alignas(16) float4x4 projection;
+        // float4x4    view;
+        // float4x4    viewInverse;
+        // float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
+    // };
 
-    struct ModelUniform {
-        float4x4 transform;
-    };
+    // struct ModelUniform {
+        // alignas(16) float4x4 transform;
+    // };
 
-    struct MaterialUniform {
-        alignas(16) float shininess{128.f};
-        alignas(4)  int32 diffuseTextureIndex{-1};
-    };
+    // struct MaterialUniform {
+    //     alignas(16) float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
+    //     alignas(16) float shininess{128.f};
+    //     alignas(4)  int32 diffuseTextureIndex{-1};
+    // };
 
-    struct SceneData {
-        // Currently active camera, first camera added to the scene or the last activated
-        std::shared_ptr<Camera> currentCamera{};
-        // All the models of the scene
-        std::list<std::shared_ptr<MeshInstance>> models{};
-        // All models containing opaque surfaces
-        std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
-        // Data for all the models of the scene, one array and one buffer for all the models
-        bool modelsUpdated{false};
-        std::unique_ptr<ModelUniform[]> modelUniforms;
-        std::unique_ptr<vireo::Buffer> modelUniformsBuffer;
+    class SceneData : public Scene {
+    public:
 
-        // Add a model to the scene
-        virtual void addNode(const std::shared_ptr<Node> &node);
+    private:
+        // Global shader data for the scene
+        // SceneUniform sceneUniform{};
+        // Model shader data for all the models of the scene, one array all the models
+        // std::shared_ptr<ModelUniform[]> modelUniforms;
+        // All materials used in the scene, used to update the buffer in GPU memory
+        // std::list<std::shared_ptr<Material>> materials;
 
-        // Remove a model from the scene
-        virtual void removeNode(const std::shared_ptr<Node> &node);
-
-        // Change the active camera, disabling the previous camera
-        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
+        // Scene data buffer
+        // std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+        // Data buffer for all the models of the scene, one buffer for all the models
+        // std::shared_ptr<vireo::Buffer> modelUniformBuffers;
+        // Data for all the materials of the scene, one buffer for all the materials
+        // std::shared_ptr<vireo::Buffer> materialUniformBuffers;
     };
 
 }

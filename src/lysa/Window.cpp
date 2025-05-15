@@ -28,6 +28,8 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
+            frame.scene = std::make_shared<Scene>();
+            frame.scene->resize(swapChain->getExtent());
         }
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
@@ -82,7 +84,7 @@ namespace lysa {
 
         const auto commandLists = renderer->render(
             swapChain->getCurrentFrameIndex(),
-            swapChain->getExtent());
+            *frame.scene);
 
         const auto commandList = commandLists.back();
         const auto colorAttachment = renderer->getColorAttachment(frameIndex);
@@ -106,6 +108,9 @@ namespace lysa {
         swapChain->recreate();
         const auto newExtent = swapChain->getExtent();
         if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
+            for (auto& frame : framesData) {
+                frame.scene->resize(swapChain->getExtent());
+            }
             renderer->resize(newExtent);
         }
     }
@@ -199,7 +204,7 @@ namespace lysa {
             // Immediate removes
             if (!data.removedNodes.empty()) {
                 for (const auto &node : data.removedNodes) {
-                    data.sceneData.removeNode(node);
+                    data.scene->removeNode(node);
                 }
                 data.removedNodes.clear();
             }
@@ -207,7 +212,7 @@ namespace lysa {
             if (!data.removedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
-                    data.sceneData.removeNode(*it);
+                    data.scene->removeNode(*it);
                     it = data.removedNodesAsync.erase(it);
                     count += 1;
                     if (count > config.maxAsyncNodesUpdatedPerFrame) { break; }
@@ -217,7 +222,7 @@ namespace lysa {
             // Immediate additions
             if (!data.addedNodes.empty()) {
                 for (const auto &node : data.addedNodes) {
-                    data.sceneData.addNode(node);
+                    data.scene->addNode(node);
                 }
                 data.addedNodes.clear();
             }
@@ -225,7 +230,7 @@ namespace lysa {
             if (!data.addedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
-                    data.sceneData.addNode(*it);
+                    data.scene->addNode(*it);
                     it = data.addedNodesAsync.erase(it);
                     count += 1;
                     if (count > config.maxAsyncNodesUpdatedPerFrame) { break; }
@@ -233,7 +238,7 @@ namespace lysa {
             }
             // Change the current camera if needed
             if (data.cameraChanged) {
-                data.sceneData.activateCamera(data.activeCamera);
+                data.scene->activateCamera(data.activeCamera);
                 // if (applicationConfig.debug) {
                     // debugRenderer->activateCamera(data.activeCamera, currentFrame);
                 // }
@@ -241,10 +246,10 @@ namespace lysa {
                 data.cameraChanged = false;
             }
             // Search for a camera in the scene tree if there is no current camera
-            if (data.sceneData.currentCamera == nullptr) {
+            if (data.scene->getCurrentCamera() == nullptr) {
                 const auto &camera = rootNode->findFirstChild<Camera>(true);
                 if (camera && camera->isProcessed()) {
-                    data.sceneData.activateCamera(camera);
+                    data.scene->activateCamera(camera);
                     // if (applicationConfig.debug) {
                         // debugRenderer->activateCamera(camera, currentFrame);
                     // }

@@ -28,7 +28,7 @@ namespace lysa {
 
     std::vector<std::shared_ptr<const vireo::CommandList>> ForwardRenderer::render(
         const uint32_t frameIndex,
-        const vireo::Extent& extent) {
+        Scene& scene) {
         const auto& frame = framesData[frameIndex];
         const auto& frameMeshes = MeshesRenderer::framesData[frameIndex];
 
@@ -36,7 +36,7 @@ namespace lysa {
         auto commandList = frameMeshes.commandList;
         commandList->begin();
         commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
-        forwardColorPass.render(frameIndex, extent, frame.colorAttachment, commandList, false);
+        forwardColorPass.render(frameIndex, scene, frame.colorAttachment, commandList, false);
 
         if (!postProcessingPasses.empty()) {
             commandList->barrier(
@@ -46,7 +46,7 @@ namespace lysa {
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(
                     frameIndex,
-                    extent,
+                    scene,
                     frame.colorAttachment,
                     commandList,
                     postProcessingPass != postProcessingPasses.back());

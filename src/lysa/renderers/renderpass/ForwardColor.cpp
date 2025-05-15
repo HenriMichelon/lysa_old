@@ -22,14 +22,14 @@ namespace lysa {
 
     void ForwardColor::render(
         const uint32_t frameIndex,
-        const vireo::Extent& extent,
+        Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
         const bool recordLastBarrier) {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         commandList->beginRendering(renderingConfig);
-        commandList->setViewport(extent);
-        commandList->setScissors(extent);
+        commandList->setViewport(scene.getViewport());
+        commandList->setScissors(scene.getScissors());
         commandList->endRendering();
     }
 }

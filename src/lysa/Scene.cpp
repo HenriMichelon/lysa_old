@@ -4,10 +4,25 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
-module lysa.renderers.scene_data;
+module lysa.scene;
 
 namespace lysa {
-    void SceneData::addNode(const std::shared_ptr<Node>& node) {
+
+    void Scene::resize(const vireo::Extent& extent) {
+        this->extent = extent;
+        if (viewportAndScissors == nullptr) {
+            viewport = vireo::Viewport{
+                .width = static_cast<float>(extent.width),
+                .height = static_cast<float>(extent.height)
+            };
+            scissors = vireo::Rect{
+                .width = extent.width,
+                .height = extent.height
+            };
+        }
+    }
+
+    void Scene::addNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
             activateCamera(static_pointer_cast<Camera>(node));
@@ -19,12 +34,17 @@ namespace lysa {
             modelsUpdated = true;
             break;
         }
+        case Node::VIEWPORT:
+            viewportAndScissors = static_pointer_cast<Viewport>(node);
+            viewport = viewportAndScissors->getViewport();
+            scissors = viewportAndScissors->getScissors();
+            break;
         default:
             break;
         }
     }
 
-    void SceneData::removeNode(const std::shared_ptr<Node>& node) {
+    void Scene::removeNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
             if (node == currentCamera) {
@@ -41,12 +61,18 @@ namespace lysa {
             }
             break;
         }
+        case Node::VIEWPORT:
+            if (node == viewportAndScissors) {
+                viewportAndScissors.reset();
+                resize(extent);
+            }
+            break;
         default:
             break;
         }
     }
 
-    void SceneData::activateCamera(const std::shared_ptr<Camera>& camera) {
+    void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {
         if (currentCamera != nullptr)
             currentCamera->setActive(false);
         if (camera == nullptr) {

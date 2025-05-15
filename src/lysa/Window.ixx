@@ -8,11 +8,11 @@ export module lysa.window;
 
 import vireo;
 import lysa.global;
+import lysa.scene;
 import lysa.window_config;
 import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
-import lysa.renderers.scene_data;
 
 export namespace lysa {
     /*
@@ -92,10 +92,12 @@ export namespace lysa {
             // Deferred list of nodes removed from the current scene, processed before each frame
             std::list<std::shared_ptr<Node>> removedNodes;
             std::list<std::shared_ptr<Node>> removedNodesAsync;
-            // Camera to activate next frame
+            // Need to activate a new camera on the next frame
             bool cameraChanged{false};
-            SceneData sceneData;
+            // Camera to activate next frame
             std::shared_ptr<Camera> activeCamera;
+            // Scene data for the frame
+            std::shared_ptr<Scene> scene;
         };
 
         // Opaque window handle for presenting
