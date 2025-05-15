@@ -58,7 +58,7 @@ namespace lysa {
             for (const auto &meshInstance : models) {
                 if (meshInstance->isUpdated()) {
                     modelUniforms[modelIndex].transform = meshInstance->getTransformGlobal();
-                    modelUniformBuffers->write(modelUniforms.get(), sizeof(ModelUniform),  sizeof(ModelUniform) * modelIndex);
+                    modelUniformBuffers->write(&modelUniforms[modelIndex], sizeof(ModelUniform));
                     meshInstance->updated--;
                 }
                 modelIndex++;
