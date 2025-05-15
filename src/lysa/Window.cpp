@@ -126,8 +126,8 @@ namespace lysa {
         rootNode = node;
         if (rootNode) {
             assert([&]{ return node->getParent() == nullptr && node->getWindow() == nullptr;}, "Node can't be a root node");
-            rootNode->ready(this);
             addNode(rootNode, false);
+            rootNode->ready(this);
         }
     }
 
