@@ -107,6 +107,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Samplers.cpp
+        ${ENGINE_SRC_DIR}/renderers/SceneData.cpp
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp

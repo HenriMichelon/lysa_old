@@ -8,11 +8,11 @@ export module lysa.window;
 
 import vireo;
 import lysa.global;
-import lysa.scene;
 import lysa.window_config;
 import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
+import lysa.renderers.scene_data;
 
 export namespace lysa {
     /*
@@ -108,7 +108,7 @@ export namespace lysa {
             // Camera to activate next frame
             std::shared_ptr<Camera> activeCamera;
             // Scene data for the frame
-            std::shared_ptr<Scene> scene;
+            std::shared_ptr<SceneData> scene;
         };
 
         // Opaque window handle for presenting

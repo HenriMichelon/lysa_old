@@ -20,6 +20,8 @@ export namespace lysa {
         //! Returns the list of all the models of the scene
         const auto& getModels() const { return models; }
 
+        virtual void update() = 0;
+
         //! Returns the current scene camera
         auto getCurrentCamera() const { return currentCamera; }
 
@@ -34,27 +36,28 @@ export namespace lysa {
         virtual ~Scene() = default;
 
     protected:
-        Scene(const vireo::Extent &extent) { resize(extent); }
-
-    private:
-        // Rendering window extent
-        vireo::Extent extent;
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
-        // Camera has been updates
+        // Camera has been updated
         bool cameraUpdated{false};
-        // Viewport & Scissors
-        vireo::Viewport viewport;
-        vireo::Rect scissors;
-        std::shared_ptr<Viewport> viewportAndScissors{nullptr};
 
         // All the models of the scene
         std::list<std::shared_ptr<MeshInstance>> models{};
         // All models containing opaque surfaces
         //std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
 
-        // Models have been updates
+        // Models have been updated
         bool modelsUpdated{false};
+
+        Scene(const vireo::Extent &extent) { resize(extent); }
+
+    private:
+        // Rendering window extent
+        vireo::Extent extent;
+        // Viewport & Scissors
+        vireo::Viewport viewport;
+        vireo::Rect scissors;
+        std::shared_ptr<Viewport> viewportAndScissors{nullptr};
 
         friend class Window;
 

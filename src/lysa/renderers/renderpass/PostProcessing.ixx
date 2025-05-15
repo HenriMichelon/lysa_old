@@ -9,9 +9,9 @@ export module lysa.renderers.renderpass.post_processing;
 import std;
 import vireo;
 import lysa.global;
-import lysa.scene;
 import lysa.window_config;
 import lysa.renderers.renderpass;
+import lysa.renderers.scene_data;
 import lysa.renderers.samplers;
 
 export namespace lysa {
@@ -30,7 +30,7 @@ export namespace lysa {
 
         void render(
            uint32 frameIndex,
-           Scene& scene,
+           SceneData& scene,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
            const std::shared_ptr<vireo::CommandList>& commandList,
            bool recordLastBarrier) override;

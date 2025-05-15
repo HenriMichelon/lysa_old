@@ -8,10 +8,10 @@ export module lysa.renderers.renderpass.forward_color;
 
 import std;
 import vireo;
-import lysa.scene;
 import lysa.window_config;
 import lysa.renderers.renderpass;
 import lysa.renderers.samplers;
+import lysa.renderers.scene_data;
 
 export namespace lysa {
     class ForwardColor : public Renderpass {
@@ -23,7 +23,7 @@ export namespace lysa {
 
         void render(
             uint32 frameIndex,
-            Scene& scene,
+            SceneData& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList,
             bool recordLastBarrier) override;
@@ -42,5 +42,7 @@ export namespace lysa {
             .depthTestEnable = pipelineConfig.depthTestEnable,
             .discardDepthStencilAfterRender = true,
         };
+
+        PushConstants pushConstants{};
     };
 }

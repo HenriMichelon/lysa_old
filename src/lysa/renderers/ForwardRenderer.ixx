@@ -8,9 +8,9 @@ export module lysa.renderers.forward_renderer;
 
 import std;
 import vireo;
-import lysa.scene;
 import lysa.window_config;
 import lysa.renderers.renderer;
+import lysa.renderers.scene_data;
 import lysa.renderers.renderpass.forward_color;
 
 export namespace lysa {
@@ -27,7 +27,7 @@ export namespace lysa {
 
         void mainColorPass(
             uint32 frameIndex,
-            Scene& scene,
+            SceneData& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList) override;
 

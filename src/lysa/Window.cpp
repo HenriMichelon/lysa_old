@@ -9,7 +9,6 @@ module lysa.window;
 import lysa.global;
 import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
-import lysa.renderers.scene_data;
 
 namespace lysa {
 
@@ -23,14 +22,14 @@ namespace lysa {
             graphicQueue,
             windowHandle,
             config.presentMode,
-            config.framesInFlight)},
-        renderer{std::make_unique<ForwardRenderer>(config, vireo, L"Main Renderer")} {
+            config.framesInFlight)} {
         assert([&]{return config.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<SceneData>(swapChain->getExtent());
+            frame.scene = std::make_shared<SceneData>(vireo, swapChain->getExtent());
         }
+        renderer = std::make_unique<ForwardRenderer>(config, vireo, L"Main Renderer"); // Must be instanciated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
     }
@@ -39,12 +38,15 @@ namespace lysa {
         graphicQueue->waitIdle();
         swapChain->waitIdle();
         framesData.clear();
+        SceneData::getDescriptorLayout().reset();
         rootNode.reset();
         config.rootNode.reset();
+        renderer.reset();
     }
 
     void Window::drawFrame() {
         const auto frameIndex = swapChain->getCurrentFrameIndex();
+        const auto& frame = framesData[frameIndex];
 
         // Add/removes nodes from the scene
         if (!lockDeferredUpdates) {
@@ -76,6 +78,7 @@ namespace lysa {
                 // Update physics here
                 accumulator -= FIXED_DELTA_TIME;
             }
+            frame.scene->update();
             renderer->update(frameIndex);
         }
         render(frameIndex);

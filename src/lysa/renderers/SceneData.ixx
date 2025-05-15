@@ -31,22 +31,48 @@ export namespace lysa {
         alignas(4)  int32 diffuseTextureIndex{-1};
     };
 
+    struct PushConstants {
+        uint32 modelIndex{0};
+        uint32 materialIndex{0};
+    };
+
     class SceneData : public Scene {
     public:
-        SceneData(const vireo::Extent &extent): Scene{extent} {}
+        static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
+            .stage = vireo::ShaderStage::ALL,
+            .size = sizeof(PushConstants),
+        };
+
+        SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
+
+        void update();
+
+        static auto& getDescriptorLayout() { return descriptorLayout; }
+
+        auto getDescriptorSet() const { return descriptorSet; }
 
     private:
+        static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
+        static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIALS{2};
+
+        inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
+
+        std::shared_ptr<vireo::Vireo>            vireo;
+        std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
+
         // Global shader data for the scene
-        // SceneUniform sceneUniform{};
+        SceneUniform sceneUniform{};
         // Model shader data for all the models of the scene, one array all the models
-        // std::shared_ptr<ModelUniform[]> modelUniforms;
+        std::shared_ptr<ModelUniform[]> modelUniforms;
+        uint32 modelUniformSize{0};
         // All materials used in the scene, used to update the buffer in GPU memory
         // std::list<std::shared_ptr<Material>> materials;
 
         // Scene data buffer
-        // std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         // Data buffer for all the models of the scene, one buffer for all the models
-        // std::shared_ptr<vireo::Buffer> modelUniformBuffers;
+        std::shared_ptr<vireo::Buffer> modelUniformBuffers{nullptr};
         // Data for all the materials of the scene, one buffer for all the materials
         // std::shared_ptr<vireo::Buffer> materialUniformBuffers;
 

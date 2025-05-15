@@ -7,10 +7,10 @@
 #include "scene_data.inc.slang"
 
 ConstantBuffer<Scene>  scene  : register(b0, space0);
-ConstantBuffer<Models> models : register(b0, space1);
+ConstantBuffer<Models> models : register(b1, space0);
 
 [[push_constant]]
-PushConstants pushConstants : register(b0, space2);
+PushConstants pushConstants : register(b0, space1);
 
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;

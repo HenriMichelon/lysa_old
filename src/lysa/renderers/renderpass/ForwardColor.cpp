@@ -15,7 +15,9 @@ namespace lysa {
         const Samplers& samplers):
         Renderpass{surfaceConfig, vireo, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
-        pipelineConfig.resources = vireo->createPipelineResources({});
+        pipelineConfig.resources = vireo->createPipelineResources(
+            {SceneData::getDescriptorLayout()},
+            SceneData::pushConstantsDesc);
         pipelineConfig.vertexInputLayout = vireo->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
         pipelineConfig.vertexShader = vireo->createShaderModule("shaders/default.vert");
         pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/forward.frag");
@@ -29,7 +31,7 @@ namespace lysa {
 
     void ForwardColor::render(
         const uint32 frameIndex,
-        Scene& scene,
+        SceneData& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
         const bool recordLastBarrier) {
@@ -37,12 +39,18 @@ namespace lysa {
         commandList->beginRendering(renderingConfig);
         commandList->setViewport(scene.getViewport());
         commandList->setScissors(scene.getScissors());
+        commandList->setDescriptors({scene.getDescriptorSet()});
         commandList->bindPipeline(pipeline);
+        commandList->bindDescriptors(pipeline, {scene.getDescriptorSet()});
+        uint32 modelIndex{0};
         for (const auto& meshInstance : scene.getModels()) {
             const auto &mesh = meshInstance->getMesh();
             commandList->bindVertexBuffer(mesh->getVertexBuffer());
             commandList->bindIndexBuffer(mesh->getIndexBuffer());
+            pushConstants.modelIndex = modelIndex;
+            commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
             commandList->drawIndexed(mesh->getIndices().size());
+            modelIndex++;
         }
         commandList->endRendering();
     }

@@ -62,7 +62,7 @@ namespace lysa {
 
     void PostProcessing::render(
         const uint32 frameIndex,
-        Scene& scene,
+        SceneData& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
         const bool recordLastBarrier) {
