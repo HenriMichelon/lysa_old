@@ -6,8 +6,29 @@
 */
 #include "scene_data.inc.slang"
 
+ConstantBuffer<Scene>  scene  : register(b0, space0);
+ConstantBuffer<Models> models : register(b0, space1);
+
+[[push_constant]]
+PushConstants pushConstants : register(b0, space2);
+
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
-    output.position = float4(input.position, 1.0) ;
+    float4x4 model = models.models[pushConstants.modelIndex].transform;
+
+    float4 localPos = float4(input.position, 1.0);
+    float4 worldPos = mul(model, localPos);
+    output.worldPos = worldPos.xyz;
+
+    output.position = mul(scene.projection, mul(scene.view, worldPos));
+
+    float3 normalW = mul((float3x3)model, input.normal);
+    output.normal = normalize(normalW);
+
+    float3 tangentW = mul((float3x3)model, input.tangent);
+    output.tangent = normalize(tangentW);
+    output.bitangent = normalize(cross(normalW, tangentW));
+
+    output.uv = input.uv;
     return output;
 }

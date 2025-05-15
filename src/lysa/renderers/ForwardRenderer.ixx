@@ -10,11 +10,11 @@ import std;
 import vireo;
 import lysa.scene;
 import lysa.window_config;
-import lysa.renderers.meshes_renderer;
+import lysa.renderers.renderer;
 import lysa.renderers.renderpass.forward_color;
 
 export namespace lysa {
-    class ForwardRenderer : public MeshesRenderer {
+    class ForwardRenderer : public Renderer {
     public:
         ForwardRenderer(
             const WindowConfig& surfaceConfig,
@@ -25,18 +25,13 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent) override;
 
-        std::vector<std::shared_ptr<const vireo::CommandList>> render(
+        void mainColorPass(
             uint32 frameIndex,
-            Scene& scene) override;
-
-        std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const override;
+            Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::CommandList>& commandList) override;
 
     private:
-        struct FrameData {
-            std::shared_ptr<vireo::RenderTarget> colorAttachment;
-        };
-
-        std::vector<FrameData> framesData;
-        ForwardColor           forwardColorPass;
+        ForwardColor forwardColorPass;
     };
 }

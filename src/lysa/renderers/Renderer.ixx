@@ -20,6 +20,7 @@ export namespace lysa {
         struct FrameData {
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             std::shared_ptr<vireo::CommandList>      commandList;
+            std::shared_ptr<vireo::RenderTarget>     colorAttachment;
         };
 
         Renderer(
@@ -27,15 +28,21 @@ export namespace lysa {
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
-        virtual void resize(const vireo::Extent& extent) { currentExtent = extent; }
+        virtual void resize(const vireo::Extent& extent);
 
-        virtual void update(uint32 frameIndex) { }
+        virtual void update(uint32 frameIndex);
 
-        virtual std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const = 0;
+        std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
 
         virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32 frameIndex,
-            Scene& scene) = 0;
+            Scene& scene);
+
+        virtual void mainColorPass(
+            uint32 frameIndex,
+            Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::CommandList>& commandList) = 0;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0);
 
@@ -44,11 +51,14 @@ export namespace lysa {
         virtual ~Renderer() = default;
 
     protected:
-        const WindowConfig&                surfaceConfig;
-        const std::wstring                  name;
-        const Samplers                      samplers;
-        std::shared_ptr<vireo::Vireo>       vireo;
-        vireo::Extent                       currentExtent;
+        const WindowConfig&           surfaceConfig;
+        const std::wstring            name;
+        const Samplers                samplers;
+        std::shared_ptr<vireo::Vireo> vireo;
+
+    private:
+        vireo::Extent                                currentExtent;
+        std::vector<FrameData>                       framesData;
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };
 }

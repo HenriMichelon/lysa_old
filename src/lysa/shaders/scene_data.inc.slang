@@ -13,6 +13,11 @@ struct VertexInput {
 
 struct VertexOutput {
     float4 position : SV_POSITION;
+    float3 worldPos : TEXCOORD0;
+    float3 normal   : TEXCOORD1;
+    float2 uv       : TEXCOORD2;
+    float3 tangent  : TEXCOORD3;
+    float3 bitangent: TEXCOORD4;
 };
 
 struct Scene {
@@ -32,3 +37,12 @@ struct Material {
     float  shininess;
     int    diffuseTextureIndex;
 }
+
+struct Models {
+    Model models[100]; // arbitrary value for debug
+}
+
+struct PushConstants {
+    uint modelIndex;
+    uint materialIndex;
+};
