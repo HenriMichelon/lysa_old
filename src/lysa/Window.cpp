@@ -273,4 +273,24 @@ namespace lysa {
         // Update renderer resources
         // sceneRenderer->postUpdateScene(currentFrame);
     }
+
+    void Window::upload(const std::vector<vireo::BufferUploadInfo>& infos) const {
+        const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto commandList = allocator->createCommandList();
+        commandList->begin();
+        commandList->upload(infos);
+        commandList->end();
+        graphicQueue->submit({commandList});
+        graphicQueue->waitIdle();
+    }
+
+    void Window::upload(const std::vector<vireo::ImageUploadInfo>& infos) const {
+        const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto commandList = allocator->createCommandList();
+        commandList->begin();
+        commandList->upload(infos);
+        commandList->end();
+        graphicQueue->submit({commandList});
+        graphicQueue->waitIdle();
+    }
 }

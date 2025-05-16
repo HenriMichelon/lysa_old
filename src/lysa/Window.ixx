@@ -88,10 +88,13 @@ export namespace lysa {
         // Remove a node from the current scene
         void removeNode(const std::shared_ptr<Node> &node, bool async);
 
+        void upload(const std::vector<vireo::BufferUploadInfo>& infos) const;
+
+        void upload(const std::vector<vireo::ImageUploadInfo>& infos) const;
+
         virtual ~Window();
 
     private:
-
         // Fixed delta time for the physics
         static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
 
