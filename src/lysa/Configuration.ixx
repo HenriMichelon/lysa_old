@@ -12,8 +12,8 @@ import lysa.global;
 export namespace lysa {
 
     struct MemoryConfiguration {
-        uint32 maxModelsCount{10000};
-        uint32 maxMaterialsCount{1000};
+        uint32 maxMeshSurfacePerBufferCount{10000};
+        uint32 maxMaterialCount{1000};
     };
 
     struct RenderingConfiguration {

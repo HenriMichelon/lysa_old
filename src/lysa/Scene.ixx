@@ -40,17 +40,10 @@ export namespace lysa {
 
     class Scene {
     public:
-        //! Returns the list of the models of the scene
-        const auto& getModels() const { return models; }
-
         const auto& getOpaqueModels() const { return opaqueModels; }
 
         const auto& getMaterialIndex(const unique_id materialId) const {
             return materialsIndices.at(materialId);
-        }
-
-        const auto& getModelIndex(const unique_id modelId) const {
-            return modelsIndices.at(modelId);
         }
 
         virtual void update() = 0;
@@ -74,20 +67,16 @@ export namespace lysa {
         // Camera has been updated
         bool cameraUpdated{false};
 
-        // All the models of the scene
-        std::vector<std::shared_ptr<MeshInstance>> models{};
-        uint32 lastModelIndex{0};
-        // Indices of all models in the buffers
-        std::unordered_map<unique_id, uint32> modelsIndices{};
         // All models containing opaque surfaces grouped by buffers
         std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
 
         // All materials used in the scene, used to update the buffer in GPU memory
         std::vector<std::shared_ptr<Material>> materials;
+        // Index used for faster updates
         uint32 lastMaterialIndex{0};
-        // Material reference counter, used to know of the material, can be removed from the scene
+        // Material reference counter, used to know if the material is still used or if it can be removed from the scene
         std::unordered_map<unique_id, uint32> materialsRefCounter;
-        // Indices of all materials & texture in the buffers
+        // Indices of all materials in the buffers
         std::unordered_map<unique_id, uint32> materialsIndices{};
 
         Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
@@ -101,8 +90,6 @@ export namespace lysa {
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
 
         friend class Window;
-
-        bool updateModel(const std::shared_ptr<MeshInstance>& meshInstance);
 
         bool updateMaterial(const std::shared_ptr<Material>& material);
 

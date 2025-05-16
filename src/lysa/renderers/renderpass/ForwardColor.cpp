@@ -15,9 +15,10 @@ namespace lysa {
         const Samplers& samplers):
         Renderpass{config, vireo, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = vireo->createPipelineResources(
-            {SceneData::getDescriptorLayout()},
-            SceneData::pushConstantsDesc);
+        pipelineConfig.resources = vireo->createPipelineResources({
+            SceneData::globalDescriptorLayout,
+            SceneData::perBufferPairDescriptorLayout
+        });
         pipelineConfig.vertexInputLayout = vireo->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
         pipelineConfig.vertexShader = vireo->createShaderModule("shaders/default.vert");
         pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/forward.frag");
@@ -39,10 +40,8 @@ namespace lysa {
         commandList->beginRendering(renderingConfig);
         commandList->setViewport(scene.getViewport());
         commandList->setScissors(scene.getScissors());
-        commandList->setDescriptors({scene.getDescriptorSet()});
         commandList->bindPipeline(pipeline);
-        commandList->bindDescriptors(pipeline, {scene.getDescriptorSet()});
-        scene.draw(commandList, pipeline->getResources(), scene.getOpaqueModels());
+        scene.draw(commandList, pipeline, scene.getOpaqueModels());
         commandList->endRendering();
     }
 }

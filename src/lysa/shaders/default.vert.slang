@@ -6,15 +6,12 @@
 */
 #include "scene_data.inc.slang"
 
-ConstantBuffer<Scene>     scene  : register(b0, space0);
-StructuredBuffer<Model> models : register(b1, space0);
-
-[[push_constant]]
-PushConstants pushConstants : register(b0, space1);
+ConstantBuffer<Scene> scene  : register(b0, space0);
+StructuredBuffer<InstanceData> instancesData : register(b0, space1);
 
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
-    float4x4 model = models[pushConstants.modelIndex].transform;
+    float4x4 model = instancesData[input.instanceID].transform;
 
     float4 localPos = float4(input.position, 1.0);
     float4 worldPos = mul(model, localPos);
@@ -30,5 +27,6 @@ VertexOutput vertexMain(VertexInput input) {
     output.bitangent = normalize(cross(normalW, tangentW));
 
     output.uv = input.uv;
+    output.materialIndex = instancesData[input.instanceID].materialIndex;
     return output;
 }

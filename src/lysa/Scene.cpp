@@ -10,8 +10,8 @@ namespace lysa {
 
     Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
         config{config} {
-        models.resize(config.memoryConfig.maxModelsCount);
-        materials.resize(config.memoryConfig.maxMaterialsCount);
+        // models.resize(config.memoryConfig.maxModelsCount);
+        materials.resize(config.memoryConfig.maxMaterialCount);
         resize(extent);
     }
 
@@ -29,17 +29,17 @@ namespace lysa {
         }
     }
 
-    bool Scene::updateModel(const std::shared_ptr<MeshInstance>& meshInstance) {
-        for (int i = lastModelIndex; i < models.size(); i++) {
-            if (models[i] == nullptr) {
-                models[i] = meshInstance;
-                modelsIndices[meshInstance->getId()] = i;
-                lastModelIndex = i + 1;
-                return true;
-            }
-        }
-        return false;
-    }
+    // bool Scene::updateModel(const std::shared_ptr<MeshInstance>& meshInstance) {
+    //     for (int i = lastModelIndex; i < models.size(); i++) {
+    //         if (models[i] == nullptr) {
+    //             models[i] = meshInstance;
+    //             modelsIndices[meshInstance->getId()] = i;
+    //             lastModelIndex = i + 1;
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     bool Scene::updateMaterial(const std::shared_ptr<Material>& material) {
         for (int i = lastMaterialIndex; i < materials.size(); i++) {
@@ -62,14 +62,7 @@ namespace lysa {
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             const auto& mesh = meshInstance->getMesh();
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
-
-            if (!updateModel(meshInstance)) {
-                lastModelIndex = 0;
-                if (!updateModel(meshInstance)) {
-                    throw Exception{"MemoryConfiguration.maxModelsCount reached."};
-                }
-            }
-            // Force material data to be written to GPU memory
+            // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
 
             const auto pair = BufferPair{mesh->getVertexBuffer(), mesh->getIndexBuffer()};
@@ -129,8 +122,8 @@ namespace lysa {
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             // Remove the model from the scene
-            models[modelsIndices[meshInstance->getId()]].reset();
-            modelsIndices.erase(meshInstance->getId());
+            // models[modelsIndices[meshInstance->getId()]].reset();
+            // modelsIndices.erase(meshInstance->getId());
             // Check if we need to remove the material from the scene
             for (const auto &material : meshInstance->getMesh()->getMaterials()) {
                 if (materialsRefCounter.contains(material->getId())) {

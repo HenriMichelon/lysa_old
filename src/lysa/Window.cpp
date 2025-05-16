@@ -38,7 +38,8 @@ namespace lysa {
         graphicQueue->waitIdle();
         swapChain->waitIdle();
         framesData.clear();
-        SceneData::getDescriptorLayout().reset();
+        SceneData::globalDescriptorLayout.reset();
+        SceneData::perBufferPairDescriptorLayout.reset();
         rootNode.reset();
         config.rootNode.reset();
         renderer.reset();

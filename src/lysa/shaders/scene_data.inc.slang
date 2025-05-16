@@ -9,15 +9,17 @@ struct VertexInput {
     float3 normal   : NORMAL;
     float2 uv       : UV;
     float3 tangent  : TANGENT;
+    uint  instanceID: SV_InstanceID;
 };
 
 struct VertexOutput {
-    float4 position : SV_POSITION;
-    float3 worldPos : TEXCOORD0;
-    float3 normal   : TEXCOORD1;
-    float2 uv       : TEXCOORD2;
-    float3 tangent  : TEXCOORD3;
-    float3 bitangent: TEXCOORD4;
+    float4 position      : SV_POSITION;
+    float3 worldPos      : TEXCOORD0;
+    float3 normal        : TEXCOORD1;
+    float2 uv            : TEXCOORD2;
+    float3 tangent       : TEXCOORD3;
+    float3 bitangent     : TEXCOORD4;
+    uint   materialIndex : TEXCOORD5;
 };
 
 struct Scene {
@@ -28,17 +30,13 @@ struct Scene {
     float4   ambientLight;
 }
 
-struct Model {
+struct InstanceData {
     float4x4 transform;
-}
+    uint     materialIndex;
+};
 
 struct Material {
     float4 albedoColor;
     float  shininess;
     int    diffuseTextureIndex;
 }
-
-struct PushConstants {
-    uint modelIndex;
-    uint materialIndex;
-};
