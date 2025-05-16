@@ -64,6 +64,8 @@ export namespace lysa {
      */
     class Mesh : public Resource {
     public:
+        friend class Window;
+
         inline static const std::vector<vireo::VertexAttributeDesc> vertexAttributes{
             {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position) },
             {"NORMAL",   vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, normal)},
@@ -82,6 +84,15 @@ export namespace lysa {
              const std::vector<uint32>& indices,
              const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
              const std::wstring& name = L"Mesh");
+
+        Mesh(const std::vector<Vertex>& vertices,
+                 const std::vector<uint32>& indices,
+                 const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
+                 uint32 firstIndex,
+                 uint32 vertexOffset,
+                 const std::shared_ptr<vireo::Buffer>& vertexBuffer,
+                 const std::shared_ptr<vireo::Buffer>& indexBuffer,
+                 const std::wstring &name = L"Mesh");
 
          /**
          * Returns the material for a given surface
@@ -141,9 +152,17 @@ export namespace lysa {
             return *a < *b;
         }
 
-        auto getVertexBuffer() { return vertexBuffer; }
+        const auto& getVertexBuffer() const { return vertexBuffer; }
 
-        auto getIndexBuffer() { return indexBuffer; }
+        const auto& getIndexBuffer() const { return indexBuffer; }
+
+        auto getFirstIndex() const { return firstIndex; }
+
+        auto getVertexOffset() const { return vertexOffset; }
+
+        auto& getMaterials() { return materials; }
+
+        void upload(Window* window);
 
     protected:
         AABB                localAABB;
@@ -158,25 +177,12 @@ export namespace lysa {
     private:
         friend class Scene;
         friend class MeshInstance;
-        friend class Window;
 
-        uint32                       firstIndex{0};
-        uint32                       vertexOffset{0};
+        uint32                         firstIndex{0};
+        uint32                         vertexOffset{0};
         std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
         std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
 
-        // Mesh(const std::vector<Vertex>& vertices,
-        //     const std::vector<uint32>& indices,
-        //     const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-        //     uint32 firstIndex,
-        //     uint32 vertexOffset,
-        //     std::shared_ptr<vireo::Buffer> vertexBuffer,
-        //     std::shared_ptr<vireo::Buffer> indexBuffer,
-        //     const std::wstring &name = L"Mesh");
-
-        void upload(Window* window);
-
-        auto& getMaterials() { return materials; }
     };
 }
 

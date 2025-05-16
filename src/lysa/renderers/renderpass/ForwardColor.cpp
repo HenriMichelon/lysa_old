@@ -45,8 +45,8 @@ namespace lysa {
         uint32 modelIndex{0};
         for (const auto& meshInstance : scene.getModels()) {
             const auto &mesh = meshInstance->getMesh();
-            commandList->bindVertexBuffer(mesh->getVertexBuffer());
-            commandList->bindIndexBuffer(mesh->getIndexBuffer());
+            commandList->bindVertexBuffer(mesh->getVertexBuffer(), mesh->getVertexOffset());
+            commandList->bindIndexBuffer(mesh->getIndexBuffer(), vireo::IndexType::UINT32, mesh->getFirstIndex());
             for (const auto& meshSurface : mesh->getSurfaces()) {
                 const auto pushConstants = PushConstants {
                     .modelIndex = modelIndex,

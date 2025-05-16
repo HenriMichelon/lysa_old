@@ -12,6 +12,7 @@ export import vireo;
 export import lysa.application;
 export import lysa.application_config;
 export import lysa.global;
+export import lysa.math;
 export import lysa.window;
 export import lysa.window_config;
 
