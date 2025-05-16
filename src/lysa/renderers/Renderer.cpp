@@ -8,7 +8,7 @@ module lysa.renderers.renderer;
 
 namespace lysa {
     Renderer::Renderer(
-        const RenderingConfig& config,
+        const RenderingConfiguration& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
         config{config},

@@ -458,6 +458,7 @@ export namespace lysa {
 
     private:
         friend class Window;
+        friend class Scene;
         friend class SceneData;
 
         static  unique_id                currentId;

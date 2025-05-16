@@ -45,7 +45,7 @@ export namespace lysa {
             .size = sizeof(PushConstants),
         };
 
-        SceneData(const RenderingConfig& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
+        SceneData(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
 
         void update() override;
 
@@ -73,15 +73,11 @@ export namespace lysa {
         // Scene data buffer
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
 
-        // Transforms for all the models of the scene
-        std::shared_ptr<ModelUniform[]> modelUniforms;
-        uint32 modelUniformsSize{0};
         // Data buffer for all the models of the scene
-        std::shared_ptr<vireo::Buffer> modelUniformBuffers{nullptr};
+        std::shared_ptr<vireo::Buffer> modelUniformBuffers;
 
         // Data for all the materials of the scene
         std::shared_ptr<vireo::Buffer> materialUniformBuffers;
-        uint32 materialUniformsSize{0};
 
 
     };

@@ -8,6 +8,13 @@ module lysa.scene;
 
 namespace lysa {
 
+    Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
+        config{config} {
+        models.resize(config.memoryConfig.maxModelsCount);
+        materials.resize(config.memoryConfig.maxMaterialsCount);
+        resize(extent);
+    }
+
     void Scene::resize(const vireo::Extent& extent) {
         this->extent = extent;
         if (viewportAndScissors == nullptr) {
@@ -22,6 +29,30 @@ namespace lysa {
         }
     }
 
+    bool Scene::updateModel(const std::shared_ptr<MeshInstance>& meshInstance) {
+        for (int i = lastModelIndex; i < models.size(); i++) {
+            if (models[i] == nullptr) {
+                models[i] = meshInstance;
+                modelsIndices[meshInstance->getId()] = i;
+                lastModelIndex = i + 1;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Scene::updateMaterial(const std::shared_ptr<Material>& material) {
+        for (int i = lastMaterialIndex; i < materials.size(); i++) {
+            if (materials[i] == nullptr) {
+                materials[i] = material;
+                materialsIndices[material->getId()] = i;
+                lastMaterialIndex = i + 1;
+                return true;
+            }
+        }
+        return false;
+    }
+
     void Scene::addNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
@@ -31,9 +62,15 @@ namespace lysa {
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             const auto& mesh = meshInstance->getMesh();
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
-            modelsIndices[meshInstance->getId()] = models.size();
-            models.push_back(meshInstance);
-            modelsUpdated = true;
+
+            if (!updateModel(meshInstance)) {
+                lastModelIndex = 0;
+                if (!updateModel(meshInstance)) {
+                    throw Exception{"MemoryConfiguration.maxModelsCount reached."};
+                }
+            }
+            // Force material data to be written to GPU memory
+            meshInstance->updated = config.framesInFlight;
 
             const auto pair = BufferPair{mesh->getVertexBuffer(), mesh->getIndexBuffer()};
             if (!opaqueModels.contains(pair)) {
@@ -60,9 +97,12 @@ namespace lysa {
                     materialsRefCounter[material->getId()]++;
                     continue;
                 }
-                materialsIndices[material->getId()] = materials.size();
-                materials.push_back(material);
-                materialsRefCounter[material->getId()]++;
+                if (!updateMaterial(material)) {
+                    lastMaterialIndex = 0;
+                    if (!updateMaterial(material)) {
+                        throw Exception{"MemoryConfiguration.maxMaterialsCount reached."};
+                    }
+                }
                 // Force material data to be written to GPU memory
                 material->updated = config.framesInFlight;
             }
@@ -88,36 +128,19 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            const auto it = std::ranges::find(models, meshInstance);
-            if (it != models.end()) {
-                models.erase(it);
-                // Rebuild the model index
-                modelsIndices.clear();
-                uint32_t modelIndex = 0;
-                for (const auto &model : models) {
-                    modelsIndices[model->getId()] = modelIndex;
-                    modelIndex++;
-                }
-                modelsUpdated = true;
-
-                for (const auto &material : meshInstance->getMesh()->getMaterials()) {
-                    if (materialsRefCounter.contains(material->getId())) {
-                        // Check if we need to remove the material from the scene
-                        if (--materialsRefCounter[material->getId()] == 0) {
-                            materialsRefCounter.erase(material->getId());
-                            // Try to remove the associated textures
-                            //...
-                            // Remove the material from the scene
-                            materials.remove(material);
-                            // Rebuild the material index
-                            materialsIndices.clear();
-                            uint32_t materialIndex = 0;
-                            for (const auto &mat : materials) {
-                                materialsIndices[mat->getId()] = materialIndex;
-                                materialIndex++;
-                            }
-                            materialsUpdated = true;
-                        }
+            // Remove the model from the scene
+            models[modelsIndices[meshInstance->getId()]].reset();
+            modelsIndices.erase(meshInstance->getId());
+            // Check if we need to remove the material from the scene
+            for (const auto &material : meshInstance->getMesh()->getMaterials()) {
+                if (materialsRefCounter.contains(material->getId())) {
+                    if (--materialsRefCounter[material->getId()] == 0) {
+                        materialsRefCounter.erase(material->getId());
+                        // Try to remove the associated textures
+                        //...
+                        // Remove the material from the scene
+                        materials[materialsIndices[material->getId()]].reset();
+                        materialsIndices.erase(material->getId());
                     }
                 }
             }

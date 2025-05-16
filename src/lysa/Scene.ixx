@@ -58,8 +58,6 @@ export namespace lysa {
         //! Returns the current scene camera
         auto getCurrentCamera() const { return currentCamera; }
 
-        auto isModelsUpdated() const { return modelsUpdated; }
-
         auto isCameraUpdated() const { return cameraUpdated; }
 
         auto getViewport() const { return viewport; }
@@ -69,7 +67,7 @@ export namespace lysa {
         virtual ~Scene() = default;
 
     protected:
-        const RenderingConfig& config;
+        const RenderingConfiguration& config;
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
@@ -77,24 +75,22 @@ export namespace lysa {
         bool cameraUpdated{false};
 
         // All the models of the scene
-        std::list<std::shared_ptr<MeshInstance>> models{};
+        std::vector<std::shared_ptr<MeshInstance>> models{};
+        uint32 lastModelIndex{0};
         // Indices of all models in the buffers
         std::unordered_map<unique_id, uint32> modelsIndices{};
         // All models containing opaque surfaces grouped by buffers
         std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
-        // Models have been updated
-        bool modelsUpdated{false};
 
         // All materials used in the scene, used to update the buffer in GPU memory
-        std::list<std::shared_ptr<Material>> materials;
+        std::vector<std::shared_ptr<Material>> materials;
+        uint32 lastMaterialIndex{0};
         // Material reference counter, used to know of the material, can be removed from the scene
         std::unordered_map<unique_id, uint32> materialsRefCounter;
         // Indices of all materials & texture in the buffers
         std::unordered_map<unique_id, uint32> materialsIndices{};
-        // Materials have been updated
-        bool materialsUpdated{true};
 
-        Scene(const RenderingConfig& config, const vireo::Extent &extent) : config{config} { resize(extent); }
+        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
 
     private:
         // Rendering window extent
@@ -106,6 +102,10 @@ export namespace lysa {
 
         friend class Window;
 
+        bool updateModel(const std::shared_ptr<MeshInstance>& meshInstance);
+
+        bool updateMaterial(const std::shared_ptr<Material>& material);
+
         void resize(const vireo::Extent &extent);
 
         //! Adds a model to the scene
@@ -116,10 +116,6 @@ export namespace lysa {
 
         //! Changes the active camera, disabling the previous camera
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
-
-        void resetCameraUpdated() { cameraUpdated = false; }
-
-        void resetModelsUpdated() { modelsUpdated = false; }
 
     };
 

@@ -10,7 +10,7 @@ import lysa.global;
 
 namespace lysa {
     PostProcessing::PostProcessing(
-        const RenderingConfig& config,
+        const RenderingConfiguration& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers,
         const std::wstring& fragShaderName,

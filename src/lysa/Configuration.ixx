@@ -11,12 +11,12 @@ import lysa.global;
 
 export namespace lysa {
 
-    struct MemoryConfig {
-        uint32 maxModelsCount{100000};
-        uint32 maxMaterialsCount{10000};
+    struct MemoryConfiguration {
+        uint32 maxModelsCount{10000};
+        uint32 maxMaterialsCount{1000};
     };
 
-    struct RenderingConfig {
+    struct RenderingConfiguration {
         //! Graphic API
         vireo::Backend     backend{vireo::Backend::VULKAN};
         //! Swap chain image format
@@ -30,7 +30,7 @@ export namespace lysa {
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
         //! VRAM buffers max sizes
-        MemoryConfig       memoryConfig;
+        MemoryConfiguration       memoryConfig;
     };
 
     /**
@@ -41,7 +41,7 @@ export namespace lysa {
         //! Startup Scene
         std::shared_ptr<Node> rootNode;
         //! Renderers configuration
-        RenderingConfig       renderingConfig;
+        RenderingConfiguration       renderingConfig;
         //! Number of nodes updates per frame for asynchronous scene updates
         uint32                maxAsyncNodesUpdatedPerFrame{20};
     };

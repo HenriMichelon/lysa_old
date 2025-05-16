@@ -6,11 +6,11 @@
 */
 #include "scene_data.inc.slang"
 
-ConstantBuffer<Materials> materials : register(b2, space0);
+StructuredBuffer<Material> materials : register(b2, space0);
 
 [[push_constant]]
 PushConstants pushConstants : register(b0, space1);
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    return materials.materials[pushConstants.materialIndex].albedoColor;
+    return materials[pushConstants.materialIndex].albedoColor;
 }

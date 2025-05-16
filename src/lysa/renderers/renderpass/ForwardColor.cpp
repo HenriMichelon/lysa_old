@@ -10,7 +10,7 @@ import lysa.resources.mesh;
 
 namespace lysa {
     ForwardColor::ForwardColor(
-        const RenderingConfig& config,
+        const RenderingConfiguration& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers):
         Renderpass{config, vireo, samplers, L"Forward Color"} {

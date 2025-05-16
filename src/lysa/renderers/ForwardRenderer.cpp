@@ -11,7 +11,7 @@ import lysa.global;
 
 namespace lysa {
     ForwardRenderer::ForwardRenderer(
-        const RenderingConfig& config,
+        const RenderingConfiguration& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
         Renderer{config, vireo, name},

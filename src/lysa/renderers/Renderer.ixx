@@ -24,7 +24,7 @@ export namespace lysa {
         };
 
         Renderer(
-            const RenderingConfig& config,
+            const RenderingConfiguration& config,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
@@ -51,7 +51,7 @@ export namespace lysa {
         virtual ~Renderer() = default;
 
     protected:
-        const RenderingConfig&        config;
+        const RenderingConfiguration&        config;
         const std::wstring            name;
         const Samplers                samplers;
         std::shared_ptr<vireo::Vireo> vireo;
