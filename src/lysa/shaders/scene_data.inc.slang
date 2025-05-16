@@ -9,7 +9,7 @@ struct VertexInput {
     float3 normal   : NORMAL;
     float2 uv       : UV;
     float3 tangent  : TANGENT;
-    uint  instanceID: SV_InstanceID;
+    uint  instanceID: SV_DrawIndex;
 };
 
 struct VertexOutput {

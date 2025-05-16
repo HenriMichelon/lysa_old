@@ -11,7 +11,7 @@ import lysa.nodes.node;
 namespace lysa {
 
     SceneData::SceneData(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent):
-        Scene{config, extent},
+        Scene{config,vireo, extent},
         vireo{vireo} {
         if (globalDescriptorLayout == nullptr) {
             globalDescriptorLayout = vireo->createDescriptorLayout(L"Scene");
@@ -21,7 +21,7 @@ namespace lysa {
             globalDescriptorLayout->build();
 
             perBufferPairDescriptorLayout = vireo->createDescriptorLayout(L"Scene per buffer");
-            perBufferPairDescriptorLayout->add(BINDING_INSTANCESDATA, vireo::DescriptorType::STORAGE);
+            perBufferPairDescriptorLayout->add(BINDING_INSTANCES_DATA, vireo::DescriptorType::STORAGE);
             perBufferPairDescriptorLayout->build();
         }
 
@@ -67,12 +67,12 @@ namespace lysa {
                 buffer = vireo->createBuffer(
                     vireo::BufferType::STORAGE,
                     sizeof(InstanceData) * config.memoryConfig.maxMeshSurfacePerBufferCount, 1,
-                    L"Per buffer instances Data");
+                    L"Per buffer instances data");
                 buffer->map();
                 const auto set = vireo->createDescriptorSet(
                      perBufferPairDescriptorLayout,
                      L"Scene per buffer");
-                set->update(BINDING_INSTANCESDATA, buffer);
+                set->update(BINDING_INSTANCES_DATA, buffer);
                 perBufferInstancesDataBuffer[bufferPair] = buffer;
                 perBufferDescriptorSets[bufferPair] = set;
                 perBufferInstancesData[bufferPair] = data;
@@ -96,7 +96,6 @@ namespace lysa {
                 }
                 surfaceIndex += meshInstance->getMesh()->getSurfaces().size();
             }
-
         }
 
         // Update in GPU memory only the materials modified since the last frame
@@ -119,26 +118,21 @@ namespace lysa {
     void SceneData::draw(
         const std::shared_ptr<vireo::CommandList>& commandList,
         const std::shared_ptr<vireo::Pipeline>& pipeline,
-        const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const {
+        const std::unordered_map<BufferPair, std::vector<vireo::DrawIndexedIndirectCommand>>& commandsByBuffer,
+        const std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>>& commandsBufferByBuffer) const {
         commandList->setDescriptors({globalDescriptorSet});
         commandList->bindDescriptor(pipeline, globalDescriptorSet, SET_GLOBAL);
-        for (const auto& [bufferPair, models] : modelsByBuffer) {
+        for (const auto& [bufferPair, commands] : commandsByBuffer) {
             const auto set = perBufferDescriptorSets.at(bufferPair);
             commandList->setDescriptors({set});
             commandList->bindDescriptor(pipeline, set, SET_PERBUFFER);
             commandList->bindVertexBuffer(bufferPair.vertexBuffer);
             commandList->bindIndexBuffer(bufferPair.indexBuffer);
-            for (const auto& meshInstance : modelsByBuffer.at(bufferPair)) {
-                const auto& mesh = meshInstance->getMesh();
-                for (const auto& meshSurface : mesh->getSurfaces()) {
-                    commandList->drawIndexed(
-                        meshSurface->indexCount,
-                        1,
-                        mesh->getFirstIndex() + meshSurface->firstIndex,
-                        mesh->getVertexOffset(),
-                        0);
-                }
-            }
+            commandList->drawIndexedIndirect(
+                commandsBufferByBuffer.at(bufferPair),
+                0,
+                commands.size(),
+                sizeof(vireo::DrawIndexedIndirectCommand));
         }
     }
 

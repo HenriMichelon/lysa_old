@@ -41,7 +41,11 @@ namespace lysa {
         commandList->setViewport(scene.getViewport());
         commandList->setScissors(scene.getScissors());
         commandList->bindPipeline(pipeline);
-        scene.draw(commandList, pipeline, scene.getOpaqueModels());
+        scene.draw(
+            commandList,
+            pipeline,
+            scene.getOpaqueDrawCommands(),
+            scene.getOpaqueDrawCommandsBuffer());
         commandList->endRendering();
     }
 }

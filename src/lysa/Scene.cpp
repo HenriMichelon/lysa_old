@@ -8,11 +8,12 @@ module lysa.scene;
 
 namespace lysa {
 
-    Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
-        config{config} {
-        // models.resize(config.memoryConfig.maxModelsCount);
+    Scene::Scene(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent) :
+        config{config}, vireo{vireo} {
         materials.resize(config.memoryConfig.maxMaterialCount);
         resize(extent);
+        commandAllocator = vireo->createCommandAllocator(vireo::CommandType::TRANSFER);
+        transferQueue = vireo->createSubmitQueue(vireo::CommandType::TRANSFER);
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -70,20 +71,30 @@ namespace lysa {
                 opaqueModels[pair] = {};
             }
             opaqueModels[pair].push_back(meshInstance);
-            //
-            // for (const auto& meshSurface : mesh->getSurfaces()) {
-            //     const auto materialPair = BufferMaterialPair{pair, meshSurface->material->getId()};
-            //     if (!opaqueDrawCommands.contains(materialPair)) {
-            //         opaqueDrawCommands[materialPair] = {};
-            //     }
-            //     opaqueDrawCommands[materialPair].push_back(vireo::DrawIndexedIndirectCommand{
-            //         .indexCount = meshSurface->indexCount,
-            //         .instanceCount = 1,
-            //         .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
-            //         .vertexOffset = mesh->getVertexOffset(),
-            //         .firstInstance = 0,
-            //     });
-            // }
+
+            for (const auto& meshSurface : mesh->getSurfaces()) {
+                if (!opaqueDrawCommands.contains(pair)) {
+                    opaqueDrawCommands[pair] = {};
+                    opaqueDrawCommandsBuffer[pair] = vireo->createBuffer(
+                        vireo::BufferType::INDIRECT,
+                        sizeof(vireo::DrawIndexedIndirectCommand) * config.memoryConfig.maxMeshSurfacePerBufferCount, 1,
+                        L"Per buffer draw commands");
+                }
+                auto& commands = opaqueDrawCommands[pair];
+                commands.push_back(vireo::DrawIndexedIndirectCommand{
+                    .indexCount = meshSurface->indexCount,
+                    .instanceCount = 1,
+                    .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
+                    .vertexOffset = mesh->getVertexOffset(),
+                    .firstInstance = static_cast<uint32_t>(commands.size()),
+                });
+            }
+            const auto cmdList = commandAllocator->createCommandList();
+            cmdList->begin();
+            cmdList->upload(opaqueDrawCommandsBuffer[pair], opaqueDrawCommands[pair].data());
+            cmdList->end();
+            transferQueue->submit({cmdList});
+            transferQueue->waitIdle();
 
             for (const auto &material :mesh->getMaterials()) {
                 if (materialsRefCounter.contains(material->getId())) {

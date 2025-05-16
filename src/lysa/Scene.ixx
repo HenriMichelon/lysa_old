@@ -42,6 +42,10 @@ export namespace lysa {
     public:
         const auto& getOpaqueModels() const { return opaqueModels; }
 
+        const auto& getOpaqueDrawCommands() const { return opaqueDrawCommands; }
+
+        const auto& getOpaqueDrawCommandsBuffer() const { return opaqueDrawCommandsBuffer; }
+
         const auto& getMaterialIndex(const unique_id materialId) const {
             return materialsIndices.at(materialId);
         }
@@ -69,6 +73,8 @@ export namespace lysa {
 
         // All models containing opaque surfaces grouped by buffers
         std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
+        std::unordered_map<BufferPair, std::vector<vireo::DrawIndexedIndirectCommand>> opaqueDrawCommands{};
+        std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>> opaqueDrawCommandsBuffer;
 
         // All materials used in the scene, used to update the buffer in GPU memory
         std::vector<std::shared_ptr<Material>> materials;
@@ -79,7 +85,7 @@ export namespace lysa {
         // Indices of all materials in the buffers
         std::unordered_map<unique_id, uint32> materialsIndices{};
 
-        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
+        Scene(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
 
     private:
         // Rendering window extent
@@ -88,6 +94,9 @@ export namespace lysa {
         vireo::Viewport viewport;
         vireo::Rect scissors;
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
+        const std::shared_ptr<vireo::Vireo>& vireo;
+        std::shared_ptr<vireo::SubmitQueue> transferQueue;
+        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
 
         friend class Window;
 

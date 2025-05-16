@@ -46,7 +46,8 @@ export namespace lysa {
         void draw(
             const std::shared_ptr<vireo::CommandList>& commandList,
             const std::shared_ptr<vireo::Pipeline>& pipeline,
-            const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const;
+            const std::unordered_map<BufferPair, std::vector<vireo::DrawIndexedIndirectCommand>>& commandsByBuffer,
+            const std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>>& commandsBufferByBuffer) const;
 
         auto getDescriptorSet() const { return globalDescriptorSet; }
 
@@ -63,7 +64,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> materialsStorageBuffer;
 
         static constexpr vireo::DescriptorIndex SET_PERBUFFER{1};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCESDATA{0};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCES_DATA{0};
         std::unordered_map<BufferPair, std::shared_ptr<vireo::DescriptorSet>> perBufferDescriptorSets;
         std::unordered_map<BufferPair, std::vector<InstanceData>> perBufferInstancesData;
         std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>> perBufferInstancesDataBuffer;
