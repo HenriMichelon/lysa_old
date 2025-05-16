@@ -63,14 +63,15 @@ export namespace lysa {
 
         // Global shader data for the scene
         SceneUniform sceneUniform{};
+        // Scene data buffer
+        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+
         // Model shader data for all the models of the scene, one array all the models
         std::shared_ptr<ModelUniform[]> modelUniforms;
         uint32 modelUniformsSize{0};
-
-        // Scene data buffer
-        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         // Data buffer for all the models of the scene, one buffer for all the models
         std::shared_ptr<vireo::Buffer> modelUniformBuffers{nullptr};
+
         // Data for all the materials of the scene, one buffer for all the materials
         std::shared_ptr<vireo::Buffer> materialUniformBuffers;
         uint32 materialUniformsSize{0};

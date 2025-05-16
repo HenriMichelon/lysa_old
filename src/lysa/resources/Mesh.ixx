@@ -42,7 +42,7 @@ export namespace lysa {
      */
     struct MeshSurface {
         //! Index of the first vertex of the surface
-        uint32                    firstVertexIndex{0};
+        uint32                    firstIndex{0};
         //! Number of vertices
         uint32                    indexCount{0};
         //! Material
@@ -51,7 +51,7 @@ export namespace lysa {
         MeshSurface(uint32 firstIndex, uint32 count);
 
         inline bool operator==(const MeshSurface &other) const {
-            return firstVertexIndex == other.firstVertexIndex && indexCount == other.indexCount && material == other.material;
+            return firstIndex == other.firstIndex && indexCount == other.indexCount && material == other.material;
         }
 
         friend inline bool operator==(const std::shared_ptr<MeshSurface>& a, const std::shared_ptr<MeshSurface>& b) {
@@ -89,7 +89,7 @@ export namespace lysa {
                  const std::vector<uint32>& indices,
                  const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
                  uint32 firstIndex,
-                 uint32 vertexOffset,
+                 uint32 firstVertex,
                  const std::shared_ptr<vireo::Buffer>& vertexBuffer,
                  const std::shared_ptr<vireo::Buffer>& indexBuffer,
                  const std::wstring &name = L"Mesh");
@@ -158,7 +158,7 @@ export namespace lysa {
 
         auto getFirstIndex() const { return firstIndex; }
 
-        auto getVertexOffset() const { return vertexOffset; }
+        auto getFirstVertex() const { return firstVertex; }
 
         auto& getMaterials() { return materials; }
 
@@ -179,7 +179,7 @@ export namespace lysa {
         friend class MeshInstance;
 
         uint32                         firstIndex{0};
-        uint32                         vertexOffset{0};
+        uint32                         firstVertex{0};
         std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
         std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
 

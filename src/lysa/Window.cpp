@@ -16,7 +16,7 @@ namespace lysa {
         windowHandle{windowHandle},
         config{config},
         vireo{vireo::Vireo::create(config.backend)},
-        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Present Queue")},
+        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
         swapChain{vireo->createSwapChain(
             config.renderingFormat,
             graphicQueue,

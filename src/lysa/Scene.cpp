@@ -29,15 +29,24 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            assert([&]{return !meshInstance->getMesh()->getMaterials().empty(); }, "Models without materials are not supported");
+            const auto& mesh = meshInstance->getMesh();
+            assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
+            modelsIndices[meshInstance->getId()] = models.size();
             models.push_back(meshInstance);
             modelsUpdated = true;
-            for (const auto &material : meshInstance->getMesh()->getMaterials()) {
+
+            const auto pair = BufferPair{mesh->getVertexBuffer(), mesh->getIndexBuffer()};
+            if (!opaqueModels.contains(pair)) {
+                opaqueModels[pair] = {};
+            }
+            opaqueModels[pair].push_back(meshInstance);
+
+            for (const auto &material :mesh->getMaterials()) {
                 if (materialsRefCounter.contains(material->getId())) {
                     materialsRefCounter[material->getId()]++;
                     continue;
                 }
-                materialsIndices[material->getId()] = static_cast<int32_t>(materials.size());
+                materialsIndices[material->getId()] = materials.size();
                 materials.push_back(material);
                 materialsRefCounter[material->getId()]++;
                 // Force material data to be written to GPU memory
@@ -68,7 +77,15 @@ namespace lysa {
             const auto it = std::ranges::find(models, meshInstance);
             if (it != models.end()) {
                 models.erase(it);
+                // Rebuild the model index
+                modelsIndices.clear();
+                uint32_t modelIndex = 0;
+                for (const auto &model : models) {
+                    modelsIndices[model->getId()] = modelIndex;
+                    modelIndex++;
+                }
                 modelsUpdated = true;
+
                 for (const auto &material : meshInstance->getMesh()->getMaterials()) {
                     if (materialsRefCounter.contains(material->getId())) {
                         // Check if we need to remove the material from the scene
@@ -82,8 +99,8 @@ namespace lysa {
                             materialsIndices.clear();
                             uint32_t materialIndex = 0;
                             for (const auto &mat : materials) {
-                                materialsIndices[mat->getId()] = static_cast<int32_t>(materialIndex);
-                                materialIndex += 1;
+                                materialsIndices[mat->getId()] = materialIndex;
+                                materialIndex++;
                             }
                             materialsUpdated = true;
                         }

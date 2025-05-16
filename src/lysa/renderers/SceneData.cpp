@@ -14,7 +14,7 @@ namespace lysa {
         Scene{framesInFlight, extent},
         vireo{vireo} {
         if (descriptorLayout == nullptr) {
-            descriptorLayout = vireo->createDescriptorLayout();
+            descriptorLayout = vireo->createDescriptorLayout(L"Scene");
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
             descriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::UNIFORM);
             descriptorLayout->add(BINDING_MATERIALS, vireo::DescriptorType::UNIFORM);

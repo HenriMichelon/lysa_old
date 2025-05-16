@@ -12,7 +12,7 @@ import lysa.window;
 namespace lysa {
 
     MeshSurface::MeshSurface(const uint32 firstIndex, const uint32 count):
-        firstVertexIndex{firstIndex},
+        firstIndex{firstIndex},
         indexCount{count},
         material{nullptr} {
     }
@@ -32,7 +32,7 @@ namespace lysa {
             const std::vector<uint32>& indices,
             const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
             const uint32 firstIndex,
-            const uint32 vertexOffset,
+            const uint32 firstVertex,
             const std::shared_ptr<vireo::Buffer>& vertexBuffer,
             const std::shared_ptr<vireo::Buffer>& indexBuffer,
             const std::wstring &name):
@@ -41,7 +41,7 @@ namespace lysa {
         indices{indices},
         surfaces{surfaces},
         firstIndex{firstIndex},
-        vertexOffset{vertexOffset},
+        firstVertex{firstVertex},
         vertexBuffer{vertexBuffer},
         indexBuffer{indexBuffer} {
         buildAABB();

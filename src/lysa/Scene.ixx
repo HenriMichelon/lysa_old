@@ -15,14 +15,43 @@ import lysa.nodes.viewport;
 import lysa.resources.material;
 
 export namespace lysa {
+    struct BufferPair {
+        std::shared_ptr<vireo::Buffer> vertexBuffer;
+        std::shared_ptr<vireo::Buffer> indexBuffer;
+
+        friend bool operator==(const BufferPair& first, const BufferPair& second) {
+            return first.vertexBuffer == second.vertexBuffer && first.indexBuffer == second.indexBuffer;
+        }
+    };
+}
+
+
+template <>
+struct std::hash<lysa::BufferPair> {
+    size_t operator()(const lysa::BufferPair& pair) const noexcept {
+        const size_t h1 = std::hash<std::shared_ptr<vireo::Buffer>>{}(pair.vertexBuffer);
+        const size_t h2 = std::hash<std::shared_ptr<vireo::Buffer>>{}(pair.indexBuffer);
+        size_t seed = h1;
+        seed ^= h2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
+
+export namespace lysa {
 
     class Scene {
     public:
         //! Returns the list of all the models of the scene
         const auto& getModels() const { return models; }
 
+        const auto& getOpaqueModels() const { return opaqueModels; }
+
         const auto& getMaterialIndex(const unique_id materialId) const {
             return materialsIndices.at(materialId);
+        }
+
+        const auto& getModelIndex(const unique_id modelId) const {
+            return modelsIndices.at(modelId);
         }
 
         virtual void update() = 0;
@@ -50,8 +79,10 @@ export namespace lysa {
 
         // All the models of the scene
         std::list<std::shared_ptr<MeshInstance>> models{};
-        // All models containing opaque surfaces
-        //std::map<unique_id, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
+        // Indices of all models in the buffers
+        std::unordered_map<unique_id, uint32> modelsIndices{};
+        // All models containing opaque surfaces grouped by buffers
+        std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
         // Models have been updated
         bool modelsUpdated{false};
 

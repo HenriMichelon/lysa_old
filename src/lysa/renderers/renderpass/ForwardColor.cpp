@@ -42,25 +42,25 @@ namespace lysa {
         commandList->setDescriptors({scene.getDescriptorSet()});
         commandList->bindPipeline(pipeline);
         commandList->bindDescriptors(pipeline, {scene.getDescriptorSet()});
-        uint32 modelIndex{0};
-        for (const auto& meshInstance : scene.getModels()) {
-            const auto &mesh = meshInstance->getMesh();
-            commandList->bindVertexBuffer(mesh->getVertexBuffer(), mesh->getVertexOffset());
-            commandList->bindIndexBuffer(mesh->getIndexBuffer(), vireo::IndexType::UINT32, mesh->getFirstIndex());
-            for (const auto& meshSurface : mesh->getSurfaces()) {
-                const auto pushConstants = PushConstants {
-                    .modelIndex = modelIndex,
-                    .materialIndex = scene.getMaterialIndex(meshSurface->material->getId()),
-                };
-                commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
-                commandList->drawIndexed(
-                    meshSurface->indexCount,
-                    1,
-                    meshSurface->firstVertexIndex,
-                    0,
-                    0);
+        for (const auto& bufferPair : std::views::keys(scene.getOpaqueModels())) {
+            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
+            commandList->bindIndexBuffer(bufferPair.indexBuffer);
+            for (const auto& meshInstance : scene.getOpaqueModels().at(bufferPair)) {
+                const auto& mesh = meshInstance->getMesh();
+                for (const auto& meshSurface : mesh->getSurfaces()) {
+                    const auto pushConstants = PushConstants {
+                        .modelIndex = scene.getModelIndex(meshInstance->getId()),
+                        .materialIndex = scene.getMaterialIndex(meshSurface->material->getId()),
+                    };
+                    commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
+                    commandList->drawIndexed(
+                        meshSurface->indexCount,
+                        1,
+                        mesh->getFirstIndex() + meshSurface->firstIndex,
+                        mesh->getFirstVertex(),
+                        0);
+                }
             }
-            modelIndex++;
         }
         commandList->endRendering();
     }

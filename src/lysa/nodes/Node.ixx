@@ -74,6 +74,11 @@ export namespace lysa {
         Node(const std::wstring &name = TypeNames[NODE], Type type = NODE);
 
         /**
+          * Returns the unique id of the node
+          */
+        auto getId() const { return id; }
+
+        /**
          * Called when a node is ready to initialize, before being added to the scene
          */
         virtual void onReady() {}
