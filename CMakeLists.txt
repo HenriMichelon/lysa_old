@@ -120,7 +120,7 @@ target_sources(${LYSA_TARGET}
     FILES
         ${ENGINE_SRC_DIR}/AABB.ixx
         ${ENGINE_SRC_DIR}/Application.ixx
-        ${ENGINE_SRC_DIR}/ApplicationConfig.ixx
+        ${ENGINE_SRC_DIR}/Configuration.ixx
         ${ENGINE_SRC_DIR}/Constants.ixx
         ${ENGINE_SRC_DIR}/Enums.ixx
         ${ENGINE_SRC_DIR}/Global.ixx
@@ -129,7 +129,6 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Window.ixx
-        ${ENGINE_SRC_DIR}/WindowConfig.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
 
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx

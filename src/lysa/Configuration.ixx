@@ -4,7 +4,7 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-export module lysa.window_config;
+export module lysa.configuration;
 
 import vireo;
 import lysa.global;
@@ -36,7 +36,7 @@ export namespace lysa {
     /**
      * Rendering window configuration
      */
-    struct WindowConfig {
+    struct WindowConfiguration {
         friend class Node;
         //! Startup Scene
         std::shared_ptr<Node> rootNode;

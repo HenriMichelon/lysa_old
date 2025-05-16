@@ -8,7 +8,7 @@ export module lysa.scene;
 
 import vireo;
 import lysa.global;
-import lysa.window_config;
+import lysa.configuration;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;

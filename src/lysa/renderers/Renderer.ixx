@@ -9,7 +9,7 @@ export module lysa.renderers.renderer;
 import std;
 import vireo;
 import lysa.global;
-import lysa.window_config;
+import lysa.configuration;
 import lysa.renderers.samplers;
 import lysa.renderers.scene_data;
 import lysa.renderers.renderpass.post_processing;

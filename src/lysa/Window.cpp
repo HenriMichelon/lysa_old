@@ -12,7 +12,7 @@ import lysa.renderers.forward_renderer;
 
 namespace lysa {
 
-    Window::Window(WindowConfig& config, void* windowHandle):
+    Window::Window(WindowConfiguration& config, void* windowHandle):
         windowHandle{windowHandle},
         config{config},
         vireo{vireo::Vireo::create(config.renderingConfig.backend)},

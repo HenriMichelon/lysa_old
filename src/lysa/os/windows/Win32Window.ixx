@@ -9,13 +9,13 @@ export module lysa.os.win32.surface;
 
 import std;
 import lysa.window;
-import lysa.window_config;
+import lysa.configuration;
 
 export namespace lysa {
 
     class Win32Window : public Window {
     public:
-        Win32Window(WindowConfig&, void* windowHandle);
+        Win32Window(WindowConfiguration&, void* windowHandle);
     };
 
 }

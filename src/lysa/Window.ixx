@@ -8,7 +8,7 @@ export module lysa.window;
 
 import vireo;
 import lysa.global;
-import lysa.window_config;
+import lysa.configuration;
 import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
@@ -23,7 +23,7 @@ export namespace lysa {
         /**
         * Creates a rendering surface
         */
-        Window(WindowConfig& config, void* windowHandle);
+        Window(WindowConfiguration& config, void* windowHandle);
 
         void resize() const;
 
@@ -119,7 +119,7 @@ export namespace lysa {
         // Opaque window handle for presenting
         void*                 windowHandle;
         // Surface configuration
-        WindowConfig&         config;
+        WindowConfiguration&         config;
         // Node tree
         std::shared_ptr<Node> rootNode;
         std::mutex            rootNodeMutex;

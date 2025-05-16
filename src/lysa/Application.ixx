@@ -7,35 +7,19 @@
 export module lysa.application;
 
 import lysa.global;
-import lysa.application_config;
 import lysa.window;
-import lysa.window_config;
+import lysa.configuration;
 
 export namespace lysa {
 
     class Application {
     public:
         /**
-         * Creates a Lysa application
-         * @param applicationConfig global application configuration
-         */
-        Application(ApplicationConfig& applicationConfig);
-
-        /**
          * Creates a rendering surface for a window
          * @param surfaceConfig The configuration parameter for this surface
          * @param windowHandle The opaque, os-specific, window handle
          */
-        std::shared_ptr<Window> createSurface(WindowConfig& surfaceConfig, void* windowHandle) const;
-
-        /**
-         * Return the global application configuration
-         */
-        auto getConfig() const { return applicationConfig; }
-
-    private:
-        // Global application configuration
-        ApplicationConfig& applicationConfig;
+        std::shared_ptr<Window> createWindow(WindowConfiguration& surfaceConfig, void* windowHandle) const;
     };
 
 };

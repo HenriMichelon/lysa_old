@@ -9,7 +9,7 @@ export module lysa.renderers.scene_data;
 import vireo;
 import lysa.global;
 import lysa.scene;
-import lysa.window_config;
+import lysa.configuration;
 import lysa.nodes.mesh_instance;
 import lysa.resources.material;
 

@@ -8,7 +8,7 @@ export module lysa.renderers.forward_renderer;
 
 import std;
 import vireo;
-import lysa.window_config;
+import lysa.configuration;
 import lysa.renderers.renderer;
 import lysa.renderers.scene_data;
 import lysa.renderers.renderpass.forward_color;

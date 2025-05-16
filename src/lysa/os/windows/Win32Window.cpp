@@ -9,7 +9,7 @@ module lysa.os.win32.surface;
 
 namespace lysa {
 
-    Win32Window::Win32Window(WindowConfig& surfaceConfig, void* windowHandle) :
+    Win32Window::Win32Window(WindowConfiguration& surfaceConfig, void* windowHandle) :
         Window{surfaceConfig, windowHandle} {
     }
 

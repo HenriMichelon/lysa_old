@@ -12,11 +12,7 @@ import lysa.os.win32.surface;
 
 namespace lysa {
 
-    Application::Application(ApplicationConfig& applicationConfig):
-        applicationConfig{applicationConfig} {
-    }
-
-    std::shared_ptr<Window> Application::createSurface(WindowConfig& surfaceConfig, void* windowHandle) const {
+    std::shared_ptr<Window> Application::createWindow(WindowConfiguration& surfaceConfig, void* windowHandle) const {
 #ifdef _WIN32
         return std::make_shared<Win32Window>(surfaceConfig, windowHandle);
 #endif
