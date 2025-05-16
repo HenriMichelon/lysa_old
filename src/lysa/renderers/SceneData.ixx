@@ -9,6 +9,7 @@ export module lysa.renderers.scene_data;
 import vireo;
 import lysa.global;
 import lysa.scene;
+import lysa.window_config;
 import lysa.nodes.mesh_instance;
 import lysa.resources.material;
 
@@ -44,14 +45,14 @@ export namespace lysa {
             .size = sizeof(PushConstants),
         };
 
-        SceneData(const std::shared_ptr<vireo::Vireo>& vireo, uint32 framesInFlight, const vireo::Extent &extent);
+        SceneData(const RenderingConfig& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
 
         void update() override;
 
         void draw(
             const std::shared_ptr<vireo::CommandList>& commandList,
             const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
-            std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>>& drawCommands) const;
+            const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const;
 
         static auto& getDescriptorLayout() { return descriptorLayout; }
 
@@ -72,13 +73,13 @@ export namespace lysa {
         // Scene data buffer
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
 
-        // Model shader data for all the models of the scene, one array all the models
+        // Transforms for all the models of the scene
         std::shared_ptr<ModelUniform[]> modelUniforms;
         uint32 modelUniformsSize{0};
-        // Data buffer for all the models of the scene, one buffer for all the models
+        // Data buffer for all the models of the scene
         std::shared_ptr<vireo::Buffer> modelUniformBuffers{nullptr};
 
-        // Data for all the materials of the scene, one buffer for all the materials
+        // Data for all the materials of the scene
         std::shared_ptr<vireo::Buffer> materialUniformBuffers;
         uint32 materialUniformsSize{0};
 

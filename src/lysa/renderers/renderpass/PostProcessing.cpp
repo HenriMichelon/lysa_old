@@ -10,14 +10,14 @@ import lysa.global;
 
 namespace lysa {
     PostProcessing::PostProcessing(
-        const WindowConfig& surfaceConfig,
+        const RenderingConfig& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers,
         const std::wstring& fragShaderName,
         void* data,
         const uint32 dataSize,
         const std::wstring& name):
-        Renderpass{surfaceConfig, vireo, samplers, name},
+        Renderpass{config, vireo, samplers, name},
         fragShaderName{fragShaderName},
         data{data},
         descriptorLayout{vireo->createDescriptorLayout(name)} {
@@ -32,7 +32,7 @@ namespace lysa {
         }
         descriptorLayout->build();
 
-        pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
+        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = vireo->createPipelineResources({
             descriptorLayout,
             samplers.getDescriptorLayout()},
@@ -42,7 +42,7 @@ namespace lysa {
         pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
         pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
 
-        framesData.resize(surfaceConfig.framesInFlight);
+        framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.paramsUniform = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
@@ -93,11 +93,11 @@ namespace lysa {
     void PostProcessing::resize(const vireo::Extent& extent) {
         for (auto& frame : framesData) {
             frame.colorAttachment = vireo->createRenderTarget(
-                surfaceConfig.renderingFormat,
+                config.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
     {},
-                surfaceConfig.msaa,
+                config.msaa,
                 name);
             frame.params.imageSize.x = extent.width;
             frame.params.imageSize.y = extent.height;

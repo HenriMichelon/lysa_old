@@ -15,21 +15,21 @@ namespace lysa {
     Window::Window(WindowConfig& config, void* windowHandle):
         windowHandle{windowHandle},
         config{config},
-        vireo{vireo::Vireo::create(config.backend)},
+        vireo{vireo::Vireo::create(config.renderingConfig.backend)},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
         swapChain{vireo->createSwapChain(
-            config.renderingFormat,
+            config.renderingConfig.renderingFormat,
             graphicQueue,
             windowHandle,
-            config.presentMode,
-            config.framesInFlight)} {
-        assert([&]{return config.framesInFlight > 0;}, "Must have at least 1 frame in flight");
-        framesData.resize(config.framesInFlight);
+            config.renderingConfig.presentMode,
+            config.renderingConfig.framesInFlight)} {
+        assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
+        framesData.resize(config.renderingConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<SceneData>(vireo, config.framesInFlight, swapChain->getExtent());
+            frame.scene = std::make_shared<SceneData>(config.renderingConfig, vireo, swapChain->getExtent());
         }
-        renderer = std::make_unique<ForwardRenderer>(config, vireo, L"Main Renderer"); // Must be instanciated after SceneData for the layout
+        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, vireo, L"Main Renderer"); // Must be instanciated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
     }

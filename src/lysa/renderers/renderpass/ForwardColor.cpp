@@ -10,11 +10,11 @@ import lysa.resources.mesh;
 
 namespace lysa {
     ForwardColor::ForwardColor(
-        const WindowConfig& surfaceConfig,
+        const RenderingConfig& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers):
-        Renderpass{surfaceConfig, vireo, samplers, L"Forward Color"} {
-        pipelineConfig.colorRenderFormats.push_back(surfaceConfig.renderingFormat);
+        Renderpass{config, vireo, samplers, L"Forward Color"} {
+        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = vireo->createPipelineResources(
             {SceneData::getDescriptorLayout()},
             SceneData::pushConstantsDesc);
@@ -23,9 +23,9 @@ namespace lysa {
         pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/forward.frag");
         pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
-            surfaceConfig.clearColor.r,
-            surfaceConfig.clearColor.g,
-            surfaceConfig.clearColor.b,
+            config.clearColor.r,
+            config.clearColor.g,
+            config.clearColor.b,
             1.0f};
     }
 

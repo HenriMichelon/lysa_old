@@ -12,6 +12,5 @@ export namespace lysa {
      * Global application configuration
      */
     struct ApplicationConfig {
-
     };
 }

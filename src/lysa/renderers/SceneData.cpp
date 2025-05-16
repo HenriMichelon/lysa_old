@@ -10,8 +10,8 @@ import lysa.nodes.node;
 
 namespace lysa {
 
-    SceneData::SceneData(const std::shared_ptr<vireo::Vireo>& vireo, const uint32 framesInFlight, const vireo::Extent &extent):
-        Scene{framesInFlight, extent},
+    SceneData::SceneData(const RenderingConfig& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent):
+        Scene{config, extent},
         vireo{vireo} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo->createDescriptorLayout(L"Scene");
@@ -91,19 +91,19 @@ namespace lysa {
     }
 
     void SceneData::draw(
-        const std::shared_ptr<vireo::CommandList>& commandList,
-        const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
-        std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>>& drawCommands) const {
+         const std::shared_ptr<vireo::CommandList>& commandList,
+         const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
+         const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const {
         auto pushConstants = PushConstants {};
-        for (const auto& bufferMaterialPair : std::views::keys(drawCommands)) {
-            commandList->bindVertexBuffer(bufferMaterialPair.bufferPair.vertexBuffer);
-            commandList->bindIndexBuffer(bufferMaterialPair.bufferPair.indexBuffer);
-            pushConstants.materialIndex = getMaterialIndex(bufferMaterialPair.materialId);
-            for (const auto& draw : drawCommands.at(bufferPair)) {
+        for (const auto& bufferPair : std::views::keys(modelsByBuffer)) {
+            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
+            commandList->bindIndexBuffer(bufferPair.indexBuffer);
+            for (const auto& meshInstance : modelsByBuffer.at(bufferPair)) {
                 pushConstants.modelIndex = getModelIndex(meshInstance->getId());
-                commandList->pushConstants(pipelineResources, pushConstantsDesc, &pushConstants);
                 const auto& mesh = meshInstance->getMesh();
                 for (const auto& meshSurface : mesh->getSurfaces()) {
+                    pushConstants.materialIndex = getMaterialIndex(meshSurface->material->getId());
+                    commandList->pushConstants(pipelineResources, pushConstantsDesc, &pushConstants);
                     commandList->drawIndexed(
                         meshSurface->indexCount,
                         1,

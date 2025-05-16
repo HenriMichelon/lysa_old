@@ -18,7 +18,7 @@ export namespace lysa {
     class PostProcessing : public Renderpass {
     public:
         PostProcessing(
-            const WindowConfig& surfaceConfig,
+            const RenderingConfig& config,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
             const std::wstring& fragShaderName,

@@ -8,14 +8,14 @@ module lysa.renderers.renderer;
 
 namespace lysa {
     Renderer::Renderer(
-        const WindowConfig& surfaceConfig,
+        const RenderingConfig& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
-        surfaceConfig{surfaceConfig},
+        config{config},
         name{name},
         samplers{vireo},
         vireo{vireo}{
-        framesData.resize(surfaceConfig.framesInFlight);
+        framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.commandAllocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
@@ -72,11 +72,11 @@ namespace lysa {
         currentExtent = extent;
         for (auto& frame : framesData) {
             frame.colorAttachment = vireo->createRenderTarget(
-                surfaceConfig.renderingFormat,
+                config.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
-                {surfaceConfig.clearColor.r, surfaceConfig.clearColor.g, surfaceConfig.clearColor.b, 1.0f},
-                surfaceConfig.msaa,
+                {config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f},
+                config.msaa,
                 name);
         }
         for (const auto& postProcessingPass : postProcessingPasses) {
@@ -86,7 +86,7 @@ namespace lysa {
 
     void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) {
         const auto postProcessingPass = std::make_shared<PostProcessing>(
-            surfaceConfig,
+            config,
             vireo,
             samplers,
             fragShaderName,

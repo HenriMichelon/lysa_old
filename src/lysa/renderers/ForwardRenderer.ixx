@@ -17,7 +17,7 @@ export namespace lysa {
     class ForwardRenderer : public Renderer {
     public:
         ForwardRenderer(
-            const WindowConfig& surfaceConfig,
+            const RenderingConfig& config,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 

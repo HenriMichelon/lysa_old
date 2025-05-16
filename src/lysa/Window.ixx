@@ -74,7 +74,7 @@ export namespace lysa {
 
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
-        auto getFramesInFlight() const { return config.framesInFlight; }
+        auto getFramesInFlight() const { return config.renderingConfig.framesInFlight; }
 
         void waitIdle() const;
 

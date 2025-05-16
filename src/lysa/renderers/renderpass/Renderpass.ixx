@@ -17,7 +17,7 @@ export namespace lysa {
     class Renderpass {
     public:
         Renderpass(
-            const WindowConfig& surfaceConfig,
+            const RenderingConfig& config,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
             const std::wstring& name);
@@ -37,7 +37,7 @@ export namespace lysa {
 
     protected:
         const std::wstring                      name;
-        const WindowConfig&                    surfaceConfig;
+        const RenderingConfig&                  config;
         std::shared_ptr<vireo::Vireo>           vireo;
         const Samplers&                         samplers;
         std::shared_ptr<vireo::GraphicPipeline> pipeline;

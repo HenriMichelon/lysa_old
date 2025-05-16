@@ -8,6 +8,7 @@ export module lysa.scene;
 
 import vireo;
 import lysa.global;
+import lysa.window_config;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
@@ -20,13 +21,6 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> indexBuffer;
         friend bool operator==(const BufferPair& first, const BufferPair& second) {
             return first.vertexBuffer == second.vertexBuffer && first.indexBuffer == second.indexBuffer;
-        }
-    };
-    struct BufferMaterialPair {
-        BufferPair bufferPair;
-        unique_id materialId;
-        friend bool operator==(const BufferMaterialPair& first, const BufferMaterialPair& second) {
-            return first.bufferPair == second.bufferPair && first.materialId == second.materialId;
         }
     };
 }
@@ -42,22 +36,11 @@ struct std::hash<lysa::BufferPair> {
     }
 };
 
-template <>
-struct std::hash<lysa::BufferMaterialPair> {
-    size_t operator()(const lysa::BufferMaterialPair& pair) const noexcept {
-        const size_t h1 = std::hash<lysa::BufferPair>{}(pair.bufferPair);
-        const size_t h2 = std::hash<lysa::unique_id>{}(pair.materialId);
-        size_t seed = h1;
-        seed ^= h2 + 0x9e3779b8 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
 export namespace lysa {
 
     class Scene {
     public:
-        //! Returns the list of all the models of the scene
+        //! Returns the list of the models of the scene
         const auto& getModels() const { return models; }
 
         const auto& getOpaqueModels() const { return opaqueModels; }
@@ -86,7 +69,7 @@ export namespace lysa {
         virtual ~Scene() = default;
 
     protected:
-        const uint32 framesInFlight;
+        const RenderingConfig& config;
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
@@ -99,8 +82,6 @@ export namespace lysa {
         std::unordered_map<unique_id, uint32> modelsIndices{};
         // All models containing opaque surfaces grouped by buffers
         std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
-        //
-        std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>> opaqueDrawCommands{};
         // Models have been updated
         bool modelsUpdated{false};
 
@@ -113,7 +94,7 @@ export namespace lysa {
         // Materials have been updated
         bool materialsUpdated{true};
 
-        Scene(const uint32 framesInFlight, const vireo::Extent &extent) : framesInFlight{framesInFlight} { resize(extent); }
+        Scene(const RenderingConfig& config, const vireo::Extent &extent) : config{config} { resize(extent); }
 
     private:
         // Rendering window extent

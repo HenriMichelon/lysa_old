@@ -17,7 +17,7 @@ export namespace lysa {
     class ForwardColor : public Renderpass {
     public:
         ForwardColor(
-            const WindowConfig& surfaceConfig,
+            const RenderingConfig& config,
             const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers);
 

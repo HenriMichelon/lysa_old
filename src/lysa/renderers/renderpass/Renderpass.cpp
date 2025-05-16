@@ -8,12 +8,12 @@ module lysa.renderers.renderpass;
 
 namespace lysa {
     Renderpass::Renderpass(
-        const WindowConfig& surfaceConfig,
+        const RenderingConfig& config,
         const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers,
         const std::wstring& name):
         name{name},
-        surfaceConfig{surfaceConfig},
+        config{config},
         vireo{vireo},
         samplers{samplers} {
     }
