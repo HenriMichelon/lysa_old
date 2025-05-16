@@ -88,7 +88,31 @@ namespace lysa {
             materialIndex++;
         }
         materialsUpdated = false;
+    }
 
+    void SceneData::draw(
+        const std::shared_ptr<vireo::CommandList>& commandList,
+        const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
+        const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const {
+        auto pushConstants = PushConstants {};
+        for (const auto& bufferPair : std::views::keys(modelsByBuffer)) {
+            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
+            commandList->bindIndexBuffer(bufferPair.indexBuffer);
+            for (const auto& meshInstance : modelsByBuffer.at(bufferPair)) {
+                const auto& mesh = meshInstance->getMesh();
+                for (const auto& meshSurface : mesh->getSurfaces()) {
+                    pushConstants.modelIndex = getModelIndex(meshInstance->getId());
+                    pushConstants.materialIndex = getMaterialIndex(meshSurface->material->getId());
+                    commandList->pushConstants(pipelineResources, pushConstantsDesc, &pushConstants);
+                    commandList->drawIndexed(
+                        meshSurface->indexCount,
+                        1,
+                        mesh->getFirstIndex() + meshSurface->firstIndex,
+                        mesh->getFirstVertex(),
+                        0);
+                }
+            }
+        }
     }
 
 }

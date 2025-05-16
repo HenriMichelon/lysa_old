@@ -42,26 +42,7 @@ namespace lysa {
         commandList->setDescriptors({scene.getDescriptorSet()});
         commandList->bindPipeline(pipeline);
         commandList->bindDescriptors(pipeline, {scene.getDescriptorSet()});
-        for (const auto& bufferPair : std::views::keys(scene.getOpaqueModels())) {
-            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
-            commandList->bindIndexBuffer(bufferPair.indexBuffer);
-            for (const auto& meshInstance : scene.getOpaqueModels().at(bufferPair)) {
-                const auto& mesh = meshInstance->getMesh();
-                for (const auto& meshSurface : mesh->getSurfaces()) {
-                    const auto pushConstants = PushConstants {
-                        .modelIndex = scene.getModelIndex(meshInstance->getId()),
-                        .materialIndex = scene.getMaterialIndex(meshSurface->material->getId()),
-                    };
-                    commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
-                    commandList->drawIndexed(
-                        meshSurface->indexCount,
-                        1,
-                        mesh->getFirstIndex() + meshSurface->firstIndex,
-                        mesh->getFirstVertex(),
-                        0);
-                }
-            }
-        }
+        scene.draw(commandList, pipeline->getResources(), scene.getOpaqueModels());
         commandList->endRendering();
     }
 }

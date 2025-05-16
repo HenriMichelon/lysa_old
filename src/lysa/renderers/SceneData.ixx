@@ -9,6 +9,7 @@ export module lysa.renderers.scene_data;
 import vireo;
 import lysa.global;
 import lysa.scene;
+import lysa.nodes.mesh_instance;
 import lysa.resources.material;
 
 export namespace lysa {
@@ -45,7 +46,12 @@ export namespace lysa {
 
         SceneData(const std::shared_ptr<vireo::Vireo>& vireo, uint32 framesInFlight, const vireo::Extent &extent);
 
-        void update();
+        void update() override;
+
+        void draw(
+            const std::shared_ptr<vireo::CommandList>& commandList,
+            const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
+            const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const;
 
         static auto& getDescriptorLayout() { return descriptorLayout; }
 
