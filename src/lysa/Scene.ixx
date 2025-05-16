@@ -21,6 +21,10 @@ export namespace lysa {
         //! Returns the list of all the models of the scene
         const auto& getModels() const { return models; }
 
+        const auto& getMaterialIndex(const unique_id materialId) const {
+            return materialsIndices.at(materialId);
+        }
+
         virtual void update() = 0;
 
         //! Returns the current scene camera
@@ -56,7 +60,7 @@ export namespace lysa {
         // Material reference counter, used to know of the material, can be removed from the scene
         std::unordered_map<unique_id, uint32> materialsRefCounter;
         // Indices of all materials & texture in the buffers
-        std::unordered_map<unique_id, int32> materialsIndices{};
+        std::unordered_map<unique_id, uint32> materialsIndices{};
         // Materials have been updated
         bool materialsUpdated{true};
 

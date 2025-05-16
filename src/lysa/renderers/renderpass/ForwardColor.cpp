@@ -47,9 +47,19 @@ namespace lysa {
             const auto &mesh = meshInstance->getMesh();
             commandList->bindVertexBuffer(mesh->getVertexBuffer());
             commandList->bindIndexBuffer(mesh->getIndexBuffer());
-            pushConstants.modelIndex = modelIndex;
-            commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
-            commandList->drawIndexed(mesh->getIndices().size());
+            for (const auto& meshSurface : mesh->getSurfaces()) {
+                const auto pushConstants = PushConstants {
+                    .modelIndex = modelIndex,
+                    .materialIndex = scene.getMaterialIndex(meshSurface->material->getId()),
+                };
+                commandList->pushConstants(pipelineConfig.resources, SceneData::pushConstantsDesc, &pushConstants);
+                commandList->drawIndexed(
+                    meshSurface->indexCount,
+                    1,
+                    meshSurface->firstVertexIndex,
+                    0,
+                    0);
+            }
             modelIndex++;
         }
         commandList->endRendering();

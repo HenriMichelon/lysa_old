@@ -43,6 +43,5 @@ export namespace lysa {
             .discardDepthStencilAfterRender = true,
         };
 
-        PushConstants pushConstants{};
     };
 }

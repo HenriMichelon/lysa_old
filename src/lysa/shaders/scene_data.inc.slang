@@ -42,6 +42,10 @@ struct Models {
     Model models[100]; // arbitrary value for debug
 }
 
+struct Materials {
+    Material materials[100]; // arbitrary value for debug
+}
+
 struct PushConstants {
     uint modelIndex;
     uint materialIndex;
