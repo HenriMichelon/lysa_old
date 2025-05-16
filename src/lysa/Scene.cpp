@@ -41,6 +41,20 @@ namespace lysa {
             }
             opaqueModels[pair].push_back(meshInstance);
 
+            for (const auto& meshSurface : mesh->getSurfaces()) {
+                const auto materialPair = BufferMaterialPair{pair, meshSurface->material->getId()};
+                if (!opaqueDrawCommands.contains(materialPair)) {
+                    opaqueDrawCommands[materialPair] = {};
+                }
+                opaqueDrawCommands[materialPair].push_back(vireo::DrawIndexedIndirectCommand{
+                    .indexCount = meshSurface->indexCount,
+                    .instanceCount = 1,
+                    .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
+                    .vertexOffset = mesh->getVertexOffset(),
+                    .firstInstance = 0,
+                });
+            }
+
             for (const auto &material :mesh->getMaterials()) {
                 if (materialsRefCounter.contains(material->getId())) {
                     materialsRefCounter[material->getId()]++;

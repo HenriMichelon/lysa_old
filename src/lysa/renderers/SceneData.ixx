@@ -51,7 +51,7 @@ export namespace lysa {
         void draw(
             const std::shared_ptr<vireo::CommandList>& commandList,
             const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
-            const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const;
+            std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>>& drawCommands) const;
 
         static auto& getDescriptorLayout() { return descriptorLayout; }
 

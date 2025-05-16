@@ -89,7 +89,7 @@ export namespace lysa {
                  const std::vector<uint32>& indices,
                  const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
                  uint32 firstIndex,
-                 uint32 firstVertex,
+                 int32 vertexOffset,
                  const std::shared_ptr<vireo::Buffer>& vertexBuffer,
                  const std::shared_ptr<vireo::Buffer>& indexBuffer,
                  const std::wstring &name = L"Mesh");
@@ -158,7 +158,7 @@ export namespace lysa {
 
         auto getFirstIndex() const { return firstIndex; }
 
-        auto getFirstVertex() const { return firstVertex; }
+        auto getVertexOffset() const { return vertexOffset; }
 
         auto& getMaterials() { return materials; }
 
@@ -179,7 +179,7 @@ export namespace lysa {
         friend class MeshInstance;
 
         uint32                         firstIndex{0};
-        uint32                         firstVertex{0};
+        int32                          vertexOffset{0};
         std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
         std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
 

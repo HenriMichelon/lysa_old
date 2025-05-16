@@ -93,22 +93,22 @@ namespace lysa {
     void SceneData::draw(
         const std::shared_ptr<vireo::CommandList>& commandList,
         const std::shared_ptr<vireo::PipelineResources>& pipelineResources,
-        const std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>>& modelsByBuffer) const {
+        std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>>& drawCommands) const {
         auto pushConstants = PushConstants {};
-        for (const auto& bufferPair : std::views::keys(modelsByBuffer)) {
-            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
-            commandList->bindIndexBuffer(bufferPair.indexBuffer);
-            for (const auto& meshInstance : modelsByBuffer.at(bufferPair)) {
+        for (const auto& bufferMaterialPair : std::views::keys(drawCommands)) {
+            commandList->bindVertexBuffer(bufferMaterialPair.bufferPair.vertexBuffer);
+            commandList->bindIndexBuffer(bufferMaterialPair.bufferPair.indexBuffer);
+            pushConstants.materialIndex = getMaterialIndex(bufferMaterialPair.materialId);
+            for (const auto& draw : drawCommands.at(bufferPair)) {
+                pushConstants.modelIndex = getModelIndex(meshInstance->getId());
+                commandList->pushConstants(pipelineResources, pushConstantsDesc, &pushConstants);
                 const auto& mesh = meshInstance->getMesh();
                 for (const auto& meshSurface : mesh->getSurfaces()) {
-                    pushConstants.modelIndex = getModelIndex(meshInstance->getId());
-                    pushConstants.materialIndex = getMaterialIndex(meshSurface->material->getId());
-                    commandList->pushConstants(pipelineResources, pushConstantsDesc, &pushConstants);
                     commandList->drawIndexed(
                         meshSurface->indexCount,
                         1,
                         mesh->getFirstIndex() + meshSurface->firstIndex,
-                        mesh->getFirstVertex(),
+                        mesh->getVertexOffset(),
                         0);
                 }
             }

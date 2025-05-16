@@ -18,13 +18,18 @@ export namespace lysa {
     struct BufferPair {
         std::shared_ptr<vireo::Buffer> vertexBuffer;
         std::shared_ptr<vireo::Buffer> indexBuffer;
-
         friend bool operator==(const BufferPair& first, const BufferPair& second) {
             return first.vertexBuffer == second.vertexBuffer && first.indexBuffer == second.indexBuffer;
         }
     };
+    struct BufferMaterialPair {
+        BufferPair bufferPair;
+        unique_id materialId;
+        friend bool operator==(const BufferMaterialPair& first, const BufferMaterialPair& second) {
+            return first.bufferPair == second.bufferPair && first.materialId == second.materialId;
+        }
+    };
 }
-
 
 template <>
 struct std::hash<lysa::BufferPair> {
@@ -33,6 +38,17 @@ struct std::hash<lysa::BufferPair> {
         const size_t h2 = std::hash<std::shared_ptr<vireo::Buffer>>{}(pair.indexBuffer);
         size_t seed = h1;
         seed ^= h2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<lysa::BufferMaterialPair> {
+    size_t operator()(const lysa::BufferMaterialPair& pair) const noexcept {
+        const size_t h1 = std::hash<lysa::BufferPair>{}(pair.bufferPair);
+        const size_t h2 = std::hash<lysa::unique_id>{}(pair.materialId);
+        size_t seed = h1;
+        seed ^= h2 + 0x9e3779b8 + (seed << 6) + (seed >> 2);
         return seed;
     }
 };
@@ -83,6 +99,8 @@ export namespace lysa {
         std::unordered_map<unique_id, uint32> modelsIndices{};
         // All models containing opaque surfaces grouped by buffers
         std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
+        //
+        std::unordered_map<BufferMaterialPair, std::vector<vireo::DrawIndexedIndirectCommand>> opaqueDrawCommands{};
         // Models have been updated
         bool modelsUpdated{false};
 
