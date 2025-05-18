@@ -9,7 +9,6 @@ struct VertexInput {
     float3 normal   : NORMAL;
     float2 uv       : UV;
     float3 tangent  : TANGENT;
-    uint  instanceID: SV_DrawIndex;
 };
 
 struct VertexOutput {
@@ -19,7 +18,7 @@ struct VertexOutput {
     float2 uv            : TEXCOORD2;
     float3 tangent       : TEXCOORD3;
     float3 bitangent     : TEXCOORD4;
-    uint   materialIndex : TEXCOORD5;
+    nointerpolation uint instanceID : INSTANCE_ID;
 };
 
 struct Scene {

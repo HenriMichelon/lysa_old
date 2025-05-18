@@ -9,5 +9,5 @@
 StructuredBuffer<Material> materials : register(b1, space0);
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    return materials[input.materialIndex].albedoColor;
+    return materials[input.instanceID].albedoColor;
 }
