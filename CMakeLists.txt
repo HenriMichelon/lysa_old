@@ -128,6 +128,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Memory.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
+        ${ENGINE_SRC_DIR}/ResourcesManager.ixx
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Window.ixx

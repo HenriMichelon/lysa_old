@@ -16,7 +16,7 @@ import lysa.renderers.renderer;
 import lysa.renderers.scene_data;
 
 export namespace lysa {
-    /*
+    /**
      * %A Rendering surface
      */
     class Window {
@@ -24,7 +24,7 @@ export namespace lysa {
         /**
         * Creates a rendering surface
         */
-        Window(WindowConfiguration& config, void* windowHandle);
+        Window(const std::shared_ptr<vireo::Vireo>& vireo, WindowConfiguration& config, void* windowHandle);
 
         void resize() const;
 
@@ -37,11 +37,6 @@ export namespace lysa {
          * Returns the opaque, os-specific, window handle
          */
         // auto getWindowHandle() const { return windowHandle; }
-
-        /**
-         * Returns the associated Vireo object
-         */
-        auto getVireo() const { return vireo; }
 
         /**
          * Returns the graphic submission queue

@@ -6,6 +6,7 @@
 */
 module lysa.resources.mesh;
 
+import lysa.application;
 import lysa.global;
 import lysa.window;
 
@@ -56,7 +57,7 @@ namespace lysa {
     void Mesh::upload(Window* window) {
         assert([&]{return window != nullptr; }, "Invalid window");
         assert([&]{return vertexBuffer == nullptr; }, "Already uploaded");
-        const auto& vireo = window->getVireo();
+        const auto& vireo = Application::getVireo();
         vertexBuffer = vireo->createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertices.size(), getName());
         indexBuffer = vireo->createBuffer(vireo::BufferType::INDEX, sizeof(uint32), indices.size(), getName());
         const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);

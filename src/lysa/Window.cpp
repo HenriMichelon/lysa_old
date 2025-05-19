@@ -12,10 +12,10 @@ import lysa.renderers.forward_renderer;
 
 namespace lysa {
 
-    Window::Window(WindowConfiguration& config, void* windowHandle):
+    Window::Window(const std::shared_ptr<vireo::Vireo>& vireo, WindowConfiguration& config, void* windowHandle):
         windowHandle{windowHandle},
         config{config},
-        vireo{vireo::Vireo::create(config.renderingConfig.backend)},
+        vireo{vireo},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
         swapChain{vireo->createSwapChain(
             config.renderingConfig.renderingFormat,
