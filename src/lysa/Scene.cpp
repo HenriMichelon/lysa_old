@@ -14,8 +14,8 @@ namespace lysa {
         config{config} {
         materials.resize(1000);
         resize(extent);
-        commandAllocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::TRANSFER);
-        transferQueue = Application::getVireo()->createSubmitQueue(vireo::CommandType::TRANSFER);
+        commandAllocator = Application::getVireo().createCommandAllocator(vireo::CommandType::TRANSFER);
+        transferQueue = Application::getVireo().createSubmitQueue(vireo::CommandType::TRANSFER);
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -77,7 +77,7 @@ namespace lysa {
             for (const auto& meshSurface : mesh->getSurfaces()) {
                 if (!opaqueDrawCommands.contains(pair)) {
                     opaqueDrawCommands[pair] = {};
-                    opaqueDrawCommandsBuffer[pair] = Application::getVireo()->createBuffer(
+                    opaqueDrawCommandsBuffer[pair] = Application::getVireo().createBuffer(
                         vireo::BufferType::INDIRECT,
                         sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1,
                         L"Per buffer draw commands");

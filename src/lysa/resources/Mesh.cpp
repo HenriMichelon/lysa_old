@@ -58,9 +58,9 @@ namespace lysa {
         assert([&]{return window != nullptr; }, "Invalid window");
         assert([&]{return vertexBuffer == nullptr; }, "Already uploaded");
         const auto& vireo = Application::getVireo();
-        vertexBuffer = Application::getVireo()->createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertices.size(), getName());
-        indexBuffer = Application::getVireo()->createBuffer(vireo::BufferType::INDEX, sizeof(uint32), indices.size(), getName());
-        const auto allocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        vertexBuffer = Application::getVireo().createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertices.size(), getName());
+        indexBuffer = Application::getVireo().createBuffer(vireo::BufferType::INDEX, sizeof(uint32), indices.size(), getName());
+        const auto allocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = allocator->createCommandList();
         commandList->begin();
         commandList->upload(vertexBuffer, vertices.data());

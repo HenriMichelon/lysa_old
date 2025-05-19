@@ -15,34 +15,34 @@ namespace lysa {
     SceneData::SceneData(const RenderingConfiguration& config, const vireo::Extent &extent):
         Scene{config, extent}  {
         if (globalDescriptorLayout == nullptr) {
-            globalDescriptorLayout = Application::getVireo()->createDescriptorLayout(L"Scene");
+            globalDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
             globalDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
             // descriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::STORAGE);
             globalDescriptorLayout->add(BINDING_MATERIALS, vireo::DescriptorType::STORAGE);
             globalDescriptorLayout->build();
 
-            perBufferPairDescriptorLayout = Application::getVireo()->createDescriptorLayout(L"Scene per buffer");
+            perBufferPairDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene per buffer");
             perBufferPairDescriptorLayout->add(BINDING_INSTANCES_DATA, vireo::DescriptorType::STORAGE);
             perBufferPairDescriptorLayout->build();
         }
 
-        sceneUniformBuffer = Application::getVireo()->createBuffer(
+        sceneUniformBuffer = Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneUniform), 1,
             L"Scene Uniform");
         sceneUniformBuffer->map();
-        // modelsStorageBuffer = Application::getVireo()->createBuffer(
+        // modelsStorageBuffer = Application::getVireo().createBuffer(
             // vireo::BufferType::STORAGE,
             // sizeof(ModelUniform) * config.memoryConfig.maxModelsCount, 1,
             // L"Models Uniforms");
         // modelsStorageBuffer->map();
-        materialsStorageBuffer = Application::getVireo()->createBuffer(
+        materialsStorageBuffer = Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(MaterialUniform) * 1000, 1,
             L"Materials Uniforms");
         materialsStorageBuffer->map();
 
-        globalDescriptorSet = Application::getVireo()->createDescriptorSet(globalDescriptorLayout, L"Scene");
+        globalDescriptorSet = Application::getVireo().createDescriptorSet(globalDescriptorLayout, L"Scene");
         globalDescriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         // descriptorSet->update(BINDING_MODELS, modelsStorageBuffer);
         globalDescriptorSet->update(BINDING_MATERIALS, materialsStorageBuffer);
@@ -65,12 +65,12 @@ namespace lysa {
             auto data = std::vector<InstanceData>{};
             if (!perBufferDescriptorSets.contains(bufferPair)) {
                 data = std::vector<InstanceData>(1000);
-                buffer = Application::getVireo()->createBuffer(
+                buffer = Application::getVireo().createBuffer(
                     vireo::BufferType::STORAGE,
                     sizeof(InstanceData) * 1000, 1,
                     L"Per buffer instances data");
                 buffer->map();
-                const auto set = Application::getVireo()->createDescriptorSet(
+                const auto set = Application::getVireo().createDescriptorSet(
                      perBufferPairDescriptorLayout,
                      L"Scene per buffer");
                 set->update(BINDING_INSTANCES_DATA, buffer);

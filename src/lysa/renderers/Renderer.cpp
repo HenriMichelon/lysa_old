@@ -16,7 +16,7 @@ namespace lysa {
         name{name} {
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
-            frame.commandAllocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::GRAPHIC);
+            frame.commandAllocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
         }
     }
@@ -70,7 +70,7 @@ namespace lysa {
     void Renderer::resize(const vireo::Extent& extent) {
         currentExtent = extent;
         for (auto& frame : framesData) {
-            frame.colorAttachment = Application::getVireo()->createRenderTarget(
+            frame.colorAttachment = Application::getVireo().createRenderTarget(
                 config.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,

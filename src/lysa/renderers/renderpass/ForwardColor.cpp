@@ -16,14 +16,14 @@ namespace lysa {
         const Samplers& samplers):
         Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = Application::getVireo()->createPipelineResources({
+        pipelineConfig.resources = Application::getVireo().createPipelineResources({
             SceneData::globalDescriptorLayout,
             SceneData::perBufferPairDescriptorLayout
         });
-        pipelineConfig.vertexInputLayout = Application::getVireo()->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
-        pipelineConfig.vertexShader = Application::getVireo()->createShaderModule("shaders/default.vert");
-        pipelineConfig.fragmentShader = Application::getVireo()->createShaderModule("shaders/forward.frag");
-        pipeline = Application::getVireo()->createGraphicPipeline(pipelineConfig, name);
+        pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
+        pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/default.vert");
+        pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/forward.frag");
+        pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,

@@ -20,12 +20,12 @@ namespace lysa {
         Renderpass{config, samplers, name},
         fragShaderName{fragShaderName},
         data{data},
-        descriptorLayout{Application::getVireo()->createDescriptorLayout(name)} {
+        descriptorLayout{Application::getVireo().createDescriptorLayout(name)} {
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
         if (data) {
             descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
-            dataUniform = Application::getVireo()->createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
+            dataUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
             dataUniform->map();
             dataUniform->write(data, dataSize);
             dataUniform->unmap();
@@ -33,20 +33,20 @@ namespace lysa {
         descriptorLayout->build();
 
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = Application::getVireo()->createPipelineResources({
+        pipelineConfig.resources = Application::getVireo().createPipelineResources({
             descriptorLayout,
             samplers.getDescriptorLayout()},
             {},
             name);
-        pipelineConfig.vertexShader = Application::getVireo()->createShaderModule("shaders/quad.vert");
-        pipelineConfig.fragmentShader = Application::getVireo()->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
-        pipeline = Application::getVireo()->createGraphicPipeline(pipelineConfig, name);
+        pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/quad.vert");
+        pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
+        pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
-            frame.paramsUniform = Application::getVireo()->createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
+            frame.paramsUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
-            frame.descriptorSet = Application::getVireo()->createDescriptorSet(descriptorLayout, name);
+            frame.descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, name);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);
@@ -92,7 +92,7 @@ namespace lysa {
 
     void PostProcessing::resize(const vireo::Extent& extent) {
         for (auto& frame : framesData) {
-            frame.colorAttachment = Application::getVireo()->createRenderTarget(
+            frame.colorAttachment = Application::getVireo().createRenderTarget(
                 config.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,

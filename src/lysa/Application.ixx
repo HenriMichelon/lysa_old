@@ -21,9 +21,9 @@ export namespace lysa {
         /**
          * Returns the global Vireo object
         */
-        static auto getVireo() {
+        static const auto& getVireo() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
-            return instance->vireo;
+            return *(instance->vireo);
         }
 
     private:

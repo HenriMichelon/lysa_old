@@ -19,8 +19,8 @@ namespace lysa {
         const std::wstring& name) :
         name{name},
         instanceSize{instanceSize},
-        buffer{Application::getVireo()->createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
-        stagingBuffer{Application::getVireo()->createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
+        buffer{Application::getVireo().createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
+        stagingBuffer{Application::getVireo().createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
         freeBlocs.push_back({0, instanceSize * instanceCount});
         stagingBuffer->map();
     }
