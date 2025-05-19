@@ -84,12 +84,6 @@ export namespace lysa {
         // Remove a node from the current scene
         void removeNode(const std::shared_ptr<Node> &node, bool async);
 
-        void upload(const std::vector<vireo::BufferUploadInfo>& infos) const;
-
-        void upload(const std::vector<vireo::ImageUploadInfo>& infos) const;
-
-        void upload(MemoryArray& memoryArray) const;
-
         virtual ~Window();
 
     private:
@@ -117,7 +111,7 @@ export namespace lysa {
         // Opaque window handle for presenting
         void*                 windowHandle;
         // Surface configuration
-        WindowConfiguration&         config;
+        WindowConfiguration&  config;
         // Node tree
         std::shared_ptr<Node> rootNode;
         std::mutex            rootNodeMutex;
@@ -127,15 +121,15 @@ export namespace lysa {
         bool                  lockDeferredUpdates{false};
 
         // Last drawFrame() start time
-        double          currentTime{0.0};
+        double currentTime{0.0};
         // Time accumulator to calculate the process delta time
-        double          accumulator{0.0};
+        double accumulator{0.0};
         // Number of frames in the last second
-        uint32        frameCount{0};
+        uint32 frameCount{0};
         // Number of seconds since the last FPS update
-        float           elapsedSeconds{0.0f};
+        float  elapsedSeconds{0.0f};
         // Average calculated FPS
-        uint32        fps{0};
+        uint32 fps{0};
 
         // Per frame data
         std::vector<FrameData>              framesData;
@@ -144,7 +138,6 @@ export namespace lysa {
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         // Swap chain for this surface
         std::shared_ptr<vireo::SwapChain>   swapChain;
-
         // Scene renderer
         std::unique_ptr<Renderer>           renderer;
 
@@ -152,7 +145,6 @@ export namespace lysa {
 
         // Process scene updates before drawing a frame
         void processDeferredUpdates(uint32 frameIndex);
-
     };
 
 }

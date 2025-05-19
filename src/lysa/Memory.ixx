@@ -26,7 +26,8 @@ export namespace lysa {
             size_t instanceSize,
             size_t instanceCount,
             size_t stagingInstanceCount,
-            vireo::BufferType, const std::wstring& name);
+            vireo::BufferType,
+            const std::wstring& name);
 
         MemoryBloc alloc(size_t instanceCount);
 

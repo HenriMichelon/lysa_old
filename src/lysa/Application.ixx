@@ -8,9 +8,10 @@ export module lysa.application;
 
 import std;
 import vireo;
-import lysa.global;
-import lysa.window;
 import lysa.configuration;
+import lysa.global;
+import lysa.resources_manager;
+import lysa.window;
 
 export namespace lysa {
 
@@ -26,11 +27,17 @@ export namespace lysa {
             return *(instance->vireo);
         }
 
+        static auto& getResourcesManager() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->resourceManager;
+        }
+
     private:
         static Application* instance;
         ApplicationConfiguration& config;
-        // Global Vireo object
         std::shared_ptr<vireo::Vireo> vireo;
+        ResourcesManager resourceManager;
+
     };
 
 };

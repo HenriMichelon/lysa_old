@@ -10,10 +10,6 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.memory;
-import lysa.nodes.camera;
-import lysa.nodes.node;
-import lysa.renderers.renderer;
-import lysa.renderers.scene_data;
 
 export namespace lysa {
     /*
@@ -24,22 +20,20 @@ export namespace lysa {
         /**
         *
         */
-        ResourcesManager(ResourcesConfiguration& config);
+        ResourcesManager(const vireo::Vireo& vireo, ResourcesConfiguration& config);
 
         void waitIdle() const;
 
-        void upload(const std::vector<vireo::BufferUploadInfo>& infos) const;
 
-        void upload(const std::vector<vireo::ImageUploadInfo>& infos) const;
-
-        void upload(MemoryArray& memoryArray) const;
-
-        virtual ~ResourcesManager() = default;
+        virtual ~ResourcesManager();
 
     private:
-        const ResourcesConfiguration&         config;
+        const ResourcesConfiguration& config;
+        std::shared_ptr<vireo::SubmitQueue> transferQueue;
+        MemoryArray vertexArray;
+        MemoryArray indexArray;
 
-
+        void upload(MemoryArray& memoryArray) const;
     };
 
 }

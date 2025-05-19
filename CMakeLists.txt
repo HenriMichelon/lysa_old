@@ -89,6 +89,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Memory.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
+        ${ENGINE_SRC_DIR}/ResourcesManager.cpp
         ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
         ${ENGINE_SRC_DIR}/Window.cpp

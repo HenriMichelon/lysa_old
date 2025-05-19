@@ -275,33 +275,4 @@ namespace lysa {
         // sceneRenderer->postUpdateScene(currentFrame);
     }
 
-    void Window::upload(MemoryArray& memoryArray) const {
-        const auto allocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-        const auto commandList = allocator->createCommandList();
-        commandList->begin();
-        memoryArray.flush(commandList);
-        commandList->end();
-        graphicQueue->submit({commandList});
-        graphicQueue->waitIdle();
-    }
-
-    void Window::upload(const std::vector<vireo::BufferUploadInfo>& infos) const {
-        const auto allocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-        const auto commandList = allocator->createCommandList();
-        commandList->begin();
-        commandList->upload(infos);
-        commandList->end();
-        graphicQueue->submit({commandList});
-        graphicQueue->waitIdle();
-    }
-
-    void Window::upload(const std::vector<vireo::ImageUploadInfo>& infos) const {
-        const auto allocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-        const auto commandList = allocator->createCommandList();
-        commandList->begin();
-        commandList->upload(infos);
-        commandList->end();
-        graphicQueue->submit({commandList});
-        graphicQueue->waitIdle();
-    }
 }
