@@ -12,9 +12,14 @@ import lysa.os.win32.surface;
 
 namespace lysa {
 
+    Application::Application(ApplicationConfiguration& config):
+        config{config},
+        vireo{vireo::Vireo::create(config.backend)} {
+    }
+
     std::shared_ptr<Window> Application::createWindow(WindowConfiguration& surfaceConfig, void* windowHandle) const {
 #ifdef _WIN32
-        return std::make_shared<Win32Window>(surfaceConfig, windowHandle);
+        return std::make_shared<Win32Window>(vireo, surfaceConfig, windowHandle);
 #endif
     }
 

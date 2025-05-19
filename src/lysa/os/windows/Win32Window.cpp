@@ -9,8 +9,8 @@ module lysa.os.win32.surface;
 
 namespace lysa {
 
-    Win32Window::Win32Window(WindowConfiguration& surfaceConfig, void* windowHandle) :
-        Window{surfaceConfig, windowHandle} {
+    Win32Window::Win32Window(const std::shared_ptr<vireo::Vireo>& vireo, WindowConfiguration& surfaceConfig, void* windowHandle) :
+        Window{vireo, surfaceConfig, windowHandle} {
     }
 
 }

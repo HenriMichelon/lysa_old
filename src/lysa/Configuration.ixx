@@ -11,14 +11,20 @@ import lysa.global;
 
 export namespace lysa {
 
-    struct MemoryConfiguration {
-        uint32 maxMeshSurfacePerBufferCount{10000};
-        uint32 maxMaterialCount{1000};
+    struct ResourcesConfiguration {
+        uint32 maxVertexInstances{10000};
+        uint32 maxIndexInstances{15000};
+        uint32 maxMaterialInstances{1000};
+    };
+
+    struct ApplicationConfiguration {
+        //! Graphic API
+        vireo::Backend     backend{vireo::Backend::VULKAN};
+        //! xxx
+        ResourcesConfiguration resourcesConfig;
     };
 
     struct RenderingConfiguration {
-        //! Graphic API
-        vireo::Backend     backend{vireo::Backend::VULKAN};
         //! Swap chain image format
         vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
         //! MSAA samples count
@@ -29,8 +35,7 @@ export namespace lysa {
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
-        //! VRAM buffers max sizes
-        MemoryConfiguration       memoryConfig;
+
     };
 
     /**
@@ -39,10 +44,11 @@ export namespace lysa {
     struct WindowConfiguration {
         friend class Node;
         //! Startup Scene
-        std::shared_ptr<Node> rootNode;
+        std::shared_ptr<Node>  rootNode;
         //! Renderers configuration
-        RenderingConfiguration       renderingConfig;
+        RenderingConfiguration renderingConfig;
         //! Number of nodes updates per frame for asynchronous scene updates
-        uint32                maxAsyncNodesUpdatedPerFrame{20};
+        uint32                 maxAsyncNodesUpdatedPerFrame{20};
     };
+
 }

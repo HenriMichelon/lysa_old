@@ -10,7 +10,7 @@ namespace lysa {
 
     Scene::Scene(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent) :
         config{config}, vireo{vireo} {
-        materials.resize(config.memoryConfig.maxMaterialCount);
+        materials.resize(1000);
         resize(extent);
         commandAllocator = vireo->createCommandAllocator(vireo::CommandType::TRANSFER);
         transferQueue = vireo->createSubmitQueue(vireo::CommandType::TRANSFER);
@@ -77,7 +77,7 @@ namespace lysa {
                     opaqueDrawCommands[pair] = {};
                     opaqueDrawCommandsBuffer[pair] = vireo->createBuffer(
                         vireo::BufferType::INDIRECT,
-                        sizeof(vireo::DrawIndexedIndirectCommand) * config.memoryConfig.maxMeshSurfacePerBufferCount, 1,
+                        sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1,
                         L"Per buffer draw commands");
                 }
                 auto& commands = opaqueDrawCommands[pair];

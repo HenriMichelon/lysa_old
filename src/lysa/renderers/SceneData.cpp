@@ -38,7 +38,7 @@ namespace lysa {
         // modelsStorageBuffer->map();
         materialsStorageBuffer = vireo->createBuffer(
             vireo::BufferType::STORAGE,
-            sizeof(MaterialUniform) * config.memoryConfig.maxMaterialCount, 1,
+            sizeof(MaterialUniform) * 1000, 1,
             L"Materials Uniforms");
         materialsStorageBuffer->map();
 
@@ -64,10 +64,10 @@ namespace lysa {
             auto buffer = std::shared_ptr<vireo::Buffer>{};
             auto data = std::vector<InstanceData>{};
             if (!perBufferDescriptorSets.contains(bufferPair)) {
-                data = std::vector<InstanceData>(config.memoryConfig.maxMeshSurfacePerBufferCount);
+                data = std::vector<InstanceData>(1000);
                 buffer = vireo->createBuffer(
                     vireo::BufferType::STORAGE,
-                    sizeof(InstanceData) * config.memoryConfig.maxMeshSurfacePerBufferCount, 1,
+                    sizeof(InstanceData) * 1000, 1,
                     L"Per buffer instances data");
                 buffer->map();
                 const auto set = vireo->createDescriptorSet(
