@@ -128,20 +128,20 @@ namespace lysa {
             commandList->setDescriptors({set});
             commandList->bindDescriptor(pipeline, set, SET_PERBUFFER);
             commandList->bindIndexBuffer(bufferPair.indexBuffer);
-            for (const auto& command : commands) {
-                commandList->bindVertexBuffer(bufferPair.vertexBuffer, command.vertexOffset * sizeof(Vertex));
-                commandList->drawIndexed(
-                    command.indexCount,
-                    1,
-                    0,
-                    0,
-                    0);
-            }
-            // commandList->drawIndexedIndirect(
-                // commandsBufferByBuffer.at(bufferPair),
-                // 0,
-                // commands.size(),
-                // sizeof(vireo::DrawIndexedIndirectCommand));
+            commandList->bindVertexBuffer(bufferPair.vertexBuffer   );
+            // for (const auto& command : commands) {
+            //     commandList->drawIndexed(
+            //         command.indexCount,
+            //         1,
+            //         command.firstIndex,
+            //         command.vertexOffset ,
+            //         0);
+            // }
+            commandList->drawIndexedIndirect(
+                commandsBufferByBuffer.at(bufferPair),
+                0,
+                commands.size(),
+                sizeof(vireo::DrawIndexedIndirectCommand));
         }
     }
 

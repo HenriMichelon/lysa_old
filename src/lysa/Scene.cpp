@@ -89,12 +89,12 @@ namespace lysa {
                     .firstInstance = 0, //static_cast<uint32_t>(commands.size()),
                 });
             }
-            // const auto cmdList = commandAllocator->createCommandList();
-            // cmdList->begin();
-            // cmdList->upload(opaqueDrawCommandsBuffer[pair], opaqueDrawCommands[pair].data());
-            // cmdList->end();
-            // transferQueue->submit({cmdList});
-            // transferQueue->waitIdle();
+            const auto cmdList = commandAllocator->createCommandList();
+            cmdList->begin();
+            cmdList->upload(opaqueDrawCommandsBuffer[pair], opaqueDrawCommands[pair].data());
+            cmdList->end();
+            transferQueue->submit({cmdList});
+            transferQueue->waitIdle();
 
             for (const auto &material :mesh->getMaterials()) {
                 if (materialsRefCounter.contains(material->getId())) {
