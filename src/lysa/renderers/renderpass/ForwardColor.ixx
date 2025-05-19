@@ -18,7 +18,6 @@ export namespace lysa {
     public:
         ForwardColor(
             const RenderingConfiguration& config,
-            const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers);
 
         void render(

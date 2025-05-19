@@ -24,7 +24,7 @@ export namespace lysa {
         /**
         * Creates a rendering surface
         */
-        Window(const std::shared_ptr<vireo::Vireo>& vireo, WindowConfiguration& config, void* windowHandle);
+        Window(WindowConfiguration& config, void* windowHandle);
 
         void resize() const;
 
@@ -140,8 +140,6 @@ export namespace lysa {
         // Per frame data
         std::vector<FrameData>              framesData;
         std::mutex                          frameDataMutex;
-        // Associated Vireo object
-        std::shared_ptr<vireo::Vireo>       vireo;
         // Submission queue used to present the swap chain
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         // Swap chain for this surface

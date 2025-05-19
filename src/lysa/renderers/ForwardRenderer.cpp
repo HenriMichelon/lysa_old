@@ -12,10 +12,9 @@ import lysa.global;
 namespace lysa {
     ForwardRenderer::ForwardRenderer(
         const RenderingConfiguration& config,
-        const std::shared_ptr<vireo::Vireo>& vireo,
         const std::wstring& name) :
-        Renderer{config, vireo, name},
-        forwardColorPass{config, vireo, samplers} {
+        Renderer{config, name},
+        forwardColorPass{config, samplers} {
     }
 
     void ForwardRenderer::update(const uint32 frameIndex) {

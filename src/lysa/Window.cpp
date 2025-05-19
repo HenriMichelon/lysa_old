@@ -6,18 +6,18 @@
 */
 module lysa.window;
 
+import lysa.application;
 import lysa.global;
 import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
 
 namespace lysa {
 
-    Window::Window(const std::shared_ptr<vireo::Vireo>& vireo, WindowConfiguration& config, void* windowHandle):
+    Window::Window(WindowConfiguration& config, void* windowHandle):
         windowHandle{windowHandle},
         config{config},
-        vireo{vireo},
-        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
-        swapChain{vireo->createSwapChain(
+        graphicQueue{Application::getVireo()->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
+        swapChain{Application::getVireo()->createSwapChain(
             config.renderingConfig.renderingFormat,
             graphicQueue,
             windowHandle,
@@ -26,10 +26,10 @@ namespace lysa {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
         for (auto& frame : framesData) {
-            frame.inFlightFence = vireo->createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<SceneData>(config.renderingConfig, vireo, swapChain->getExtent());
+            frame.inFlightFence = Application::getVireo()->createFence(true, L"Present Fence");
+            frame.scene = std::make_shared<SceneData>(config.renderingConfig, swapChain->getExtent());
         }
-        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, vireo, L"Main Renderer"); // Must be instanciated after SceneData for the layout
+        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instanciated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
     }
@@ -276,7 +276,7 @@ namespace lysa {
     }
 
     void Window::upload(MemoryArray& memoryArray) const {
-        const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto allocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = allocator->createCommandList();
         commandList->begin();
         memoryArray.flush(commandList);
@@ -286,7 +286,7 @@ namespace lysa {
     }
 
     void Window::upload(const std::vector<vireo::BufferUploadInfo>& infos) const {
-        const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto allocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = allocator->createCommandList();
         commandList->begin();
         commandList->upload(infos);
@@ -296,7 +296,7 @@ namespace lysa {
     }
 
     void Window::upload(const std::vector<vireo::ImageUploadInfo>& infos) const {
-        const auto allocator = vireo->createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto allocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = allocator->createCommandList();
         commandList->begin();
         commandList->upload(infos);

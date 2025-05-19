@@ -19,7 +19,6 @@ export namespace lysa {
     public:
         PostProcessing(
             const RenderingConfiguration& config,
-            const std::shared_ptr<vireo::Vireo>& vireo,
             const Samplers& samplers,
             const std::wstring& fragShaderName,
             void* data,

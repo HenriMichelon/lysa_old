@@ -8,21 +8,22 @@ module lysa.renderers.renderpass.forward_color;
 
 import lysa.resources.mesh;
 
+import lysa.application;
+
 namespace lysa {
     ForwardColor::ForwardColor(
         const RenderingConfiguration& config,
-        const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers):
-        Renderpass{config, vireo, samplers, L"Forward Color"} {
+        Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = vireo->createPipelineResources({
+        pipelineConfig.resources = Application::getVireo()->createPipelineResources({
             SceneData::globalDescriptorLayout,
             SceneData::perBufferPairDescriptorLayout
         });
-        pipelineConfig.vertexInputLayout = vireo->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
-        pipelineConfig.vertexShader = vireo->createShaderModule("shaders/default.vert");
-        pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/forward.frag");
-        pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
+        pipelineConfig.vertexInputLayout = Application::getVireo()->createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
+        pipelineConfig.vertexShader = Application::getVireo()->createShaderModule("shaders/default.vert");
+        pipelineConfig.fragmentShader = Application::getVireo()->createShaderModule("shaders/forward.frag");
+        pipeline = Application::getVireo()->createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,

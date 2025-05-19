@@ -19,13 +19,6 @@ export namespace lysa {
         Application(ApplicationConfiguration& config);
 
         /**
-         * Creates a rendering surface for a window
-         * @param surfaceConfig The configuration parameter for this surface
-         * @param windowHandle The opaque, os-specific, window handle
-         */
-        std::shared_ptr<Window> createWindow(WindowConfiguration& surfaceConfig, void* windowHandle) const;
-
-        /**
          * Returns the global Vireo object
         */
         static auto getVireo() {

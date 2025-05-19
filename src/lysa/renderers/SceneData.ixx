@@ -39,7 +39,7 @@ export namespace lysa {
         inline static std::shared_ptr<vireo::DescriptorLayout> globalDescriptorLayout{nullptr};
         inline static std::shared_ptr<vireo::DescriptorLayout> perBufferPairDescriptorLayout{nullptr};
 
-        SceneData(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
+        SceneData(const RenderingConfiguration& config, const vireo::Extent &extent);
 
         void update() override;
 
@@ -52,8 +52,6 @@ export namespace lysa {
         auto getDescriptorSet() const { return globalDescriptorSet; }
 
     private:
-        std::shared_ptr<vireo::Vireo> vireo;
-
         static constexpr vireo::DescriptorIndex SET_GLOBAL{0};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_MATERIALS{1};

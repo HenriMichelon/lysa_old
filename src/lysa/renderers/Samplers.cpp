@@ -5,10 +5,12 @@
  */
 module lysa.renderers.samplers;
 
+import lysa.application;
+
 namespace lysa {
 
-    Samplers::Samplers(const std::shared_ptr<vireo::Vireo>& vireo) {
-        samplers[static_cast<int>(SamplerIndex::NEAREST_NEAREST_BORDER_LINEAR)] = vireo->createSampler(
+    Samplers::Samplers() {
+        samplers[static_cast<int>(SamplerIndex::NEAREST_NEAREST_BORDER_LINEAR)] = Application::getVireo()->createSampler(
             vireo::Filter::NEAREST,
             vireo::Filter::NEAREST,
             vireo::AddressMode::CLAMP_TO_BORDER,
@@ -18,7 +20,7 @@ namespace lysa {
             vireo::Sampler::LOD_CLAMP_NONE,
             true,
             vireo::MipMapMode::LINEAR);
-        samplers[static_cast<int>(SamplerIndex::LINEAR_LINEAR_EDGE_LINEAR)] = vireo->createSampler(
+        samplers[static_cast<int>(SamplerIndex::LINEAR_LINEAR_EDGE_LINEAR)] = Application::getVireo()->createSampler(
             vireo::Filter::LINEAR,
             vireo::Filter::LINEAR,
             vireo::AddressMode::CLAMP_TO_EDGE,
@@ -29,13 +31,13 @@ namespace lysa {
             true,
             vireo::MipMapMode::LINEAR);
 
-        descriptorLayout = vireo->createSamplerDescriptorLayout(L"Static Samplers");
+        descriptorLayout = Application::getVireo()->createSamplerDescriptorLayout(L"Static Samplers");
         for (int i = 0; i < samplers.size(); i++) {
             descriptorLayout->add(i, vireo::DescriptorType::SAMPLER);
         }
         descriptorLayout->build();
 
-        descriptorSet = vireo->createDescriptorSet(descriptorLayout, L"Static Samplers");
+        descriptorSet = Application::getVireo()->createDescriptorSet(descriptorLayout, L"Static Samplers");
         for (int i = 0; i < samplers.size(); i++) {
             descriptorSet->update(i, samplers[i]);
         }

@@ -18,7 +18,6 @@ export namespace lysa {
     public:
         ForwardRenderer(
             const RenderingConfiguration& config,
-            const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
         void update(uint32 frameIndex) override;

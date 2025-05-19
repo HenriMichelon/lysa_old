@@ -25,7 +25,6 @@ export namespace lysa {
 
         Renderer(
             const RenderingConfiguration& config,
-            const std::shared_ptr<vireo::Vireo>& vireo,
             const std::wstring& name);
 
         virtual void resize(const vireo::Extent& extent);
@@ -54,7 +53,6 @@ export namespace lysa {
         const RenderingConfiguration&        config;
         const std::wstring            name;
         const Samplers                samplers;
-        std::shared_ptr<vireo::Vireo> vireo;
 
     private:
         vireo::Extent                                currentExtent{};

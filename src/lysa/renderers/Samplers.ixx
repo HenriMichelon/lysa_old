@@ -17,7 +17,7 @@ export namespace lysa {
             LINEAR_LINEAR_EDGE_LINEAR     = 1,
         };
 
-        Samplers(const std::shared_ptr<vireo::Vireo>& vireo);
+        Samplers();
 
         const auto& getDescriptorLayout() const { return descriptorLayout; }
         const auto& getDescriptorSet() const { return descriptorSet; }

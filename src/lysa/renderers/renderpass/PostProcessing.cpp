@@ -6,26 +6,26 @@
 */
 module lysa.renderers.renderpass.post_processing;
 
+import lysa.application;
 import lysa.global;
 
 namespace lysa {
     PostProcessing::PostProcessing(
         const RenderingConfiguration& config,
-        const std::shared_ptr<vireo::Vireo>& vireo,
         const Samplers& samplers,
         const std::wstring& fragShaderName,
         void* data,
         const uint32 dataSize,
         const std::wstring& name):
-        Renderpass{config, vireo, samplers, name},
+        Renderpass{config, samplers, name},
         fragShaderName{fragShaderName},
         data{data},
-        descriptorLayout{vireo->createDescriptorLayout(name)} {
+        descriptorLayout{Application::getVireo()->createDescriptorLayout(name)} {
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
         if (data) {
             descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
-            dataUniform = vireo->createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
+            dataUniform = Application::getVireo()->createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
             dataUniform->map();
             dataUniform->write(data, dataSize);
             dataUniform->unmap();
@@ -33,20 +33,20 @@ namespace lysa {
         descriptorLayout->build();
 
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = vireo->createPipelineResources({
+        pipelineConfig.resources = Application::getVireo()->createPipelineResources({
             descriptorLayout,
             samplers.getDescriptorLayout()},
             {},
             name);
-        pipelineConfig.vertexShader = vireo->createShaderModule("shaders/quad.vert");
-        pipelineConfig.fragmentShader = vireo->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
-        pipeline = vireo->createGraphicPipeline(pipelineConfig, name);
+        pipelineConfig.vertexShader = Application::getVireo()->createShaderModule("shaders/quad.vert");
+        pipelineConfig.fragmentShader = Application::getVireo()->createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
+        pipeline = Application::getVireo()->createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
-            frame.paramsUniform = vireo->createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
+            frame.paramsUniform = Application::getVireo()->createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
-            frame.descriptorSet = vireo->createDescriptorSet(descriptorLayout, name);
+            frame.descriptorSet = Application::getVireo()->createDescriptorSet(descriptorLayout, name);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);
@@ -92,7 +92,7 @@ namespace lysa {
 
     void PostProcessing::resize(const vireo::Extent& extent) {
         for (auto& frame : framesData) {
-            frame.colorAttachment = vireo->createRenderTarget(
+            frame.colorAttachment = Application::getVireo()->createRenderTarget(
                 config.renderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,

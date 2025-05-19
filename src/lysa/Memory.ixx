@@ -23,7 +23,6 @@ export namespace lysa {
     class MemoryArray {
     public:
         MemoryArray(
-            const std::shared_ptr<vireo::Vireo>& vireo,
             size_t instanceSize,
             size_t instanceCount,
             size_t stagingInstanceCount,

@@ -85,7 +85,7 @@ export namespace lysa {
         // Indices of all materials in the buffers
         std::unordered_map<unique_id, uint32> materialsIndices{};
 
-        Scene(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent);
+        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
 
     private:
         // Rendering window extent
@@ -94,7 +94,6 @@ export namespace lysa {
         vireo::Viewport viewport;
         vireo::Rect scissors;
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
-        const std::shared_ptr<vireo::Vireo>& vireo;
         std::shared_ptr<vireo::SubmitQueue> transferQueue;
         std::shared_ptr<vireo::CommandAllocator> commandAllocator;
 

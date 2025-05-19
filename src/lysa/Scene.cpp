@@ -6,14 +6,16 @@
  */
 module lysa.scene;
 
+import lysa.application;
+
 namespace lysa {
 
-    Scene::Scene(const RenderingConfiguration& config, const std::shared_ptr<vireo::Vireo>& vireo, const vireo::Extent &extent) :
-        config{config}, vireo{vireo} {
+    Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
+        config{config} {
         materials.resize(1000);
         resize(extent);
-        commandAllocator = vireo->createCommandAllocator(vireo::CommandType::TRANSFER);
-        transferQueue = vireo->createSubmitQueue(vireo::CommandType::TRANSFER);
+        commandAllocator = Application::getVireo()->createCommandAllocator(vireo::CommandType::TRANSFER);
+        transferQueue = Application::getVireo()->createSubmitQueue(vireo::CommandType::TRANSFER);
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -75,7 +77,7 @@ namespace lysa {
             for (const auto& meshSurface : mesh->getSurfaces()) {
                 if (!opaqueDrawCommands.contains(pair)) {
                     opaqueDrawCommands[pair] = {};
-                    opaqueDrawCommandsBuffer[pair] = vireo->createBuffer(
+                    opaqueDrawCommandsBuffer[pair] = Application::getVireo()->createBuffer(
                         vireo::BufferType::INDIRECT,
                         sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1,
                         L"Per buffer draw commands");

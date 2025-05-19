@@ -77,11 +77,9 @@ target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
 
 #######################################################
 if(WIN32)
-    set(WIN32_SRC
-            ${ENGINE_SRC_DIR}/os/windows/Win32Window.cpp
+    set(WIN32_SRC ""
     )
-    set(WIN32_MODULES
-            ${ENGINE_SRC_DIR}/os/windows/Win32Window.ixx
+    set(WIN32_MODULES ""
     )
 endif ()
 

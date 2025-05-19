@@ -6,10 +6,6 @@
 */
 module lysa.application;
 
-#ifdef _WIN32
-import lysa.os.win32.window;
-#endif
-
 namespace lysa {
 
     Application* Application::instance{nullptr};
@@ -19,12 +15,6 @@ namespace lysa {
         vireo{vireo::Vireo::create(config.backend)} {
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
-    }
-
-    std::shared_ptr<Window> Application::createWindow(WindowConfiguration& surfaceConfig, void* windowHandle) const {
-#ifdef _WIN32
-        return std::make_shared<Win32Window>(vireo, surfaceConfig, windowHandle);
-#endif
     }
 
 }
