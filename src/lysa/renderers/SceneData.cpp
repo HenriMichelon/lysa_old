@@ -7,6 +7,7 @@
 module lysa.renderers.scene_data;
 
 import lysa.nodes.node;
+import lysa.resources.mesh;
 
 namespace lysa {
 
@@ -126,13 +127,21 @@ namespace lysa {
             const auto set = perBufferDescriptorSets.at(bufferPair);
             commandList->setDescriptors({set});
             commandList->bindDescriptor(pipeline, set, SET_PERBUFFER);
-            commandList->bindVertexBuffer(bufferPair.vertexBuffer);
             commandList->bindIndexBuffer(bufferPair.indexBuffer);
-            commandList->drawIndexedIndirect(
-                commandsBufferByBuffer.at(bufferPair),
-                0,
-                commands.size(),
-                sizeof(vireo::DrawIndexedIndirectCommand));
+            for (const auto& command : commands) {
+                commandList->bindVertexBuffer(bufferPair.vertexBuffer, command.vertexOffset * sizeof(Vertex));
+                commandList->drawIndexed(
+                    command.indexCount,
+                    1,
+                    0,
+                    0,
+                    0);
+            }
+            // commandList->drawIndexedIndirect(
+                // commandsBufferByBuffer.at(bufferPair),
+                // 0,
+                // commands.size(),
+                // sizeof(vireo::DrawIndexedIndirectCommand));
         }
     }
 

@@ -89,6 +89,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/Global.cpp
+        ${ENGINE_SRC_DIR}/Memory.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
@@ -125,6 +126,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Enums.ixx
         ${ENGINE_SRC_DIR}/Global.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
+        ${ENGINE_SRC_DIR}/Memory.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx

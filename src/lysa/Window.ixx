@@ -9,6 +9,7 @@ export module lysa.window;
 import vireo;
 import lysa.global;
 import lysa.configuration;
+import lysa.memory;
 import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
@@ -91,6 +92,8 @@ export namespace lysa {
         void upload(const std::vector<vireo::BufferUploadInfo>& infos) const;
 
         void upload(const std::vector<vireo::ImageUploadInfo>& infos) const;
+
+        void upload(MemoryArray& memoryArray) const;
 
         virtual ~Window();
 
