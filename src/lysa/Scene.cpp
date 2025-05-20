@@ -26,7 +26,22 @@ namespace lysa {
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
 
         resize(extent);
+        createInstanceDataArray();
+        opaqueDrawCommandsBuffer = Application::getVireo().createBuffer(
+           vireo::BufferType::INDIRECT,
+           sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1, // TODO automatic grows
+            L"Draw commands");
         sceneUniformBuffer->map();
+    }
+
+    void Scene::createInstanceDataArray() {
+        instanceDataArray = std::make_unique<MemoryArray>(
+            Application::getVireo(),
+            sizeof(MeshSurfaceInstanceData),
+            maxInstanceData, // TODO automatic grows
+            maxInstanceData,
+            vireo::BufferType::STORAGE,
+            L"MeshSurface Instance Data");
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -43,7 +58,7 @@ namespace lysa {
         }
     }
 
-    void Scene::update() const {
+    void Scene::update() {
         if (currentCamera && currentCamera->isUpdated()) {
             const auto sceneUniform = SceneData {
                 .cameraPosition = currentCamera->getPositionGlobal(),
@@ -53,6 +68,20 @@ namespace lysa {
             };
             sceneUniformBuffer->write(&sceneUniform);
             currentCamera->updated--;
+        }
+        if (resourcesUpdated) {
+            Application::getResources().flush();
+            resourcesUpdated = false;
+        }
+        auto surfaceIndex{0};
+        for (const auto& meshInstance : models) {
+            const auto& mesh = meshInstance->getMesh();
+            if (meshInstance->isUpdated()) {
+                for (int i = 0; i < mesh->getSurfaces().size(); i++) {
+
+                }
+            }
+            surfaceIndex += mesh->getSurfaces().size();
         }
     }
 
@@ -69,25 +98,10 @@ namespace lysa {
                 mesh->upload();
                 resourcesUpdated = true;
             }
+            models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
-
-            // for (const auto& meshSurface : mesh->getSurfaces()) {
-            //     opaqueDrawCommands.push_back(vireo::DrawIndexedIndirectCommand{
-            //         .indexCount = meshSurface->indexCount,
-            //         .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
-            //         .vertexOffset = static_cast<int32_t>(mesh->getFirstVertex()),
-            //     });
-            // }
-            // commandsUpdated = true;
-
-            if (opaqueDrawCommandsBuffer == nullptr) {
-                opaqueDrawCommandsBuffer = Application::getVireo().createBuffer(
-                    vireo::BufferType::INDIRECT,
-                    sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1, // TODO automatic grows
-                L"Draw commands");
-            }
             break;
         }
         case Node::VIEWPORT:

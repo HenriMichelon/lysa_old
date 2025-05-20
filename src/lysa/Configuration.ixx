@@ -40,7 +40,6 @@ export namespace lysa {
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
-
     };
 
     /**

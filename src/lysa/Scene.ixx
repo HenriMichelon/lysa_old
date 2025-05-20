@@ -9,6 +9,7 @@ export module lysa.scene;
 import vireo;
 import lysa.global;
 import lysa.configuration;
+import lysa.memory;
 import lysa.samplers;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
@@ -37,6 +38,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex SET_SCENE{1};
         static constexpr vireo::DescriptorIndex SET_SAMPLERS{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
@@ -61,7 +63,7 @@ export namespace lysa {
 
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
-        void update() const;
+        void update();
 
         void resize(const vireo::Extent &extent);
 
@@ -84,6 +86,12 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         bool resourcesUpdated{false};
 
+        std::unique_ptr<MemoryArray> instanceDataArray;
+        size_t maxInstanceData{1000};
+        // All models
+        std::list<std::shared_ptr<MeshInstance>> models{};
+        std::vector<MemoryBlock> meshSurfaceMemoryBlocks{};
+
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
 
@@ -92,6 +100,8 @@ export namespace lysa {
         std::vector<vireo::DrawIndexedIndirectCommand> opaqueDrawCommands{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         bool commandsUpdated{false};
+
+        void createInstanceDataArray();
 
     };
 

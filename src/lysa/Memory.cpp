@@ -26,12 +26,16 @@ namespace lysa {
         stagingBuffer->map();
     }
 
+    MemoryArray::~MemoryArray() {
+        cleanup();
+    }
+
     void MemoryArray::cleanup() {
         buffer.reset();
         stagingBuffer.reset();
     }
 
-    void MemoryArray::write(const MemoryBloc& destination, const void* source) {
+    void MemoryArray::write(const MemoryBlock& destination, const void* source) {
         stagingBuffer->write(source, destination.size, stagingBufferCurrentOffset);
         pendingWrites.push_back({
             stagingBufferCurrentOffset,
@@ -47,11 +51,11 @@ namespace lysa {
         pendingWrites.clear();
     }
 
-    MemoryBloc MemoryArray::alloc(const size_t instanceCount) {
+    MemoryBlock MemoryArray::alloc(const size_t instanceCount) {
         const auto size = instanceSize * instanceCount;
-        for (MemoryBloc& bloc : freeBlocs) {
+        for (MemoryBlock& bloc : freeBlocs) {
             if (bloc.size >= size) {
-                const MemoryBloc result{
+                const MemoryBlock result{
                     static_cast<uint32>(bloc.offset / instanceSize),
                     bloc.offset,
                     size};
@@ -67,7 +71,7 @@ namespace lysa {
         throw Exception{"Out of memory for array " + std::to_string(name)};
     }
 
-    void MemoryArray::free(const MemoryBloc& bloc) {
+    void MemoryArray::free(const MemoryBlock& bloc) {
         freeBlocs.push_back(bloc);
     }
 

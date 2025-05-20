@@ -76,7 +76,7 @@ export namespace lysa {
         vireo::CullMode  cullMode{vireo::CullMode::NONE};
         Transparency     transparency{Transparency::DISABLED};
         float            alphaScissor{0.1f};
-        MemoryBloc       memoryBloc;
+        MemoryBlock       memoryBloc;
     };
 
     /**

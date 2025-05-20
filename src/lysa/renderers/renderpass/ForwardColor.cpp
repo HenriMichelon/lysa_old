@@ -19,8 +19,8 @@ namespace lysa {
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Scene::descriptorLayout,
-            samplers.getDescriptorLayout(),
-        });
+            samplers.getDescriptorLayout()},
+            {}, name);
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/default.vert");
         pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/forward.frag");

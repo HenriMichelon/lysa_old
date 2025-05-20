@@ -50,11 +50,11 @@ namespace lysa {
             if (!material->isUploaded()) {
                 material->upload();
             }
-            meshSurfaceData[i].firstIndex = indexMemoryBloc.instanceIndex;
-            meshSurfaceData[i].firstVertex = vertexMemoryBloc.instanceIndex;
+            meshSurfaceData[i].indexIndex = indexMemoryBloc.instanceIndex + surfaces[i]->firstIndex;
+            meshSurfaceData[i].vertexIndex = vertexMemoryBloc.instanceIndex;
             meshSurfaceData[i].materialIndex = material->getMaterialIndex();
         }
-        resources.getMeshSurfaceArray().write(meshSurfaceMemoryBloc, &meshSurfaceData);
+        resources.getMeshSurfaceArray().write(meshSurfaceMemoryBloc, meshSurfaceData.data());
     }
 
     bool Mesh::operator==(const Mesh &other) const {

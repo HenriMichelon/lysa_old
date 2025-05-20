@@ -38,8 +38,8 @@ export namespace lysa {
     };
 
     struct MeshSurfaceData {
-        uint32 firstIndex{0};
-        uint32 firstVertex{0};
+        uint32 indexIndex{0};
+        uint32 vertexIndex{0};
         uint32 materialIndex{0};
     };
 
@@ -166,9 +166,9 @@ export namespace lysa {
         void buildAABB();
 
     private:
-        MemoryBloc vertexMemoryBloc;
-        MemoryBloc indexMemoryBloc;
-        MemoryBloc meshSurfaceMemoryBloc;
+        MemoryBlock vertexMemoryBloc;
+        MemoryBlock indexMemoryBloc;
+        MemoryBlock meshSurfaceMemoryBloc;
     };
 }
 

@@ -39,3 +39,9 @@ struct Material {
     float  shininess;
     int    diffuseTextureIndex;
 }
+
+struct MeshSurface {
+    uint firstIndex;
+    uint firstVertex;
+    uint materialIndex;
+}

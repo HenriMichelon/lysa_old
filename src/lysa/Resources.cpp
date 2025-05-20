@@ -85,5 +85,4 @@ namespace lysa {
         transferQueue->waitIdle();
     }
 
-
 }
