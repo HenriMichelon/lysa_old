@@ -16,27 +16,6 @@ import lysa.nodes.viewport;
 import lysa.resources.material;
 
 export namespace lysa {
-    struct BufferPair {
-        std::shared_ptr<vireo::Buffer> vertexBuffer;
-        std::shared_ptr<vireo::Buffer> indexBuffer;
-        friend bool operator==(const BufferPair& first, const BufferPair& second) {
-            return first.vertexBuffer == second.vertexBuffer && first.indexBuffer == second.indexBuffer;
-        }
-    };
-}
-
-template <>
-struct std::hash<lysa::BufferPair> {
-    size_t operator()(const lysa::BufferPair& pair) const noexcept {
-        const size_t h1 = std::hash<std::shared_ptr<vireo::Buffer>>{}(pair.vertexBuffer);
-        const size_t h2 = std::hash<std::shared_ptr<vireo::Buffer>>{}(pair.indexBuffer);
-        size_t seed = h1;
-        seed ^= h2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
-export namespace lysa {
 
     class Scene {
     public:
@@ -46,9 +25,9 @@ export namespace lysa {
 
         const auto& getOpaqueDrawCommandsBuffer() const { return opaqueDrawCommandsBuffer; }
 
-        const auto& getMaterialIndex(const unique_id materialId) const {
-            return materialsIndices.at(materialId);
-        }
+        // const auto& getMaterialIndex(const unique_id materialId) const {
+            // return materialsIndices.at(materialId);
+        // }
 
         virtual void update() = 0;
 
@@ -65,6 +44,7 @@ export namespace lysa {
 
     protected:
         const RenderingConfiguration& config;
+        bool memoryUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
@@ -72,18 +52,19 @@ export namespace lysa {
         bool cameraUpdated{false};
 
         // All models containing opaque surfaces grouped by buffers
-        std::unordered_map<BufferPair, std::list<std::shared_ptr<MeshInstance>>> opaqueModels{};
-        std::unordered_map<BufferPair, std::vector<vireo::DrawIndexedIndirectCommand>> opaqueDrawCommands{};
-        std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>> opaqueDrawCommandsBuffer;
+        std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
+        std::vector<vireo::DrawIndexedIndirectCommand> opaqueDrawCommands{};
+        std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
+        bool commandsUpdated{false};
 
         // All materials used in the scene, used to update the buffer in GPU memory
-        std::vector<std::shared_ptr<Material>> materials;
+        // std::vector<std::shared_ptr<Material>> materials;
         // Index used for faster updates
-        uint32 lastMaterialIndex{0};
+        // uint32 lastMaterialIndex{0};
         // Material reference counter, used to know if the material is still used or if it can be removed from the scene
-        std::unordered_map<unique_id, uint32> materialsRefCounter;
+        // std::unordered_map<unique_id, uint32> materialsRefCounter;
         // Indices of all materials in the buffers
-        std::unordered_map<unique_id, uint32> materialsIndices{};
+        // std::unordered_map<unique_id, uint32> materialsIndices{};
 
         Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
 
@@ -94,8 +75,6 @@ export namespace lysa {
         vireo::Viewport viewport;
         vireo::Rect scissors;
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
-        std::shared_ptr<vireo::SubmitQueue> transferQueue;
-        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
 
         friend class Window;
 

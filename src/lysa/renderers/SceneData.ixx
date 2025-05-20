@@ -12,6 +12,7 @@ import lysa.scene;
 import lysa.configuration;
 import lysa.nodes.mesh_instance;
 import lysa.resources.material;
+import lysa.renderers.samplers;
 
 export namespace lysa {
 
@@ -36,8 +37,7 @@ export namespace lysa {
 
     class SceneData : public Scene {
     public:
-        inline static std::shared_ptr<vireo::DescriptorLayout> globalDescriptorLayout{nullptr};
-        inline static std::shared_ptr<vireo::DescriptorLayout> perBufferPairDescriptorLayout{nullptr};
+        inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         SceneData(const RenderingConfiguration& config, const vireo::Extent &extent);
 
@@ -46,27 +46,18 @@ export namespace lysa {
         void draw(
             const std::shared_ptr<vireo::CommandList>& commandList,
             const std::shared_ptr<vireo::Pipeline>& pipeline,
-            const std::unordered_map<BufferPair, std::vector<vireo::DrawIndexedIndirectCommand>>& commandsByBuffer,
-            const std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>>& commandsBufferByBuffer) const;
+            const Samplers& samplers,
+            const std::vector<vireo::DrawIndexedIndirectCommand>& commands,
+            const std::shared_ptr<vireo::Buffer>& commandBuffer) const;
 
-        auto getDescriptorSet() const { return globalDescriptorSet; }
+        auto getDescriptorSet() const { return descriptorSet; }
 
     private:
-        static constexpr vireo::DescriptorIndex SET_GLOBAL{0};
+        static constexpr vireo::DescriptorIndex SET_RESOURCES{0};
+        static constexpr vireo::DescriptorIndex SET_SCENE{1};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIALS{1};
-        std::shared_ptr<vireo::DescriptorSet> globalDescriptorSet;
-        // Scene data buffer
+        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
-        // Data for all the materials of the scene
-        std::shared_ptr<vireo::Buffer> materialsStorageBuffer;
-
-        static constexpr vireo::DescriptorIndex SET_PERBUFFER{1};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCES_DATA{0};
-        std::unordered_map<BufferPair, std::shared_ptr<vireo::DescriptorSet>> perBufferDescriptorSets;
-        std::unordered_map<BufferPair, std::vector<InstanceData>> perBufferInstancesData;
-        std::unordered_map<BufferPair, std::shared_ptr<vireo::Buffer>> perBufferInstancesDataBuffer;
-
     };
 
 }

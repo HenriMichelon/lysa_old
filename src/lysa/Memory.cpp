@@ -12,6 +12,7 @@ import lysa.global;
 namespace lysa {
 
     MemoryArray::MemoryArray(
+        const vireo::Vireo& vireo,
         const size_t instanceSize,
         const size_t instanceCount,
         const size_t stagingInstanceCount,
@@ -19,8 +20,8 @@ namespace lysa {
         const std::wstring& name) :
         name{name},
         instanceSize{instanceSize},
-        buffer{Application::getVireo().createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
-        stagingBuffer{Application::getVireo().createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
+        buffer{vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
+        stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
         freeBlocs.push_back({0, instanceSize * instanceCount});
         stagingBuffer->map();
     }
@@ -45,7 +46,10 @@ namespace lysa {
         const auto size = instanceSize * instanceCount;
         for (MemoryBloc& bloc : freeBlocs) {
             if (bloc.size >= size) {
-                const MemoryBloc result{bloc.offset, size};
+                const MemoryBloc result{
+                    static_cast<uint32>(bloc.offset / instanceSize),
+                    bloc.offset,
+                    size};
                 if (bloc.size == size) {
                     freeBlocs.remove(bloc);
                 } else {

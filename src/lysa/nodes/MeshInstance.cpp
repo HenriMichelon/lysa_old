@@ -35,11 +35,4 @@ namespace lysa {
         worldAABB = mesh->getAABB().toGlobal(globalTransform) ;
     }
 
-    void MeshInstance::ready(Window* window) {
-        Node::ready(window);
-        if (window && !mesh->isUploaded()) {
-            mesh->upload(window);
-        }
-    }
-
 }

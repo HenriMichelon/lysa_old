@@ -12,10 +12,8 @@ namespace lysa {
 
     Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
         config{config} {
-        materials.resize(1000);
+        // materials.resize(1000);
         resize(extent);
-        commandAllocator = Application::getVireo().createCommandAllocator(vireo::CommandType::TRANSFER);
-        transferQueue = Application::getVireo().createSubmitQueue(vireo::CommandType::TRANSFER);
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -45,14 +43,14 @@ namespace lysa {
     // }
 
     bool Scene::updateMaterial(const std::shared_ptr<Material>& material) {
-        for (int i = lastMaterialIndex; i < materials.size(); i++) {
-            if (materials[i] == nullptr) {
-                materials[i] = material;
-                materialsIndices[material->getId()] = i;
-                lastMaterialIndex = i + 1;
-                return true;
-            }
-        }
+        // for (int i = lastMaterialIndex; i < materials.size(); i++) {
+        //     if (materials[i] == nullptr) {
+        //         materials[i] = material;
+        //         materialsIndices[material->getId()] = i;
+        //         lastMaterialIndex = i + 1;
+        //         return true;
+        //     }
+        // }
         return false;
     }
 
@@ -65,53 +63,44 @@ namespace lysa {
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             const auto& mesh = meshInstance->getMesh();
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
+            if (!mesh->isUploaded()) {
+                mesh->upload();
+                memoryUpdated = true;
+            }
+            opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
 
-            const auto pair = BufferPair{mesh->getVertexBuffer(), mesh->getIndexBuffer()};
-            if (!opaqueModels.contains(pair)) {
-                opaqueModels[pair] = {};
-            }
-            opaqueModels[pair].push_back(meshInstance);
-
             for (const auto& meshSurface : mesh->getSurfaces()) {
-                if (!opaqueDrawCommands.contains(pair)) {
-                    opaqueDrawCommands[pair] = {};
-                    opaqueDrawCommandsBuffer[pair] = Application::getVireo().createBuffer(
-                        vireo::BufferType::INDIRECT,
-                        sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1,
-                        L"Per buffer draw commands");
-                }
-                auto& commands = opaqueDrawCommands[pair];
-                commands.push_back(vireo::DrawIndexedIndirectCommand{
+                opaqueDrawCommands.push_back(vireo::DrawIndexedIndirectCommand{
                     .indexCount = meshSurface->indexCount,
-                    .instanceCount = 1,
                     .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
-                    .vertexOffset = mesh->getVertexOffset(),
-                    .firstInstance = 0, //static_cast<uint32_t>(commands.size()),
+                    .vertexOffset = static_cast<int32_t>(mesh->getFirstVertex()),
                 });
             }
-            const auto cmdList = commandAllocator->createCommandList();
-            cmdList->begin();
-            cmdList->upload(opaqueDrawCommandsBuffer[pair], opaqueDrawCommands[pair].data());
-            cmdList->end();
-            transferQueue->submit({cmdList});
-            transferQueue->waitIdle();
+            commandsUpdated = true;
 
-            for (const auto &material :mesh->getMaterials()) {
-                if (materialsRefCounter.contains(material->getId())) {
-                    materialsRefCounter[material->getId()]++;
-                    continue;
-                }
-                if (!updateMaterial(material)) {
-                    lastMaterialIndex = 0;
-                    if (!updateMaterial(material)) {
-                        throw Exception{"MemoryConfiguration.maxMaterialsCount reached."};
-                    }
-                }
-                // Force material data to be written to GPU memory
-                material->updated = config.framesInFlight;
+            if (opaqueDrawCommandsBuffer == nullptr) {
+                opaqueDrawCommandsBuffer = Application::getVireo().createBuffer(
+                    vireo::BufferType::INDIRECT,
+                    sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1, // TODO automatic grows
+                L"Draw commands");
             }
+
+            // for (const auto &material :mesh->getMaterials()) {
+            //     if (materialsRefCounter.contains(material->getId())) {
+            //         materialsRefCounter[material->getId()]++;
+            //         continue;
+            //     }
+            //     if (!updateMaterial(material)) {
+            //         lastMaterialIndex = 0;
+            //         if (!updateMaterial(material)) {
+            //             throw Exception{"MemoryConfiguration.maxMaterialsCount reached."};
+            //         }
+            //     }
+            //     // Force material data to be written to GPU memory
+            //     material->updated = config.framesInFlight;
+            // }
             break;
         }
         case Node::VIEWPORT:
@@ -138,18 +127,18 @@ namespace lysa {
             // models[modelsIndices[meshInstance->getId()]].reset();
             // modelsIndices.erase(meshInstance->getId());
             // Check if we need to remove the material from the scene
-            for (const auto &material : meshInstance->getMesh()->getMaterials()) {
-                if (materialsRefCounter.contains(material->getId())) {
-                    if (--materialsRefCounter[material->getId()] == 0) {
-                        materialsRefCounter.erase(material->getId());
-                        // Try to remove the associated textures
-                        //...
-                        // Remove the material from the scene
-                        materials[materialsIndices[material->getId()]].reset();
-                        materialsIndices.erase(material->getId());
-                    }
-                }
-            }
+            // for (const auto &material : meshInstance->getMesh()->getMaterials()) {
+            //     if (materialsRefCounter.contains(material->getId())) {
+            //         if (--materialsRefCounter[material->getId()] == 0) {
+            //             materialsRefCounter.erase(material->getId());
+            //             // Try to remove the associated textures
+            //             //...
+            //             // Remove the material from the scene
+            //             materials[materialsIndices[material->getId()]].reset();
+            //             materialsIndices.erase(material->getId());
+            //         }
+            //     }
+            // }
             break;
         }
         case Node::VIEWPORT:

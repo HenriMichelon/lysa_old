@@ -6,14 +6,15 @@
 */
 export module lysa.memory;
 
-import std;
 import vireo;
+import lysa.global;
 
 export namespace lysa {
 
     struct MemoryBloc {
-        size_t offset;
-        size_t size;
+        uint32 instanceIndex{0};
+        size_t offset{0};
+        size_t size{0};
 
         friend bool operator==(const MemoryBloc&first, const MemoryBloc&second) {
             return first.offset == second.offset && first.size == second.size;
@@ -23,6 +24,7 @@ export namespace lysa {
     class MemoryArray {
     public:
         MemoryArray(
+            const vireo::Vireo& vireo,
             size_t instanceSize,
             size_t instanceCount,
             size_t stagingInstanceCount,

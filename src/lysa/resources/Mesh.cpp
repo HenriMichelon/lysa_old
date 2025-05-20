@@ -29,46 +29,19 @@ namespace lysa {
         buildAABB();
     }
 
-    Mesh::Mesh(const std::vector<Vertex>& vertices,
-            const std::vector<uint32>& indices,
-            const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-            const uint32 firstIndex,
-            const int32 vertexOffset,
-            const std::shared_ptr<vireo::Buffer>& vertexBuffer,
-            const std::shared_ptr<vireo::Buffer>& indexBuffer,
-            const std::wstring &name):
-        Resource{name},
-        vertices{vertices},
-        indices{indices},
-        surfaces{surfaces},
-        firstIndex{firstIndex},
-        vertexOffset{vertexOffset},
-        vertexBuffer{vertexBuffer},
-        indexBuffer{indexBuffer} {
-        buildAABB();
-    }
-
     void Mesh::setSurfaceMaterial(const uint32 surfaceIndex, const std::shared_ptr<Material>& material) {
         assert([&]{return surfaceIndex < surfaces.size();}, "Invalid surface index");
         surfaces[surfaceIndex]->material = material;
         materials.insert(surfaces[surfaceIndex]->material);
     }
 
-    void Mesh::upload(Window* window) {
-        assert([&]{return window != nullptr; }, "Invalid window");
-        assert([&]{return vertexBuffer == nullptr; }, "Already uploaded");
-        const auto& vireo = Application::getVireo();
-        vertexBuffer = Application::getVireo().createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertices.size(), getName());
-        indexBuffer = Application::getVireo().createBuffer(vireo::BufferType::INDEX, sizeof(uint32), indices.size(), getName());
-        const auto allocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-        const auto commandList = allocator->createCommandList();
-        commandList->begin();
-        commandList->upload(vertexBuffer, vertices.data());
-        commandList->upload(indexBuffer, indices.data());
-        commandList->end();
-        window->getGraphicQueue()->submit({commandList});
-        window->getGraphicQueue()->waitIdle();
-        commandList->cleanup();
+    void Mesh::upload() {
+        assert([&]{return !isUploaded(); }, "Mesh already uploaded");
+        auto& resourceManager = Application::getResourcesManager();
+        vertexMemoryBloc = resourceManager.getVertexArray().alloc(vertices.size());
+        resourceManager.getVertexArray().write(vertexMemoryBloc, vertices.data());
+        indexMemoryBloc = resourceManager.getIndexArray().alloc(indices.size());
+        resourceManager.getIndexArray().write(indexMemoryBloc, indices.data());
     }
 
     bool Mesh::operator==(const Mesh &other) const {

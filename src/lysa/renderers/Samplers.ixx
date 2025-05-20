@@ -20,6 +20,7 @@ export namespace lysa {
         Samplers();
 
         const auto& getDescriptorLayout() const { return descriptorLayout; }
+
         const auto& getDescriptorSet() const { return descriptorSet; }
 
     private:

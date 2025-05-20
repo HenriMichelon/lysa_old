@@ -7,10 +7,10 @@
 export module lysa.resources.mesh;
 #include <cstddef>
 
-import std;
 import vireo;
 import lysa.aabb;
 import lysa.global;
+import lysa.memory;
 import lysa.resources.material;
 import lysa.resources.resource;
 
@@ -140,8 +140,6 @@ export namespace lysa {
          */
         const AABB& getAABB() const { return localAABB; }
 
-        auto isUploaded() const { return vertexBuffer != nullptr; }
-
         bool operator==(const Mesh &other) const;
 
         friend inline bool operator==(const std::shared_ptr<Mesh>& a, const std::shared_ptr<Mesh>& b) {
@@ -152,17 +150,15 @@ export namespace lysa {
             return *a < *b;
         }
 
-        const auto& getVertexBuffer() const { return vertexBuffer; }
+        auto getFirstIndex() const { return indexMemoryBloc.instanceIndex; }
 
-        const auto& getIndexBuffer() const { return indexBuffer; }
-
-        auto getFirstIndex() const { return firstIndex; }
-
-        auto getVertexOffset() const { return vertexOffset; }
+        auto getFirstVertex() const { return vertexMemoryBloc.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 
-        void upload(Window* window);
+        auto isUploaded() const { return vertexMemoryBloc.size > 0; }
+
+        void upload();
 
     protected:
         AABB                localAABB;
@@ -175,14 +171,9 @@ export namespace lysa {
         void buildAABB();
 
     private:
-        friend class Scene;
-        friend class MeshInstance;
-
-        uint32                         firstIndex{0};
-        int32                          vertexOffset{0};
-        std::shared_ptr<vireo::Buffer> vertexBuffer{nullptr};
-        std::shared_ptr<vireo::Buffer> indexBuffer{nullptr};
-
+        // friend class Scene;
+        MemoryBloc vertexMemoryBloc;
+        MemoryBloc indexMemoryBloc;
     };
 }
 

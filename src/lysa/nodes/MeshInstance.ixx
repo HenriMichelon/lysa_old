@@ -63,8 +63,6 @@ export namespace lysa {
 
         std::shared_ptr<Node> duplicateInstance() const override;
 
-        void ready(Window* window) override;
-
     private:
         AABB                  worldAABB;
         std::shared_ptr<Mesh> mesh;
@@ -72,7 +70,6 @@ export namespace lysa {
         // bool                            outlined{false};
         // std::shared_ptr<ShaderMaterial> outlineMaterial;
 
-        
         void updateGlobalTransform() override;
     };
 

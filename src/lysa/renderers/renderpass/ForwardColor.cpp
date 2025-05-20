@@ -6,9 +6,9 @@
 */
 module lysa.renderers.renderpass.forward_color;
 
-import lysa.resources.mesh;
-
 import lysa.application;
+import lysa.resources_manager;
+import lysa.resources.mesh;
 
 namespace lysa {
     ForwardColor::ForwardColor(
@@ -17,8 +17,9 @@ namespace lysa {
         Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
-            SceneData::globalDescriptorLayout,
-            SceneData::perBufferPairDescriptorLayout
+            ResourcesManager::descriptorLayout,
+            SceneData::descriptorLayout,
+            samplers.getDescriptorLayout(),
         });
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/default.vert");
@@ -41,10 +42,10 @@ namespace lysa {
         commandList->beginRendering(renderingConfig);
         commandList->setViewport(scene.getViewport());
         commandList->setScissors(scene.getScissors());
-        commandList->bindPipeline(pipeline);
         scene.draw(
             commandList,
             pipeline,
+            samplers,
             scene.getOpaqueDrawCommands(),
             scene.getOpaqueDrawCommandsBuffer());
         commandList->endRendering();
