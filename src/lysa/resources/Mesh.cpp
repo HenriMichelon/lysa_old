@@ -37,7 +37,7 @@ namespace lysa {
 
     void Mesh::upload() {
         assert([&]{return !isUploaded(); }, "Mesh already uploaded");
-        auto& resourceManager = Application::getResourcesManager();
+        auto& resourceManager = Application::getResources();
         vertexMemoryBloc = resourceManager.getVertexArray().alloc(vertices.size());
         resourceManager.getVertexArray().write(vertexMemoryBloc, vertices.data());
         indexMemoryBloc = resourceManager.getIndexArray().alloc(indices.size());

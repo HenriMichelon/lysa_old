@@ -9,9 +9,9 @@ module lysa.resources_manager;
 import lysa.application;
 
 namespace lysa {
-    ResourcesManager::ResourcesManager(const vireo::Vireo& vireo, ResourcesConfiguration& config):
+    Resources::Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config):
     config{config},
-    transferQueue{vireo.createSubmitQueue(vireo::CommandType::TRANSFER, L"Resources")},
+    transferQueue{vireo.createSubmitQueue(vireo::CommandType::TRANSFER, L"Resources transfer")},
     commandAllocator{vireo.createCommandAllocator(vireo::CommandType::TRANSFER)},
     commandList{commandAllocator->createCommandList()},
     vertexArray{
@@ -23,35 +23,55 @@ namespace lysa {
         L"Vertex Array"},
     indexArray{
         vireo,
-        sizeof(Vertex),
+        sizeof(uint32),
         config.maxIndexInstances,
         config.maxStagingIndexInstances,
         vireo::BufferType::STORAGE,
-        L"Index Array"} {
+        L"Index Array"},
+    materialArray{
+        vireo,
+        sizeof(MaterialData),
+        config.maxMaterialInstances,
+        config.maxStagingMaterialInstances,
+        vireo::BufferType::STORAGE,
+        L"Material Array"},
+    meshSurfaceArray{
+        vireo,
+        sizeof(MeshSurfaceData),
+        config.maxMeshSurfacesInstances,
+        config.maxStagingMeshSurfacesInstances,
+        vireo::BufferType::STORAGE,
+        L"MeshSurface Array"} {
         if (descriptorLayout == nullptr) {
             descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_INDEX, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_MESH_SURFACE, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
         descriptorSet->update(BINDING_VERTEX, vertexArray.getBuffer());
         descriptorSet->update(BINDING_INDEX, indexArray.getBuffer());
+        descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
+        descriptorSet->update(BINDING_MESH_SURFACE, meshSurfaceArray.getBuffer());
     }
 
-    ResourcesManager::~ResourcesManager() {
+    Resources::~Resources() {
         waitIdle();
     }
 
-    void ResourcesManager::flush() {
+    void Resources::flush() {
         commandList->begin();
         vertexArray.flush(commandList);
         indexArray.flush(commandList);
+        materialArray.flush(commandList);
+        meshSurfaceArray.flush(commandList);
         commandList->end();
         transferQueue->submit({commandList});
         transferQueue->waitIdle();
     }
 
-    void ResourcesManager::waitIdle() const {
+    void Resources::waitIdle() const {
         transferQueue->waitIdle();
     }
 

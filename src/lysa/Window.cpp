@@ -27,7 +27,7 @@ namespace lysa {
         framesData.resize(config.renderingConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = Application::getVireo().createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<SceneData>(config.renderingConfig, swapChain->getExtent());
+            frame.scene = std::make_shared<Scene>(config.renderingConfig, swapChain->getExtent());
         }
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instanciated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
@@ -38,8 +38,6 @@ namespace lysa {
         graphicQueue->waitIdle();
         swapChain->waitIdle();
         framesData.clear();
-        SceneData::descriptorLayout.reset();
-        SceneData::perBufferPairDescriptorLayout.reset();
         rootNode.reset();
         config.rootNode.reset();
         renderer.reset();

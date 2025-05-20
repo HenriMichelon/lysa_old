@@ -17,8 +17,8 @@ namespace lysa {
         Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
-            ResourcesManager::descriptorLayout,
-            SceneData::descriptorLayout,
+            Resources::descriptorLayout,
+            Scene::descriptorLayout,
             samplers.getDescriptorLayout(),
         });
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
@@ -34,7 +34,7 @@ namespace lysa {
 
     void ForwardColor::render(
         const uint32 frameIndex,
-        SceneData& scene,
+        Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList,
         const bool recordLastBarrier) {

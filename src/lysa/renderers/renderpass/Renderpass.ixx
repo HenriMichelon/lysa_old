@@ -10,8 +10,8 @@ import std;
 import vireo;
 import lysa.global;
 import lysa.configuration;
-import lysa.renderers.samplers;
-import lysa.renderers.scene_data;
+import lysa.samplers;
+import lysa.scene;
 
 export namespace lysa {
     class Renderpass {
@@ -27,7 +27,7 @@ export namespace lysa {
 
         virtual void render(
             uint32 frameIndex,
-            SceneData& scene,
+            Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList,
             bool recordLastBarrier = true) = 0;
@@ -36,7 +36,7 @@ export namespace lysa {
 
     protected:
         const std::wstring                      name;
-        const RenderingConfiguration&                  config;
+        const RenderingConfiguration&           config;
         const Samplers&                         samplers;
         std::shared_ptr<vireo::GraphicPipeline> pipeline;
 

@@ -10,8 +10,8 @@ import std;
 import vireo;
 import lysa.global;
 import lysa.configuration;
-import lysa.renderers.samplers;
-import lysa.renderers.scene_data;
+import lysa.samplers;
+import lysa.scene;
 import lysa.renderers.renderpass.post_processing;
 
 export namespace lysa {
@@ -35,11 +35,11 @@ export namespace lysa {
 
         virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32 frameIndex,
-            SceneData& scene);
+            Scene& scene);
 
         virtual void mainColorPass(
             uint32 frameIndex,
-            SceneData& scene,
+            Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::CommandList>& commandList) = 0;
 

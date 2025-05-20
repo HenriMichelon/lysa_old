@@ -9,6 +9,7 @@ export module lysa.scene;
 import vireo;
 import lysa.global;
 import lysa.configuration;
+import lysa.samplers;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
@@ -17,79 +18,79 @@ import lysa.resources.material;
 
 export namespace lysa {
 
+    struct SceneData {
+        float3      cameraPosition;
+        alignas(16) float4x4 projection;
+        float4x4    view;
+        float4x4    viewInverse;
+        float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
+    };
+
+    struct MeshSurfaceInstanceData {
+        float4x4 transform;
+        uint32   meshSurfaceIndex;
+    };
+
     class Scene {
     public:
+        static constexpr vireo::DescriptorIndex SET_RESOURCES{0};
+        static constexpr vireo::DescriptorIndex SET_SCENE{1};
+        static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
+        inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
+
+        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
+
         const auto& getOpaqueModels() const { return opaqueModels; }
 
         const auto& getOpaqueDrawCommands() const { return opaqueDrawCommands; }
 
         const auto& getOpaqueDrawCommandsBuffer() const { return opaqueDrawCommandsBuffer; }
 
-        // const auto& getMaterialIndex(const unique_id materialId) const {
-            // return materialsIndices.at(materialId);
-        // }
-
-        virtual void update() = 0;
-
-        //! Returns the current scene camera
         auto getCurrentCamera() const { return currentCamera; }
-
-        auto isCameraUpdated() const { return cameraUpdated; }
 
         auto getViewport() const { return viewport; }
 
         auto getScissors() const { return scissors; }
 
+        auto getDescriptorSet() const { return descriptorSet; }
+
+        virtual void addNode(const std::shared_ptr<Node> &node);
+
+        virtual void removeNode(const std::shared_ptr<Node> &node);
+
+        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
+
+        void update() const;
+
+        void resize(const vireo::Extent &extent);
+
+        void draw(
+           const std::shared_ptr<vireo::CommandList>& commandList,
+           const std::shared_ptr<vireo::Pipeline>& pipeline,
+           const Samplers& samplers,
+           const std::vector<vireo::DrawIndexedIndirectCommand>& commands,
+           const std::shared_ptr<vireo::Buffer>& commandBuffer) const;
+
         virtual ~Scene() = default;
 
-    protected:
+    private:
         const RenderingConfiguration& config;
-        bool memoryUpdated{false};
+        vireo::Extent extent;
+        vireo::Viewport viewport;
+        vireo::Rect scissors;
+        std::shared_ptr<Viewport> viewportAndScissors{nullptr};
+        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+        bool resourcesUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
-        // Camera has been updated
-        bool cameraUpdated{false};
 
-        // All models containing opaque surfaces grouped by buffers
+        // All models containing opaque surfaces
         std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
         std::vector<vireo::DrawIndexedIndirectCommand> opaqueDrawCommands{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         bool commandsUpdated{false};
-
-        // All materials used in the scene, used to update the buffer in GPU memory
-        // std::vector<std::shared_ptr<Material>> materials;
-        // Index used for faster updates
-        // uint32 lastMaterialIndex{0};
-        // Material reference counter, used to know if the material is still used or if it can be removed from the scene
-        // std::unordered_map<unique_id, uint32> materialsRefCounter;
-        // Indices of all materials in the buffers
-        // std::unordered_map<unique_id, uint32> materialsIndices{};
-
-        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
-
-    private:
-        // Rendering window extent
-        vireo::Extent extent;
-        // Viewport & Scissors
-        vireo::Viewport viewport;
-        vireo::Rect scissors;
-        std::shared_ptr<Viewport> viewportAndScissors{nullptr};
-
-        friend class Window;
-
-        bool updateMaterial(const std::shared_ptr<Material>& material);
-
-        void resize(const vireo::Extent &extent);
-
-        //! Adds a model to the scene
-        virtual void addNode(const std::shared_ptr<Node> &node);
-
-        //! Removes a model from the scene
-        virtual void removeNode(const std::shared_ptr<Node> &node);
-
-        //! Changes the active camera, disabling the previous camera
-        virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
     };
 

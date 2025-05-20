@@ -13,19 +13,34 @@ import lysa.memory;
 import lysa.resources.mesh;
 
 export namespace lysa {
+
+    struct MaterialData {
+        float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
+        float  shininess{128.f};
+        int32  diffuseTextureIndex{-1};
+    };
+
+    struct MeshSurfaceData {
+        uint32 firstIndex{0};
+        uint32 firstVertex{0};
+        uint32 materialIndex{0};
+    };
+
     /*
      *
      */
-    class ResourcesManager {
+    class Resources {
     public:
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{1};
         static constexpr vireo::DescriptorIndex BINDING_INDEX{2};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{3};
+        static constexpr vireo::DescriptorIndex BINDING_MESH_SURFACE{4};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         /**
         *
         */
-        ResourcesManager(const vireo::Vireo& vireo, ResourcesConfiguration& config);
+        Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config);
 
         void waitIdle() const;
 
@@ -33,11 +48,15 @@ export namespace lysa {
 
         auto& getIndexArray() { return indexArray; }
 
+        auto& getMaterialArray() { return materialArray; }
+
+        auto& getMeshSurfaceArray() { return meshSurfaceArray; }
+
         const auto& getDescriptorSet() const { return descriptorSet; }
 
         void flush();
 
-        virtual ~ResourcesManager();
+        virtual ~Resources();
 
     private:
         const ResourcesConfiguration& config;
@@ -47,6 +66,8 @@ export namespace lysa {
         std::shared_ptr<vireo::CommandList> commandList;
         MemoryArray vertexArray;
         MemoryArray indexArray;
+        MemoryArray materialArray;
+        MemoryArray meshSurfaceArray;
 
     };
 

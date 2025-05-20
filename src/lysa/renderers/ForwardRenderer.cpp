@@ -24,7 +24,7 @@ namespace lysa {
 
     void ForwardRenderer::mainColorPass(
         const uint32 frameIndex,
-        SceneData& scene,
+        Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::CommandList>& commandList) {
         forwardColorPass.render(frameIndex, scene, colorAttachment, commandList, false);

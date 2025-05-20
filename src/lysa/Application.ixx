@@ -27,16 +27,18 @@ export namespace lysa {
             return *(instance->vireo);
         }
 
-        static auto& getResourcesManager() {
+        static auto& getResources() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
-            return instance->resourceManager;
+            return instance->resources;
         }
+
+        virtual ~Application();
 
     private:
         static Application* instance;
         ApplicationConfiguration& config;
         std::shared_ptr<vireo::Vireo> vireo;
-        ResourcesManager resourceManager;
+        Resources resources;
 
     };
 

@@ -29,7 +29,7 @@ namespace lysa {
 
     std::vector<std::shared_ptr<const vireo::CommandList>> Renderer::render(
         const uint32 frameIndex,
-        SceneData& scene) {
+        Scene& scene) {
         const auto& frame = framesData[frameIndex];
 
         frame.commandAllocator->reset();

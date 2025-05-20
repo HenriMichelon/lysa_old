@@ -18,6 +18,8 @@ export namespace lysa {
         uint32 maxStagingIndexInstances{7500};
         uint32 maxMaterialInstances{1000};
         uint32 maxStagingMaterialInstances{500};
+        uint32 maxMeshSurfacesInstances{5000};
+        uint32 maxStagingMeshSurfacesInstances{2500};
     };
 
     struct ApplicationConfiguration {

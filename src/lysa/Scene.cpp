@@ -11,9 +11,22 @@ import lysa.application;
 namespace lysa {
 
     Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
-        config{config} {
-        // materials.resize(1000);
+        config{config},
+        sceneUniformBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::UNIFORM,
+            sizeof(SceneData), 1,
+            L"Scene Data")} {
+        if (descriptorLayout == nullptr) {
+            descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
+            descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
+            descriptorLayout->build();
+        }
+
+        descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Scene");
+        descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
+
         resize(extent);
+        sceneUniformBuffer->map();
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -30,28 +43,17 @@ namespace lysa {
         }
     }
 
-    // bool Scene::updateModel(const std::shared_ptr<MeshInstance>& meshInstance) {
-    //     for (int i = lastModelIndex; i < models.size(); i++) {
-    //         if (models[i] == nullptr) {
-    //             models[i] = meshInstance;
-    //             modelsIndices[meshInstance->getId()] = i;
-    //             lastModelIndex = i + 1;
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    bool Scene::updateMaterial(const std::shared_ptr<Material>& material) {
-        // for (int i = lastMaterialIndex; i < materials.size(); i++) {
-        //     if (materials[i] == nullptr) {
-        //         materials[i] = material;
-        //         materialsIndices[material->getId()] = i;
-        //         lastMaterialIndex = i + 1;
-        //         return true;
-        //     }
-        // }
-        return false;
+    void Scene::update() const {
+        if (currentCamera && currentCamera->isUpdated()) {
+            const auto sceneUniform = SceneData {
+                .cameraPosition = currentCamera->getPositionGlobal(),
+                .projection = currentCamera->getProjection(),
+                .view = inverse(currentCamera->getTransformGlobal()),
+                .viewInverse = currentCamera->getTransformGlobal(),
+            };
+            sceneUniformBuffer->write(&sceneUniform);
+            currentCamera->updated--;
+        }
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {
@@ -65,7 +67,7 @@ namespace lysa {
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
             if (!mesh->isUploaded()) {
                 mesh->upload();
-                memoryUpdated = true;
+                resourcesUpdated = true;
             }
             opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
@@ -86,21 +88,6 @@ namespace lysa {
                     sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1, // TODO automatic grows
                 L"Draw commands");
             }
-
-            // for (const auto &material :mesh->getMaterials()) {
-            //     if (materialsRefCounter.contains(material->getId())) {
-            //         materialsRefCounter[material->getId()]++;
-            //         continue;
-            //     }
-            //     if (!updateMaterial(material)) {
-            //         lastMaterialIndex = 0;
-            //         if (!updateMaterial(material)) {
-            //             throw Exception{"MemoryConfiguration.maxMaterialsCount reached."};
-            //         }
-            //     }
-            //     // Force material data to be written to GPU memory
-            //     material->updated = config.framesInFlight;
-            // }
             break;
         }
         case Node::VIEWPORT:
@@ -123,22 +110,6 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            // Remove the model from the scene
-            // models[modelsIndices[meshInstance->getId()]].reset();
-            // modelsIndices.erase(meshInstance->getId());
-            // Check if we need to remove the material from the scene
-            // for (const auto &material : meshInstance->getMesh()->getMaterials()) {
-            //     if (materialsRefCounter.contains(material->getId())) {
-            //         if (--materialsRefCounter[material->getId()] == 0) {
-            //             materialsRefCounter.erase(material->getId());
-            //             // Try to remove the associated textures
-            //             //...
-            //             // Remove the material from the scene
-            //             materials[materialsIndices[material->getId()]].reset();
-            //             materialsIndices.erase(material->getId());
-            //         }
-            //     }
-            // }
             break;
         }
         case Node::VIEWPORT:
@@ -149,6 +120,30 @@ namespace lysa {
             break;
         default:
             break;
+        }
+    }
+
+    void Scene::draw(
+        const std::shared_ptr<vireo::CommandList>& commandList,
+        const std::shared_ptr<vireo::Pipeline>& pipeline,
+        const Samplers& samplers,
+        const std::vector<vireo::DrawIndexedIndirectCommand>& commands,
+        const std::shared_ptr<vireo::Buffer>& commandBuffer) const {
+        auto& resources = Application::getResources();
+        const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
+            resources.getDescriptorSet(),
+            getDescriptorSet(),
+            samplers.getDescriptorSet()};
+        commandList->setDescriptors(sets);
+        commandList->bindPipeline(pipeline);
+        commandList->bindDescriptors(pipeline, sets);
+        //commandList->bindIndexBuffer(XXX);
+        for (const auto& command : commands) {
+            commandList->drawIndexedIndirect(
+                commandBuffer,
+                0,
+                commands.size(),
+                sizeof(vireo::DrawIndexedIndirectCommand));
         }
     }
 
