@@ -41,11 +41,13 @@ export namespace lysa {
 
         auto getBuffer() const { return buffer; }
 
+        void cleanup();
+
     private:
         const std::wstring name;
         const size_t instanceSize;
-        const std::shared_ptr<vireo::Buffer> buffer;
-        const std::shared_ptr<vireo::Buffer> stagingBuffer;
+        std::shared_ptr<vireo::Buffer> buffer;
+        std::shared_ptr<vireo::Buffer> stagingBuffer;
         size_t stagingBufferCurrentOffset{0};
         std::list<MemoryBloc> freeBlocs;
         std::vector<vireo::BufferCopyRegion> pendingWrites;

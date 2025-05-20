@@ -44,6 +44,7 @@ namespace lysa {
         vireo::BufferType::STORAGE,
         L"MeshSurface Array"} {
         if (descriptorLayout == nullptr) {
+            descriptorLayout = vireo.createDescriptorLayout(L"Resources");
             descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_INDEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
@@ -57,8 +58,16 @@ namespace lysa {
         descriptorSet->update(BINDING_MESH_SURFACE, meshSurfaceArray.getBuffer());
     }
 
-    Resources::~Resources() {
+    void Resources::cleanup() {
         waitIdle();
+        vertexArray.cleanup();
+        indexArray.cleanup();
+        materialArray.cleanup();
+        meshSurfaceArray.cleanup();
+        commandAllocator.reset();
+        commandList.reset();
+        descriptorSet.reset();
+        transferQueue.reset();
     }
 
     void Resources::flush() {

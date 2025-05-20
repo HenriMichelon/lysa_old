@@ -73,14 +73,14 @@ namespace lysa {
             // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
 
-            for (const auto& meshSurface : mesh->getSurfaces()) {
-                opaqueDrawCommands.push_back(vireo::DrawIndexedIndirectCommand{
-                    .indexCount = meshSurface->indexCount,
-                    .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
-                    .vertexOffset = static_cast<int32_t>(mesh->getFirstVertex()),
-                });
-            }
-            commandsUpdated = true;
+            // for (const auto& meshSurface : mesh->getSurfaces()) {
+            //     opaqueDrawCommands.push_back(vireo::DrawIndexedIndirectCommand{
+            //         .indexCount = meshSurface->indexCount,
+            //         .firstIndex = mesh->getFirstIndex() + meshSurface->firstIndex,
+            //         .vertexOffset = static_cast<int32_t>(mesh->getFirstVertex()),
+            //     });
+            // }
+            // commandsUpdated = true;
 
             if (opaqueDrawCommandsBuffer == nullptr) {
                 opaqueDrawCommandsBuffer = Application::getVireo().createBuffer(
@@ -134,17 +134,17 @@ namespace lysa {
             resources.getDescriptorSet(),
             getDescriptorSet(),
             samplers.getDescriptorSet()};
-        commandList->setDescriptors(sets);
-        commandList->bindPipeline(pipeline);
-        commandList->bindDescriptors(pipeline, sets);
-        //commandList->bindIndexBuffer(XXX);
-        for (const auto& command : commands) {
-            commandList->drawIndexedIndirect(
-                commandBuffer,
-                0,
-                commands.size(),
-                sizeof(vireo::DrawIndexedIndirectCommand));
-        }
+        // commandList->setDescriptors(sets);
+        // commandList->bindPipeline(pipeline);
+        // commandList->bindDescriptors(pipeline, sets);
+        // //commandList->bindIndexBuffer(XXX);
+        // for (const auto& command : commands) {
+        //     commandList->drawIndexedIndirect(
+        //         commandBuffer,
+        //         0,
+        //         commands.size(),
+        //         sizeof(vireo::DrawIndexedIndirectCommand));
+        // }
     }
 
     void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {

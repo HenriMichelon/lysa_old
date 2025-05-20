@@ -22,8 +22,13 @@ namespace lysa {
         instanceSize{instanceSize},
         buffer{vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
         stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
-        freeBlocs.push_back({0, instanceSize * instanceCount});
+        freeBlocs.push_back({0, 0, instanceSize * instanceCount});
         stagingBuffer->map();
+    }
+
+    void MemoryArray::cleanup() {
+        buffer.reset();
+        stagingBuffer.reset();
     }
 
     void MemoryArray::write(const MemoryBloc& destination, const void* source) {

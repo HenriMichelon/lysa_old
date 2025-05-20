@@ -38,7 +38,7 @@ export namespace lysa {
 
         void flush();
 
-        virtual ~Resources();
+        void cleanup();
 
     private:
         const ResourcesConfiguration& config;
