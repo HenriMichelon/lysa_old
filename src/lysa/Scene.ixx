@@ -35,6 +35,7 @@ export namespace lysa {
     public:
         static constexpr vireo::DescriptorIndex SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex SET_SCENE{1};
+        static constexpr vireo::DescriptorIndex SET_SAMPLERS{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 

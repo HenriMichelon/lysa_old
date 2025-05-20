@@ -7,6 +7,7 @@
 module lysa.resources_manager;
 
 import lysa.application;
+import lysa.resources.material;
 
 namespace lysa {
     Resources::Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config):

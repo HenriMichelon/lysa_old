@@ -6,10 +6,33 @@
 */
 module lysa.resources.material;
 
+import lysa.application;
+
 namespace lysa {
 
     Material::Material(const std::wstring &name):
         Resource(name) {
+    }
+
+    void Material::upload() {
+        auto& resources = Application::getResources();
+        if (!isUploaded()) {
+            memoryBloc = resources.getMaterialArray().alloc(1);
+        }
+        const auto materialData = getMaterialData();
+        resources.getMaterialArray().write(memoryBloc, &materialData);
+    }
+
+    MaterialData StandardMaterial::getMaterialData() const {
+        return {
+            .albedoColor = albedoColor,
+        };
+    }
+
+    MaterialData ShaderMaterial::getMaterialData() const {
+        return {
+
+        };
     }
 
     StandardMaterial::StandardMaterial(const std::wstring &name):

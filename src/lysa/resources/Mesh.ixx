@@ -37,6 +37,12 @@ export namespace lysa {
         }
     };
 
+    struct MeshSurfaceData {
+        uint32 firstIndex{0};
+        uint32 firstVertex{0};
+        uint32 materialIndex{0};
+    };
+
     /**
      * %A Mesh surface, with counterclockwise triangles
      */
@@ -84,15 +90,6 @@ export namespace lysa {
              const std::vector<uint32>& indices,
              const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
              const std::wstring& name = L"Mesh");
-
-        Mesh(const std::vector<Vertex>& vertices,
-                 const std::vector<uint32>& indices,
-                 const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-                 uint32 firstIndex,
-                 int32 vertexOffset,
-                 const std::shared_ptr<vireo::Buffer>& vertexBuffer,
-                 const std::shared_ptr<vireo::Buffer>& indexBuffer,
-                 const std::wstring &name = L"Mesh");
 
          /**
          * Returns the material for a given surface
@@ -150,9 +147,7 @@ export namespace lysa {
             return *a < *b;
         }
 
-        auto getFirstIndex() const { return indexMemoryBloc.instanceIndex; }
-
-        auto getFirstVertex() const { return vertexMemoryBloc.instanceIndex; }
+        auto geMeshSurfaceIndex() const { return meshSurfaceMemoryBloc.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 
@@ -171,9 +166,9 @@ export namespace lysa {
         void buildAABB();
 
     private:
-        // friend class Scene;
         MemoryBloc vertexMemoryBloc;
         MemoryBloc indexMemoryBloc;
+        MemoryBloc meshSurfaceMemoryBloc;
     };
 }
 

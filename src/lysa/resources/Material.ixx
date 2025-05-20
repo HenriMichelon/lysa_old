@@ -9,10 +9,18 @@ export module lysa.resources.material;
 import std;
 import vireo;
 import lysa.global;
+import lysa.memory;
 import lysa.resources.resource;
 import lysa.resources.texture;
 
 export namespace lysa {
+
+    struct MaterialData {
+        float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
+        float  shininess{128.f};
+        int32  diffuseTextureIndex{-1};
+    };
+
     /**
      * Base class for all materials of models surfaces
      */
@@ -53,6 +61,14 @@ export namespace lysa {
          */
         void setAlphaScissor(const float scissor) { alphaScissor = scissor; }
 
+        auto isUploaded() const { return memoryBloc.size > 0; }
+
+        void upload();
+
+        virtual MaterialData getMaterialData() const = 0;
+
+        const auto& getMaterialIndex() const { return memoryBloc.instanceIndex; }
+
     protected:
         Material(const std::wstring &name);
 
@@ -60,6 +76,7 @@ export namespace lysa {
         vireo::CullMode  cullMode{vireo::CullMode::NONE};
         Transparency     transparency{Transparency::DISABLED};
         float            alphaScissor{0.1f};
+        MemoryBloc       memoryBloc;
     };
 
     /**
@@ -192,6 +209,8 @@ export namespace lysa {
          */
         void setNormalScale(float scale);
 
+        MaterialData getMaterialData() const;
+
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
         TextureInfo  albedoTexture{};
@@ -250,6 +269,8 @@ export namespace lysa {
          * Returns a parameter value
          */
         auto getParameter(const int index) const { return parameters[index]; }
+
+        MaterialData getMaterialData() const;
 
     private:
         const std::wstring fragFileName;
