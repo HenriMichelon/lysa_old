@@ -37,12 +37,6 @@ export namespace lysa {
         }
     };
 
-    struct MeshSurfaceData {
-        uint32 indexIndex{0};
-        uint32 vertexIndex{0};
-        uint32 materialIndex{0};
-    };
-
     /**
      * %A Mesh surface, with counterclockwise triangles
      */
@@ -147,7 +141,9 @@ export namespace lysa {
             return *a < *b;
         }
 
-        auto geMeshSurfaceIndex() const { return meshSurfaceMemoryBloc.instanceIndex; }
+        auto getVertexIndex() const { return vertexMemoryBloc.instanceIndex; }
+
+        auto getIndexIndex() const { return indexMemoryBloc.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 
@@ -168,7 +164,6 @@ export namespace lysa {
     private:
         MemoryBlock vertexMemoryBloc;
         MemoryBlock indexMemoryBloc;
-        MemoryBlock meshSurfaceMemoryBloc;
     };
 }
 

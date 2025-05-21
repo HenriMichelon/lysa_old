@@ -29,7 +29,9 @@ export namespace lysa {
 
     struct MeshSurfaceInstanceData {
         float4x4 transform;
-        uint32   meshSurfaceIndex;
+        uint32 indexIndex{0};
+        uint32 vertexIndex{0};
+        uint32 materialIndex{0};
     };
 
     class Scene {
@@ -43,19 +45,11 @@ export namespace lysa {
 
         Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
 
-        const auto& getOpaqueModels() const { return opaqueModels; }
-
-        const auto& getOpaqueDrawCommands() const { return opaqueDrawCommands; }
-
-        const auto& getOpaqueDrawCommandsBuffer() const { return opaqueDrawCommandsBuffer; }
-
         auto getCurrentCamera() const { return currentCamera; }
 
         auto getViewport() const { return viewport; }
 
         auto getScissors() const { return scissors; }
-
-        auto getDescriptorSet() const { return descriptorSet; }
 
         virtual void addNode(const std::shared_ptr<Node> &node);
 
@@ -70,9 +64,7 @@ export namespace lysa {
         void draw(
            const std::shared_ptr<vireo::CommandList>& commandList,
            const std::shared_ptr<vireo::Pipeline>& pipeline,
-           const Samplers& samplers,
-           const std::vector<vireo::DrawIndexedIndirectCommand>& commands,
-           const std::shared_ptr<vireo::Buffer>& commandBuffer) const;
+           const Samplers& samplers) const;
 
         virtual ~Scene() = default;
 
@@ -84,24 +76,30 @@ export namespace lysa {
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+        std::shared_ptr<vireo::CommandList> commandList;
+        std::shared_ptr<vireo::SubmitQueue> transferQueue;
         bool resourcesUpdated{false};
 
-        std::unique_ptr<MemoryArray> instanceDataArray;
-        size_t maxInstanceData{1000};
         // All models
         std::list<std::shared_ptr<MeshInstance>> models{};
-        std::vector<MemoryBlock> meshSurfaceMemoryBlocks{};
+
+        MemoryArray instancesDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
+        bool instancesDataUpdated{false};
+
+        std::shared_ptr<vireo::Buffer> drawIndicesBuffer;
+        std::shared_ptr<vireo::Buffer> drawIndicesStagingBuffer;
+        bool drawIndicesUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
 
         // All models containing opaque surfaces
         std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
-        std::vector<vireo::DrawIndexedIndirectCommand> opaqueDrawCommands{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
+        std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
         bool commandsUpdated{false};
-
-        void createInstanceDataArray();
 
     };
 

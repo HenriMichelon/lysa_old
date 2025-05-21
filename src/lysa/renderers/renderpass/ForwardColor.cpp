@@ -21,7 +21,6 @@ namespace lysa {
             Scene::descriptorLayout,
             samplers.getDescriptorLayout()},
             {}, name);
-        pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(Vertex), Mesh::vertexAttributes);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/default.vert");
         pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/forward.frag");
         pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
@@ -45,9 +44,7 @@ namespace lysa {
         scene.draw(
             commandList,
             pipeline,
-            samplers,
-            scene.getOpaqueDrawCommands(),
-            scene.getOpaqueDrawCommandsBuffer());
+            samplers);
         commandList->endRendering();
     }
 }

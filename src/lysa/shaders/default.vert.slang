@@ -6,12 +6,19 @@
 */
 #include "scene_data.inc.slang"
 
-ConstantBuffer<Scene> scene  : register(b0, space0);
-StructuredBuffer<InstanceData> instancesData : register(b0, space1);
+StructuredBuffer<Vertex> vertices : register(b0, space0);
+StructuredBuffer<uint> indices : register(b1, space0);
+StructuredBuffer<Material> materials : register(b2, space0);
 
-VertexOutput vertexMain(VertexInput input, uint instanceID: SV_StartInstanceLocation ) {
+ConstantBuffer<Scene> scene  : register(b0, space1);
+StructuredBuffer<InstanceData> instancesData : register(b1, space1);
+
+VertexOutput vertexMain(uint indexIndex: SV_VertexID ) {
     VertexOutput output;
-    float4x4 model = instancesData[instanceID].transform;
+
+    InstanceData instanceData = instancesData[indexIndex];
+    Vertex input = vertices[indices[instanceData.firstIndex] + instanceData.firstVertex];
+    float4x4 model = instanceData.transform;
 
     float4 localPos = float4(input.position, 1.0);
     float4 worldPos = mul(model, localPos);
@@ -27,6 +34,5 @@ VertexOutput vertexMain(VertexInput input, uint instanceID: SV_StartInstanceLoca
     output.bitangent = normalize(cross(normalW, tangentW));
 
     output.uv = input.uv;
-    output.instanceID = instanceID;
     return output;
 }

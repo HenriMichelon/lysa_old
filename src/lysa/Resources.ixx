@@ -16,10 +16,9 @@ export namespace lysa {
 
     class Resources {
     public:
-        static constexpr vireo::DescriptorIndex BINDING_VERTEX{1};
-        static constexpr vireo::DescriptorIndex BINDING_INDEX{2};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{3};
-        static constexpr vireo::DescriptorIndex BINDING_MESH_SURFACE{4};
+        static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
+        static constexpr vireo::DescriptorIndex BINDING_INDEX{1};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config);
@@ -31,8 +30,6 @@ export namespace lysa {
         auto& getIndexArray() { return indexArray; }
 
         auto& getMaterialArray() { return materialArray; }
-
-        auto& getMeshSurfaceArray() { return meshSurfaceArray; }
 
         const auto& getDescriptorSet() const { return descriptorSet; }
 
@@ -49,8 +46,6 @@ export namespace lysa {
         MemoryArray vertexArray;
         MemoryArray indexArray;
         MemoryArray materialArray;
-        MemoryArray meshSurfaceArray;
-
     };
 
 }

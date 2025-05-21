@@ -15,33 +15,45 @@ namespace lysa {
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
-            L"Scene Data")} {
+            L"Scene Data")},
+        commandAllocator{Application::getVireo().createCommandAllocator(vireo::CommandType::TRANSFER)},
+        commandList{commandAllocator->createCommandList()},
+        transferQueue{Application::getVireo().createSubmitQueue(vireo::CommandType::TRANSFER, L"Scene data transfer")},
+        instancesDataArray{Application::getVireo(),
+            sizeof(MeshSurfaceInstanceData),
+            1000, // TODO make dynamic
+            1000, // TODO make dynamic
+            vireo::BufferType::STORAGE,
+            L"MeshSurface Instance Data"},
+        drawIndicesBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::INDEX,
+            sizeof(uint32), 10000, // TODO make dynamic
+           L"Draw indices")},
+        drawIndicesStagingBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::BUFFER_UPLOAD,
+            sizeof(uint32), 10000, // TODO make dynamic
+           L"Draw indices upload")},
+        opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::INDIRECT,
+            sizeof(vireo::DrawIndexedIndirectCommand), 1,
+            L"Draw commands")},
+        opaqueDrawCommandsStagingBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::BUFFER_UPLOAD,
+            sizeof(vireo::DrawIndexedIndirectCommand), 1,
+        L"Draw commands upload")} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
+            descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
-
         descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
-
-        resize(extent);
-        createInstanceDataArray();
-        opaqueDrawCommandsBuffer = Application::getVireo().createBuffer(
-           vireo::BufferType::INDIRECT,
-           sizeof(vireo::DrawIndexedIndirectCommand) * 1000, 1, // TODO automatic grows
-            L"Draw commands");
+        descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         sceneUniformBuffer->map();
-    }
-
-    void Scene::createInstanceDataArray() {
-        instanceDataArray = std::make_unique<MemoryArray>(
-            Application::getVireo(),
-            sizeof(MeshSurfaceInstanceData),
-            maxInstanceData, // TODO automatic grows
-            maxInstanceData,
-            vireo::BufferType::STORAGE,
-            L"MeshSurface Instance Data");
+        drawIndicesStagingBuffer->map();
+        opaqueDrawCommandsStagingBuffer->map();
+        resize(extent);
     }
 
     void Scene::resize(const vireo::Extent& extent) {
@@ -73,16 +85,46 @@ namespace lysa {
             Application::getResources().flush();
             resourcesUpdated = false;
         }
-        auto surfaceIndex{0};
-        for (const auto& meshInstance : models) {
-            const auto& mesh = meshInstance->getMesh();
-            if (meshInstance->isUpdated()) {
-                for (int i = 0; i < mesh->getSurfaces().size(); i++) {
 
-                }
-            }
-            surfaceIndex += mesh->getSurfaces().size();
+        commandAllocator->reset();
+        commandList->begin();
+        if (instancesDataUpdated) {
+            instancesDataArray.flush(commandList);
+            instancesDataUpdated = false;
         }
+        if (drawIndicesUpdated) {
+            uint32 drawIndicesOffset{0};
+            for (const auto& meshInstance : models) {
+                const auto& memoryBloc = instancesDataMemoryBlocks[meshInstance];
+                const auto& mesh = meshInstance->getMesh();
+                const auto& surfaces = mesh->getSurfaces();
+                auto surfacesIndices = std::vector<uint32>(mesh->getIndices().size());
+                auto indexIndex{0};
+                for (int surfaceIndex = 0; surfaceIndex < surfaces.size(); surfaceIndex++) {
+                    const auto instanceDataIndex = memoryBloc.instanceIndex + surfaceIndex;
+                    for (int i = 0; i < surfaces[surfaceIndex]->indexCount; i++) {
+                        surfacesIndices[indexIndex++] = instanceDataIndex;
+                    }
+                }
+                drawIndicesStagingBuffer->write(
+                    surfacesIndices.data(),
+                    indexIndex * sizeof(uint32),
+                    drawIndicesOffset * drawIndicesStagingBuffer->getInstanceSizeAligned());
+                drawIndicesOffset += surfacesIndices.size();
+            }
+            if (drawIndicesOffset > 0) {
+                commandList->copy(drawIndicesStagingBuffer, drawIndicesBuffer);
+                const auto drawCommand = vireo::DrawIndexedIndirectCommand {
+                    .indexCount = drawIndicesOffset
+                };
+                opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
+                commandList->copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
+            }
+            drawIndicesUpdated = false;
+        }
+        commandList->end();
+        transferQueue->submit({commandList});
+        transferQueue->waitIdle();
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {
@@ -97,11 +139,24 @@ namespace lysa {
             if (!mesh->isUploaded()) {
                 mesh->upload();
                 resourcesUpdated = true;
+                drawIndicesUpdated = true;
             }
             models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
+
+            const auto& surfaces = mesh->getSurfaces();
+            instancesDataMemoryBlocks[meshInstance] = instancesDataArray.alloc(surfaces.size());
+            auto instancesData = std::vector<MeshSurfaceInstanceData>{surfaces.size()};
+            for (int i = 0; i < surfaces.size(); i++) {
+                    instancesData[i].transform = meshInstance->getTransformGlobal();
+                    instancesData[i].indexIndex = mesh->getIndexIndex() + surfaces[i]->firstIndex;
+                    instancesData[i].vertexIndex = mesh->getVertexIndex();
+                    instancesData[i].materialIndex = surfaces[i]->material->getMaterialIndex();
+            }
+            instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
+            instancesDataUpdated = true;
             break;
         }
         case Node::VIEWPORT:
@@ -140,24 +195,24 @@ namespace lysa {
     void Scene::draw(
         const std::shared_ptr<vireo::CommandList>& commandList,
         const std::shared_ptr<vireo::Pipeline>& pipeline,
-        const Samplers& samplers,
-        const std::vector<vireo::DrawIndexedIndirectCommand>& commands,
-        const std::shared_ptr<vireo::Buffer>& commandBuffer) const {
+        const Samplers& samplers) const {
         auto& resources = Application::getResources();
         const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
             resources.getDescriptorSet(),
-            getDescriptorSet(),
+            descriptorSet,
             samplers.getDescriptorSet()};
-        // commandList->setDescriptors(sets);
-        // commandList->bindPipeline(pipeline);
-        // commandList->bindDescriptors(pipeline, sets);
-        // //commandList->bindIndexBuffer(XXX);
+        commandList->setDescriptors(sets);
+        commandList->bindPipeline(pipeline);
+        commandList->bindDescriptors(pipeline, sets);
+        commandList->bindIndexBuffer(drawIndicesBuffer);
+        commandList->drawIndexedIndirect(opaqueDrawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndexedIndirectCommand));
+
         // for (const auto& command : commands) {
-        //     commandList->drawIndexedIndirect(
-        //         commandBuffer,
-        //         0,
-        //         commands.size(),
-        //         sizeof(vireo::DrawIndexedIndirectCommand));
+        // commandList->drawIndexedIndirect(
+        // commandBuffer,
+        // 0,
+        // commands.size(),
+        // sizeof(vireo::DrawIndexedIndirectCommand));
         // }
     }
 
