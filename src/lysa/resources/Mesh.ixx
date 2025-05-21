@@ -143,8 +143,6 @@ export namespace lysa {
 
         auto getVertexIndex() const { return vertexMemoryBloc.instanceIndex; }
 
-        auto getIndexIndex() const { return indexMemoryBloc.instanceIndex; }
-
         auto& getMaterials() { return materials; }
 
         auto isUploaded() const { return vertexMemoryBloc.size > 0; }
@@ -163,7 +161,6 @@ export namespace lysa {
 
     private:
         MemoryBlock vertexMemoryBloc;
-        MemoryBlock indexMemoryBloc;
     };
 }
 

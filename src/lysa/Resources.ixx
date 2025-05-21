@@ -14,11 +14,17 @@ import lysa.resources.mesh;
 
 export namespace lysa {
 
+    struct VertexData {
+        float3 position;
+        float3 normal;
+        float2 uv;
+        float3 tangent;
+    };
+
     class Resources {
     public:
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
-        static constexpr vireo::DescriptorIndex BINDING_INDEX{1};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{2};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config);
@@ -26,8 +32,6 @@ export namespace lysa {
         void waitIdle() const;
 
         auto& getVertexArray() { return vertexArray; }
-
-        auto& getIndexArray() { return indexArray; }
 
         auto& getMaterialArray() { return materialArray; }
 
@@ -44,7 +48,6 @@ export namespace lysa {
         std::shared_ptr<vireo::CommandAllocator> commandAllocator;
         std::shared_ptr<vireo::CommandList> commandList;
         MemoryArray vertexArray;
-        MemoryArray indexArray;
         MemoryArray materialArray;
     };
 

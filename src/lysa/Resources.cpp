@@ -17,18 +17,11 @@ namespace lysa {
     commandList{commandAllocator->createCommandList()},
     vertexArray{
         vireo,
-        sizeof(Vertex),
+        sizeof(VertexData),
         config.maxVertexInstances,
         config.maxStagingVertexInstances,
         vireo::BufferType::STORAGE,
         L"Vertex Array"},
-    indexArray{
-        vireo,
-        sizeof(uint32),
-        config.maxIndexInstances,
-        config.maxStagingIndexInstances,
-        vireo::BufferType::STORAGE,
-        L"Index Array"},
     materialArray{
         vireo,
         sizeof(MaterialData),
@@ -39,20 +32,17 @@ namespace lysa {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
             descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
-            descriptorLayout->add(BINDING_INDEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
         descriptorSet->update(BINDING_VERTEX, vertexArray.getBuffer());
-        descriptorSet->update(BINDING_INDEX, indexArray.getBuffer());
         descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
     }
 
     void Resources::cleanup() {
         waitIdle();
         vertexArray.cleanup();
-        indexArray.cleanup();
         materialArray.cleanup();
         commandAllocator.reset();
         commandList.reset();
@@ -63,7 +53,6 @@ namespace lysa {
     void Resources::flush() {
         commandList->begin();
         vertexArray.flush(commandList);
-        indexArray.flush(commandList);
         materialArray.flush(commandList);
         commandList->end();
         transferQueue->submit({commandList});

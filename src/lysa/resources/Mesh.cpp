@@ -39,19 +39,13 @@ namespace lysa {
         auto& resources = Application::getResources();
         if (!isUploaded()) {
             vertexMemoryBloc = resources.getVertexArray().alloc(vertices.size());
-            indexMemoryBloc = resources.getIndexArray().alloc(indices.size());
         }
         resources.getVertexArray().write(vertexMemoryBloc, vertices.data());
-        resources.getIndexArray().write(indexMemoryBloc, indices.data());
-        // auto meshSurfaceData = std::vector<MeshSurfaceData>(surfaces.size());
         for (int i = 0; i < surfaces.size(); i++) {
         const auto& material = surfaces[i]->material;
             if (!material->isUploaded()) {
                material->upload();
             }
-        //     meshSurfaceData[i].indexIndex = indexMemoryBloc.instanceIndex + surfaces[i]->firstIndex;
-        //     meshSurfaceData[i].vertexIndex = vertexMemoryBloc.instanceIndex;
-        //     meshSurfaceData[i].materialIndex = material->getMaterialIndex();
         }
     }
 

@@ -29,9 +29,13 @@ export namespace lysa {
 
     struct MeshSurfaceInstanceData {
         float4x4 transform;
-        uint32 indexIndex{0};
         uint32 vertexIndex{0};
         uint32 materialIndex{0};
+    };
+
+    struct Index {
+        uint index;
+        uint surfaceIndex;
     };
 
     class Scene {
@@ -41,6 +45,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex SET_SAMPLERS{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
@@ -88,9 +93,9 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
 
-        std::shared_ptr<vireo::Buffer> drawIndicesBuffer;
-        std::shared_ptr<vireo::Buffer> drawIndicesStagingBuffer;
-        bool drawIndicesUpdated{false};
+        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
+        std::shared_ptr<vireo::Buffer> instancesIndexStagingBuffer;
+        bool instancesIndexUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
