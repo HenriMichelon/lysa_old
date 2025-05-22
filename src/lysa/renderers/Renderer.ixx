@@ -40,6 +40,8 @@ export namespace lysa {
         void removePostprocessing(const std::wstring& fragShaderName);
 
         virtual ~Renderer() = default;
+        Renderer(Renderer&) = delete;
+        Renderer& operator=(Renderer&) = delete;
 
     protected:
         const RenderingConfiguration& config;

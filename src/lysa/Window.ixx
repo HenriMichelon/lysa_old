@@ -85,6 +85,8 @@ export namespace lysa {
         void removeNode(const std::shared_ptr<Node> &node, bool async);
 
         virtual ~Window();
+        Window(Window&) = delete;
+        Window& operator=(Window&) = delete;
 
     private:
         // Fixed delta time for the physics

@@ -41,9 +41,13 @@ export namespace lysa {
 
         auto getBuffer() const { return buffer; }
 
+        void copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) const;
+
         void cleanup();
 
         ~MemoryArray();
+        MemoryArray(MemoryArray&) = delete;
+        MemoryArray& operator=(MemoryArray&) = delete;
 
     private:
         const std::wstring name;

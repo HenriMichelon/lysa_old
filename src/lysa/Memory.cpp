@@ -75,4 +75,8 @@ namespace lysa {
         freeBlocs.push_back(bloc);
     }
 
+    void MemoryArray::copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) const {
+        commandList.copy(buffer, destination.buffer);
+    }
+
 }

@@ -33,7 +33,8 @@ export namespace lysa {
             bool recordLastBarrier = true) = 0;
 
         virtual ~Renderpass() = default;
-
+        Renderpass(Renderpass&) = delete;
+        Renderpass& operator=(Renderpass&) = delete;
     protected:
         const std::wstring                      name;
         const RenderingConfiguration&           config;

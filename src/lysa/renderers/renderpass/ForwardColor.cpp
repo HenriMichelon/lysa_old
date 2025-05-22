@@ -39,9 +39,7 @@ namespace lysa {
         const bool recordLastBarrier) {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         commandList.beginRendering(renderingConfig);
-        commandList.setViewport(scene.getViewport());
-        commandList.setScissors(scene.getScissors());
-        scene.draw(
+        scene.drawOpaquesModels(
             commandList,
             *pipeline,
             samplers);

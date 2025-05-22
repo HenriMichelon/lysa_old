@@ -39,6 +39,9 @@ export namespace lysa {
 
         void cleanup();
 
+        Resources(Resources&) = delete;
+        Resources& operator=(Resources&) = delete;
+
     private:
         const ResourcesConfiguration& config;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;

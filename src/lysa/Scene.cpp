@@ -85,25 +85,6 @@ namespace lysa {
 
         if (instancesDataUpdated) {
             instancesDataArray.flush(commandList);
-            instancesDataUpdated = false;
-        }
-        if (instancesIndexUpdated) {
-            auto instancesIndex = std::vector<Index>{};
-            for (const auto& meshInstance : models) {
-                const auto& memoryBloc = instancesDataMemoryBlocks[meshInstance];
-                const auto& mesh = meshInstance->getMesh();
-                const auto& surfaces = mesh->getSurfaces();
-                auto& meshIndices = mesh->getIndices();
-                for (int surfaceIndex = 0; surfaceIndex < surfaces.size(); surfaceIndex++) {
-                    const auto instanceDataIndex = memoryBloc.instanceIndex + surfaceIndex;
-                    for (int i = 0; i < surfaces[surfaceIndex]->indexCount; i++) {
-                        instancesIndex.push_back({
-                            .index = meshIndices[surfaces[surfaceIndex]->firstIndex + i],
-                            .surfaceIndex = instanceDataIndex
-                        });
-                    }
-                }
-            }
             if (instancesIndex.size() > 0) {
                 const auto instancesIndexMemoryBlock = instancesIndexArray.alloc(instancesIndex.size());
                 instancesIndexArray.write(instancesIndexMemoryBlock, instancesIndex.data());
@@ -115,7 +96,7 @@ namespace lysa {
                 opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
                 commandList.copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
             }
-            instancesIndexUpdated = false;
+            instancesDataUpdated = false;
         }
     }
 
@@ -132,20 +113,28 @@ namespace lysa {
                 mesh->upload();
                 resourcesUpdated = true;
             }
-            instancesIndexUpdated = true;
-            models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
             meshInstance->updated = config.framesInFlight;
 
-            const auto& surfaces = mesh->getSurfaces();
-            instancesDataMemoryBlocks[meshInstance] = instancesDataArray.alloc(surfaces.size());
-            auto instancesData = std::vector<MeshSurfaceInstanceData>{surfaces.size()};
-            for (int i = 0; i < surfaces.size(); i++) {
-                instancesData[i].transform = meshInstance->getTransformGlobal();
-                instancesData[i].vertexIndex = mesh->getVertexIndex();
-                instancesData[i].materialIndex = surfaces[i]->material->getMaterialIndex();
+            const auto& meshSurfaces = mesh->getSurfaces();
+            const auto& meshIndices = mesh->getIndices();
+            const auto memoryBlock = instancesDataArray.alloc(meshSurfaces.size());
+            auto instancesData = std::vector<MeshSurfaceInstanceData>{meshSurfaces.size()};
+            for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
+                const auto& meshSurface = meshSurfaces[surfaceIndex];
+                instancesData[surfaceIndex].transform = meshInstance->getTransformGlobal();
+                instancesData[surfaceIndex].vertexIndex = mesh->getVertexIndex();
+                instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
+                const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
+                for (int i = 0; i < meshSurface->indexCount; i++) {
+                    instancesIndex.push_back({
+                       .index = meshIndices[meshSurface->firstIndex + i],
+                       .surfaceIndex = instanceDataIndex
+                    });
+                }
             }
+            instancesDataMemoryBlocks[meshInstance] = memoryBlock;
             instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
             instancesDataUpdated = true;
             break;
@@ -183,27 +172,29 @@ namespace lysa {
         }
     }
 
-    void Scene::draw(
+    void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
-        auto& resources = Application::getResources();
+        draw(commandList, pipeline, samplers, opaqueDrawCommandsBuffer);
+    }
+
+    void Scene::draw(
+        vireo::CommandList& commandList,
+        const vireo::Pipeline& pipeline,
+        const Samplers& samplers,
+        const std::shared_ptr<vireo::Buffer>& drawCommand) const {
+        const auto& resources = Application::getResources();
         const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
             resources.getDescriptorSet(),
             descriptorSet,
             samplers.getDescriptorSet()};
+        commandList.setViewport(viewport);
+        commandList.setScissors(scissors);
         commandList.setDescriptors(sets);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, sets);
-        commandList.drawIndirect(opaqueDrawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
-
-        // for (const auto& command : commands) {
-        // commandList->drawIndexedIndirect(
-        // commandBuffer,
-        // 0,
-        // commands.size(),
-        // sizeof(vireo::DrawIndexedIndirectCommand));
-        // }
+        commandList.drawIndirect(drawCommand, 0, 1, sizeof(vireo::DrawIndirectCommand));
     }
 
     void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {

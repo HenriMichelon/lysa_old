@@ -66,12 +66,14 @@ export namespace lysa {
 
         void resize(const vireo::Extent &extent);
 
-        void draw(
+        void drawOpaquesModels(
            vireo::CommandList& commandList,
            const vireo::Pipeline& pipeline,
            const Samplers& samplers) const;
 
         virtual ~Scene() = default;
+        Scene(Scene&) = delete;
+        Scene& operator=(Scene&) = delete;
 
     private:
         const RenderingConfiguration& config;
@@ -83,15 +85,11 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         bool resourcesUpdated{false};
 
-        // All models
-        std::list<std::shared_ptr<MeshInstance>> models{};
-
         MemoryArray instancesDataArray;
+        MemoryArray instancesIndexArray;
+        std::vector<Index> instancesIndex;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
-
-        MemoryArray instancesIndexArray;
-        bool instancesIndexUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
@@ -101,6 +99,13 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
         bool commandsUpdated{false};
+
+
+        void draw(
+           vireo::CommandList& commandList,
+           const vireo::Pipeline& pipeline,
+           const Samplers& samplers,
+           const std::shared_ptr<vireo::Buffer>& drawCommand) const;
 
     };
 
