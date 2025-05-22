@@ -57,10 +57,20 @@ set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
 #######################################################
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
-file(GLOB_RECURSE SHADERS_SOURCE_FILES
-        "${SHADERS_SRC_DIR}/*.slang"
+#file(GLOB_RECURSE SHADERS_SOURCE_FILES
+#        "${SHADERS_SRC_DIR}/*.slang"
+#)
+set(SHADERS_SOURCE_FILES
+        "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
+        "${SHADERS_SRC_DIR}/quad.vert.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
+
+set(SHADERS_SOURCE_FILES_FORWARD
+        "${SHADERS_SRC_DIR}/default.vert.slang"
+        "${SHADERS_SRC_DIR}/forward.frag.slang"
+)
+add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
 
 #######################################################
 # HLSL++ math library
@@ -156,7 +166,7 @@ target_sources(${LYSA_TARGET}
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET})
-add_dependencies(${LYSA_TARGET} ${VIREO_TARGET} )
+add_dependencies(${LYSA_TARGET} ${VIREO_TARGET} ${LYSA_TARGET}_shaders_forward)
 target_precompile_headers(${LYSA_TARGET} PRIVATE
         "<cstdint>"
 )
