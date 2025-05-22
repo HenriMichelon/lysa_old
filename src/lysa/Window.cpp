@@ -85,8 +85,6 @@ namespace lysa {
                 rootNode->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
             }
         }
-        frame.scene->update();
-        renderer->update(frameIndex);
         render(frameIndex);
     }
 

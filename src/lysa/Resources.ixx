@@ -29,24 +29,19 @@ export namespace lysa {
 
         Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config);
 
-        void waitIdle() const;
-
         auto& getVertexArray() { return vertexArray; }
 
         auto& getMaterialArray() { return materialArray; }
 
         const auto& getDescriptorSet() const { return descriptorSet; }
 
-        void flush();
+        void flush(vireo::CommandList& commandList);
 
         void cleanup();
 
     private:
         const ResourcesConfiguration& config;
-        std::shared_ptr<vireo::SubmitQueue> transferQueue;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
-        std::shared_ptr<vireo::CommandList> commandList;
         MemoryArray vertexArray;
         MemoryArray materialArray;
     };

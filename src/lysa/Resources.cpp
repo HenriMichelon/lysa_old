@@ -12,9 +12,6 @@ import lysa.resources.material;
 namespace lysa {
     Resources::Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config):
     config{config},
-    transferQueue{vireo.createSubmitQueue(vireo::CommandType::TRANSFER, L"Resources transfer")},
-    commandAllocator{vireo.createCommandAllocator(vireo::CommandType::TRANSFER)},
-    commandList{commandAllocator->createCommandList()},
     vertexArray{
         vireo,
         sizeof(VertexData),
@@ -41,26 +38,15 @@ namespace lysa {
     }
 
     void Resources::cleanup() {
-        waitIdle();
         vertexArray.cleanup();
         materialArray.cleanup();
-        commandAllocator.reset();
-        commandList.reset();
         descriptorSet.reset();
-        transferQueue.reset();
     }
 
-    void Resources::flush() {
-        commandList->begin();
+    void Resources::flush(vireo::CommandList& commandList) {
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
-        commandList->end();
-        transferQueue->submit({commandList});
-        transferQueue->waitIdle();
     }
 
-    void Resources::waitIdle() const {
-        transferQueue->waitIdle();
-    }
 
 }

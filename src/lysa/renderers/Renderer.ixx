@@ -29,19 +29,11 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent);
 
-        virtual void update(uint32 frameIndex);
-
         std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
 
         virtual std::vector<std::shared_ptr<const vireo::CommandList>> render(
             uint32 frameIndex,
             Scene& scene);
-
-        virtual void mainColorPass(
-            uint32 frameIndex,
-            Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::CommandList>& commandList) = 0;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0);
 
@@ -50,9 +42,17 @@ export namespace lysa {
         virtual ~Renderer() = default;
 
     protected:
-        const RenderingConfiguration&        config;
+        const RenderingConfiguration& config;
         const std::wstring            name;
         const Samplers                samplers;
+
+        virtual void update(uint32 frameIndex);
+
+        virtual void mainColorPass(
+            uint32 frameIndex,
+            Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::CommandList>& commandList) = 0;
 
     private:
         vireo::Extent                                currentExtent{};

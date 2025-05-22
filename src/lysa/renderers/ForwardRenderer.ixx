@@ -20,9 +20,10 @@ export namespace lysa {
             const RenderingConfiguration& config,
             const std::wstring& name);
 
-        void update(uint32 frameIndex) override;
-
         void resize(const vireo::Extent& extent) override;
+
+    protected:
+        void update(uint32 frameIndex) override;
 
         void mainColorPass(
             uint32 frameIndex,

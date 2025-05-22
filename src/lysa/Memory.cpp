@@ -45,8 +45,8 @@ namespace lysa {
         stagingBufferCurrentOffset += destination.size;
     }
 
-    void MemoryArray::flush(const std::shared_ptr<vireo::CommandList>& commandList) {
-        commandList->copy(stagingBuffer, buffer, pendingWrites);
+    void MemoryArray::flush(vireo::CommandList& commandList) {
+        commandList.copy(stagingBuffer, buffer, pendingWrites);
         stagingBufferCurrentOffset = 0;
         pendingWrites.clear();
     }

@@ -62,13 +62,13 @@ export namespace lysa {
 
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
-        void update();
+        void update(vireo::CommandList& commandList);
 
         void resize(const vireo::Extent &extent);
 
         void draw(
-           const std::shared_ptr<vireo::CommandList>& commandList,
-           const std::shared_ptr<vireo::Pipeline>& pipeline,
+           vireo::CommandList& commandList,
+           const vireo::Pipeline& pipeline,
            const Samplers& samplers) const;
 
         virtual ~Scene() = default;
@@ -81,9 +81,6 @@ export namespace lysa {
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
-        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
-        std::shared_ptr<vireo::CommandList> commandList;
-        std::shared_ptr<vireo::SubmitQueue> transferQueue;
         bool resourcesUpdated{false};
 
         // All models

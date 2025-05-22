@@ -35,6 +35,10 @@ namespace lysa {
         frame.commandAllocator->reset();
         auto commandList = frame.commandList;
         commandList->begin();
+
+        scene.update(*commandList);
+        update(frameIndex);
+
         commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
 
         mainColorPass(frameIndex, scene, frame.colorAttachment, commandList);

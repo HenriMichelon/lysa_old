@@ -16,9 +16,6 @@ namespace lysa {
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
             L"Scene Data")},
-        commandAllocator{Application::getVireo().createCommandAllocator(vireo::CommandType::TRANSFER)},
-        commandList{commandAllocator->createCommandList()},
-        transferQueue{Application::getVireo().createSubmitQueue(vireo::CommandType::TRANSFER, L"Scene data transfer")},
         instancesDataArray{Application::getVireo(),
             sizeof(MeshSurfaceInstanceData),
             1000, // TODO make dynamic
@@ -69,7 +66,7 @@ namespace lysa {
         }
     }
 
-    void Scene::update() {
+    void Scene::update(vireo::CommandList& commandList) {
         if (currentCamera && currentCamera->isUpdated()) {
             const auto sceneUniform = SceneData {
                 .cameraPosition = currentCamera->getPositionGlobal(),
@@ -81,12 +78,10 @@ namespace lysa {
             currentCamera->updated--;
         }
         if (resourcesUpdated) {
-            Application::getResources().flush();
+            Application::getResources().flush(commandList);
             resourcesUpdated = false;
         }
 
-        commandAllocator->reset();
-        commandList->begin();
         if (instancesDataUpdated) {
             instancesDataArray.flush(commandList);
             instancesDataUpdated = false;
@@ -117,13 +112,10 @@ namespace lysa {
                     .vertexCount = static_cast<uint32>(instancesIndex.size())
                 };
                 opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-                commandList->copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
+                commandList.copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
             }
-            // instancesIndexUpdated = false;
+            instancesIndexUpdated = false;
         }
-        commandList->end();
-        transferQueue->submit({commandList});
-        transferQueue->waitIdle();
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {
@@ -191,18 +183,18 @@ namespace lysa {
     }
 
     void Scene::draw(
-        const std::shared_ptr<vireo::CommandList>& commandList,
-        const std::shared_ptr<vireo::Pipeline>& pipeline,
+        vireo::CommandList& commandList,
+        vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
         auto& resources = Application::getResources();
         const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
             resources.getDescriptorSet(),
             descriptorSet,
             samplers.getDescriptorSet()};
-        commandList->setDescriptors(sets);
-        commandList->bindPipeline(pipeline);
-        commandList->bindDescriptors(pipeline, sets);
-        commandList->drawIndirect(opaqueDrawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+        commandList.setDescriptors(sets);
+        commandList.bindPipeline(pipeline);
+        commandList.bindDescriptors(pipeline, sets);
+        commandList.drawIndirect(opaqueDrawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
 
         // for (const auto& command : commands) {
         // commandList->drawIndexedIndirect(

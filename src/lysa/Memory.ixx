@@ -37,7 +37,7 @@ export namespace lysa {
 
         void write(const MemoryBlock& destination, const void* source);
 
-        void flush(const std::shared_ptr<vireo::CommandList>& commandList);
+        void flush(vireo::CommandList& commandList);
 
         auto getBuffer() const { return buffer; }
 
