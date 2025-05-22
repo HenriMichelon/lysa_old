@@ -17,7 +17,6 @@ namespace lysa {
         Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
-            Resources::descriptorLayout,
             Scene::descriptorLayout,
             samplers.getDescriptorLayout()},
             {}, name);

@@ -21,13 +21,13 @@ namespace lysa {
             sizeof(MeshSurfaceInstanceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
-            vireo::BufferType::STORAGE,
+            vireo::BufferType::READWRITE_STORAGE,
             L"MeshSurface Instance Data"},
         instancesIndexArray{Application::getVireo(),
             sizeof(Index),
             config.maxVertexPerFrame,
             config.maxVertexPerFrame,
-            vireo::BufferType::STORAGE,
+            vireo::BufferType::READWRITE_STORAGE,
             L"Draw indices"},
         opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
@@ -39,12 +39,17 @@ namespace lysa {
         L"Draw commands upload")} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
+            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
             descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
+        auto& resources = Application::getResources();
         descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Scene");
+        descriptorSet->update(BINDING_VERTEX, resources.getVertexArray().getBuffer());
+        descriptorSet->update(BINDING_MATERIAL, resources.getMaterialArray().getBuffer());
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexArray.getBuffer());
@@ -184,9 +189,7 @@ namespace lysa {
         const vireo::Pipeline& pipeline,
         const Samplers& samplers,
         const std::shared_ptr<vireo::Buffer>& drawCommand) const {
-        const auto& resources = Application::getResources();
         const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
-            resources.getDescriptorSet(),
             descriptorSet,
             samplers.getDescriptorSet()};
         commandList.setViewport(viewport);

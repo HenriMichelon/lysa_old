@@ -22,7 +22,6 @@ namespace lysa {
 
     Application::~Application() {
         Scene::descriptorLayout.reset();
-        Resources::descriptorLayout.reset();
         resources.cleanup();
         vireo.reset();
     }

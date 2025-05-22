@@ -40,12 +40,11 @@ export namespace lysa {
 
     class Scene {
     public:
-        static constexpr vireo::DescriptorIndex SET_RESOURCES{0};
-        static constexpr vireo::DescriptorIndex SET_SCENE{1};
-        static constexpr vireo::DescriptorIndex SET_SAMPLERS{2};
-        static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{2};
+        static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
+        static constexpr vireo::DescriptorIndex BINDING_SCENE{2};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{3};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{4};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent);

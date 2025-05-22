@@ -6,7 +6,7 @@
 */
 #include "scene_data.inc.slang"
 
-StructuredBuffer<Material> materials : register(b1, space0);
+StructuredBuffer<Material> materials : register(t1);
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
     return materials[input.materialIndex].albedoColor;
