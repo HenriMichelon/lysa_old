@@ -37,11 +37,11 @@ namespace lysa {
         L"Draw commands upload")} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
-            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::READWRITE_STORAGE);
-            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::READWRITE_STORAGE);
+            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
-            descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::READWRITE_STORAGE);
-            descriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::READWRITE_STORAGE);
+            descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
         auto& resources = Application::getResources();

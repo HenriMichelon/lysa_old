@@ -29,7 +29,7 @@ export namespace lysa {
 
         auto& getMaterialArray() { return materialArray; }
 
-        void flush(vireo::CommandList& commandList);
+        void flush(const vireo::CommandList& commandList);
 
         void cleanup();
 

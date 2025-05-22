@@ -71,6 +71,7 @@ namespace lysa {
         assert([&]{ return bufferType == vireo::BufferType::VERTEX ||
             bufferType == vireo::BufferType::INDEX ||
             bufferType == vireo::BufferType::INDIRECT ||
+            bufferType == vireo::BufferType::DEVICE_STORAGE ||
             bufferType == vireo::BufferType::READWRITE_STORAGE;}, "Invalid buffer type for device memory array");
         stagingBuffer->map();
     }

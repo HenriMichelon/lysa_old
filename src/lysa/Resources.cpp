@@ -17,14 +17,14 @@ namespace lysa {
         sizeof(VertexData),
         config.maxVertexInstances,
         config.maxStagingVertexInstances,
-        vireo::BufferType::READWRITE_STORAGE,
+        vireo::BufferType::DEVICE_STORAGE,
         L"Vertex Array"},
     materialArray{
         vireo,
         sizeof(MaterialData),
         config.maxMaterialInstances,
         config.maxStagingMaterialInstances,
-        vireo::BufferType::READWRITE_STORAGE,
+        vireo::BufferType::DEVICE_STORAGE,
         L"Material Array"} {
     }
 
@@ -33,7 +33,7 @@ namespace lysa {
         materialArray.cleanup();
     }
 
-    void Resources::flush(vireo::CommandList& commandList) {
+    void Resources::flush(const vireo::CommandList& commandList) {
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
     }
