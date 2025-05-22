@@ -17,7 +17,7 @@ VertexOutput vertexMain(uint vertexId: SV_VertexID ) {
     VertexOutput output;
 
     Index index = indices[vertexId];
-    InstanceData instanceData = instancesData[1];
+    InstanceData instanceData = instancesData[index.surfaceIndex];
     Vertex input = vertices[vertexId];
     float4x4 model = instanceData.transform;
 

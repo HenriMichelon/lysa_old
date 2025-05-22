@@ -63,12 +63,12 @@ file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/quad.vert.slang"
+        "${SHADERS_SRC_DIR}/forward.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 
 set(SHADERS_SOURCE_FILES_FORWARD
         "${SHADERS_SRC_DIR}/default.vert.slang"
-        "${SHADERS_SRC_DIR}/forward.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
 

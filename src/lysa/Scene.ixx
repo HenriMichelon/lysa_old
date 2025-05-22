@@ -93,8 +93,7 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
 
-        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
-        std::shared_ptr<vireo::Buffer> instancesIndexStagingBuffer;
+        MemoryArray instancesIndexArray;
         bool instancesIndexUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
