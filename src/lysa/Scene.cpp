@@ -6,6 +6,7 @@
  */
 module lysa.scene;
 
+import vireo;
 import lysa.application;
 
 namespace lysa {
@@ -184,7 +185,7 @@ namespace lysa {
 
     void Scene::draw(
         vireo::CommandList& commandList,
-        vireo::Pipeline& pipeline,
+        const vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
         auto& resources = Application::getResources();
         const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {

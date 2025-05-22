@@ -64,26 +64,26 @@ namespace lysa {
         const uint32 frameIndex,
         Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-        const std::shared_ptr<vireo::CommandList>& commandList,
+        vireo::CommandList& commandList,
         const bool recordLastBarrier) {
         auto& frame = framesData[frameIndex];
 
         frame.descriptorSet->update(BINDING_INPUT, colorAttachment->getImage());
         renderingConfig.colorRenderTargets[0].renderTarget = frame.colorAttachment;
-        commandList->barrier(
+        commandList.barrier(
             frame.colorAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
-        commandList->setDescriptors({frame.descriptorSet, samplers.getDescriptorSet()});
-        commandList->beginRendering(renderingConfig);
-        commandList->setViewport(scene.getViewport());
-        commandList->setScissors(scene.getScissors());
-        commandList->bindPipeline(pipeline);
-        commandList->bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
-        commandList->draw(3);
-        commandList->endRendering();
+        commandList.setDescriptors({frame.descriptorSet, samplers.getDescriptorSet()});
+        commandList.beginRendering(renderingConfig);
+        commandList.setViewport(scene.getViewport());
+        commandList.setScissors(scene.getScissors());
+        commandList.bindPipeline(pipeline);
+        commandList.bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
+        commandList.draw(3);
+        commandList.endRendering();
         if (recordLastBarrier) {
-            commandList->barrier(
+            commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::RENDER_TARGET_COLOR,
                 vireo::ResourceState::UNDEFINED);

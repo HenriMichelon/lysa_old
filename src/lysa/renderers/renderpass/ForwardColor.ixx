@@ -24,7 +24,7 @@ export namespace lysa {
             uint32 frameIndex,
             Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::CommandList>& commandList,
+            vireo::CommandList& commandList,
             bool recordLastBarrier) override;
 
     private:

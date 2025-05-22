@@ -41,7 +41,7 @@ namespace lysa {
 
         commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
 
-        mainColorPass(frameIndex, scene, frame.colorAttachment, commandList);
+        mainColorPass(frameIndex, scene, frame.colorAttachment, *commandList);
 
         if (!postProcessingPasses.empty()) {
             commandList->barrier(
@@ -53,7 +53,7 @@ namespace lysa {
                     frameIndex,
                     scene,
                     frame.colorAttachment,
-                    commandList,
+                    *commandList,
                     postProcessingPass != postProcessingPasses.back());
             });
             commandList->barrier(

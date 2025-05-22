@@ -52,7 +52,7 @@ export namespace lysa {
             uint32 frameIndex,
             Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::CommandList>& commandList) = 0;
+            vireo::CommandList& commandList) = 0;
 
     private:
         vireo::Extent                                currentExtent{};
