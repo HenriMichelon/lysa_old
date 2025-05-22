@@ -77,4 +77,16 @@ export namespace lysa {
         std::vector<vireo::BufferCopyRegion> pendingWrites;
     };
 
+    class HostVisibleMemoryArray : public MemoryArray {
+    public:
+        HostVisibleMemoryArray(
+            const vireo::Vireo& vireo,
+            size_t instanceSize,
+            size_t instanceCount,
+            vireo::BufferType,
+            const std::wstring& name);
+
+        void write(const MemoryBlock& destination, const void* source) override;
+    };
+
 }

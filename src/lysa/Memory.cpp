@@ -72,7 +72,6 @@ namespace lysa {
             bufferType == vireo::BufferType::INDEX ||
             bufferType == vireo::BufferType::INDIRECT ||
             bufferType == vireo::BufferType::READWRITE_STORAGE;}, "Invalid buffer type for device memory array");
-        freeBlocs.push_back({0, 0, instanceSize * instanceCount});
         stagingBuffer->map();
     }
 
@@ -101,5 +100,23 @@ namespace lysa {
         DeviceMemoryArray::cleanup();
     }
 
+    HostVisibleMemoryArray::HostVisibleMemoryArray(
+        const vireo::Vireo& vireo,
+        const size_t instanceSize,
+        const size_t instanceCount,
+        const vireo::BufferType bufferType,
+        const std::wstring& name) :
+        MemoryArray{vireo, instanceSize, instanceCount, bufferType, name} {
+        assert([&]{ return bufferType == vireo::BufferType::UNIFORM ||
+            bufferType == vireo::BufferType::STORAGE ||
+            bufferType == vireo::BufferType::BUFFER_UPLOAD ||
+            bufferType == vireo::BufferType::IMAGE_DOWNLOAD ||
+            bufferType == vireo::BufferType::IMAGE_UPLOAD;}, "Invalid buffer type for host visible memory array");
+        buffer->map();
+    }
 
-}
+    void HostVisibleMemoryArray::write(const MemoryBlock& destination, const void* source) {
+        buffer->write(source, destination.size, destination.offset);
+    }
+
+ }
