@@ -12,21 +12,26 @@ import lysa.global;
 export namespace lysa {
 
     struct ResourcesConfiguration {
-        uint32 maxVertexInstances{10000};
-        uint32 maxStagingVertexInstances{5000};
-        uint32 maxIndexInstances{15000};
-        uint32 maxStagingIndexInstances{7500};
+        uint32 maxVertexInstances{1000000};
+        uint32 maxStagingVertexInstances{500000};
+        uint32 maxIndexInstances{1000000};
+        uint32 maxStagingIndexInstances{500000};
         uint32 maxMaterialInstances{1000};
         uint32 maxStagingMaterialInstances{500};
-        uint32 maxMeshSurfacesInstances{5000};
-        uint32 maxStagingMeshSurfacesInstances{2500};
     };
 
     struct ApplicationConfiguration {
         //! Graphic API
-        vireo::Backend     backend{vireo::Backend::VULKAN};
+        vireo::Backend         backend{vireo::Backend::VULKAN};
         //! xxx
         ResourcesConfiguration resourcesConfig;
+    };
+
+    struct SceneConfiguration {
+        //! Number of nodes updates per frame for asynchronous scene updates
+        uint32 maxAsyncNodesUpdatedPerFrame{20};
+        uint32 maxMeshSurfacePerFrame{100000};
+        uint32 maxVertexPerFrame{1000000};
     };
 
     struct RenderingConfiguration {
@@ -51,8 +56,8 @@ export namespace lysa {
         std::shared_ptr<Node>  rootNode;
         //! Renderers configuration
         RenderingConfiguration renderingConfig;
-        //! Number of nodes updates per frame for asynchronous scene updates
-        uint32                 maxAsyncNodesUpdatedPerFrame{20};
+        //! Scene configuration
+        SceneConfiguration     sceneConfig;
     };
 
 }

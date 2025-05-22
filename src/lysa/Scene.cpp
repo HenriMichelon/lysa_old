@@ -11,22 +11,22 @@ import lysa.application;
 
 namespace lysa {
 
-    Scene::Scene(const RenderingConfiguration& config, const vireo::Extent &extent) :
-        config{config},
+    Scene::Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent) :
+        framesInFlight{rconfig.framesInFlight},
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
             L"Scene Data")},
         instancesDataArray{Application::getVireo(),
             sizeof(MeshSurfaceInstanceData),
-            1000, // TODO make dynamic
-            1000, // TODO make dynamic
+            config.maxMeshSurfacePerFrame,
+            config.maxMeshSurfacePerFrame,
             vireo::BufferType::STORAGE,
             L"MeshSurface Instance Data"},
         instancesIndexArray{Application::getVireo(),
             sizeof(Index),
-            1000, // TODO make dynamic
-            1000, // TODO make dynamic
+            config.maxVertexPerFrame,
+            config.maxVertexPerFrame,
             vireo::BufferType::STORAGE,
             L"Draw indices"},
         opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
@@ -115,7 +115,7 @@ namespace lysa {
             }
             opaqueModels.push_back(meshInstance);
             // Force model data to be written to GPU memory
-            meshInstance->updated = config.framesInFlight;
+            meshInstance->updated = framesInFlight;
 
             const auto& meshSurfaces = mesh->getSurfaces();
             const auto& meshIndices = mesh->getIndices();

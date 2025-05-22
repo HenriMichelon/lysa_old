@@ -48,7 +48,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
-        Scene(const RenderingConfiguration& config, const vireo::Extent &extent);
+        Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent);
 
         auto getCurrentCamera() const { return currentCamera; }
 
@@ -76,7 +76,7 @@ export namespace lysa {
         Scene& operator=(Scene&) = delete;
 
     private:
-        const RenderingConfiguration& config;
+        const uint32 framesInFlight;
         vireo::Extent extent;
         vireo::Viewport viewport;
         vireo::Rect scissors;
@@ -99,7 +99,6 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
         bool commandsUpdated{false};
-
 
         void draw(
            vireo::CommandList& commandList,

@@ -27,9 +27,9 @@ namespace lysa {
         framesData.resize(config.renderingConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = Application::getVireo().createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<Scene>(config.renderingConfig, swapChain->getExtent());
+            frame.scene = std::make_shared<Scene>(config.sceneConfig, config.renderingConfig, swapChain->getExtent());
         }
-        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instanciated after SceneData for the layout
+        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         setRootNode(config.rootNode);
     }
@@ -219,14 +219,14 @@ namespace lysa {
                 }
                 data.removedNodes.clear();
             }
-            // Batched removes
+            // Async removes
             if (!data.removedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
                     data.scene->removeNode(*it);
                     it = data.removedNodesAsync.erase(it);
                     count += 1;
-                    if (count > config.maxAsyncNodesUpdatedPerFrame) { break; }
+                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
                 }
             }
             // Add to the renderer the nodes previously added to the scene tree
@@ -237,14 +237,14 @@ namespace lysa {
                 }
                 data.addedNodes.clear();
             }
-            // Batched additions
+            // Async additions
             if (!data.addedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
                     data.scene->addNode(*it);
                     it = data.addedNodesAsync.erase(it);
                     count += 1;
-                    if (count > config.maxAsyncNodesUpdatedPerFrame) { break; }
+                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
                 }
             }
             // Change the current camera if needed
