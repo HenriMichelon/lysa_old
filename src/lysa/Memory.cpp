@@ -15,40 +15,20 @@ namespace lysa {
         const vireo::Vireo& vireo,
         const size_t instanceSize,
         const size_t instanceCount,
-        const size_t stagingInstanceCount,
         const vireo::BufferType bufferType,
         const std::wstring& name) :
         name{name},
         instanceSize{instanceSize},
-        buffer{vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name)},
-        stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
+        buffer{vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name)} {
         freeBlocs.push_back({0, 0, instanceSize * instanceCount});
-        stagingBuffer->map();
     }
 
     MemoryArray::~MemoryArray() {
-        cleanup();
+        MemoryArray::cleanup();
     }
 
     void MemoryArray::cleanup() {
         buffer.reset();
-        stagingBuffer.reset();
-    }
-
-    void MemoryArray::write(const MemoryBlock& destination, const void* source) {
-        stagingBuffer->write(source, destination.size, stagingBufferCurrentOffset);
-        pendingWrites.push_back({
-            stagingBufferCurrentOffset,
-            destination.offset,
-            destination.size,
-        });
-        stagingBufferCurrentOffset += destination.size;
-    }
-
-    void MemoryArray::flush(vireo::CommandList& commandList) {
-        commandList.copy(stagingBuffer, buffer, pendingWrites);
-        stagingBufferCurrentOffset = 0;
-        pendingWrites.clear();
     }
 
     MemoryBlock MemoryArray::alloc(const size_t instanceCount) {
@@ -78,5 +58,48 @@ namespace lysa {
     void MemoryArray::copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) const {
         commandList.copy(buffer, destination.buffer);
     }
+
+    DeviceMemoryArray::DeviceMemoryArray(
+        const vireo::Vireo& vireo,
+        const size_t instanceSize,
+        const size_t instanceCount,
+        const size_t stagingInstanceCount,
+        const vireo::BufferType bufferType,
+        const std::wstring& name) :
+        MemoryArray{vireo, instanceSize, instanceCount, bufferType, name},
+        stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
+        assert([&]{ return bufferType == vireo::BufferType::VERTEX ||
+            bufferType == vireo::BufferType::INDEX ||
+            bufferType == vireo::BufferType::INDIRECT ||
+            bufferType == vireo::BufferType::READWRITE_STORAGE;}, "Invalid buffer type for device memory array");
+        freeBlocs.push_back({0, 0, instanceSize * instanceCount});
+        stagingBuffer->map();
+    }
+
+    void DeviceMemoryArray::write(const MemoryBlock& destination, const void* source) {
+        stagingBuffer->write(source, destination.size, stagingBufferCurrentOffset);
+        pendingWrites.push_back({
+            stagingBufferCurrentOffset,
+            destination.offset,
+            destination.size,
+        });
+        stagingBufferCurrentOffset += destination.size;
+    }
+
+    void DeviceMemoryArray::flush(const vireo::CommandList& commandList) {
+        commandList.copy(stagingBuffer, buffer, pendingWrites);
+        stagingBufferCurrentOffset = 0;
+        pendingWrites.clear();
+    }
+
+    void DeviceMemoryArray::cleanup() {
+        MemoryArray::cleanup();
+        stagingBuffer.reset();
+    }
+
+    DeviceMemoryArray::~DeviceMemoryArray() {
+        DeviceMemoryArray::cleanup();
+    }
+
 
 }

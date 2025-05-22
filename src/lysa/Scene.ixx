@@ -84,8 +84,8 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         bool resourcesUpdated{false};
 
-        MemoryArray instancesDataArray;
-        MemoryArray instancesIndexArray;
+        DeviceMemoryArray instancesDataArray;
+        DeviceMemoryArray instancesIndexArray;
         std::vector<Index> instancesIndex;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};

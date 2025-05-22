@@ -38,8 +38,8 @@ export namespace lysa {
 
     private:
         const ResourcesConfiguration& config;
-        MemoryArray vertexArray;
-        MemoryArray materialArray;
+        DeviceMemoryArray vertexArray;
+        DeviceMemoryArray materialArray;
     };
 
 }
