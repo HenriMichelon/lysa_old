@@ -24,28 +24,46 @@ namespace lysa {
             } else {
                 setOrthographicProjection(0.0f, 1.0f, 0.0f, 1.0f, nearDistance, farDistance);
             }
-            updated = getWindow()->getFramesInFlight();
+            setUpdated();
         }
     }
 
     void Camera::setNearDistance(const float distance) {
         nearDistance = distance;
-        if (perspectiveProjection) setPerspectiveProjection(fov, nearDistance, farDistance);
+        if (perspectiveProjection) {
+            setPerspectiveProjection(fov, nearDistance, farDistance);
+        } else {
+            setOrthographicProjection(left, right, top, bottom, nearDistance, farDistance);
+        }
     }
 
     void Camera::setFarDistance(const float distance) {
         farDistance = distance;
-        if (perspectiveProjection) setPerspectiveProjection(fov, nearDistance, farDistance);
+        if (perspectiveProjection) {
+            setPerspectiveProjection(fov, nearDistance, farDistance);
+        } else {
+            setOrthographicProjection(left, right, top, bottom, nearDistance, farDistance);
+        }
     }
 
     void Camera::setFov(const float fov) {
         this->fov = fov;
-        if (perspectiveProjection) setPerspectiveProjection(fov, nearDistance, farDistance);
+        if (perspectiveProjection) {
+            setPerspectiveProjection(fov, nearDistance, farDistance);
+        } else {
+            setOrthographicProjection(left, right, top, bottom, nearDistance, farDistance);
+        }
     }
 
     void Camera::setOrthographicProjection(const float left, const float right,
                                            const float top, const float  bottom,
                                            const float near, const float far) {
+        this->left = left;
+        this->right = right;
+        this->top = top;
+        this->bottom = bottom;
+        nearDistance           = near;
+        farDistance            = far;
         perspectiveProjection  = false;
         projectionMatrix       = float4x4::identity();
         projectionMatrix[0][0] = 2.f / (right - left);
@@ -54,6 +72,7 @@ namespace lysa {
         projectionMatrix[3][0] = -(right + left) / (right - left);
         projectionMatrix[3][1] = -(bottom + top) / (bottom - top);
         projectionMatrix[3][2] = -near / (far - near);
+        setUpdated();
     }
 
     void Camera::setPerspectiveProjection(const float fov, const float near, const float far) {
@@ -70,6 +89,7 @@ namespace lysa {
                 0.0f,       f,     0.0f,                         0.0f,
                 0.0f,       0.0f,  (far + near) / zRange,        -1.0f,
                 0.0f,       0.0f,  (2.0f * far * near) / zRange, 0.0f};
+            setUpdated();
         }
     }
 

@@ -440,7 +440,6 @@ export namespace lysa {
     protected:
         float4x4 localTransform{};
         float4x4 globalTransform{};
-        uint32   updated{0};
 
         virtual std::shared_ptr<Node> duplicateInstance() const;
 
@@ -456,10 +455,10 @@ export namespace lysa {
 
         virtual void exitScene() { onExitScene(); }
 
+        void setUpdated() { updated = framesInFlight; }
+
     private:
         friend class Window;
-        friend class Scene;
-        friend class SceneData;
 
         static  unique_id                currentId;
         unique_id                        id;
@@ -470,6 +469,10 @@ export namespace lysa {
         std::list<std::shared_ptr<Node>> children;
         std::list<std::wstring>          groups;
         ProcessMode                      processMode{ProcessMode::INHERIT};
+
+        friend class Scene;
+        uint32   updated{0};
+        uint32   framesInFlight{0};
 
         auto isUpdated() const { return updated > 0;}
     };

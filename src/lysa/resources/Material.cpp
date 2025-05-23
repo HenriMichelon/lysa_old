@@ -41,40 +41,49 @@ namespace lysa {
 
     void StandardMaterial::setAlbedoTexture(const TextureInfo &texture) {
         albedoTexture = texture;
+        setUpdated();
     }
 
     void StandardMaterial::setNormalTexture(const TextureInfo &texture) {
         normalTexture = texture;
+        setUpdated();
     }
 
     void StandardMaterial::setMetallicTexture(const TextureInfo &texture) {
         metallicTexture = texture;
         if (metallicFactor == -1.0f) { metallicFactor = 0.0f; }
+        setUpdated();
     }
 
     void StandardMaterial::setRoughnessTexture(const TextureInfo &texture) {
         roughnessTexture = texture;
         if (metallicFactor == -1.0f) { metallicFactor = 0.0f; }
+        setUpdated();
     }
 
     void StandardMaterial::setEmissiveTexture(const TextureInfo &texture) {
         emissiveTexture = texture;
+        setUpdated();
     }
 
     void StandardMaterial::setMetallicFactor(const float metallic) {
         this->metallicFactor = metallic;
+        setUpdated();
     }
 
     void StandardMaterial::setRoughnessFactor(const float roughness) {
         this->roughnessFactor = roughness;
+        setUpdated();
     }
 
     void StandardMaterial::setEmissiveFactor(const float3& factor) {
         emissiveFactor = factor;
+        setUpdated();
     }
 
     void StandardMaterial::setEmissiveStrength(const float strength) {
         emissiveStrength = strength;
+        setUpdated();
     }
 
     void StandardMaterial::setNormalScale(const float scale) {
@@ -100,6 +109,7 @@ namespace lysa {
 
     void ShaderMaterial::setParameter(const int index, const float4& value) {
         parameters[index] = value;
+        setUpdated();
     }
 
 }

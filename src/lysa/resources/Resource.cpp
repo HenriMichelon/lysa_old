@@ -21,5 +21,4 @@ namespace lysa {
         throw Exception{"Not implemented"};
     }
 
-
 }

@@ -65,9 +65,7 @@ namespace lysa {
         } else {
             globalTransform = localTransform;
         }
-        if (window) {
-            updated = window->getFramesInFlight();
-        }
+        setUpdated();
         for (const auto& child : children) {
             child->updateGlobalTransform();
         }
@@ -91,7 +89,6 @@ namespace lysa {
         children.push_back(child);
         child->updateGlobalTransform();
         if (window) {
-            updated = window->getFramesInFlight();
             window->addNode(child, false);
             child->ready(window);
         }

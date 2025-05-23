@@ -100,7 +100,6 @@ export namespace lysa {
         std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
-        bool commandsUpdated{false};
 
         void draw(
            vireo::CommandList& commandList,

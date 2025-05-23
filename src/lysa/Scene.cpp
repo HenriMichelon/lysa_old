@@ -103,7 +103,6 @@ namespace lysa {
 
         if (instancesIndexUpdated) {
             if (instancesIndex.size() > 0) {
-                instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index)); // TODO incremental writes
                 const auto drawCommand = vireo::DrawIndirectCommand {
                     .vertexCount = static_cast<uint32>(instancesIndex.size())
                 };
@@ -117,6 +116,7 @@ namespace lysa {
     void Scene::addNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
+            node->framesInFlight = framesInFlight;
             activateCamera(static_pointer_cast<Camera>(node));
             break;
         case Node::MESH_INSTANCE:{
@@ -129,16 +129,19 @@ namespace lysa {
             }
             models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
+            meshInstance->framesInFlight = framesInFlight;
+            meshInstance->setUpdated();
 
-            const auto& meshSurfaces = mesh->getSurfaces();
-            const auto& meshIndices = mesh->getIndices();
-            const auto memoryBlock = instancesDataArray.alloc(meshSurfaces.size());
-            auto instancesData = std::vector<MeshSurfaceInstanceData>{meshSurfaces.size()};
+            for (const auto& material : mesh->getMaterials()) {
+                material->framesInFlight = framesInFlight;
+            }
+
+            const auto& meshSurfaces{mesh->getSurfaces()};
+            const auto& meshIndices{mesh->getIndices()};
+            const auto memoryBlock{instancesDataArray.alloc(meshSurfaces.size())};
+            const auto startIndex{instancesIndex.size()};
             for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                 const auto& meshSurface = meshSurfaces[surfaceIndex];
-                instancesData[surfaceIndex].transform = meshInstance->getTransformGlobal();
-                instancesData[surfaceIndex].vertexIndex = mesh->getVertexIndex();
-                instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                 const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
                 for (int i = 0; i < meshSurface->indexCount; i++) {
                     instancesIndex.push_back({
@@ -147,8 +150,11 @@ namespace lysa {
                     });
                 }
             }
+            instancesIndexBuffer->write(
+                &instancesIndex[startIndex],
+                mesh->getIndices().size() * sizeof(Index),
+                startIndex * sizeof(Index));
             instancesDataMemoryBlocks[meshInstance] = memoryBlock;
-            instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
             instancesIndexUpdated = true;
             break;
         }

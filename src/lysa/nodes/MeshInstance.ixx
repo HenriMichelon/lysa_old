@@ -59,8 +59,6 @@ export namespace lysa {
         }
 
     protected:
-        friend class Window;
-
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:

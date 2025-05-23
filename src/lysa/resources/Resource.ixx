@@ -41,15 +41,16 @@ export namespace lysa {
         virtual std::shared_ptr<Resource> duplicate() const;
 
     protected:
-        uint32 updated{0};
+        void setUpdated() { updated = framesInFlight; }
 
     private:
-        friend class Scene;
-        friend class SceneData;
-
         unique_id          id;
         static unique_id   currentId;
         const std::wstring name;
+
+        friend class Scene;
+        uint32 updated{0};
+        uint32 framesInFlight{0};
 
         auto isUpdated() const { return updated > 0;}
     };

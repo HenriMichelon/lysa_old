@@ -96,6 +96,11 @@ export namespace lysa {
         bool perspectiveProjection{true};
         // Projection matrix for the global
         float4x4 projectionMatrix{1.0f};
+        // Parameters for orthographic projection:
+        float left;
+        float right;
+        float top;
+        float bottom;
 
         void setActive(bool isActive);
     };
