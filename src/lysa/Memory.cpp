@@ -87,9 +87,11 @@ namespace lysa {
     }
 
     void DeviceMemoryArray::flush(const vireo::CommandList& commandList) {
-        commandList.copy(stagingBuffer, buffer, pendingWrites);
-        stagingBufferCurrentOffset = 0;
-        pendingWrites.clear();
+        if (!pendingWrites.empty()) {
+            commandList.copy(stagingBuffer, buffer, pendingWrites);
+            stagingBufferCurrentOffset = 0;
+            pendingWrites.clear();
+        }
     }
 
     void DeviceMemoryArray::cleanup() {
