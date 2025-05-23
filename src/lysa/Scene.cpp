@@ -80,12 +80,28 @@ namespace lysa {
             sceneUniformBuffer->write(&sceneUniform);
             currentCamera->updated--;
         }
+
         if (resourcesUpdated) {
             Application::getResources().flush(commandList);
             resourcesUpdated = false;
         }
 
-        if (instancesDataUpdated) {
+        for (const auto& meshInstance : models) {
+            if (meshInstance->isUpdated()) {
+                const auto& mesh = meshInstance->getMesh();
+                const auto& meshSurfaces = mesh->getSurfaces();
+                auto instancesData = std::vector<MeshSurfaceInstanceData>{meshSurfaces.size()};
+                for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
+                    const auto& meshSurface = meshSurfaces[surfaceIndex];
+                    instancesData[surfaceIndex].transform = meshInstance->getTransformGlobal();
+                    instancesData[surfaceIndex].vertexIndex = mesh->getVertexIndex();
+                    instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
+                }
+                instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
+            }
+        }
+
+        if (instancesIndexUpdated) {
             if (instancesIndex.size() > 0) {
                 instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index)); // TODO incremental writes
                 const auto drawCommand = vireo::DrawIndirectCommand {
@@ -94,7 +110,7 @@ namespace lysa {
                 opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
                 commandList.copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
             }
-            instancesDataUpdated = false;
+            instancesIndexUpdated = false;
         }
     }
 
@@ -111,9 +127,8 @@ namespace lysa {
                 mesh->upload();
                 resourcesUpdated = true;
             }
+            models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
-            // Force model data to be written to GPU memory
-            meshInstance->updated = framesInFlight;
 
             const auto& meshSurfaces = mesh->getSurfaces();
             const auto& meshIndices = mesh->getIndices();
@@ -134,7 +149,7 @@ namespace lysa {
             }
             instancesDataMemoryBlocks[meshInstance] = memoryBlock;
             instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
-            instancesDataUpdated = true;
+            instancesIndexUpdated = true;
             break;
         }
         case Node::VIEWPORT:

@@ -20,6 +20,7 @@ export namespace lysa {
         float  shininess{128.f};
         int32  diffuseTextureIndex{-1};
     };
+    static_assert(sizeof(MaterialData) == 32, "MaterialData struct must be 32 bytes for StructuredBuffer alignment");
 
     /**
      * Base class for all materials of models surfaces

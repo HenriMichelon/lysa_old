@@ -88,15 +88,15 @@ export namespace lysa {
 
         std::vector<Index> instancesIndex;
         std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
+        bool instancesIndexUpdated{false};
 
         HostVisibleMemoryArray instancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
-        bool instancesDataUpdated{false};
 
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
 
-        // All models containing opaque surfaces
+        std::list<std::shared_ptr<MeshInstance>> models{};
         std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;

@@ -37,13 +37,16 @@ struct InstanceData {
     float4x4 transform;
     uint firstVertex;
     uint materialIndex;
-    uint2 _pad;
+    float _pad0;
+    float _pad1;
 };
 
 struct Material {
     float4 albedoColor;
     float  shininess;
     int    diffuseTextureIndex;
+    float _pad0;
+    float _pad1;
 }
 
 struct Index {
