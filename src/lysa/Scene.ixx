@@ -32,11 +32,13 @@ export namespace lysa {
         uint32 vertexIndex{0};
         uint32 materialIndex{0};
     };
+    static_assert(sizeof(MeshSurfaceInstanceData) == 80, "MeshSurfaceInstanceData must be 80 bytes for StructuredBuffer alignment");
 
-    struct Index {
+    struct alignas(8) Index {
         uint index;
         uint surfaceIndex;
     };
+    static_assert(sizeof(Index) == 8, "Index must be 8 bytes for StructuredBuffer alignment");
 
     class Scene {
     public:
@@ -84,9 +86,10 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         bool resourcesUpdated{false};
 
-        HostVisibleMemoryArray instancesDataArray;
-        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
         std::vector<Index> instancesIndex;
+        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
+
+        HostVisibleMemoryArray instancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
 

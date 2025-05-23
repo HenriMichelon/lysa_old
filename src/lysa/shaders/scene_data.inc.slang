@@ -6,9 +6,13 @@
 */
 struct Vertex {
     float3 position;
+    float _pad0;
     float3 normal;
+    float _pad1;
     float2 uv;
+    float2 _pad2;
     float3 tangent;
+    float _pad3;
 };
 
 struct VertexOutput {
@@ -33,6 +37,7 @@ struct InstanceData {
     float4x4 transform;
     uint firstVertex;
     uint materialIndex;
+    uint2 _pad;
 };
 
 struct Material {

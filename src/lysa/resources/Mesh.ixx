@@ -19,7 +19,7 @@ export namespace lysa {
     /**
      * %A Mesh vertex
      */
-    struct Vertex {
+    struct  Vertex {
         //! local position
         float3 position;
         //! surface normal
@@ -36,6 +36,7 @@ export namespace lysa {
                     all(tangent == other.tangent);
         }
     };
+    static_assert(sizeof(Vertex) == 64, "Vertex struct must be 64 bytes for StructuredBuffer alignment");
 
     /**
      * %A Mesh surface, with counterclockwise triangles
