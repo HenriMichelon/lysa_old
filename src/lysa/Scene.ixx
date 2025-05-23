@@ -85,7 +85,7 @@ export namespace lysa {
         bool resourcesUpdated{false};
 
         HostVisibleMemoryArray instancesDataArray;
-        HostVisibleMemoryArray instancesIndexArray;
+        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
         std::vector<Index> instancesIndex;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};

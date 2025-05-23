@@ -10,7 +10,6 @@ import vireo;
 import lysa.application;
 
 namespace lysa {
-
     Scene::Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent) :
         framesInFlight{rconfig.framesInFlight},
         sceneUniformBuffer{Application::getVireo().createBuffer(
@@ -22,11 +21,10 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::STORAGE,
             L"MeshSurface Instance Data"},
-        instancesIndexArray{Application::getVireo(),
-            sizeof(Index),
-            config.maxVertexPerFrame,
+        instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
-            L"Draw indices"},
+            sizeof(Index) * config.maxVertexPerFrame, 1,
+            L"Draw indices")},
         opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
@@ -50,9 +48,10 @@ namespace lysa {
         descriptorSet->update(BINDING_MATERIAL, resources.getMaterialArray().getBuffer());
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
-        descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexArray.getBuffer());
+        descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
         sceneUniformBuffer->map();
         opaqueDrawCommandsStagingBuffer->map();
+        instancesIndexBuffer->map();
         resize(extent);
     }
 
@@ -88,9 +87,7 @@ namespace lysa {
 
         if (instancesDataUpdated) {
             if (instancesIndex.size() > 0) {
-                const auto instancesIndexMemoryBlock = instancesIndexArray.alloc(instancesIndex.size());
-                instancesIndexArray.write(instancesIndexMemoryBlock, instancesIndex.data());
-                instancesIndexArray.free(instancesIndexMemoryBlock);
+                instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index));
                 const auto drawCommand = vireo::DrawIndirectCommand {
                     .vertexCount = static_cast<uint32>(instancesIndex.size())
                 };
