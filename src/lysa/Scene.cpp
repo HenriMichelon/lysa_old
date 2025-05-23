@@ -19,9 +19,10 @@ namespace lysa {
         instancesDataArray{Application::getVireo(),
             sizeof(MeshSurfaceInstanceData),
             config.maxMeshSurfacePerFrame,
-            vireo::BufferType::STORAGE,
+            config.maxMeshSurfacePerFrame,
+            vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurface Instance Data"},
-        instancesIndexBuffer{Application::getVireo().createBuffer(
+        opaqueInstancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
             L"Draw indices")},
@@ -48,10 +49,10 @@ namespace lysa {
         descriptorSet->update(BINDING_MATERIAL, resources.getMaterialArray().getBuffer());
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
-        descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
+        descriptorSet->update(BINDING_INSTANCE_INDEX, opaqueInstancesIndexBuffer);
         sceneUniformBuffer->map();
         opaqueDrawCommandsStagingBuffer->map();
-        instancesIndexBuffer->map();
+        opaqueInstancesIndexBuffer->map();
         resize(extent);
     }
 
@@ -69,7 +70,7 @@ namespace lysa {
         }
     }
 
-    void Scene::update(vireo::CommandList& commandList) {
+    void Scene::update(const vireo::CommandList& commandList) {
         if (currentCamera && currentCamera->isUpdated()) {
             const auto sceneUniform = SceneData {
                 .cameraPosition = currentCamera->getPositionGlobal(),
@@ -93,6 +94,7 @@ namespace lysa {
                     instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                 }
                 instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
+                instancesDataUpdated = true;
 
                 for (const auto& material : mesh->getMaterials()) {
                     if (material->isUpdated()) {
@@ -103,20 +105,25 @@ namespace lysa {
             }
         }
 
+        if (instancesDataUpdated) {
+            instancesDataArray.flush(commandList);
+            instancesDataUpdated = false;
+        }
+
         if (resourcesUpdated) {
             Application::getResources().flush(commandList);
             resourcesUpdated = false;
         }
 
-        if (instancesIndexUpdated) {
-            if (instancesIndex.size() > 0) {
+        if (opaqueInstancesIndexUpdated) {
+            if (opaqueInstancesIndex.size() > 0) {
                 const auto drawCommand = vireo::DrawIndirectCommand {
-                    .vertexCount = static_cast<uint32>(instancesIndex.size())
+                    .vertexCount = static_cast<uint32>(opaqueInstancesIndex.size())
                 };
                 opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
                 commandList.copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
             }
-            instancesIndexUpdated = false;
+            opaqueInstancesIndexUpdated = false;
         }
     }
 
@@ -146,23 +153,23 @@ namespace lysa {
             const auto& meshSurfaces{mesh->getSurfaces()};
             const auto& meshIndices{mesh->getIndices()};
             const auto memoryBlock{instancesDataArray.alloc(meshSurfaces.size())};
-            const auto startIndex{instancesIndex.size()};
+            const auto startIndex{opaqueInstancesIndex.size()};
             for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                 const auto& meshSurface = meshSurfaces[surfaceIndex];
                 const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
                 for (int i = 0; i < meshSurface->indexCount; i++) {
-                    instancesIndex.push_back({
+                    opaqueInstancesIndex.push_back({
                        .index = meshIndices[meshSurface->firstIndex + i],
                        .surfaceIndex = instanceDataIndex
                     });
                 }
             }
-            instancesIndexBuffer->write(
-                &instancesIndex[startIndex],
+            opaqueInstancesIndexBuffer->write(
+                &opaqueInstancesIndex[startIndex],
                 mesh->getIndices().size() * sizeof(Index),
                 startIndex * sizeof(Index));
             instancesDataMemoryBlocks[meshInstance] = memoryBlock;
-            instancesIndexUpdated = true;
+            opaqueInstancesIndexUpdated = true;
             break;
         }
         case Node::VIEWPORT:
@@ -185,6 +192,14 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
+            if (instancesDataMemoryBlocks.contains(meshInstance)) {
+                const auto& memoryBlock = instancesDataMemoryBlocks[meshInstance];
+                instancesDataArray.free(memoryBlock);
+                instancesDataMemoryBlocks.erase(meshInstance);
+                models.remove(meshInstance);
+                opaqueModels.remove(meshInstance);
+                rebuildInstancesIndex();
+            }
             break;
         }
         case Node::VIEWPORT:
@@ -198,10 +213,31 @@ namespace lysa {
         }
     }
 
+    void Scene::rebuildInstancesIndex() {
+        opaqueInstancesIndex.clear();
+        for (const auto& meshInstance : models) {
+            const auto& mesh = meshInstance->getMesh();
+            const auto& meshSurfaces = mesh->getSurfaces();
+            for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
+                const auto& meshSurface = meshSurfaces[surfaceIndex];
+                const auto instanceDataIndex = instancesDataMemoryBlocks[meshInstance].instanceIndex + surfaceIndex;
+                for (int i = 0; i < meshSurface->indexCount; i++) {
+                    opaqueInstancesIndex.push_back({
+                        .index = mesh->getIndices()[meshSurface->firstIndex + i],
+                        .surfaceIndex = instanceDataIndex
+                    });
+                }
+            }
+        }
+        opaqueInstancesIndexBuffer->write(opaqueInstancesIndex.data(), opaqueInstancesIndex.size() * sizeof(Index));
+        opaqueInstancesIndexUpdated = true;
+    }
+
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
+        if (opaqueInstancesIndex.empty()) { return; }
         draw(commandList, pipeline, samplers, opaqueDrawCommandsBuffer);
     }
 

@@ -63,7 +63,7 @@ export namespace lysa {
 
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
-        void update(vireo::CommandList& commandList);
+        void update(const vireo::CommandList& commandList);
 
         void resize(const vireo::Extent &extent);
 
@@ -84,28 +84,29 @@ export namespace lysa {
         std::shared_ptr<Viewport> viewportAndScissors{nullptr};
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
-        bool resourcesUpdated{false};
-
-        std::vector<Index> instancesIndex;
-        std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
-        bool instancesIndexUpdated{false};
-
-        HostVisibleMemoryArray instancesDataArray;
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
-
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
+        bool resourcesUpdated{false};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
+        DeviceMemoryArray instancesDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
+        bool instancesDataUpdated{false};
+
         std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
         std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
+        std::vector<Index> opaqueInstancesIndex;
+        std::shared_ptr<vireo::Buffer> opaqueInstancesIndexBuffer;
+        bool opaqueInstancesIndexUpdated{false};
 
         void draw(
            vireo::CommandList& commandList,
            const vireo::Pipeline& pipeline,
            const Samplers& samplers,
            const std::shared_ptr<vireo::Buffer>& drawCommand) const;
+
+        void rebuildInstancesIndex();
 
     };
 
