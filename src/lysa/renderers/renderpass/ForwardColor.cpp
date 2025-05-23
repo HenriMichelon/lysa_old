@@ -7,7 +7,7 @@
 module lysa.renderers.renderpass.forward_color;
 
 import lysa.application;
-import lysa.resources_manager;
+import lysa.resources;
 import lysa.resources.mesh;
 
 namespace lysa {
@@ -17,6 +17,7 @@ namespace lysa {
         Renderpass{config, samplers, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
+            Resources::descriptorLayout,
             Scene::descriptorLayout,
             samplers.getDescriptorLayout()},
             {}, name);

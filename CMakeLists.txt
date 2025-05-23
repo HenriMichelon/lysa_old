@@ -68,10 +68,10 @@ set(SHADERS_SOURCE_FILES
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 
-set(SHADERS_SOURCE_FILES_FORWARD
-        "${SHADERS_SRC_DIR}/default.vert.slang"
-)
-add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
+#set(SHADERS_SOURCE_FILES_FORWARD
+#        "${SHADERS_SRC_DIR}/default.vert.slang"
+#)
+#add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
 
 #######################################################
 # HLSL++ math library
@@ -141,8 +141,8 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Samplers.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
-        ${ENGINE_SRC_DIR}/Window.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
+        ${ENGINE_SRC_DIR}/Window.ixx
 
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx

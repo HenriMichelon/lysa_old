@@ -36,17 +36,12 @@ namespace lysa {
             L"Draw commands upload")} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
-            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
-            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
             descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
             descriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
             descriptorLayout->build();
         }
-        auto& resources = Application::getResources();
         descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Scene");
-        descriptorSet->update(BINDING_VERTEX, resources.getVertexArray().getBuffer());
-        descriptorSet->update(BINDING_MATERIAL, resources.getMaterialArray().getBuffer());
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         descriptorSet->update(BINDING_INSTANCE_INDEX, opaqueInstancesIndexBuffer);
@@ -246,14 +241,13 @@ namespace lysa {
         const vireo::Pipeline& pipeline,
         const Samplers& samplers,
         const std::shared_ptr<vireo::Buffer>& drawCommand) const {
-        const auto sets = std::vector<std::shared_ptr<const vireo::DescriptorSet>> {
-            descriptorSet,
-            samplers.getDescriptorSet()};
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.setDescriptors(sets);
         commandList.bindPipeline(pipeline);
-        commandList.bindDescriptors(pipeline, sets);
+        commandList.bindDescriptors(pipeline, {
+            Application::getResources().getDescriptorSet(),
+            descriptorSet,
+            samplers.getDescriptorSet()});
         commandList.drawIndirect(drawCommand, 0, 1, sizeof(vireo::DrawIndirectCommand));
     }
 

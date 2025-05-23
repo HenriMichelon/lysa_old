@@ -74,7 +74,6 @@ namespace lysa {
             frame.colorAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
-        commandList.setDescriptors({frame.descriptorSet, samplers.getDescriptorSet()});
         commandList.beginRendering(renderingConfig);
         commandList.setViewport(scene.getViewport());
         commandList.setScissors(scene.getScissors());

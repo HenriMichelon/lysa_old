@@ -10,7 +10,7 @@ import std;
 import vireo;
 import lysa.configuration;
 import lysa.global;
-import lysa.resources_manager;
+import lysa.resources;
 import lysa.window;
 
 export namespace lysa {

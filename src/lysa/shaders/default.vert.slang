@@ -6,11 +6,10 @@
 */
 #include "scene_data.inc.slang"
 
-StructuredBuffer<Vertex> vertices : register(t0);
-StructuredBuffer<Material> materials : register(t1);
-ConstantBuffer<Scene> scene  : register(b2);
-StructuredBuffer<InstanceData> instancesData : register(t3);
-StructuredBuffer<Index> indices : register(t4);
+StructuredBuffer<Vertex> vertices : register(t0, space0);
+ConstantBuffer<Scene> scene  : register(b0, space1);
+StructuredBuffer<InstanceData> instancesData : register(t1, space1);
+StructuredBuffer<Index> indices : register(t2, space1);
 
 VertexOutput vertexMain(uint vertexId: SV_VertexID ) {
     VertexOutput output;
