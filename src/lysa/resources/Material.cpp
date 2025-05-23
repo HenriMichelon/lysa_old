@@ -39,6 +39,11 @@ namespace lysa {
         Material(name) {
     }
 
+    void StandardMaterial::setAlbedoColor(const float4 &color) {
+        albedoColor = color;
+        setUpdated();
+    }
+
     void StandardMaterial::setAlbedoTexture(const TextureInfo &texture) {
         albedoTexture = texture;
         setUpdated();

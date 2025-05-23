@@ -106,7 +106,7 @@ export namespace lysa {
         /**
          * Sets the material's base color.
          */
-        void setAlbedoColor(const float4 &color) { albedoColor = color; }
+        void setAlbedoColor(const float4 &color);
 
         /**
          * Returns the albedo texture (texture to multiply by albedo color. Used for basic texturing of objects).

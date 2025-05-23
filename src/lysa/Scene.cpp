@@ -81,11 +81,6 @@ namespace lysa {
             currentCamera->updated--;
         }
 
-        if (resourcesUpdated) {
-            Application::getResources().flush(commandList);
-            resourcesUpdated = false;
-        }
-
         for (const auto& meshInstance : models) {
             if (meshInstance->isUpdated()) {
                 const auto& mesh = meshInstance->getMesh();
@@ -98,7 +93,19 @@ namespace lysa {
                     instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                 }
                 instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
+
+                for (const auto& material : mesh->getMaterials()) {
+                    if (material->isUpdated()) {
+                        material->upload();
+                        resourcesUpdated = true;
+                    }
+                }
             }
+        }
+
+        if (resourcesUpdated) {
+            Application::getResources().flush(commandList);
+            resourcesUpdated = false;
         }
 
         if (instancesIndexUpdated) {
