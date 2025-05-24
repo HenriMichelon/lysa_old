@@ -48,16 +48,22 @@ export namespace lysa {
     };
 
     /**
+     */
+    struct ViewportConfiguration {
+        friend class Node;
+        vireo::Viewport        viewport;
+        vireo::Rect            scissors;
+        //! Scene configuration
+        SceneConfiguration     sceneConfig;
+    };
+
+    /**
      * Rendering window configuration
      */
     struct WindowConfiguration {
-        friend class Node;
-        //! Startup Scene
-        std::shared_ptr<Node>  rootNode;
+        ViewportConfiguration  viewportConfig;
         //! Renderers configuration
         RenderingConfiguration renderingConfig;
-        //! Scene configuration
-        SceneConfiguration     sceneConfig;
     };
 
 }

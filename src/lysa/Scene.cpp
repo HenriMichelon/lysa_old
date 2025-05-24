@@ -10,30 +10,36 @@ import vireo;
 import lysa.application;
 
 namespace lysa {
-    Scene::Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent) :
-        framesInFlight{rconfig.framesInFlight},
+    Scene::Scene(
+        const SceneConfiguration& config,
+        const uint32 framesInFlight,
+        const vireo::Viewport& viewport,
+        const vireo::Rect& scissors) :
+        framesInFlight{framesInFlight},
+        opaqueDrawCommandsStagingBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::BUFFER_UPLOAD,
+            sizeof(vireo::DrawIndexedIndirectCommand), 1,
+            L"Draw commands upload")},
         opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands")},
+        opaqueInstancesIndexBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::STORAGE,
+            sizeof(Index) * config.maxVertexPerFrame, 1,
+            L"Draw indices")},
         instancesDataArray{Application::getVireo(),
             sizeof(MeshSurfaceInstanceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurface Instance Data"},
-        opaqueInstancesIndexBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::STORAGE,
-            sizeof(Index) * config.maxVertexPerFrame, 1,
-            L"Draw indices")},
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
             L"Scene Data")},
-        opaqueDrawCommandsStagingBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::BUFFER_UPLOAD,
-            sizeof(vireo::DrawIndexedIndirectCommand), 1,
-            L"Draw commands upload")} {
+        scissors{scissors},
+        viewport{viewport} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
             descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
@@ -46,23 +52,8 @@ namespace lysa {
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         descriptorSet->update(BINDING_INSTANCE_INDEX, opaqueInstancesIndexBuffer);
         sceneUniformBuffer->map();
-        opaqueDrawCommandsStagingBuffer->map();
         opaqueInstancesIndexBuffer->map();
-        resize(extent);
-    }
-
-    void Scene::resize(const vireo::Extent& extent) {
-        this->extent = extent;
-        if (viewportAndScissors == nullptr) {
-            viewport = vireo::Viewport{
-                .width = static_cast<float>(extent.width),
-                .height = static_cast<float>(extent.height)
-            };
-            scissors = vireo::Rect{
-                .width = extent.width,
-                .height = extent.height
-            };
-        }
+        opaqueDrawCommandsStagingBuffer->map();
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
@@ -167,11 +158,6 @@ namespace lysa {
             opaqueInstancesIndexUpdated = true;
             break;
         }
-        case Node::VIEWPORT:
-            viewportAndScissors = static_pointer_cast<Viewport>(node);
-            viewport = viewportAndScissors->getViewport();
-            scissors = viewportAndScissors->getScissors();
-            break;
         default:
             break;
         }
@@ -197,12 +183,6 @@ namespace lysa {
             }
             break;
         }
-        case Node::VIEWPORT:
-            if (node == viewportAndScissors) {
-                viewportAndScissors.reset();
-                resize(extent);
-            }
-            break;
         default:
             break;
         }

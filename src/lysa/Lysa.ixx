@@ -10,11 +10,12 @@ export import std;
 export import vireo;
 
 export import lysa.application;
+export import lysa.configuration;
 export import lysa.global;
 export import lysa.math;
 export import lysa.memory;
+export import lysa.viewport;
 export import lysa.window;
-export import lysa.configuration;
 
 export import lysa.nodes.camera;
 export import lysa.nodes.mesh_instance;

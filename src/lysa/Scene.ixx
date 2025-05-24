@@ -14,7 +14,6 @@ import lysa.samplers;
 import lysa.nodes.camera;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
-import lysa.nodes.viewport;
 import lysa.resources.material;
 
 export namespace lysa {
@@ -47,7 +46,11 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
-        Scene(const SceneConfiguration& config, const RenderingConfiguration& rconfig, const vireo::Extent &extent);
+        Scene(
+            const SceneConfiguration& config,
+            uint32 framesInFlight,
+            const vireo::Viewport& viewport,
+            const vireo::Rect& scissors);
 
         auto getCurrentCamera() const { return currentCamera; }
 
@@ -63,8 +66,6 @@ export namespace lysa {
 
         void update(const vireo::CommandList& commandList);
 
-        void resize(const vireo::Extent &extent);
-
         void drawOpaquesModels(
            vireo::CommandList& commandList,
            const vireo::Pipeline& pipeline,
@@ -76,10 +77,8 @@ export namespace lysa {
 
     private:
         const uint32 framesInFlight;
-        vireo::Extent extent;
-        vireo::Viewport viewport;
-        vireo::Rect scissors;
-        std::shared_ptr<Viewport> viewportAndScissors{nullptr};
+        const vireo::Viewport& viewport;
+        const vireo::Rect& scissors;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         // Currently active camera, first camera added to the scene or the last activated

@@ -16,7 +16,7 @@ export namespace lysa {
      */
     class Node : public Object {
     public:
-        friend class Window;
+        friend class Viewport;
 
         //! Node type
         enum Type {
@@ -429,7 +429,7 @@ export namespace lysa {
         /**
          * Returns the attached rendering window or `nullptr` if the node is not attached to a window.
          */
-        auto getWindow() const { return window; }
+        auto getViewport() const { return viewport; }
 
         // auto getVireo() const {
             // assert([this]{ return window != nullptr; }, "Node is not attached to a window");
@@ -445,7 +445,7 @@ export namespace lysa {
 
         virtual void updateGlobalTransform();
 
-        virtual void ready(Window* window);
+        virtual void ready(Viewport* viewport);
 
         virtual void physicsProcess(float delta);
 
@@ -464,7 +464,7 @@ export namespace lysa {
         unique_id                        id;
         Type                             type;
         std::wstring                     name;
-        Window*                          window{nullptr};
+        Viewport*                        viewport{nullptr};
         Node*                            parent{nullptr};
         std::list<std::shared_ptr<Node>> children;
         std::list<std::wstring>          groups;

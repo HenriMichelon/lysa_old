@@ -104,6 +104,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Samplers.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
+        ${ENGINE_SRC_DIR}/Viewport.cpp
         ${ENGINE_SRC_DIR}/Window.cpp
 
         ${ENGINE_SRC_DIR}/nodes/Camera.cpp
@@ -142,12 +143,12 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Samplers.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
+        ${ENGINE_SRC_DIR}/Viewport.ixx
         ${ENGINE_SRC_DIR}/Window.ixx
 
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
-        ${ENGINE_SRC_DIR}/nodes/Viewport.ixx
 
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx

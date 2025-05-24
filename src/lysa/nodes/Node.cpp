@@ -7,7 +7,7 @@
 module lysa.nodes.node;
 
 import lysa.global;
-import lysa.window;
+import lysa.viewport;
 
 namespace lysa {
 
@@ -30,11 +30,11 @@ namespace lysa {
         Node::updateGlobalTransform();
     }
 
-    void Node::ready(Window* window) {
-        assert([&]{return window != nullptr; }, "Invalid window");
-        this->window = window;
+    void Node::ready(Viewport* viewport) {
+        assert([&]{return viewport != nullptr; }, "Invalid viewport");
+        this->viewport = viewport;
         for (const auto& child : children) {
-            child->ready(window);
+            child->ready(viewport);
         }
         if (isProcessed()) {
             onReady();
@@ -88,9 +88,9 @@ namespace lysa {
         child->parent = this;
         children.push_back(child);
         child->updateGlobalTransform();
-        if (window) {
-            window->addNode(child, false);
-            child->ready(window);
+        if (viewport) {
+            viewport->addNode(child, false);
+            child->ready(viewport);
         }
         // child->visible = visible && child->visible;
         // child->castShadows = castShadows;
@@ -123,7 +123,7 @@ namespace lysa {
     }
 
     bool Node::isProcessed() const {
-        const auto paused = window == nullptr || window->isPaused();
+        const auto paused = viewport == nullptr || viewport->isPaused();
         auto       mode   = processMode;
         if ((parent == nullptr) && (mode == ProcessMode::INHERIT))
             mode = ProcessMode::PAUSABLE;

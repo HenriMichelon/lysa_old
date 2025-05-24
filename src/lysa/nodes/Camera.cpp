@@ -7,7 +7,7 @@
 module lysa.nodes.camera;
 
 import lysa.global;
-import lysa.window;
+import lysa.viewport;
 
 namespace lysa {
 
@@ -16,7 +16,7 @@ namespace lysa {
     }
 
     void Camera::setActive(const bool isActive) {
-        assert([&]{return  getWindow() != nullptr; }, "Invalid window");
+        assert([&]{return  getViewport() != nullptr; }, "Invalid window");
         active = isActive;
         if (active) {
             if (perspectiveProjection) {
@@ -76,12 +76,12 @@ namespace lysa {
     }
 
     void Camera::setPerspectiveProjection(const float fov, const float near, const float far) {
-        if (getWindow()) {
+        if (getViewport()) {
             perspectiveProjection  = true;
             this->fov              = fov;
             nearDistance           = near;
             farDistance            = far;
-            const auto aspect      = getWindow()->getAspectRatio();
+            const auto aspect      = getViewport()->getAspectRatio();
             const float f = 1.0f / std::tan(lysa::radians(lysa::float1{fov}) * 0.5f);
             const float zRange = near - far;
             projectionMatrix = float4x4{

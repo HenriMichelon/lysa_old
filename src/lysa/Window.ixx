@@ -10,8 +10,7 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.memory;
-import lysa.scene;
-import lysa.nodes.camera;
+import lysa.viewport;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
 
@@ -43,46 +42,19 @@ export namespace lysa {
          */
         auto getGraphicQueue() const { return graphicQueue; }
 
-        /**
-         * Returns the surface configuration
-         */
-        // auto getConfig() const { return surfaceConfig; }
-
-        /**
-        * Changes the current scene
-        * @param node The new scene. Must not have a parent
-        */
-        void setRootNode(const std::shared_ptr<Node> &node);
-
-        /**
-         * Checks if the scene is paused, in respect for z0::ProcessMode
-         * @return  true if the current scene is paused
-         */
-        auto isPaused() const { return paused; }
-
-        /**
-         * Pause or resume the current scene
-         * @param pause the new state
-         *  - true pause the scene
-         *  - false resume the scene
-         */
-        void setPaused(bool pause);
-
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
+        auto getExtent() const { return swapChain->getExtent(); }
+
         auto getFramesInFlight() const { return config.renderingConfig.framesInFlight; }
+
+        auto& getViewport() const { return *viewport; }
 
         void waitIdle() const;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
-
-        // Add a node to the current scene
-        void addNode(const std::shared_ptr<Node> &node, bool async);
-
-        // Remove a node from the current scene
-        void removeNode(const std::shared_ptr<Node> &node, bool async);
 
         virtual ~Window();
         Window(Window&) = delete;
@@ -96,31 +68,13 @@ export namespace lysa {
         struct FrameData {
             // frames rendering & presenting synchronization
             std::shared_ptr<vireo::Fence> inFlightFence;
-            // Deferred list of nodes added to the current scene, processed before each frame
-            std::list<std::shared_ptr<Node>> addedNodes;
-            std::list<std::shared_ptr<Node>> addedNodesAsync;
-            // Deferred list of nodes removed from the current scene, processed before each frame
-            std::list<std::shared_ptr<Node>> removedNodes;
-            std::list<std::shared_ptr<Node>> removedNodesAsync;
-            // Need to activate a new camera on the next frame
-            bool cameraChanged{false};
-            // Camera to activate next frame
-            std::shared_ptr<Camera> activeCamera;
-            // Scene data for the frame
-            std::shared_ptr<Scene> scene;
+            std::shared_ptr<Viewport> viewport;
         };
 
         // Opaque window handle for presenting
         void*                 windowHandle;
         // Surface configuration
         WindowConfiguration&  config;
-        // Node tree
-        std::shared_ptr<Node> rootNode;
-        std::mutex            rootNodeMutex;
-        // State of the current scene
-        bool                  paused{false};
-        //
-        bool                  lockDeferredUpdates{false};
 
         // Last drawFrame() start time
         double currentTime{0.0};
@@ -142,11 +96,10 @@ export namespace lysa {
         std::shared_ptr<vireo::SwapChain>   swapChain;
         // Scene renderer
         std::unique_ptr<Renderer>           renderer;
+        std::shared_ptr<Viewport>           viewport;
 
         void render(uint32 frameIndex) const;
 
-        // Process scene updates before drawing a frame
-        void processDeferredUpdates(uint32 frameIndex);
     };
 
 }

@@ -27,19 +27,16 @@ namespace lysa {
         framesData.resize(config.renderingConfig.framesInFlight);
         for (auto& frame : framesData) {
             frame.inFlightFence = Application::getVireo().createFence(true, L"Present Fence");
-            frame.scene = std::make_shared<Scene>(config.sceneConfig, config.renderingConfig, swapChain->getExtent());
         }
+        viewport = std::make_shared<Viewport>(config.viewportConfig, *this, config.renderingConfig.framesInFlight);
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
-        setRootNode(config.rootNode);
     }
 
     Window::~Window() {
         graphicQueue->waitIdle();
         swapChain->waitIdle();
         framesData.clear();
-        rootNode.reset();
-        config.rootNode.reset();
         renderer.reset();
     }
 
@@ -47,10 +44,7 @@ namespace lysa {
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         const auto& frame = framesData[frameIndex];
 
-        // Add/removes nodes from the scene
-        if (!lockDeferredUpdates) {
-            processDeferredUpdates(frameIndex);
-        }
+        viewport->update(frameIndex);
 
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
             std::chrono::steady_clock::now().time_since_epoch())
@@ -73,17 +67,12 @@ namespace lysa {
         currentTime = newTime;
         accumulator += frameTime;
         {
-            auto lock = std::lock_guard(rootNodeMutex);
             while (accumulator >= FIXED_DELTA_TIME) {
                 // Update physics here
-                if (rootNode) {
-                    rootNode->physicsProcess(FIXED_DELTA_TIME);
-                }
+                viewport->physicsProcess(FIXED_DELTA_TIME);
                 accumulator -= FIXED_DELTA_TIME;
             }
-            if (rootNode) {
-                rootNode->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
-            }
+            viewport->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
         }
         render(frameIndex);
     }
@@ -94,7 +83,7 @@ namespace lysa {
 
         const auto commandLists = renderer->render(
             swapChain->getCurrentFrameIndex(),
-            *frame.scene);
+            *viewport->getScene(frameIndex));
 
         const auto commandList = commandLists.back();
         const auto colorAttachment = renderer->getColorAttachment(frameIndex);
@@ -118,24 +107,8 @@ namespace lysa {
         swapChain->recreate();
         const auto newExtent = swapChain->getExtent();
         if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
-            for (auto& frame : framesData) {
-                frame.scene->resize(swapChain->getExtent());
-            }
+            viewport->resize(swapChain->getExtent());
             renderer->resize(newExtent);
-        }
-    }
-
-    void Window::setRootNode(const std::shared_ptr<Node> &node) {
-        waitIdle();
-        auto lock = std::lock_guard(rootNodeMutex);
-        if (rootNode) {
-            removeNode(rootNode, false);
-        }
-        rootNode = node;
-        if (rootNode) {
-            assert([&]{ return node->getParent() == nullptr && node->getWindow() == nullptr;}, "Node can't be a root node");
-            addNode(rootNode, false);
-            rootNode->ready(this);
         }
     }
 
@@ -152,123 +125,6 @@ namespace lysa {
     void Window::removePostprocessing(const std::wstring& fragShaderName) const {
         waitIdle();
         renderer->removePostprocessing(fragShaderName);
-    }
-
-    void Window::setPaused(const bool state) {
-        paused = state;
-        // pause(rootNode);
-    }
-
-    void Window::addNode(const std::shared_ptr<Node> &node, const bool async) {
-        assert([&]{return node != nullptr;}, "Node can't be null");
-        lockDeferredUpdates = true;
-        {
-            auto lock = std::lock_guard(frameDataMutex);
-            for (auto& frame : framesData) {
-                if (async) {
-                    frame.addedNodesAsync.push_back(node );
-                } else {
-                    frame.addedNodes.push_back(node );
-                }
-            }
-        }
-        node->enterScene();
-        for (const auto &child : node->getChildren()) {
-            addNode(child, async);
-        }
-        // node->_setAddedToScene(true);
-        lockDeferredUpdates = false;
-    }
-
-    void Window::removeNode(const std::shared_ptr<Node> &node, const bool async) {
-        assert([&]{return node != nullptr && node->getWindow() != nullptr;},
-            "Node can't be null and not attached to a window");
-        lockDeferredUpdates = true;
-        for (auto &child : node->getChildren()) {
-            removeNode(child, async);
-        }
-        {
-            auto lock = std::lock_guard(frameDataMutex);
-            for (auto& frame : framesData) {
-                if (async) {
-                    frame.removedNodesAsync.push_back(node);
-                } else {
-                    frame.removedNodes.push_back(node);
-                }
-            }
-        }
-        // node->_setAddedToScene(false);
-        node->exitScene();
-        lockDeferredUpdates = false;
-    }
-
-
-    void Window::processDeferredUpdates(const uint32 frameIndex) {
-        // Update renderer resources
-        // sceneRenderer->preUpdateScene(currentFrame);
-        // Register UI drawing commands
-        // windowManager->drawFrame();
-        {
-            auto lock = std::lock_guard(frameDataMutex);
-            auto &data = framesData[frameIndex];
-            // Remove from the renderer the nodes previously removed from the scene tree
-            // Immediate removes
-            if (!data.removedNodes.empty()) {
-                for (const auto &node : data.removedNodes) {
-                    data.scene->removeNode(node);
-                }
-                data.removedNodes.clear();
-            }
-            // Async removes
-            if (!data.removedNodesAsync.empty()) {
-                auto count = 0;
-                for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
-                    data.scene->removeNode(*it);
-                    it = data.removedNodesAsync.erase(it);
-                    count += 1;
-                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
-                }
-            }
-            // Add to the renderer the nodes previously added to the scene tree
-            // Immediate additions
-            if (!data.addedNodes.empty()) {
-                for (const auto &node : data.addedNodes) {
-                    data.scene->addNode(node);
-                }
-                data.addedNodes.clear();
-            }
-            // Async additions
-            if (!data.addedNodesAsync.empty()) {
-                auto count = 0;
-                for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
-                    data.scene->addNode(*it);
-                    it = data.addedNodesAsync.erase(it);
-                    count += 1;
-                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
-                }
-            }
-            // Change the current camera if needed
-            if (data.cameraChanged) {
-                data.scene->activateCamera(data.activeCamera);
-                // if (applicationConfig.debug) {
-                    // debugRenderer->activateCamera(data.activeCamera, currentFrame);
-                // }
-                data.activeCamera.reset();
-                data.cameraChanged = false;
-            }
-            // Search for a camera in the scene tree if there is no current camera
-            if (data.scene->getCurrentCamera() == nullptr) {
-                const auto &camera = rootNode->findFirstChild<Camera>(true);
-                if (camera && camera->isProcessed()) {
-                    data.scene->activateCamera(camera);
-                    // if (applicationConfig.debug) {
-                        // debugRenderer->activateCamera(camera, currentFrame);
-                    // }
-                }
-            }
-        }
-        // Update renderer resources
-        // sceneRenderer->postUpdateScene(currentFrame);
     }
 
 }
