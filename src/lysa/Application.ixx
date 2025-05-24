@@ -17,7 +17,19 @@ export namespace lysa {
 
     class Application {
     public:
+        friend class Node;
+
         Application(ApplicationConfiguration& config);
+
+        virtual void onReady() {}
+        virtual void onQuit() {}
+
+        void addWindow(const std::shared_ptr<Window>& window);
+
+        /**
+         * Prepare and draw a frame
+         */
+        void drawFrame() const;
 
         /**
          * Returns the global Vireo object
@@ -39,6 +51,7 @@ export namespace lysa {
         ApplicationConfiguration& config;
         std::shared_ptr<vireo::Vireo> vireo;
         Resources resources;
+        std::vector<std::shared_ptr<Window>> windows;
 
     };
 

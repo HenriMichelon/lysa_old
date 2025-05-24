@@ -7,6 +7,7 @@
 module lysa.application;
 
 import lysa.scene;
+import lysa.nodes.node;
 
 namespace lysa {
 
@@ -21,9 +22,20 @@ namespace lysa {
     }
 
     Application::~Application() {
+        windows.clear();
         Scene::descriptorLayout.reset();
         resources.cleanup();
         vireo.reset();
+    }
+
+    void Application::addWindow(const std::shared_ptr<Window>& window) {
+        windows.push_back(window);
+    }
+
+    void Application::drawFrame() const {
+        for (const auto& window : windows) {
+            window->drawFrame();
+        }
     }
 
 }

@@ -20,17 +20,11 @@ export namespace lysa {
      */
     class Window {
     public:
-        /**
-        * Creates a rendering surface
-        */
-        Window(WindowConfiguration& config, void* windowHandle);
+
+        virtual void onReady() {}
+        virtual void onClose() {}
 
         void resize() const;
-
-        /**
-         * Prepare and draw a frame
-         */
-        void drawFrame();
 
         /**
          * Returns the opaque, os-specific, window handle
@@ -55,6 +49,10 @@ export namespace lysa {
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
+
+        Window(WindowConfiguration& config, void* windowHandle, const std::shared_ptr<Node>& rootNode = nullptr);
+
+        void drawFrame();
 
         virtual ~Window();
         Window(Window&) = delete;

@@ -13,7 +13,10 @@ import lysa.renderers.forward_renderer;
 
 namespace lysa {
 
-    Window::Window(WindowConfiguration& config, void* windowHandle):
+    Window::Window(
+        WindowConfiguration& config,
+        void* windowHandle,
+        const std::shared_ptr<Node>& rootNode):
         windowHandle{windowHandle},
         config{config},
         graphicQueue{Application::getVireo().createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
@@ -31,6 +34,7 @@ namespace lysa {
         viewport = std::make_shared<Viewport>(config.viewportConfig, *this, config.renderingConfig.framesInFlight);
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
+        viewport->setRootNode(rootNode);
     }
 
     Window::~Window() {
@@ -42,8 +46,6 @@ namespace lysa {
 
     void Window::drawFrame() {
         const auto frameIndex = swapChain->getCurrentFrameIndex();
-        const auto& frame = framesData[frameIndex];
-
         viewport->update(frameIndex);
 
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(

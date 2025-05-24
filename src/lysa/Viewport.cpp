@@ -1,0 +1,198 @@
+/*
+ * Copyright (c) 2025-present Henri Michelon
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+*/
+module lysa.viewport;
+
+import lysa.window;
+import lysa.nodes.node;
+
+namespace lysa {
+    
+    Viewport::Viewport(
+        ViewportConfiguration& config,
+        Window& window,
+        const uint32 framesInFlight) :
+        config{config},
+        window{window},
+        viewport{config.viewport},
+        scissors{config.scissors} {
+        resize(window.getExtent());
+        framesData.resize(framesInFlight);
+        for (auto& frame : framesData) {
+            frame.scene = std::make_shared<Scene>(config.sceneConfig, framesInFlight, viewport, scissors);
+        }
+    }
+
+    Viewport::~Viewport() {
+        framesData.clear();
+        rootNode.reset();
+    }
+
+    void Viewport::resize(const vireo::Extent &extent) {
+        if (config.viewport.width == 0.0f || config.viewport.height == 0.0f) {
+            viewport = vireo::Viewport{
+                .width = static_cast<float>(extent.width),
+                .height = static_cast<float>(extent.height)
+            };
+        }
+        if (config.scissors.width == 0.0f || config.scissors.height == 0.0f) {
+            scissors = vireo::Rect{
+                .width = static_cast<uint32>(viewport.width),
+                .height = static_cast<uint32>(viewport.height)
+            };
+        }
+    }
+
+    void Viewport::update(const uint32 frameIndex) {
+        if (rootNode && !lockDeferredUpdates) {
+            processDeferredUpdates(frameIndex);
+        }
+    }
+
+    void Viewport::physicsProcess(const float delta) const {
+        if (rootNode) {
+            rootNode->physicsProcess(delta);
+        }
+    }
+
+    void Viewport::process(const float alpha) const {
+        if (rootNode) {
+            rootNode->process(alpha);
+        }
+    }
+
+    void Viewport::addNode(const std::shared_ptr<Node> &node, const bool async) {
+        assert([&]{return node != nullptr;}, "Node can't be null");
+        lockDeferredUpdates = true;
+        {
+            auto lock = std::lock_guard(frameDataMutex);
+            for (auto& frame : framesData) {
+                if (async) {
+                    frame.addedNodesAsync.push_back(node );
+                } else {
+                    frame.addedNodes.push_back(node );
+                }
+            }
+        }
+        node->enterScene();
+        for (const auto &child : node->getChildren()) {
+            addNode(child, async);
+        }
+        // node->_setAddedToScene(true);
+        lockDeferredUpdates = false;
+    }
+
+    void Viewport::removeNode(const std::shared_ptr<Node> &node, const bool async) {
+        assert([&]{return node != nullptr && node->getViewport() != nullptr;},
+            "Node can't be null and not attached to a window");
+        lockDeferredUpdates = true;
+        for (auto &child : node->getChildren()) {
+            removeNode(child, async);
+        }
+        {
+            auto lock = std::lock_guard(frameDataMutex);
+            for (auto& frame : framesData) {
+                if (async) {
+                    frame.removedNodesAsync.push_back(node);
+                } else {
+                    frame.removedNodes.push_back(node);
+                }
+            }
+        }
+        // node->_setAddedToScene(false);
+        node->exitScene();
+        lockDeferredUpdates = false;
+    }
+
+    void Viewport::processDeferredUpdates(const uint32 frameIndex) {
+        // Update renderer resources
+        // sceneRenderer->preUpdateScene(currentFrame);
+        // Register UI drawing commands
+        // windowManager->drawFrame();
+        {
+            auto lock = std::lock_guard(frameDataMutex);
+            auto &data = framesData[frameIndex];
+            // Remove from the renderer the nodes previously removed from the scene tree
+            // Immediate removes
+            if (!data.removedNodes.empty()) {
+                for (const auto &node : data.removedNodes) {
+                    data.scene->removeNode(node);
+                }
+                data.removedNodes.clear();
+            }
+            // Async removes
+            if (!data.removedNodesAsync.empty()) {
+                auto count = 0;
+                for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
+                    data.scene->removeNode(*it);
+                    it = data.removedNodesAsync.erase(it);
+                    count += 1;
+                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
+                }
+            }
+            // Add to the renderer the nodes previously added to the scene tree
+            // Immediate additions
+            if (!data.addedNodes.empty()) {
+                for (const auto &node : data.addedNodes) {
+                    data.scene->addNode(node);
+                }
+                data.addedNodes.clear();
+            }
+            // Async additions
+            if (!data.addedNodesAsync.empty()) {
+                auto count = 0;
+                for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
+                    data.scene->addNode(*it);
+                    it = data.addedNodesAsync.erase(it);
+                    count += 1;
+                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
+                }
+            }
+            // Change the current camera if needed
+            if (data.cameraChanged) {
+                data.scene->activateCamera(data.activeCamera);
+                // if (applicationConfig.debug) {
+                    // debugRenderer->activateCamera(data.activeCamera, currentFrame);
+                // }
+                data.activeCamera.reset();
+                data.cameraChanged = false;
+            }
+            // Search for a camera in the scene tree if there is no current camera
+            if (data.scene->getCurrentCamera() == nullptr) {
+                const auto &camera = rootNode->findFirstChild<Camera>(true);
+                if (camera && camera->isProcessed()) {
+                    data.scene->activateCamera(camera);
+                    // if (applicationConfig.debug) {
+                        // debugRenderer->activateCamera(camera, currentFrame);
+                    // }
+                }
+            }
+        }
+        // Update renderer resources
+        // sceneRenderer->postUpdateScene(currentFrame);
+    }
+    
+    void Viewport::setRootNode(const std::shared_ptr<Node> &node) {
+        window.waitIdle();
+        auto lock = std::lock_guard(rootNodeMutex);
+        if (rootNode) {
+            removeNode(rootNode, false);
+        }
+        rootNode = node;
+        if (rootNode) {
+            assert([&]{ return node->getParent() == nullptr && node->getViewport() == nullptr;}, "Node can't be a root node");
+            addNode(rootNode, false);
+            rootNode->ready(this);
+        }
+    }
+
+    void Viewport::setPaused(const bool pause) {
+        paused = pause;
+        // pause(rootNode);
+    }
+
+
+}
