@@ -21,11 +21,11 @@ export namespace lysa {
             const Samplers& samplers);
 
         void render(
-            uint32 frameIndex,
-            Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             vireo::CommandList& commandList,
-            bool recordLastBarrier) override;
+            const Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            bool clearAttachment,
+            uint32 frameIndex);
 
     private:
         vireo::GraphicPipelineConfiguration pipelineConfig {
@@ -35,9 +35,7 @@ export namespace lysa {
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{
-                .clear = true,
-            }},
+            .colorRenderTargets = {{ }},
             .depthTestEnable = pipelineConfig.depthTestEnable,
             .discardDepthStencilAfterRender = true,
         };

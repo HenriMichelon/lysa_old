@@ -11,24 +11,26 @@ import lysa.nodes.node;
 
 namespace lysa {
     
-    Viewport::Viewport(
-        ViewportConfiguration& config,
-        Window& window,
-        const uint32 framesInFlight) :
+    Viewport::Viewport(ViewportConfiguration& config) :
         config{config},
-        window{window},
         viewport{config.viewport},
         scissors{config.scissors} {
-        resize(window.getExtent());
-        framesData.resize(framesInFlight);
-        for (auto& frame : framesData) {
-            frame.scene = std::make_shared<Scene>(config.sceneConfig, framesInFlight, viewport, scissors);
-        }
     }
 
     Viewport::~Viewport() {
         framesData.clear();
         rootNode.reset();
+    }
+
+    void Viewport::attachToWindow(Window& window) {
+        assert([&]{ return this->window == nullptr; }, "Viewport already attached to a window");
+        this->window = &window;
+        auto framesInFlight = window.getFramesInFlight();
+        framesData.resize(framesInFlight);
+        for (auto& frame : framesData) {
+            frame.scene = std::make_shared<Scene>(config.sceneConfig, framesInFlight, viewport, scissors);
+        }
+        resize(window.getExtent());
     }
 
     void Viewport::resize(const vireo::Extent &extent) {
@@ -87,7 +89,7 @@ namespace lysa {
 
     void Viewport::removeNode(const std::shared_ptr<Node> &node, const bool async) {
         assert([&]{return node != nullptr && node->getViewport() != nullptr;},
-            "Node can't be null and not attached to a window");
+            "Node can't be null and not attached to a viewport");
         lockDeferredUpdates = true;
         for (auto &child : node->getChildren()) {
             removeNode(child, async);
@@ -176,7 +178,7 @@ namespace lysa {
     }
     
     void Viewport::setRootNode(const std::shared_ptr<Node> &node) {
-        window.waitIdle();
+        getWindow().waitIdle();
         auto lock = std::lock_guard(rootNodeMutex);
         if (rootNode) {
             removeNode(rootNode, false);

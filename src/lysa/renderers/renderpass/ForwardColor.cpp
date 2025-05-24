@@ -32,11 +32,12 @@ namespace lysa {
     }
 
     void ForwardColor::render(
-        const uint32 frameIndex,
-        Scene& scene,
-        const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         vireo::CommandList& commandList,
-        const bool recordLastBarrier) {
+        const Scene& scene,
+        const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+        const bool clearAttachment,
+        const uint32) {
+        renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(

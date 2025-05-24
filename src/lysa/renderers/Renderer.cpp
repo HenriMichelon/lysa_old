@@ -15,10 +15,6 @@ namespace lysa {
         config{config},
         name{name} {
         framesData.resize(config.framesInFlight);
-        for (auto& frame : framesData) {
-            frame.commandAllocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-            frame.commandList = frame.commandAllocator->createCommandList();
-        }
     }
 
     void Renderer::update(const uint32 frameIndex) {
@@ -27,48 +23,55 @@ namespace lysa {
         }
     }
 
-    std::vector<std::shared_ptr<const vireo::CommandList>> Renderer::render(
-        const uint32 frameIndex,
-        Scene& scene) {
+    void Renderer::render(
+        vireo::CommandList& commandList,
+        Scene& scene,
+        const bool clearAttachment,
+        const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-
-        frame.commandAllocator->reset();
-        auto commandList = frame.commandList;
-        commandList->begin();
-
-        scene.update(*commandList);
+        scene.update(commandList);
         update(frameIndex);
+        if (clearAttachment) {
+            commandList.barrier(
+                frame.colorAttachment,
+                vireo::ResourceState::UNDEFINED,
+                vireo::ResourceState::RENDER_TARGET_COLOR);
+        }
+        mainColorPass(commandList, scene, frame.colorAttachment, clearAttachment, frameIndex);
+    }
 
-        commandList->barrier(frame.colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::RENDER_TARGET_COLOR);
-
-        mainColorPass(frameIndex, scene, frame.colorAttachment, *commandList);
-
+    void Renderer::postprocess(
+        vireo::CommandList& commandList,
+        const vireo::Viewport&viewport,
+        const vireo::Rect&scissor,
+        uint32 frameIndex) {
+        const auto& frame = framesData[frameIndex];
         if (!postProcessingPasses.empty()) {
-            commandList->barrier(
+            commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::RENDER_TARGET_COLOR,
                 vireo::ResourceState::SHADER_READ);
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(
                     frameIndex,
-                    scene,
+                    viewport,
+                    scissor,
                     frame.colorAttachment,
-                    *commandList,
+                    commandList,
                     postProcessingPass != postProcessingPasses.back());
             });
-            commandList->barrier(
+            commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::UNDEFINED);
         }
-        return {commandList};
     }
 
     std::shared_ptr<vireo::Image> Renderer::getColorAttachment(const uint32 frameIndex) const {
         if (postProcessingPasses.empty()) {
             return framesData[frameIndex].colorAttachment->getImage();
         }
-        return  postProcessingPasses.back()->getColorAttachment(frameIndex);
+        return postProcessingPasses.back()->getColorAttachment(frameIndex);
     }
 
     void Renderer::resize(const vireo::Extent& extent) {

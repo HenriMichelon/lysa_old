@@ -62,7 +62,8 @@ namespace lysa {
 
     void PostProcessing::render(
         const uint32 frameIndex,
-        Scene& scene,
+        const vireo::Viewport& viewport,
+        const vireo::Rect& scissor,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         vireo::CommandList& commandList,
         const bool recordLastBarrier) {
@@ -75,18 +76,16 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
-        commandList.setViewport(scene.getViewport());
-        commandList.setScissors(scene.getScissors());
+        commandList.setViewport(viewport);
+        commandList.setScissors(scissor);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
         commandList.draw(3);
         commandList.endRendering();
-        if (recordLastBarrier) {
-            commandList.barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::RENDER_TARGET_COLOR,
-                vireo::ResourceState::UNDEFINED);
-        }
+        commandList.barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::RENDER_TARGET_COLOR,
+            vireo::ResourceState::UNDEFINED);
     }
 
     void PostProcessing::resize(const vireo::Extent& extent) {

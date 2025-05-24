@@ -25,13 +25,6 @@ export namespace lysa {
 
         virtual void update(uint32 frameIndex) { }
 
-        virtual void render(
-            uint32 frameIndex,
-            Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            vireo::CommandList& commandList,
-            bool recordLastBarrier = true) = 0;
-
         virtual ~Renderpass() = default;
         Renderpass(Renderpass&) = delete;
         Renderpass& operator=(Renderpass&) = delete;

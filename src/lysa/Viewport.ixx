@@ -22,13 +22,8 @@ export namespace lysa {
         friend class Window;
         /**
          * Creates a Viewport
-         * @param viewport Viewport
-         * @param scissors Scissors
          */
-        Viewport(
-            ViewportConfiguration& config,
-            Window& window,
-            uint32 framesInFlight);
+        Viewport(ViewportConfiguration& config);
 
         /**
         * Changes the current scene
@@ -80,7 +75,10 @@ export namespace lysa {
          */
         void setScissors(const vireo::Rect& scissors) { this->scissors = scissors; }
 
-        auto& getWindow() const { return window; }
+        auto& getWindow() const {
+            assert([&]{ return window != nullptr;}, "Viewport not attached to a window");
+            return *window;
+        }
 
         virtual ~Viewport();
         Viewport(Viewport&) = delete;
@@ -106,9 +104,9 @@ export namespace lysa {
         };
 
         ViewportConfiguration& config;
-        Window&       window;
-        vireo::Viewport     viewport{};
-        vireo::Rect         scissors{};
+        vireo::Viewport        viewport{};
+        vireo::Rect            scissors{};
+        Window*               window{nullptr};
         // Node tree
         std::shared_ptr<Node> rootNode;
         std::mutex            rootNodeMutex;
@@ -121,6 +119,8 @@ export namespace lysa {
         bool                  lockDeferredUpdates{false};
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }
+
+        void attachToWindow(Window& window);
 
         void update(uint32 frameIndex);
 

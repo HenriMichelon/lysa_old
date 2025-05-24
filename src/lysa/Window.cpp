@@ -28,10 +28,14 @@ namespace lysa {
             config.renderingConfig.framesInFlight)} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
+        auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
-            frame.inFlightFence = Application::getVireo().createFence(true, L"Present Fence");
+            frame.inFlightFence = vireo.createFence(true, L"Present Fence");
+            frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
+            frame.commandList = frame.commandAllocator->createCommandList();
         }
-        viewport = std::make_shared<Viewport>(config.viewportConfig, *this, config.renderingConfig.framesInFlight);
+        const auto viewport = std::make_shared<Viewport>(config.viewportConfig);
+        addViewport(viewport);
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         viewport->setRootNode(rootNode);
@@ -44,9 +48,18 @@ namespace lysa {
         renderer.reset();
     }
 
+    std::shared_ptr<Viewport> Window::addViewport(const std::shared_ptr<Viewport>& viewport) {
+        waitIdle();
+        viewport->attachToWindow(*this);
+        viewports.push_back(viewport);
+        return viewport;
+    }
+
     void Window::drawFrame() {
         const auto frameIndex = swapChain->getCurrentFrameIndex();
-        viewport->update(frameIndex);
+        for (const auto& viewport : viewports) {
+            viewport->update(frameIndex);
+        }
 
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
             std::chrono::steady_clock::now().time_since_epoch())
@@ -71,10 +84,14 @@ namespace lysa {
         {
             while (accumulator >= FIXED_DELTA_TIME) {
                 // Update physics here
-                viewport->physicsProcess(FIXED_DELTA_TIME);
+                for (const auto& viewport : viewports) {
+                    viewport->physicsProcess(FIXED_DELTA_TIME);
+                }
                 accumulator -= FIXED_DELTA_TIME;
             }
-            viewport->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
+            for (const auto& viewport : viewports) {
+                viewport->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
+            }
         }
         render(frameIndex);
     }
@@ -83,13 +100,26 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 
-        const auto commandLists = renderer->render(
-            swapChain->getCurrentFrameIndex(),
-            *viewport->getScene(frameIndex));
+        frame.commandAllocator->reset();
+        auto& commandList = frame.commandList;
+        const auto& mainViewport = viewports.front();
 
-        const auto commandList = commandLists.back();
+        commandList->begin();
+        for (const auto& viewport : viewports) {
+            renderer->render(
+                *commandList,
+                *viewport->getScene(frameIndex),
+                viewport == mainViewport,
+                swapChain->getCurrentFrameIndex());
+        }
+        renderer->postprocess(
+            *commandList,
+            mainViewport->getViewport(),
+            mainViewport->getScissors(),
+            swapChain->getCurrentFrameIndex());
+
         const auto colorAttachment = renderer->getColorAttachment(frameIndex);
-        commandList->barrier(colorAttachment, vireo::ResourceState::RENDER_TARGET_COLOR,vireo::ResourceState::COPY_SRC);
+        commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
         commandList->copy(colorAttachment, swapChain);
         commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
@@ -99,7 +129,7 @@ namespace lysa {
         graphicQueue->submit(
             frame.inFlightFence,
             swapChain,
-            commandLists);
+            {commandList});
         swapChain->present();
         swapChain->nextFrameIndex();
     }
@@ -109,7 +139,9 @@ namespace lysa {
         swapChain->recreate();
         const auto newExtent = swapChain->getExtent();
         if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
-            viewport->resize(swapChain->getExtent());
+            for (const auto& viewport : viewports) {
+                viewport->resize(swapChain->getExtent());
+            }
             renderer->resize(newExtent);
         }
     }

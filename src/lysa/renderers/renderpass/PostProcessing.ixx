@@ -29,10 +29,11 @@ export namespace lysa {
 
         void render(
            uint32 frameIndex,
-           Scene& scene,
+           const vireo::Viewport&viewport,
+           const vireo::Rect&scissor,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
            vireo::CommandList& commandList,
-           bool recordLastBarrier) override;
+           bool recordLastBarrier);
 
         void resize(const vireo::Extent& extent) override;
 

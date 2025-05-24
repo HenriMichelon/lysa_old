@@ -26,6 +26,8 @@ export namespace lysa {
 
         void resize() const;
 
+        std::shared_ptr<Viewport> addViewport(const std::shared_ptr<Viewport>& viewport);
+
         /**
          * Returns the opaque, os-specific, window handle
          */
@@ -38,11 +40,11 @@ export namespace lysa {
 
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
-        auto getExtent() const { return swapChain->getExtent(); }
+        const auto& getExtent() const { return swapChain->getExtent(); }
 
-        auto getFramesInFlight() const { return config.renderingConfig.framesInFlight; }
+        const auto& getFramesInFlight() const { return config.renderingConfig.framesInFlight; }
 
-        auto& getViewport() const { return *viewport; }
+        auto& getViewports() const { return viewports; }
 
         void waitIdle() const;
 
@@ -66,7 +68,8 @@ export namespace lysa {
         struct FrameData {
             // frames rendering & presenting synchronization
             std::shared_ptr<vireo::Fence> inFlightFence;
-            std::shared_ptr<Viewport> viewport;
+            std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+            std::shared_ptr<vireo::CommandList> commandList;
         };
 
         // Opaque window handle for presenting
@@ -86,15 +89,15 @@ export namespace lysa {
         uint32 fps{0};
 
         // Per frame data
-        std::vector<FrameData>              framesData;
-        std::mutex                          frameDataMutex;
+        std::vector<FrameData>                 framesData;
+        std::mutex                             frameDataMutex;
         // Submission queue used to present the swap chain
-        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
+        std::shared_ptr<vireo::SubmitQueue>    graphicQueue;
         // Swap chain for this surface
-        std::shared_ptr<vireo::SwapChain>   swapChain;
+        std::shared_ptr<vireo::SwapChain>      swapChain;
         // Scene renderer
-        std::unique_ptr<Renderer>           renderer;
-        std::shared_ptr<Viewport>           viewport;
+        std::unique_ptr<Renderer>              renderer;
+        std::vector<std::shared_ptr<Viewport>> viewports;
 
         void render(uint32 frameIndex) const;
 
