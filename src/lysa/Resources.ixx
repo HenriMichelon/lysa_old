@@ -39,6 +39,12 @@ export namespace lysa {
 
         void cleanup();
 
+        void setUpdated() { updated = true; }
+
+        auto isUpdated() const { return updated; }
+
+        auto& getMutex() { return mutex; }
+
         Resources(Resources&) = delete;
         Resources& operator=(Resources&) = delete;
 
@@ -47,6 +53,8 @@ export namespace lysa {
         DeviceMemoryArray vertexArray;
         DeviceMemoryArray materialArray;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        bool updated{false};
+        std::mutex mutex;
     };
 
 }

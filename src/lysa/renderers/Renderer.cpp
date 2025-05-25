@@ -28,6 +28,7 @@ namespace lysa {
         Scene& scene,
         const bool clearAttachment,
         const uint32 frameIndex) {
+        auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         const auto& frame = framesData[frameIndex];
         scene.update(commandList);
         update(frameIndex);

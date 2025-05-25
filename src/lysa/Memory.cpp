@@ -32,6 +32,7 @@ namespace lysa {
     }
 
     MemoryBlock MemoryArray::alloc(const size_t instanceCount) {
+        auto lock = std::lock_guard{mutex};
         const auto size = instanceSize * instanceCount;
         for (MemoryBlock& bloc : freeBlocs) {
             if (bloc.size >= size) {
@@ -52,10 +53,12 @@ namespace lysa {
     }
 
     void MemoryArray::free(const MemoryBlock& bloc) {
+        auto lock = std::lock_guard{mutex};
         freeBlocs.push_back(bloc);
     }
 
-    void MemoryArray::copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) const {
+    void MemoryArray::copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) {
+        auto lock = std::lock_guard{mutex};
         commandList.copy(buffer, destination.buffer);
     }
 
@@ -77,6 +80,7 @@ namespace lysa {
     }
 
     void DeviceMemoryArray::write(const MemoryBlock& destination, const void* source) {
+        auto lock = std::lock_guard{mutex};
         stagingBuffer->write(source, destination.size, stagingBufferCurrentOffset);
         pendingWrites.push_back({
             stagingBufferCurrentOffset,
@@ -87,6 +91,7 @@ namespace lysa {
     }
 
     void DeviceMemoryArray::flush(const vireo::CommandList& commandList) {
+        auto lock = std::lock_guard{mutex};
         if (!pendingWrites.empty()) {
             commandList.copy(stagingBuffer, buffer, pendingWrites);
             stagingBufferCurrentOffset = 0;
@@ -119,6 +124,7 @@ namespace lysa {
     }
 
     void HostVisibleMemoryArray::write(const MemoryBlock& destination, const void* source) {
+        auto lock = std::lock_guard{mutex};
         buffer->write(source, destination.size, destination.offset);
     }
 

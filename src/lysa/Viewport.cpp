@@ -42,6 +42,7 @@ namespace lysa {
         }
         if (config.scissors.width == 0.0f || config.scissors.height == 0.0f) {
             scissors = vireo::Rect{
+                .x = static_cast<int32>(viewport.x),
                 .width = static_cast<uint32>(viewport.width),
                 .height = static_cast<uint32>(viewport.height)
             };

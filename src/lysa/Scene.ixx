@@ -83,7 +83,6 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
-        bool resourcesUpdated{false};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
         DeviceMemoryArray instancesDataArray;

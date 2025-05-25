@@ -60,6 +60,16 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
         }
+        if (Application::getResources().isUpdated()) {
+            auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
+            const auto& frame = framesData[frameIndex];
+            frame.commandAllocator->reset();
+            frame.commandList->begin();
+            Application::getResources().flush(*frame.commandList);
+            frame.commandList->end();
+            graphicQueue->submit({frame.commandList});
+            graphicQueue->waitIdle();
+        }
 
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
             std::chrono::steady_clock::now().time_since_epoch())

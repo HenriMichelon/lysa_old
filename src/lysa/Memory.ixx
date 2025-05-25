@@ -29,7 +29,7 @@ export namespace lysa {
 
         virtual void write(const MemoryBlock& destination, const void* source) = 0;
 
-        void copyTo(const vireo::CommandList& commandList, const MemoryArray& destination) const;
+        void copyTo(const vireo::CommandList& commandList, const MemoryArray& destination);
 
         auto getBuffer() const { return buffer; }
 
@@ -44,6 +44,7 @@ export namespace lysa {
         const size_t instanceSize;
         std::shared_ptr<vireo::Buffer> buffer;
         std::list<MemoryBlock> freeBlocs;
+        std::mutex mutex;
 
         MemoryArray(
             const vireo::Vireo& vireo,

@@ -45,8 +45,10 @@ namespace lysa {
     }
 
     void Resources::flush(const vireo::CommandList& commandList) {
+        auto lock = std::unique_lock(mutex, std::try_to_lock);
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
+        updated = false;
     }
 
 }

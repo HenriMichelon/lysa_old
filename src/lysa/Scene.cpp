@@ -85,7 +85,7 @@ namespace lysa {
                 for (const auto& material : mesh->getMaterials()) {
                     if (material->isUpdated()) {
                         material->upload();
-                        resourcesUpdated = true;
+                        Application::getResources().setUpdated();
                     }
                 }
             }
@@ -96,9 +96,8 @@ namespace lysa {
             instancesDataUpdated = false;
         }
 
-        if (resourcesUpdated) {
+        if (Application::getResources().isUpdated()) {
             Application::getResources().flush(commandList);
-            resourcesUpdated = false;
         }
 
         if (opaqueInstancesIndexUpdated) {
@@ -125,7 +124,7 @@ namespace lysa {
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
             if (!mesh->isUploaded()) {
                 mesh->upload();
-                resourcesUpdated = true;
+                Application::getResources().setUpdated();
             }
             models.push_back(meshInstance);
             opaqueModels.push_back(meshInstance);
