@@ -15,10 +15,9 @@ namespace lysa {
 
     Window::Window(
         WindowConfiguration& config,
-        void* windowHandle,
         const std::shared_ptr<Node>& rootNode):
-        windowHandle{windowHandle},
         config{config},
+        windowHandle{createWindow()},
         graphicQueue{Application::getVireo().createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
         swapChain{Application::getVireo().createSwapChain(
             config.renderingConfig.renderingFormat,
@@ -34,11 +33,12 @@ namespace lysa {
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
         }
-        const auto viewport = std::make_shared<Viewport>(config.viewportConfig);
+        const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
         renderer->resize(swapChain->getExtent());
         viewport->setRootNode(rootNode);
+        show();
     }
 
     Window::~Window() {
@@ -56,6 +56,7 @@ namespace lysa {
     }
 
     void Window::drawFrame() {
+        if (closing) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
@@ -145,6 +146,7 @@ namespace lysa {
     }
 
     void Window::resize() const {
+        if (closing) { return; }
         const auto oldExtent = swapChain->getExtent();
         swapChain->recreate();
         const auto newExtent = swapChain->getExtent();

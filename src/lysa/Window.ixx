@@ -4,6 +4,10 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef _WIN32
+#include <windows.h>
+#endif
 export module lysa.window;
 
 import vireo;
@@ -20,6 +24,7 @@ export namespace lysa {
      */
     class Window {
     public:
+        Window(WindowConfiguration& config, const std::shared_ptr<Node>& rootNode = nullptr);
 
         virtual void onReady() {}
         virtual void onClose() {}
@@ -52,9 +57,11 @@ export namespace lysa {
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
 
-        Window(WindowConfiguration& config, void* windowHandle, const std::shared_ptr<Node>& rootNode = nullptr);
-
         void drawFrame();
+
+        void show() const;
+
+        void close();
 
         virtual ~Window();
         Window(Window&) = delete;
@@ -72,10 +79,10 @@ export namespace lysa {
             std::shared_ptr<vireo::CommandList> commandList;
         };
 
-        // Opaque window handle for presenting
-        void*                 windowHandle;
-        // Surface configuration
         WindowConfiguration&  config;
+        // Opaque window handle for presenting
+        void* windowHandle;
+        bool closing{false};
 
         // Last drawFrame() start time
         double currentTime{0.0};
@@ -94,13 +101,27 @@ export namespace lysa {
         // Submission queue used to present the swap chain
         std::shared_ptr<vireo::SubmitQueue>    graphicQueue;
         // Swap chain for this surface
-        std::shared_ptr<vireo::SwapChain>      swapChain;
+        std::shared_ptr<vireo::SwapChain>      swapChain{nullptr};
         // Scene renderer
         std::unique_ptr<Renderer>              renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
 
         void render(uint32 frameIndex) const;
 
+        void* createWindow();
+
+        friend class Application;
+        bool mainWindow{false};
+
+#ifdef _WIN32
+        struct MonitorEnumData {
+            int  enumIndex{0};
+            int  monitorIndex{0};
+            RECT monitorRect{};
+        };
+        static BOOL CALLBACK monitorEnumProc(HMONITOR, HDC , const LPRECT lprcMonitor, const LPARAM dwData);
+        static LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+#endif
     };
 
 }

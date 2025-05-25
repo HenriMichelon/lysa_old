@@ -9,6 +9,21 @@ export module lysa.enums;
 import std;
 
 export namespace lysa {
+
+    /**
+     * Rendering Window mode
+     */
+    enum class WindowMode : uint8_t {
+        //! A Window with a border and a title that can be minimized
+        WINDOWED = 0,
+        //! A maximized Window with a border and a title that can be minimized
+        WINDOWED_MAXIMIZED = 1,
+        //! A maximized Window without a border and without a title
+        // WINDOWED_FULLSCREEN = 2,
+        //! A full-screen Window. The screen resolution will be changed
+        // FULLSCREEN = 3,
+    };
+
     /**
     * A Material transparency mode
     * Any transparency mode other than Transparency::DISABLED has a greater performance impact compared to opaque rendering.

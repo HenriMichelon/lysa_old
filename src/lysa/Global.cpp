@@ -4,6 +4,10 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef _WIN32
+#include <windows.h>
+#endif
 module lysa.global;
 
 namespace lysa {
@@ -37,10 +41,16 @@ namespace lysa {
         return angles; // radians
     }
 
-
     float getCurrentTimeMilliseconds() {
         using namespace std::chrono;
         return static_cast<float>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
     }
+
+#ifdef _WIN32
+    bool dirExists(const std::string& dirName) {
+        const DWORD ftyp = GetFileAttributesA(dirName.c_str());
+        return (ftyp != INVALID_FILE_ATTRIBUTES) && (ftyp & FILE_ATTRIBUTE_DIRECTORY);
+    }
+#endif
 
 }

@@ -23,7 +23,6 @@ export namespace lysa {
     struct ApplicationConfiguration {
         //! Graphic API
         vireo::Backend         backend{vireo::Backend::VULKAN};
-        //! xxx
         ResourcesConfiguration resourcesConfig;
     };
 
@@ -51,19 +50,30 @@ export namespace lysa {
      */
     struct ViewportConfiguration {
         friend class Node;
-        vireo::Viewport        viewport;
-        vireo::Rect            scissors;
-        //! Scene configuration
-        SceneConfiguration     sceneConfig;
+        vireo::Viewport        viewport{};
+        vireo::Rect            scissors{};
+        SceneConfiguration     sceneConfig{};
     };
 
     /**
      * Rendering window configuration
      */
     struct WindowConfiguration {
-        ViewportConfiguration  viewportConfig;
-        //! Renderers configuration
-        RenderingConfiguration renderingConfig;
+        //! Window title bar
+        std::wstring            title{};
+        //! State of the display Window
+        WindowMode              mode{WindowMode::WINDOWED};
+        int32                   x{-1};
+        int32                   y{-1};
+        //! Width in pixels of the display Window
+        uint32                  width{1280};
+        //! Height in pixels of the display Window
+        uint32                  height{720};
+        //! Monitor index to display the Window
+        int32                   monitor{0};
+
+        ViewportConfiguration   mainViewportConfig{};
+        RenderingConfiguration  renderingConfig{};
     };
 
 }

@@ -4,10 +4,11 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-export module lysa.global;
+module;
 #ifdef _WIN32
 #include <windows.h>
 #endif
+export module lysa.global;
 
 export import std;
 export import lysa.constants;
@@ -23,6 +24,8 @@ export namespace lysa {
     float getCurrentTimeMilliseconds();
 
     std::wstring sanitizeName(const std::wstring &name);
+
+    bool dirExists(const std::string& dirName);
 
     class Exception : public std::exception {
     public:

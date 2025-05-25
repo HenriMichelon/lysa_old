@@ -26,10 +26,7 @@ export namespace lysa {
 
         void addWindow(const std::shared_ptr<Window>& window);
 
-        /**
-         * Prepare and draw a frame
-         */
-        void drawFrame() const;
+        void run();
 
         /**
          * Returns the global Vireo object
@@ -52,6 +49,10 @@ export namespace lysa {
         std::shared_ptr<vireo::Vireo> vireo;
         Resources resources;
         std::vector<std::shared_ptr<Window>> windows;
+
+        void drawFrame() const;
+
+        void mainLoop() const;
 
     };
 

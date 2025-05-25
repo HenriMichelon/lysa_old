@@ -28,7 +28,14 @@ namespace lysa {
         vireo.reset();
     }
 
+    void Application::run() {
+        onReady();
+        mainLoop();
+        onQuit();
+    }
+
     void Application::addWindow(const std::shared_ptr<Window>& window) {
+        window->mainWindow = windows.empty();
         windows.push_back(window);
     }
 
