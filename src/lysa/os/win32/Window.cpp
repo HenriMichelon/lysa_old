@@ -8,16 +8,12 @@ module;
 #include <windows.h>
 module lysa.window;
 
+import lysa.application;
+
 namespace lysa {
 
     void Window::show() const {
         ShowWindow(static_cast<HWND>(windowHandle), SW_SHOW);
-    }
-
-    void Window::close() {
-        closing = true;
-        waitIdle();
-        CloseWindow(static_cast<HWND>(windowHandle));
     }
 
     void* Window::createWindow() {
@@ -96,12 +92,8 @@ namespace lysa {
             window->resize();
             return 0;
         case WM_CLOSE:
-            if (window->mainWindow) {
-                PostQuitMessage(0);
-            } else {
-                window->close();
-            }
-            return 0;
+            window->close();
+            break;
         default:;
         }
         return DefWindowProc(hWnd, message, wParam, lParam);

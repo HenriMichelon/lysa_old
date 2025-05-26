@@ -18,10 +18,9 @@ namespace lysa {
         const std::shared_ptr<Node>& rootNode):
         config{config},
         windowHandle{createWindow()},
-        graphicQueue{Application::getVireo().createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
         swapChain{Application::getVireo().createSwapChain(
             config.renderingConfig.renderingFormat,
-            graphicQueue,
+            Application::getGraphicQueue(),
             windowHandle,
             config.renderingConfig.presentMode,
             config.renderingConfig.framesInFlight)} {
@@ -42,10 +41,14 @@ namespace lysa {
     }
 
     Window::~Window() {
-        graphicQueue->waitIdle();
         swapChain->waitIdle();
         framesData.clear();
         renderer.reset();
+    }
+
+    void Window::close() {
+        closing = true;
+        Application::getInstance().removeWindow(this);
     }
 
     std::shared_ptr<Viewport> Window::addViewport(const std::shared_ptr<Viewport>& viewport) {
@@ -55,59 +58,32 @@ namespace lysa {
         return viewport;
     }
 
-    void Window::drawFrame() {
+    void Window::update() {
         if (closing) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
         }
-        if (Application::getResources().isUpdated()) {
-            auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
-            const auto& frame = framesData[frameIndex];
-            frame.commandAllocator->reset();
-            frame.commandList->begin();
-            Application::getResources().flush(*frame.commandList);
-            frame.commandList->end();
-            graphicQueue->submit({frame.commandList});
-            graphicQueue->waitIdle();
-        }
-
-        const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
-            std::chrono::steady_clock::now().time_since_epoch())
-            .count();
-        double frameTime = newTime - currentTime;
-
-        // Calculate the FPS
-        elapsedSeconds += static_cast<float>(frameTime);
-        frameCount++;
-        if (elapsedSeconds >= 1.0) {
-            fps = static_cast<uint32>(frameCount / elapsedSeconds);
-            frameCount = 0;
-            elapsedSeconds = 0;
-        }
-
-        // https://gafferongames.com/post/fix_your_timestep/
-        if (frameTime > 0.25) {
-            frameTime = 0.25; // Note: Max frame time to avoid spiral of death
-        }
-        currentTime = newTime;
-        accumulator += frameTime;
-        {
-            while (accumulator >= FIXED_DELTA_TIME) {
-                // Update physics here
-                for (const auto& viewport : viewports) {
-                    viewport->physicsProcess(FIXED_DELTA_TIME);
-                }
-                accumulator -= FIXED_DELTA_TIME;
-            }
-            for (const auto& viewport : viewports) {
-                viewport->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
-            }
-        }
-        render(frameIndex);
     }
 
-    void Window::render(const uint32 frameIndex) const {
+    void Window::physicsProcess(const float delta) const {
+        if (closing) { return; }
+        for (const auto& viewport : viewports) {
+            viewport->physicsProcess(delta);
+        }
+    }
+
+    void Window::process(float alpha) const {
+        if (closing) { return; }
+        for (const auto& viewport : viewports) {
+            viewport->process(alpha);
+        }
+    }
+
+    void Window::drawFrame() {
+        if (closing) { return; }
+        const auto frameIndex = swapChain->getCurrentFrameIndex();
+
         const auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 
@@ -137,7 +113,7 @@ namespace lysa {
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
         // commandLists.push_back(commandList);
-        graphicQueue->submit(
+        Application::getGraphicQueue()->submit(
             frame.inFlightFence,
             swapChain,
             {commandList});
@@ -159,7 +135,6 @@ namespace lysa {
     }
 
     void Window::waitIdle() const {
-        graphicQueue->waitIdle();
         swapChain->waitIdle();
     }
 

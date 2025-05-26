@@ -10,9 +10,9 @@ module lysa.application;
 
 namespace lysa {
 
-    void Application::mainLoop() const {
+    void Application::mainLoop() {
         auto msg = MSG{};
-        while (msg.message != WM_QUIT) {
+        while (!quit) {
             drawFrame();
             if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);

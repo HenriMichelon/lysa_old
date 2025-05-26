@@ -26,6 +26,8 @@ export namespace lysa {
 
         void addWindow(const std::shared_ptr<Window>& window);
 
+        void removeWindow(Window* window);
+
         void run();
 
         /**
@@ -41,6 +43,16 @@ export namespace lysa {
             return instance->resources;
         }
 
+        static auto& getGraphicQueue() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->graphicQueue;
+        }
+
+        static auto& getInstance() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return *instance;
+        }
+
         virtual ~Application();
 
     private:
@@ -48,11 +60,20 @@ export namespace lysa {
         ApplicationConfiguration& config;
         std::shared_ptr<vireo::Vireo> vireo;
         Resources resources;
-        std::vector<std::shared_ptr<Window>> windows;
+        std::list<std::shared_ptr<Window>> windows;
+        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
+        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+        std::shared_ptr<vireo::CommandList> commandList;
+        bool quit{false};
 
-        void drawFrame() const;
+        // Fixed delta time for the physics
+        static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
+        double currentTime{0.0};
+        double accumulator{0.0};
 
-        void mainLoop() const;
+        void drawFrame();
+
+        void mainLoop();
 
     };
 

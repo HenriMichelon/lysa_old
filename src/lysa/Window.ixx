@@ -38,11 +38,6 @@ export namespace lysa {
          */
         // auto getWindowHandle() const { return windowHandle; }
 
-        /**
-         * Returns the graphic submission queue
-         */
-        auto getGraphicQueue() const { return graphicQueue; }
-
         auto getAspectRatio() const { return swapChain->getAspectRatio(); }
 
         const auto& getExtent() const { return swapChain->getExtent(); }
@@ -57,8 +52,6 @@ export namespace lysa {
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
 
-        void drawFrame();
-
         void show() const;
 
         void close();
@@ -68,8 +61,6 @@ export namespace lysa {
         Window& operator=(Window&) = delete;
 
     private:
-        // Fixed delta time for the physics
-        static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
 
         // Per frame data
         struct FrameData {
@@ -84,33 +75,27 @@ export namespace lysa {
         void* windowHandle;
         bool closing{false};
 
-        // Last drawFrame() start time
-        double currentTime{0.0};
-        // Time accumulator to calculate the process delta time
-        double accumulator{0.0};
-        // Number of frames in the last second
-        uint32 frameCount{0};
-        // Number of seconds since the last FPS update
-        float  elapsedSeconds{0.0f};
-        // Average calculated FPS
-        uint32 fps{0};
-
         // Per frame data
         std::vector<FrameData>                 framesData;
         std::mutex                             frameDataMutex;
-        // Submission queue used to present the swap chain
-        std::shared_ptr<vireo::SubmitQueue>    graphicQueue;
         // Swap chain for this surface
         std::shared_ptr<vireo::SwapChain>      swapChain{nullptr};
         // Scene renderer
         std::unique_ptr<Renderer>              renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
 
-        void render(uint32 frameIndex) const;
-
         void* createWindow();
 
         friend class Application;
+
+        void update();
+
+        void drawFrame();
+
+        void physicsProcess(float delta) const;
+
+        void process(float alpha) const;
+
         bool mainWindow{false};
 
 #ifdef _WIN32
