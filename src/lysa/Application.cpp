@@ -26,6 +26,8 @@ namespace lysa {
 
     Application::~Application() {
         graphicQueue->waitIdle();
+        commandList.reset();
+        commandAllocator.reset();
         windows.clear();
         Scene::descriptorLayout.reset();
         resources.cleanup();
