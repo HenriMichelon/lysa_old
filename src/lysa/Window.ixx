@@ -88,7 +88,7 @@ export namespace lysa {
 
         friend class Application;
 
-        void update();
+        void update() const;
 
         void drawFrame();
 

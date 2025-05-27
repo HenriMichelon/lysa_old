@@ -23,7 +23,7 @@ namespace lysa {
             {}, name);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/default.vert");
         pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/forward.frag");
-        pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
+        defaultPipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,
@@ -42,7 +42,7 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
             commandList,
-            *pipeline,
+            *defaultPipeline,
             samplers);
         commandList.endRendering();
     }

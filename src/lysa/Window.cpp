@@ -58,7 +58,7 @@ namespace lysa {
         return viewport;
     }
 
-    void Window::update() {
+    void Window::update() const {
         if (closing) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
@@ -73,7 +73,7 @@ namespace lysa {
         }
     }
 
-    void Window::process(float alpha) const {
+    void Window::process(const float alpha) const {
         if (closing) { return; }
         for (const auto& viewport : viewports) {
             viewport->process(alpha);

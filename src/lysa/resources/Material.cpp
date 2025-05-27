@@ -31,7 +31,12 @@ namespace lysa {
 
     MaterialData ShaderMaterial::getMaterialData() const {
         return {
-
+            .parameters = {
+                parameters[0],
+                parameters[1],
+                parameters[2],
+                parameters[3],
+            }
         };
     }
 
@@ -99,7 +104,7 @@ namespace lysa {
         Material{orig->getName()},
         fragFileName{orig->fragFileName},
         vertFileName{orig->vertFileName} {
-        for (int i = 0; i < MAX_PARAMETERS; i++) {
+        for (int i = 0; i < SHADER_MATERIAL_MAX_PARAMETERS; i++) {
             parameters[i] = orig->parameters[i];
         }
     }

@@ -32,7 +32,7 @@ export namespace lysa {
         void render(
             vireo::CommandList& commandList,
             Scene& scene,
-            const bool clearAttachment,
+            bool clearAttachment,
             uint32 frameIndex);
 
         void postprocess(

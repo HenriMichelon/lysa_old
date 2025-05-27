@@ -88,4 +88,10 @@ export namespace lysa {
 
     constexpr float HALF_PI = std::numbers::pi_v<float> / 2.0f;
 
+    /**
+     * Maximum number of parameters of a ShaderMaterial
+     */
+    constexpr int SHADER_MATERIAL_MAX_PARAMETERS{4};
+
+
 }

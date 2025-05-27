@@ -16,11 +16,12 @@ import lysa.resources.texture;
 export namespace lysa {
 
     struct MaterialData {
-        float4 albedoColor{0.9f, 0.5f, 0.6f, 1.0f};
+        float4 albedoColor{0.9f, 0.0f, 0.6f, 1.0f};
         float  shininess{128.f};
         int32  diffuseTextureIndex{-1};
+        float4 parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
-    static_assert(sizeof(MaterialData) == 32, "MaterialData struct must be 32 bytes for StructuredBuffer alignment");
+    static_assert(sizeof(MaterialData) == 96, "MaterialData struct must be 96 bytes for StructuredBuffer alignment");
 
     /**
      * Base class for all materials of models surfaces
@@ -210,7 +211,7 @@ export namespace lysa {
          */
         void setNormalScale(float scale);
 
-        MaterialData getMaterialData() const;
+        MaterialData getMaterialData() const override;
 
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
@@ -231,11 +232,6 @@ export namespace lysa {
      */
     class ShaderMaterial : public Material {
     public:
-        /**
-         * Maximum number of parameters of a ShaderMaterial
-         */
-        static constexpr int MAX_PARAMETERS{4};
-
         /**
          * Creates a ShaderMaterial by copy
          */
@@ -271,12 +267,12 @@ export namespace lysa {
          */
         auto getParameter(const int index) const { return parameters[index]; }
 
-        MaterialData getMaterialData() const;
+        MaterialData getMaterialData() const override;
 
     private:
         const std::wstring fragFileName;
         const std::wstring vertFileName;
-        float4             parameters[MAX_PARAMETERS]{};
+        float4             parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
 
 }
