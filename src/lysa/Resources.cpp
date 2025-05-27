@@ -38,6 +38,7 @@ namespace lysa {
     }
 
     void Resources::reset() {
+        auto lock = std::unique_lock(mutex, std::try_to_lock);
         vertexArray.reset();
         materialArray.reset();
     }
