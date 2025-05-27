@@ -94,9 +94,12 @@ namespace lysa {
         auto lock = std::lock_guard{mutex};
         if (!pendingWrites.empty()) {
             commandList.copy(stagingBuffer, buffer, pendingWrites);
-            stagingBufferCurrentOffset = 0;
             pendingWrites.clear();
         }
+    }
+
+    void DeviceMemoryArray::reset() {
+        stagingBufferCurrentOffset = 0;
     }
 
     void DeviceMemoryArray::cleanup() {

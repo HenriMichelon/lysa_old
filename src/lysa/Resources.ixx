@@ -37,6 +37,8 @@ export namespace lysa {
 
         void flush(const vireo::CommandList& commandList);
 
+        void reset();
+
         void cleanup();
 
         void setUpdated() { updated = true; }

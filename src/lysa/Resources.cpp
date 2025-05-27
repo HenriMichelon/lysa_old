@@ -16,14 +16,14 @@ namespace lysa {
         vireo,
         sizeof(VertexData),
         config.maxVertexInstances,
-        config.maxStagingVertexInstances,
+        config.maxVertexInstances,
         vireo::BufferType::DEVICE_STORAGE,
         L"Vertex Array"},
     materialArray {
         vireo,
         sizeof(MaterialData),
         config.maxMaterialInstances,
-        config.maxStagingMaterialInstances,
+        config.maxMaterialInstances,
         vireo::BufferType::DEVICE_STORAGE,
         L"Material Array"} {
         if (descriptorLayout == nullptr) {
@@ -35,6 +35,11 @@ namespace lysa {
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
         descriptorSet->update(BINDING_VERTEX, vertexArray.getBuffer());
         descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
+    }
+
+    void Resources::reset() {
+        vertexArray.reset();
+        materialArray.reset();
     }
 
     void Resources::cleanup() {

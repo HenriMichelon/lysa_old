@@ -57,14 +57,17 @@ namespace lysa {
     }
 
     void Application::drawFrame() {
-        if (resources.isUpdated()) {
+        {
             auto resourcesLock = std::lock_guard{resources.getMutex()};
-            commandAllocator->reset();
-            commandList->begin();
-            resources.flush(*commandList);
-            commandList->end();
-            graphicQueue->submit({commandList});
-            graphicQueue->waitIdle();
+            resources.reset();
+            if (resources.isUpdated()) {
+                commandAllocator->reset();
+                commandList->begin();
+                resources.flush(*commandList);
+                commandList->end();
+                graphicQueue->submit({commandList});
+                graphicQueue->waitIdle();
+            }
         }
 
         for (const auto& window : windows) {

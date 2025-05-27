@@ -13,11 +13,8 @@ export namespace lysa {
 
     struct ResourcesConfiguration {
         uint32 maxVertexInstances{1000000};
-        uint32 maxStagingVertexInstances{500000};
         uint32 maxIndexInstances{1000000};
-        uint32 maxStagingIndexInstances{500000};
         uint32 maxMaterialInstances{1000};
-        uint32 maxStagingMaterialInstances{500};
     };
 
     struct ApplicationConfiguration {
