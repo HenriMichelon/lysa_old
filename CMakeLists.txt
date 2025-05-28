@@ -74,6 +74,16 @@ add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} $
 #add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
 
 #######################################################
+# xxHash library
+add_library(xxhash STATIC
+        ${xxhash_SOURCE_DIR}/xxhash.c
+)
+
+target_include_directories(xxhash PUBLIC
+        ${xxhash_SOURCE_DIR}
+)
+
+#######################################################
 # HLSL++ math library
 add_library(${HLSLPP_TARGET})
 target_sources(${HLSLPP_TARGET}
@@ -168,8 +178,8 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR})
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET})
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR} ${xxhash_SOURCE_DIR})
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
         "<cstdint>"

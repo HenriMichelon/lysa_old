@@ -19,3 +19,4 @@ A 3D game engine.
 - [Vireo RHI](https://github.com/HenriMichelon/vireo_rhi) : A 3D Rendering Hardware Interface
 - [HLSL++](https://github.com/redorav/hlslpp/) : A math library using HLSL syntax with multiplatform SIMD support by Emilio López
 - [JoltPhysics](https://github.com/jrouwe/JoltPhysics) : A multicore-friendly rigid body physics and collision detection library by Jorrit Rouwe
+- [xxHash](https://github.com/Cyan4973/xxHash) : Extremely fast non-cryptographic hash algorithm by Yann Collet

@@ -41,3 +41,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
+###### xxHash
+message(NOTICE "Fetching xxHash from https://github.com/Cyan4973/xxHash...")
+FetchContent_Declare(
+        xxhash
+        GIT_REPOSITORY https://github.com/Cyan4973/xxHash.git
+        GIT_TAG v0.8.3
+)
+set(XXHASH_BUNDLED_MODE OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(xxhash)
+#set(DirectXH_DIR ${CMAKE_BINARY_DIR}/_deps/directx-headers-src)

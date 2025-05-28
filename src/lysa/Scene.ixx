@@ -89,20 +89,34 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
 
-        std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
-        std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
-        std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
-        std::vector<Index> opaqueInstancesIndex;
-        std::shared_ptr<vireo::Buffer> opaqueInstancesIndexBuffer;
-        bool opaqueInstancesIndexUpdated{false};
+        struct ModelsData {
+            std::list<std::shared_ptr<MeshInstance>> opaqueModels{};
+            std::shared_ptr<vireo::Buffer> opaqueDrawCommandsBuffer;
+            std::shared_ptr<vireo::Buffer> opaqueDrawCommandsStagingBuffer;
+            std::vector<Index> opaqueInstancesIndex;
+            std::shared_ptr<vireo::Buffer> opaqueInstancesIndexBuffer;
+            bool opaqueInstancesIndexUpdated{false};
+
+            ModelsData::ModelsData(const SceneConfiguration& config);
+
+            void update(const vireo::CommandList& commandList);
+
+            void addNode(
+                const std::shared_ptr<MeshInstance>& meshInstance,
+                DeviceMemoryArray& instancesDataArray,
+                std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
+
+            void rebuildInstancesIndex(
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
+        };
+
+        ModelsData modelsData;
 
         void draw(
            vireo::CommandList& commandList,
            const vireo::Pipeline& pipeline,
            const Samplers& samplers,
            const std::shared_ptr<vireo::Buffer>& drawCommand) const;
-
-        void rebuildInstancesIndex();
 
     };
 
