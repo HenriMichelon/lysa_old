@@ -53,6 +53,11 @@ export namespace lysa {
             return *instance;
         }
 
+        static auto& getConfiguration() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->config;
+        }
+
         virtual ~Application();
 
     private:

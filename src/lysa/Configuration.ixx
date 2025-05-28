@@ -18,6 +18,8 @@ export namespace lysa {
     };
 
     struct ApplicationConfiguration {
+        //! Directory to search for resources and compiled shaders for the app:// URI
+        std::filesystem::path  appDir{L"."};
         //! Graphic API
         vireo::Backend         backend{vireo::Backend::VULKAN};
         ResourcesConfiguration resourcesConfig;

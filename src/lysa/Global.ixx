@@ -34,7 +34,9 @@ export namespace lysa {
 
     std::string to_string(const wchar_t* wstr);
 
-    std::wstring to_wstring(const std::string &str);
+    std::string to_string(const std::wstring& wstr);
+
+    std::wstring to_wstring(const std::string& str);
 
     std::wstring to_lower(const std::wstring& str);
 
