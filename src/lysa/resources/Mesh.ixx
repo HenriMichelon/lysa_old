@@ -67,13 +67,6 @@ export namespace lysa {
     public:
         friend class Window;
 
-        // inline static const std::vector<vireo::VertexAttributeDesc> vertexAttributes{
-        //     {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position) },
-        //     {"NORMAL",   vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, normal)},
-        //     {"UV",       vireo::AttributeFormat::R32G32_FLOAT,   offsetof(Vertex, uv)},
-        //     {"TANGENT",  vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, tangent)},
-        // };
-
         /**
          * Creates a Mesh from vertices
          * @param vertices Vertices

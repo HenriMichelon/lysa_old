@@ -132,7 +132,6 @@ export namespace lysa {
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
-
     };
 
 }

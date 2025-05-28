@@ -113,7 +113,9 @@ namespace lysa {
     bool Node::removeChild(const std::shared_ptr<Node>& child, const bool async) {
         if (!haveChild(child, false)) { return false; }
         child->parent = nullptr;
-        // if (node->addedToScene) { app()._removeNode(node, async); }
+        if (child->viewport) {
+            child->viewport->removeNode(child, async);
+        }
         children.remove(child);
         return true;
     }

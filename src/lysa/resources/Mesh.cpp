@@ -33,6 +33,7 @@ namespace lysa {
         assert([&]{return surfaceIndex < surfaces.size();}, "Invalid surface index");
         surfaces[surfaceIndex]->material = material;
         materials.insert(surfaces[surfaceIndex]->material);
+        setUpdated();
     }
 
     void Mesh::upload() {
@@ -51,9 +52,9 @@ namespace lysa {
 
     bool Mesh::operator==(const Mesh &other) const {
         return vertices == other.vertices &&
-                indices == other.indices &&
-                surfaces == other.surfaces &&
-                materials == other.materials;
+               indices == other.indices &&
+               surfaces == other.surfaces &&
+               materials == other.materials;
     }
 
     void Mesh::buildAABB() {

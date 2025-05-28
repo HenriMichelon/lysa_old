@@ -67,8 +67,8 @@ namespace lysa {
         }
 
         for (const auto& meshInstance : models) {
-            if (meshInstance->isUpdated()) {
-                const auto& mesh = meshInstance->getMesh();
+            const auto& mesh = meshInstance->getMesh();
+            if (meshInstance->isUpdated() || mesh->isUpdated()) {
                 const auto& meshSurfaces = mesh->getSurfaces();
                 auto instancesData = std::vector<MeshSurfaceInstanceData>{meshSurfaces.size()};
                 for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
@@ -79,12 +79,13 @@ namespace lysa {
                 }
                 instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
                 instancesDataUpdated = true;
-
-                for (const auto& material : mesh->getMaterials()) {
-                    if (material->isUpdated()) {
-                        material->upload();
-                        Application::getResources().setUpdated();
-                    }
+                if (meshInstance->isUpdated()) { meshInstance->updated--; }
+                if (mesh->isUpdated()) { mesh->updated--; }
+            }
+            for (const auto& material : mesh->getMaterials()) {
+                if (material->isUpdated()) {
+                    material->upload();
+                    Application::getResources().setUpdated();
                 }
             }
         }
@@ -118,6 +119,7 @@ namespace lysa {
             }
             models.push_back(meshInstance);
             meshInstance->framesInFlight = framesInFlight;
+            mesh->framesInFlight = framesInFlight;
             meshInstance->setUpdated();
 
             auto nodePipelineIds = std::list<uint32>{};
@@ -155,10 +157,19 @@ namespace lysa {
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             if (instancesDataMemoryBlocks.contains(meshInstance)) {
+                const auto& mesh = meshInstance->getMesh();
                 const auto& memoryBlock = instancesDataMemoryBlocks[meshInstance];
                 instancesDataArray.free(memoryBlock);
                 instancesDataMemoryBlocks.erase(meshInstance);
                 models.remove(meshInstance);
+                auto nodePipelineIds = std::list<uint32>{};
+                for (const auto& material : mesh->getMaterials()) {
+                    auto id = material->getPipelineId();
+                    nodePipelineIds.push_back(id);
+                }
+                for (const auto& pipelineId : nodePipelineIds) {
+                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, instancesDataMemoryBlocks);
+                }
                 // opaqueModels.removeNode(meshInstance, instancesDataMemoryBlocks);
             }
             break;
@@ -256,14 +267,16 @@ namespace lysa {
             const auto startIndex{instancesIndex.size()};
             auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
-                const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
-                for (int i = 0; i < meshSurface->indexCount; i++) {
-                    instancesIndex.push_back({
-                       .index = meshIndices[meshSurface->firstIndex + i],
-                       .surfaceIndex = instanceDataIndex
-                    });
+                if (meshSurface->material->getPipelineId() == pipelineId) {
+                    const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
+                    for (int i = 0; i < meshSurface->indexCount; i++) {
+                        instancesIndex.push_back({
+                           .index = meshIndices[meshSurface->firstIndex + i],
+                           .surfaceIndex = instanceDataIndex
+                        });
+                    }
+                    surfaceIndex++;
                 }
-                surfaceIndex++;
             }
             instancesIndexBuffer->write(
                 &instancesIndex[startIndex],
@@ -278,7 +291,7 @@ namespace lysa {
         const std::shared_ptr<MeshInstance>& meshInstance,
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
         models.remove(meshInstance);
-        rebuildInstancesIndex(instancesDataMemoryBlocks);
+        rebuildInstancesIndex(instancesDataMemoryBlocks); // TODO one call per frame
     }
 
     void Scene::PipelineData::rebuildInstancesIndex(
@@ -287,14 +300,27 @@ namespace lysa {
         for (const auto& meshInstance : models) {
             const auto& mesh = meshInstance->getMesh();
             const auto& meshSurfaces = mesh->getSurfaces();
-            for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
-                const auto& meshSurface = meshSurfaces[surfaceIndex];
-                const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
-                for (int i = 0; i < meshSurface->indexCount; i++) {
-                    instancesIndex.push_back({
-                        .index = mesh->getIndices()[meshSurface->firstIndex + i],
-                        .surfaceIndex = instanceDataIndex
-                    });
+
+            auto surfaceCount{0};
+            for (const auto& meshSurface : meshSurfaces) {
+                if (meshSurface->material->getPipelineId() == pipelineId) {
+                    surfaceCount++;
+                }
+            }
+
+            if (surfaceCount > 0) {
+                auto surfaceIndex{0};
+                for (const auto& meshSurface : meshSurfaces) {
+                    if (meshSurface->material->getPipelineId() == pipelineId) {
+                        const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
+                        for (int i = 0; i < meshSurface->indexCount; i++) {
+                            instancesIndex.push_back({
+                                .index = mesh->getIndices()[meshSurface->firstIndex + i],
+                                .surfaceIndex = instanceDataIndex
+                            });
+                        }
+                        surfaceIndex++;
+                    }
                 }
             }
         }
