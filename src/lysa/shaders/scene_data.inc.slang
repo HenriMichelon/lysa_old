@@ -49,6 +49,7 @@ struct Material {
     int    diffuseTextureIndex;
     float _pad0;
     float _pad1;
+    float4 parameters[4];
 }
 
 struct Index {

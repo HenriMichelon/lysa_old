@@ -44,6 +44,8 @@ namespace lysa {
                         fragShaderName = to_string(shaderMaterial->getFragFileName());
                     }
                 }
+                pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
+                pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/" + vertShaderName);
                 pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
