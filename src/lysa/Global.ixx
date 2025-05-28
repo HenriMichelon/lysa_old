@@ -34,6 +34,16 @@ export namespace lysa {
 
     std::string to_string(const wchar_t* wstr);
 
+    std::wstring to_wstring(const std::string &str);
+
+    std::wstring to_lower(const std::wstring& str);
+
+    std::string to_lower(const std::string& str);
+
+    float3 to_float3(const std::string& str);
+
+    float4 to_float4(const std::string& str);
+
     class Exception : public std::exception {
     public:
         template <typename... Args>

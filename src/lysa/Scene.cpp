@@ -56,12 +56,15 @@ namespace lysa {
     void Scene::update(const vireo::CommandList& commandList) {
         instancesDataArray.restart();
         if (currentCamera && currentCamera->isUpdated()) {
-            const auto sceneUniform = SceneData {
+            auto sceneUniform = SceneData {
                 .cameraPosition = currentCamera->getPositionGlobal(),
                 .projection = currentCamera->getProjection(),
                 .view = inverse(currentCamera->getTransformGlobal()),
                 .viewInverse = currentCamera->getTransformGlobal(),
             };
+            if (currentEnvironment) {
+                sceneUniform.ambientLight = currentEnvironment->getAmbientColorAndIntensity();
+            }
             sceneUniformBuffer->write(&sceneUniform);
             currentCamera->updated--;
         }
@@ -109,6 +112,10 @@ namespace lysa {
             node->framesInFlight = framesInFlight;
             activateCamera(static_pointer_cast<Camera>(node));
             break;
+        case Node::ENVIRONMENT:
+            node->framesInFlight = framesInFlight;
+            currentEnvironment = static_pointer_cast<Environment>(node);
+            break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
             const auto& mesh = meshInstance->getMesh();
@@ -152,6 +159,11 @@ namespace lysa {
             if (node == currentCamera) {
                 currentCamera->setActive(false);
                 currentCamera.reset();
+            }
+            break;
+        case Node::ENVIRONMENT:
+            if (node == currentEnvironment) {
+                currentEnvironment.reset();
             }
             break;
         case Node::MESH_INSTANCE:{

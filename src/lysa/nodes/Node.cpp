@@ -254,5 +254,37 @@ namespace lysa {
 
     quaternion Node::getRotationQuaternionGlobal() const {
     }*/
-    
+
+
+
+    void Node::setProperty(const std::string &property, const std::string &value) {
+        if (property == "position") {
+        } else if (property == "rotation") {
+        } else if (property == "scale") {
+        } else if (property == "groups") {
+            for(const auto groupName : split(value, ';')) {
+                addToGroup(to_wstring(groupName.data()));
+            }
+        } else if (property == "process_mode") {
+            const auto v = to_lower(value);
+            if (v == "inherit") {
+                setProcessMode(ProcessMode::INHERIT);
+            } else if (v == "pausable") {
+                setProcessMode(ProcessMode::PAUSABLE);
+            } else if (v == "when_paused") {
+                setProcessMode(ProcessMode::WHEN_PAUSED);
+            } else if (v == "always") {
+                setProcessMode(ProcessMode::ALWAYS);
+            } else if (v == "disabled") {
+                setProcessMode(ProcessMode::DISABLED);
+            }
+        } else if (property == "visible") {
+            // setVisible(value == "true");
+        } else if (property == "name") {
+            // setName(value);
+        } else  if (property == "cast_shadows") {
+            // setCastShadows(value == "true");
+        }
+    }
+
 }

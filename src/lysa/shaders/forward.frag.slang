@@ -7,6 +7,5 @@
 #include "scene_data.inc.slang"
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    return materials[input.materialIndex].albedoColor;
-//     return float4(0., 0., 0., 1.0);
+    return materials[input.materialIndex].albedoColor * scene.ambientLight;
 }

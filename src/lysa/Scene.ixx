@@ -12,6 +12,7 @@ import lysa.configuration;
 import lysa.memory;
 import lysa.samplers;
 import lysa.nodes.camera;
+import lysa.nodes.environment;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
 import lysa.resources.material;
@@ -23,7 +24,7 @@ export namespace lysa {
         alignas(16) float4x4 projection;
         float4x4    view;
         float4x4    viewInverse;
-        float4      ambientLight{1.0f, 1.0f, 1.0f, 0.01f}; // RGB + strength
+        float4      ambientLight{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + strength
     };
 
     struct MeshSurfaceInstanceData {
@@ -93,6 +94,7 @@ export namespace lysa {
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         std::shared_ptr<Camera> currentCamera{};
+        std::shared_ptr<Environment> currentEnvironment{};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
         DeviceMemoryArray instancesDataArray;

@@ -423,9 +423,29 @@ export namespace lysa {
         const std::list<std::shared_ptr<Node>> &getChildren() const { return children; }
 
         /**
+        * Returns a list of group names that the node has been added to.
+        */
+        const std::list<std::wstring>& getGroups() const { return groups; }
+
+        /**
+         * Adds the node to the group. Groups can be helpful to organize a subset of nodes, for example "enemies" or "stairs".
+         */
+        void addToGroup(const std::wstring &group) { groups.push_back(group); }
+
+        /**
+         * Removes the node from the given group. Does nothing if the node is not in the group
+         */
+        void removeFromGroup(const std::wstring &group) { groups.remove(group); }
+
+        /**
          * Returns true if this node has been added to the given group
          */
         auto isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
+
+        /**
+         * Changes the node's processing behavior.
+         */
+        void setProcessMode(const ProcessMode mode) { processMode = mode; }
 
         /**
          * Returns true if the node is processed and receive input callbacks
@@ -442,9 +462,11 @@ export namespace lysa {
          */
         auto getViewport() const { return viewport; }
 
-        // auto getVireo() const {
-            // assert([this]{ return window != nullptr; }, "Node is not attached to a window");
-        // }
+        /**
+        * Sets a property by is name and value.
+        * Currently, not all properties in all nodes classes are supported.
+        */
+        virtual void setProperty(const std::string &property, const std::string &value);
 
         ~Node() override = default;
     
