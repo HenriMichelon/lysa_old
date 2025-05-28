@@ -82,6 +82,17 @@ namespace lysa {
         }
     }
 
+    void Node::rotateY(const float angle) {
+        localTransform = mul(float4x4::rotation_y(angle), localTransform);
+        updateGlobalTransform();
+    }
+
+    void Node::rotateGlobalY(float angle) {
+        localTransform = mul(localTransform, float4x4::rotation_y(angle));
+        updateGlobalTransform();
+    }
+
+
     bool Node::addChild(const std::shared_ptr<Node> child, const bool async) {
         if (haveChild(child, false)) { return false; }
         assert([&]{return child->parent == nullptr; }, "Remove child from parent first");
@@ -200,11 +211,7 @@ namespace lysa {
     void Node::rotateX(const float angle) {
         updateGlobalTransform();
     }
-    
-    void Node::rotateY(const float angle) {
-        updateGlobalTransform();
-    }
-    
+
     void Node::rotateZ(const float angle) {
         updateGlobalTransform();
     }

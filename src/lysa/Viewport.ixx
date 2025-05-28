@@ -9,6 +9,7 @@ export module lysa.viewport;
 import vireo;
 import lysa.configuration;
 import lysa.global;
+import lysa.input_event;
 import lysa.scene;
 import lysa.nodes.camera;
 import lysa.nodes.node;
@@ -119,6 +120,11 @@ export namespace lysa {
         bool                  lockDeferredUpdates{false};
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }
+
+        bool input(InputEvent &inputEvent) { return input(rootNode, inputEvent); }
+
+        // Recursively call onInput() on a tree node
+        bool input(const std::shared_ptr<Node> &node, InputEvent &inputEvent);
 
         void attachToWindow(Window& window);
 

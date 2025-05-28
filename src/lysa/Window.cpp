@@ -58,6 +58,14 @@ namespace lysa {
         return viewport;
     }
 
+    void Window::input(InputEvent &inputEvent) {
+        if (closing) return;
+        // if (windowManager->onInput(inputEvent)) return;
+        for (const auto& viewport : viewports) {
+            viewport->input(inputEvent);
+        }
+    }
+
     void Window::update() const {
         if (closing) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();

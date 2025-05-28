@@ -46,6 +46,24 @@ namespace lysa {
         return static_cast<float>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
     }
 
+    std::string to_string(const wchar_t* wstr) {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        return conv.to_bytes(wstr);
+    }
+
+    std::vector<std::string_view> split(const std::string_view str, const char delimiter) {
+        std::vector<std::string_view> result;
+        size_t start = 0;
+        size_t end = str.find(delimiter);
+        while (end != std::string_view::npos) {
+            result.push_back(str.substr(start, end - start));
+            start = end + 1;
+            end = str.find(delimiter, start);
+        }
+        result.push_back(str.substr(start)); // Add the last token
+        return result;
+    }
+
 #ifdef _WIN32
     bool dirExists(const std::string& dirName) {
         const DWORD ftyp = GetFileAttributesA(dirName.c_str());

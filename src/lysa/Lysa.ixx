@@ -12,6 +12,8 @@ export import vireo;
 export import lysa.application;
 export import lysa.configuration;
 export import lysa.global;
+export import lysa.input;
+export import lysa.input_event;
 export import lysa.math;
 export import lysa.memory;
 export import lysa.viewport;

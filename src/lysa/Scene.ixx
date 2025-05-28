@@ -102,7 +102,7 @@ export namespace lysa {
         std::unordered_map<uint32, std::shared_ptr<Material>> materials;
         bool materialsUpdated{false};
 
-        struct ModelsData {
+        struct PipelineData {
             uint32 pipelineId;
             std::list<std::shared_ptr<MeshInstance>> models{};
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
@@ -114,7 +114,7 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
 
-            ModelsData::ModelsData(const SceneConfiguration& config, uint32 pipelineId);
+            PipelineData::PipelineData(const SceneConfiguration& config, uint32 pipelineId);
 
             void update(const vireo::CommandList& commandList);
 
@@ -131,7 +131,7 @@ export namespace lysa {
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
         };
 
-        std::unordered_map<uint32, std::unique_ptr<ModelsData>> opaqueModels;
+        std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
 
     };
 

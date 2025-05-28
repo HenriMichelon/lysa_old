@@ -47,6 +47,7 @@ namespace lysa {
         if (config.scissors.width == 0.0f || config.scissors.height == 0.0f) {
             scissors = vireo::Rect{
                 .x = static_cast<int32>(viewport.x),
+                .y = static_cast<int32>(viewport.y),
                 .width = static_cast<uint32>(viewport.width),
                 .height = static_cast<uint32>(viewport.height)
             };
@@ -115,10 +116,6 @@ namespace lysa {
     }
 
     void Viewport::processDeferredUpdates(const uint32 frameIndex) {
-        // Update renderer resources
-        // sceneRenderer->preUpdateScene(currentFrame);
-        // Register UI drawing commands
-        // windowManager->drawFrame();
         {
             auto lock = std::lock_guard(frameDataMutex);
             auto &data = framesData[frameIndex];
@@ -178,8 +175,6 @@ namespace lysa {
                 }
             }
         }
-        // Update renderer resources
-        // sceneRenderer->postUpdateScene(currentFrame);
     }
     
     void Viewport::setRootNode(const std::shared_ptr<Node> &node) {
@@ -199,6 +194,18 @@ namespace lysa {
     void Viewport::setPaused(const bool pause) {
         paused = pause;
         // pause(rootNode);
+    }
+
+    bool Viewport::input(const std::shared_ptr<Node> &node, InputEvent &inputEvent) {
+        assert([&]{ return node != nullptr; }, "Invalide node");
+        for (auto &child : node->children) {
+            if (input(child, inputEvent))
+                return true;
+        }
+        if (node->isProcessed()) {
+            return node->onInput(inputEvent);
+        }
+        return false;
     }
 
 

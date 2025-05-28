@@ -98,7 +98,7 @@ namespace lysa {
         }
     }
 
-    void DeviceMemoryArray::reset() {
+    void DeviceMemoryArray::restart() {
         stagingBufferCurrentOffset = 0;
     }
 

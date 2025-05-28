@@ -13,6 +13,7 @@ export module lysa.window;
 import vireo;
 import lysa.global;
 import lysa.configuration;
+import lysa.input_event;
 import lysa.memory;
 import lysa.viewport;
 import lysa.nodes.node;
@@ -58,6 +59,31 @@ export namespace lysa {
 
         void close();
 
+        /**
+         * Sets the mouse visibility and capture mode
+         */
+        void setMouseMode(MouseMode mode) const;
+
+        /**
+         * Sets the mouse cursor
+         */
+        void setMouseCursor(MouseCursor cursor) const;
+
+        /**
+         * Sets the mouse position to the center of the window
+         */
+        void resetMousePosition() const;
+
+        /**
+         * Returns the mouse position
+         */
+        float2 getMousePosition() const;
+
+        /**
+         * Returns the mouse position
+         */
+        void setMousePosition(const float2& position) const;
+
         virtual ~Window();
         Window(Window&) = delete;
         Window& operator=(Window&) = delete;
@@ -89,6 +115,7 @@ export namespace lysa {
         void* createWindow();
 
         friend class Application;
+        friend class Input;
 
         void update() const;
 
@@ -100,14 +127,21 @@ export namespace lysa {
 
         bool mainWindow{false};
 
+        // Propagate input event to the UI Window manager and to the current scene tree
+        void input(InputEvent &inputEvent);
+
 #ifdef _WIN32
         struct MonitorEnumData {
             int  enumIndex{0};
             int  monitorIndex{0};
             RECT monitorRect{};
         };
-        static BOOL CALLBACK monitorEnumProc(HMONITOR, HDC , const LPRECT lprcMonitor, const LPARAM dwData);
+        static BOOL CALLBACK monitorEnumProc(HMONITOR, HDC , LPRECT lprcMonitor, LPARAM dwData);
         static LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+        RECT rect;
+        static bool resettingMousePosition;
+        static std::map<MouseCursor, HCURSOR> _mouseCursors;
 #endif
     };
 

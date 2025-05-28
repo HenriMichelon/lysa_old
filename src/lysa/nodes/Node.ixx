@@ -8,6 +8,7 @@ export module lysa.nodes.node;
 
 import std;
 import lysa.global;
+import lysa.input_event;
 
 export namespace lysa {
 
@@ -104,6 +105,11 @@ export namespace lysa {
         virtual void onPhysicsProcess(const float delta) {}
 
         /**
+         * Called on a keyboard, mouse or gamepad event
+         */
+        virtual bool onInput(InputEvent &inputEvent) { return false; }
+
+        /**
          * Returns the local space transformation matrix
          */
         const float4x4 &getTransformLocal() const { return localTransform; }
@@ -171,7 +177,7 @@ export namespace lysa {
         /**
          * Rotates the local transformation around the Y axis by angle in radians.
          */
-        // void rotateY(float angle);
+        void rotateY(float angle);
     
         /**
          * Rotates the local transformation around the Z axis by angle in radians.
@@ -183,6 +189,11 @@ export namespace lysa {
          */
         // void rotate(quat quater);
     
+        /**
+         * Rotates the local transformation around the Y axis by angle in radians.
+         */
+        void rotateGlobalY(float angle);
+
         /**
          * Sets the local transformation
          */
@@ -459,6 +470,7 @@ export namespace lysa {
 
     private:
         friend class Window;
+        friend class Viewport;
 
         static  unique_id                currentId;
         unique_id                        id;

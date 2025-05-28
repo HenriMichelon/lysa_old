@@ -27,6 +27,13 @@ export namespace lysa {
 
     bool dirExists(const std::string& dirName);
 
+    /**
+    * Split a string
+    */
+    std::vector<std::string_view> split(std::string_view str,  char delimiter);
+
+    std::string to_string(const wchar_t* wstr);
+
     class Exception : public std::exception {
     public:
         template <typename... Args>

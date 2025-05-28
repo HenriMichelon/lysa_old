@@ -50,10 +50,11 @@ namespace lysa {
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         sceneUniformBuffer->map();
 
-        opaqueModels[DEFAULT_PIPELINE_ID] = std::make_unique<ModelsData>(ModelsData{config, DEFAULT_PIPELINE_ID});
+        opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(PipelineData{config, DEFAULT_PIPELINE_ID});
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
+        instancesDataArray.restart();
         if (currentCamera && currentCamera->isUpdated()) {
             const auto sceneUniform = SceneData {
                 .cameraPosition = currentCamera->getPositionGlobal(),
@@ -87,18 +88,17 @@ namespace lysa {
                 }
             }
         }
-
         if (instancesDataUpdated) {
             instancesDataArray.flush(commandList);
             instancesDataUpdated = false;
         }
 
-        if (Application::getResources().isUpdated()) {
-            Application::getResources().flush(commandList);
+        for (auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            pipelineData->update(commandList);
         }
 
-        for (auto& [pipelineId, modelsData] : opaqueModels) {
-            modelsData->update(commandList);
+        if (Application::getResources().isUpdated()) {
+            Application::getResources().flush(commandList);
         }
     }
 
@@ -132,12 +132,11 @@ namespace lysa {
             }
 
             for (const auto& pipelineId : nodePipelineIds) {
-                if (!opaqueModels.contains(pipelineId)) {
-                    opaqueModels[pipelineId] = std::make_unique<ModelsData>(ModelsData{config, pipelineId});
+                if (!opaquePipelinesData.contains(pipelineId)) {
+                    opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(PipelineData{config, pipelineId});
                 }
-                opaqueModels[pipelineId]->addNode(meshInstance, instancesDataArray, instancesDataMemoryBlocks);
+                opaquePipelinesData[pipelineId]->addNode(meshInstance, instancesDataArray, instancesDataMemoryBlocks);
             }
-
             break;
         }
         default:
@@ -175,19 +174,18 @@ namespace lysa {
         const Samplers& samplers) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.bindDescriptors(pipelines.at(0), {
-            Application::getResources().getDescriptorSet(),
-            samplers.getDescriptorSet(),
-            descriptorSet
-        });
-        for (const auto& [pipelineId, modelsData] : opaqueModels) {
-            if (modelsData->instancesIndex.empty()) { return; }
-            commandList.bindPipeline(pipelines.at(pipelineId));
-            commandList.bindDescriptor(
-                pipelines.at(pipelineId),
-                modelsData->descriptorSet,
-                SET_DRAW_COMMAND);
-            commandList.drawIndirect( modelsData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            if (!pipelineData->instancesIndex.empty()) {
+                const auto& pipeline = pipelines.at(pipelineId);
+                commandList.bindPipeline(pipeline);
+                commandList.bindDescriptors(pipeline, {
+                    Application::getResources().getDescriptorSet(),
+                    samplers.getDescriptorSet(),
+                    descriptorSet,
+                    pipelineData->descriptorSet,
+                });
+                commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            }
         }
     }
 
@@ -202,7 +200,7 @@ namespace lysa {
         }
     }
 
-    Scene::ModelsData::ModelsData(const SceneConfiguration& config, const uint32 pipelineId):
+    Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId):
         pipelineId{pipelineId},
         drawCommandsStagingBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::BUFFER_UPLOAD,
@@ -224,7 +222,7 @@ namespace lysa {
         drawCommandsStagingBuffer->map();
     }
 
-    void Scene::ModelsData::update(const vireo::CommandList& commandList) {
+    void Scene::PipelineData::update(const vireo::CommandList& commandList) {
         if (instancesIndexUpdated) {
             if (instancesIndex.size() > 0) {
                 const auto drawCommand = vireo::DrawIndirectCommand {
@@ -237,7 +235,7 @@ namespace lysa {
         }
     }
 
-    void Scene::ModelsData::addNode(
+    void Scene::PipelineData::addNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
         DeviceMemoryArray& instancesDataArray,
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
@@ -276,14 +274,14 @@ namespace lysa {
         }
     }
 
-    void Scene::ModelsData::removeNode(
+    void Scene::PipelineData::removeNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
         models.remove(meshInstance);
         rebuildInstancesIndex(instancesDataMemoryBlocks);
     }
 
-    void Scene::ModelsData::rebuildInstancesIndex(
+    void Scene::PipelineData::rebuildInstancesIndex(
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
         instancesIndex.clear();
         for (const auto& meshInstance : models) {
