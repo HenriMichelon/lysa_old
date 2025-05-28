@@ -59,6 +59,11 @@ namespace lysa {
         }
     }
 
+    void Node::setTransformLocal(const float4x4 &transform) {
+        localTransform = transform;
+        updateGlobalTransform();
+    }
+
     void Node::updateGlobalTransform() {
         if (parent) {
             globalTransform = mul(parent->globalTransform, localTransform);

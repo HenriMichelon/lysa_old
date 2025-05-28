@@ -113,7 +113,9 @@ export namespace lysa {
          * Returns the local space transformation matrix
          */
         const float4x4 &getTransformLocal() const { return localTransform; }
-    
+
+        void setTransformLocal(const float4x4 &transform);
+
         /**
          * Returns the world space transformation matrix
          */

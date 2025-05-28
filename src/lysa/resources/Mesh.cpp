@@ -18,6 +18,10 @@ namespace lysa {
         material{nullptr} {
     }
 
+    Mesh::Mesh(const std::wstring &name):
+        Resource{name} {
+    }
+
     Mesh::Mesh(const std::vector<Vertex>& vertices,
                const std::vector<uint32>& indices,
                const std::vector<std::shared_ptr<MeshSurface>> &surfaces,

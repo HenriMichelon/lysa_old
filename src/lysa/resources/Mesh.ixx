@@ -79,6 +79,8 @@ export namespace lysa {
              const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
              const std::wstring& name = L"Mesh");
 
+        Mesh(const std::wstring& name = L"Mesh");
+
          /**
          * Returns the material for a given surface
          * @param surfaceIndex Zero-based index of the surface

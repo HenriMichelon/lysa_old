@@ -573,4 +573,51 @@ export namespace lysa {
     };
 
 
+    /**
+    * Animation type for a animation track
+    */
+    enum class AnimationType : uint8_t {
+        /**
+         * The values are the translation along the X, Y, and Z axes.
+         */
+        TRANSLATION = 1,
+        /**
+         * The values are a quaternion in the order x, y, z, w where w is the scalar.
+         */
+        ROTATION = 2,
+        /**
+         * The values are scaling factors along the X, Y, and Z axes.
+         */
+        SCALE = 3,
+        // Weights = 4,
+    };
+
+    /**
+     * Interpolation type to apply when caculating animation values
+     */
+    enum class AnimationInterpolation : uint8_t {
+        /**
+         * The animated values are linearly interpolated between keyframes..
+         */
+        LINEAR = 0,
+        /**
+         * The animated values remain constant to the output of the first keyframe, until the next
+         * keyframe.
+         */
+        STEP = 1,
+        /**
+         * The animation’s interpolation is computed using a cubic spline with specified tangents.
+         */
+        // CUBIC = 2,
+    };
+
+    /**
+     * Animation loop mode
+     */
+    enum class AnimationLoopMode : uint8_t {
+        //! No loop (default)
+        NONE    = 0,
+        //! Restart from start of the track
+        LINEAR  = 1,
+    };
 }
