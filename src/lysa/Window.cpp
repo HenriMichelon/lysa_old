@@ -32,10 +32,10 @@ namespace lysa {
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
         }
+        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer");
+        renderer->resize(swapChain->getExtent());
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
-        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer"); // Must be instantiated after SceneData for the layout
-        renderer->resize(swapChain->getExtent());
         viewport->setRootNode(rootNode);
         show();
     }

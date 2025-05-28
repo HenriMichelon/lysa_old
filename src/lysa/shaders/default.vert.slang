@@ -6,10 +6,7 @@
 */
 #include "scene_data.inc.slang"
 
-StructuredBuffer<Vertex> vertices : register(t0, space0);
-ConstantBuffer<Scene> scene  : register(b0, space1);
-StructuredBuffer<InstanceData> instancesData : register(t1, space1);
-StructuredBuffer<Index> indices : register(t2, space1);
+[[vk::binding(0, 3)]] StructuredBuffer<Index> indices : register(t0, space3);
 
 VertexOutput vertexMain(uint vertexId: SV_VertexID ) {
     VertexOutput output;

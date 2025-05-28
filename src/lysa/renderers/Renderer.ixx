@@ -17,6 +17,7 @@ import lysa.renderers.renderpass.post_processing;
 export namespace lysa {
     class Renderer {
     public:
+
         struct FrameData {
             std::shared_ptr<vireo::RenderTarget> colorAttachment;
         };

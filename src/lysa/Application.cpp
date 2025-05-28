@@ -22,6 +22,7 @@ namespace lysa {
         commandList{commandAllocator->createCommandList()}{
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
+        Scene::createDescriptorLayouts();
     }
 
     Application::~Application() {
@@ -29,7 +30,7 @@ namespace lysa {
         commandList.reset();
         commandAllocator.reset();
         windows.clear();
-        Scene::descriptorLayout.reset();
+        Scene::destroyDescriptorLayouts();
         resources.cleanup();
         vireo.reset();
     }

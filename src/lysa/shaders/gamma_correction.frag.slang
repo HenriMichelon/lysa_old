@@ -6,16 +6,11 @@
 */
 #include "postprocess.inc.slang"
 
-
 struct Data {
     float gamma;
 };
 
-
-ConstantBuffer<Params> params : register(b0);
-ConstantBuffer<Data> data     : register(b2);
-Texture2D inputImage          : register(t1);
-SamplerState sampler          : register(SAMPLER_NEAREST_NEAREST_BORDER_LINEAR, space1);
+[[vk::binding(2, 0)]] ConstantBuffer<Data> data : register(b2);
 
 float3 linearToSrgb(
     float3 c,
@@ -31,8 +26,7 @@ float3 linearToSrgb(
     );
 }
 
-
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    float4 color = inputImage.Sample(sampler, input.uv);
+    float4 color = inputImage.Sample(sampler0, input.uv);
     return float4(linearToSrgb(color.rgb, data.gamma), color.a);
 }

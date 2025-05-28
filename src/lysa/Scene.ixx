@@ -41,10 +41,17 @@ export namespace lysa {
 
     class Scene {
     public:
+        static constexpr uint32_t SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{2};
-        inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
+        inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
+
+        static constexpr uint32_t SET_DRAW_COMMAND{3};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_INDEX{0};
+        inline static std::shared_ptr<vireo::DescriptorLayout> drawCommandDescriptorLayout{nullptr};
+
+        static void createDescriptorLayouts();
+        static void destroyDescriptorLayouts();
 
         Scene(
             const SceneConfiguration& config,
@@ -76,12 +83,12 @@ export namespace lysa {
         Scene& operator=(Scene&) = delete;
 
     private:
+        const SceneConfiguration& config;
         const uint32 framesInFlight;
         const vireo::Viewport& viewport;
         const vireo::Rect& scissors;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
-        // Currently active camera, first camera added to the scene or the last activated
         std::shared_ptr<Camera> currentCamera{};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
@@ -90,7 +97,9 @@ export namespace lysa {
         bool instancesDataUpdated{false};
 
         struct ModelsData {
+            uint32 pipelineId;
             std::list<std::shared_ptr<MeshInstance>> models{};
+            std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
             std::shared_ptr<vireo::Buffer> drawCommandsStagingBuffer;
@@ -99,13 +108,14 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
 
-            ModelsData::ModelsData(const SceneConfiguration& config);
+            ModelsData::ModelsData(const SceneConfiguration& config, uint32 pipelineId);
 
             void update(const vireo::CommandList& commandList);
 
-            MemoryBlock addNode(
+            void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,
-                DeviceMemoryArray& instancesDataArray);
+                DeviceMemoryArray& instancesDataArray,
+                std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,
@@ -115,13 +125,13 @@ export namespace lysa {
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
         };
 
-        ModelsData modelsData;
+        std::unordered_map<uint32, std::unique_ptr<ModelsData>> opaqueModels;
 
-        void draw(
-           vireo::CommandList& commandList,
-           const vireo::Pipeline& pipeline,
-           const Samplers& samplers,
-           const std::shared_ptr<vireo::Buffer>& drawCommand) const;
+        // void draw(
+           // vireo::CommandList& commandList,
+           // const vireo::Pipeline& pipeline,
+           // const Samplers& samplers,
+           // const std::shared_ptr<vireo::Buffer>& drawCommand) const;
 
     };
 

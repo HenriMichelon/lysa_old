@@ -4,6 +4,8 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+#include "samplers.inc.slang"
+
 struct Vertex {
     float3 position;
     float _pad0;
@@ -53,4 +55,9 @@ struct Index {
     uint index;
     uint surfaceIndex;
 }
+
+[[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);
+[[vk::binding(1, 0)]] StructuredBuffer<Material> materials : register(t1, space0);
+[[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
+[[vk::binding(1, 2)]] StructuredBuffer<InstanceData> instancesData : register(t1, space2);
 

@@ -5,6 +5,7 @@
  * https://opensource.org/licenses/MIT
 */
 module lysa.resources.material;
+#include <xxhash.h>
 
 import lysa.application;
 
@@ -120,6 +121,11 @@ namespace lysa {
     void ShaderMaterial::setParameter(const int index, const float4& value) {
         parameters[index] = value;
         setUpdated();
+    }
+
+    uint32 ShaderMaterial::getPipelineId() const {
+        const auto name = vertFileName + fragFileName;
+        return XXH32(name.c_str(), name.size(), 0);
     }
 
 }

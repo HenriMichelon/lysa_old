@@ -69,6 +69,8 @@ export namespace lysa {
 
         virtual MaterialData getMaterialData() const = 0;
 
+        virtual uint32 getPipelineId() const = 0;
+
         const auto& getMaterialIndex() const { return memoryBloc.instanceIndex; }
 
     protected:
@@ -213,6 +215,8 @@ export namespace lysa {
 
         MaterialData getMaterialData() const override;
 
+        uint32 getPipelineId() const override { return DEFAULT_PIPELINE_ID; }
+
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
         TextureInfo  albedoTexture{};
@@ -246,6 +250,8 @@ export namespace lysa {
         ShaderMaterial(const std::wstring &fragShaderFileName,
                        const std::wstring &vertShaderFileName = L"",
                        const std::wstring &name               = L"ShaderMaterial");
+
+        uint32 getPipelineId() const override;
 
         /**
          * Returns the fragment shader file path, relative to the application directory

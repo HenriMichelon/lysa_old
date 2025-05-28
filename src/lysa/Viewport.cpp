@@ -28,7 +28,11 @@ namespace lysa {
         auto framesInFlight = window.getFramesInFlight();
         framesData.resize(framesInFlight);
         for (auto& frame : framesData) {
-            frame.scene = std::make_shared<Scene>(config.sceneConfig, framesInFlight, viewport, scissors);
+            frame.scene = std::make_shared<Scene>(
+                config.sceneConfig,
+                framesInFlight,
+                viewport,
+                scissors);
         }
         resize(window.getExtent());
     }

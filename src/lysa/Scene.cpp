@@ -4,19 +4,34 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
-module;
-#include <xxhash.h>
 module lysa.scene;
 
 import vireo;
 import lysa.application;
 
 namespace lysa {
+
+    void Scene::createDescriptorLayouts() {
+        sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
+        sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
+        sceneDescriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
+        sceneDescriptorLayout->build();
+        drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
+        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
+        drawCommandDescriptorLayout->build();
+    }
+
+    void Scene::destroyDescriptorLayouts() {
+        sceneDescriptorLayout.reset();
+        drawCommandDescriptorLayout.reset();
+    }
+
     Scene::Scene(
         const SceneConfiguration& config,
         const uint32 framesInFlight,
         const vireo::Viewport& viewport,
         const vireo::Rect& scissors) :
+        config{config},
         framesInFlight{framesInFlight},
         viewport{viewport},
         scissors{scissors},
@@ -29,19 +44,13 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurface Instance Data"},
-        modelsData{config} {
-        if (descriptorLayout == nullptr) {
-            descriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
-            descriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
-            descriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
-            descriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
-            descriptorLayout->build();
-        }
-        descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Scene");
+            L"MeshSurface Instance Data"} {
+        descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
         sceneUniformBuffer->map();
+
+        opaqueModels[DEFAULT_PIPELINE_ID] = std::make_unique<ModelsData>(ModelsData{config, DEFAULT_PIPELINE_ID});
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
@@ -88,7 +97,9 @@ namespace lysa {
             Application::getResources().flush(commandList);
         }
 
-        modelsData.update(commandList);
+        for (auto& [pipelineId, modelsData] : opaqueModels) {
+            modelsData->update(commandList);
+        }
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {
@@ -109,11 +120,19 @@ namespace lysa {
             meshInstance->framesInFlight = framesInFlight;
             meshInstance->setUpdated();
 
+            auto pipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
                 material->framesInFlight = framesInFlight;
+                pipelineIds.push_back(material->getPipelineId());
             }
 
-            instancesDataMemoryBlocks[meshInstance] = modelsData.addNode(meshInstance, instancesDataArray);
+            for (const auto& pipelineId : pipelineIds) {
+                if (!opaqueModels.contains(pipelineId)) {
+                    opaqueModels[pipelineId] = std::make_unique<ModelsData>(ModelsData{config, pipelineId});
+                }
+                opaqueModels[pipelineId]->addNode(meshInstance, instancesDataArray, instancesDataMemoryBlocks);
+            }
+
             break;
         }
         default:
@@ -136,7 +155,7 @@ namespace lysa {
                 instancesDataArray.free(memoryBlock);
                 instancesDataMemoryBlocks.erase(meshInstance);
                 models.remove(meshInstance);
-                modelsData.removeNode(meshInstance, instancesDataMemoryBlocks);
+                // opaqueModels.removeNode(meshInstance, instancesDataMemoryBlocks);
             }
             break;
         }
@@ -149,25 +168,43 @@ namespace lysa {
         vireo::CommandList& commandList,
         const vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
-        if (modelsData.instancesIndex.empty()) { return; }
-        descriptorSet->update(BINDING_INSTANCE_INDEX, modelsData.instancesIndexBuffer);
-        draw(commandList, pipeline, samplers, modelsData.drawCommandsBuffer);
-    }
-
-    void Scene::draw(
-        vireo::CommandList& commandList,
-        const vireo::Pipeline& pipeline,
-        const Samplers& samplers,
-        const std::shared_ptr<vireo::Buffer>& drawCommand) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, {
             Application::getResources().getDescriptorSet(),
-            descriptorSet,
-            samplers.getDescriptorSet()});
-        commandList.drawIndirect(drawCommand, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            samplers.getDescriptorSet(),
+            descriptorSet
+        });
+        // commandList.bindDescriptor(
+        //     pipeline,
+        //     *Application::getResources().getDescriptorSet(),
+        //     Application::getResources().SET_RESOURCES);
+        // commandList.bindDescriptor(
+        //     pipeline,
+        //     *samplers.getDescriptorSet(),
+        //     samplers.SET_SAMPLERS);
+        // commandList.bindDescriptor(
+        //     pipeline,
+        //     *descriptorSet,
+        //     SET_SCENE);
+        for (const auto& [pipelineId, modelsData] : opaqueModels) {
+            if (modelsData->instancesIndex.empty()) { return; }
+            commandList.bindPipeline(pipeline);
+            commandList.bindDescriptor(
+                pipeline,
+                *modelsData->descriptorSet,
+                SET_DRAW_COMMAND);
+            commandList.drawIndirect( modelsData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            // draw(commandList, pipeline, samplers, modelsData->drawCommandsBuffer);
+        }
     }
+
+    // void Scene::draw(
+        // vireo::CommandList& commandList,
+        // const vireo::Pipeline& pipeline,
+        // const Samplers& samplers,
+        // const std::shared_ptr<vireo::Buffer>& drawCommand) const {
+    // }
 
     void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {
         if (currentCamera != nullptr)
@@ -180,7 +217,8 @@ namespace lysa {
         }
     }
 
-    Scene::ModelsData::ModelsData(const SceneConfiguration& config):
+    Scene::ModelsData::ModelsData(const SceneConfiguration& config, const uint32 pipelineId):
+        pipelineId{pipelineId},
         drawCommandsStagingBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::BUFFER_UPLOAD,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
@@ -193,6 +231,10 @@ namespace lysa {
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
             L"Draw indices")} {
+        descriptorSet = Application::getVireo().createDescriptorSet(
+            drawCommandDescriptorLayout,
+            L"Draw Command");
+        descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
         instancesIndexBuffer->map();
         drawCommandsStagingBuffer->map();
     }
@@ -210,31 +252,43 @@ namespace lysa {
         }
     }
 
-    MemoryBlock Scene::ModelsData::addNode(
+    void Scene::ModelsData::addNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
-        DeviceMemoryArray& instancesDataArray) {
+        DeviceMemoryArray& instancesDataArray,
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
         models.push_back(meshInstance);
         const auto& mesh = meshInstance->getMesh();
         const auto& meshSurfaces{mesh->getSurfaces()};
         const auto& meshIndices{mesh->getIndices()};
-        const auto memoryBlock{instancesDataArray.alloc(meshSurfaces.size())};
-        const auto startIndex{instancesIndex.size()};
-        for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
-            const auto& meshSurface = meshSurfaces[surfaceIndex];
-            const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
-            for (int i = 0; i < meshSurface->indexCount; i++) {
-                instancesIndex.push_back({
-                   .index = meshIndices[meshSurface->firstIndex + i],
-                   .surfaceIndex = instanceDataIndex
-                });
+
+        auto surfaceCount{0};
+        for (const auto& meshSurface : meshSurfaces) {
+            if (meshSurface->material->getPipelineId() == pipelineId) {
+                surfaceCount++;
             }
         }
-        instancesIndexBuffer->write(
-            &instancesIndex[startIndex],
-            mesh->getIndices().size() * sizeof(Index),
-            startIndex * sizeof(Index));
-        instancesIndexUpdated = true;
-        return memoryBlock;
+
+        if (surfaceCount > 0) {
+            const auto memoryBlock{instancesDataArray.alloc(surfaceCount)};
+            const auto startIndex{instancesIndex.size()};
+            auto surfaceIndex{0};
+            for (const auto& meshSurface : meshSurfaces) {
+                const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
+                for (int i = 0; i < meshSurface->indexCount; i++) {
+                    instancesIndex.push_back({
+                       .index = meshIndices[meshSurface->firstIndex + i],
+                       .surfaceIndex = instanceDataIndex
+                    });
+                }
+                surfaceIndex++;
+            }
+            instancesIndexBuffer->write(
+                &instancesIndex[startIndex],
+                mesh->getIndices().size() * sizeof(Index),
+                startIndex * sizeof(Index));
+            instancesIndexUpdated = true;
+            instancesDataMemoryBlocks[meshInstance] = memoryBlock;
+        }
     }
 
     void Scene::ModelsData::removeNode(

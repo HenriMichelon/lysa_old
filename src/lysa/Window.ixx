@@ -46,6 +46,8 @@ export namespace lysa {
 
         auto& getViewports() const { return viewports; }
 
+        auto& getRenderer() const { return *renderer; }
+
         void waitIdle() const;
 
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;

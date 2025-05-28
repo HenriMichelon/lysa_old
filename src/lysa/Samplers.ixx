@@ -12,6 +12,8 @@ export namespace lysa {
 
     class Samplers {
     public:
+        static constexpr uint32_t SET_SAMPLERS{1};
+
         enum class SamplerIndex {
             NEAREST_NEAREST_BORDER_LINEAR = 0,
             LINEAR_LINEAR_EDGE_LINEAR     = 1,

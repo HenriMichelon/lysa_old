@@ -15,3 +15,6 @@ struct Params {
     uint2 imageSize;
     float time;
 };
+
+[[vk::binding(0, 0)]] ConstantBuffer<Params> params : register(b0);
+[[vk::binding(1, 0)]] Texture2D inputImage          : register(t1);

@@ -23,6 +23,7 @@ export namespace lysa {
 
     class Resources {
     public:
+        static constexpr uint32_t SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
         static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
