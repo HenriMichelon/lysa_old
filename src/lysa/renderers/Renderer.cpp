@@ -47,7 +47,12 @@ namespace lysa {
         const vireo::Rect&scissor,
         uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (!postProcessingPasses.empty()) {
+        if (postProcessingPasses.empty()) {
+            commandList.barrier(
+                frame.colorAttachment,
+                vireo::ResourceState::RENDER_TARGET_COLOR,
+                vireo::ResourceState::UNDEFINED);
+        } else {
             commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::RENDER_TARGET_COLOR,

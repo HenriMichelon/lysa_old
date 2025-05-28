@@ -170,7 +170,6 @@ namespace lysa {
                 for (const auto& pipelineId : nodePipelineIds) {
                     opaquePipelinesData[pipelineId]->removeNode(meshInstance, instancesDataMemoryBlocks);
                 }
-                // opaqueModels.removeNode(meshInstance, instancesDataMemoryBlocks);
             }
             break;
         }
@@ -291,7 +290,7 @@ namespace lysa {
         const std::shared_ptr<MeshInstance>& meshInstance,
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
         models.remove(meshInstance);
-        rebuildInstancesIndex(instancesDataMemoryBlocks); // TODO one call per frame
+        rebuildInstancesIndex(instancesDataMemoryBlocks);
     }
 
     void Scene::PipelineData::rebuildInstancesIndex(
