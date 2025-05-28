@@ -113,7 +113,7 @@ namespace lysa {
                 material->framesInFlight = framesInFlight;
             }
 
-            modelsData.addNode(meshInstance, instancesDataArray, instancesDataMemoryBlocks);
+            instancesDataMemoryBlocks[meshInstance] = modelsData.addNode(meshInstance, instancesDataArray);
             break;
         }
         default:
@@ -136,8 +136,7 @@ namespace lysa {
                 instancesDataArray.free(memoryBlock);
                 instancesDataMemoryBlocks.erase(meshInstance);
                 models.remove(meshInstance);
-                modelsData.opaqueModels.remove(meshInstance);
-                modelsData.rebuildInstancesIndex(instancesDataMemoryBlocks);
+                modelsData.removeNode(meshInstance, instancesDataMemoryBlocks);
             }
             break;
         }
@@ -150,9 +149,9 @@ namespace lysa {
         vireo::CommandList& commandList,
         const vireo::Pipeline& pipeline,
         const Samplers& samplers) const {
-        if (modelsData.opaqueInstancesIndex.empty()) { return; }
-        descriptorSet->update(BINDING_INSTANCE_INDEX, modelsData.opaqueInstancesIndexBuffer);
-        draw(commandList, pipeline, samplers, modelsData.opaqueDrawCommandsBuffer);
+        if (modelsData.instancesIndex.empty()) { return; }
+        descriptorSet->update(BINDING_INSTANCE_INDEX, modelsData.instancesIndexBuffer);
+        draw(commandList, pipeline, samplers, modelsData.drawCommandsBuffer);
     }
 
     void Scene::draw(
@@ -182,82 +181,88 @@ namespace lysa {
     }
 
     Scene::ModelsData::ModelsData(const SceneConfiguration& config):
-        opaqueDrawCommandsStagingBuffer{Application::getVireo().createBuffer(
+        drawCommandsStagingBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::BUFFER_UPLOAD,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands upload")},
-        opaqueDrawCommandsBuffer{Application::getVireo().createBuffer(
+        drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands")},
-        opaqueInstancesIndexBuffer{Application::getVireo().createBuffer(
+        instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
             L"Draw indices")} {
-        opaqueInstancesIndexBuffer->map();
-        opaqueDrawCommandsStagingBuffer->map();
+        instancesIndexBuffer->map();
+        drawCommandsStagingBuffer->map();
     }
 
     void Scene::ModelsData::update(const vireo::CommandList& commandList) {
-        if (opaqueInstancesIndexUpdated) {
-            if (opaqueInstancesIndex.size() > 0) {
+        if (instancesIndexUpdated) {
+            if (instancesIndex.size() > 0) {
                 const auto drawCommand = vireo::DrawIndirectCommand {
-                    .vertexCount = static_cast<uint32>(opaqueInstancesIndex.size())
+                    .vertexCount = static_cast<uint32>(instancesIndex.size())
                 };
-                opaqueDrawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-                commandList.copy(opaqueDrawCommandsStagingBuffer, opaqueDrawCommandsBuffer);
+                drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
+                commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
             }
-            opaqueInstancesIndexUpdated = false;
+            instancesIndexUpdated = false;
         }
     }
 
-    void Scene::ModelsData::addNode(
+    MemoryBlock Scene::ModelsData::addNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
-        DeviceMemoryArray& instancesDataArray,
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
-        opaqueModels.push_back(meshInstance);
+        DeviceMemoryArray& instancesDataArray) {
+        models.push_back(meshInstance);
         const auto& mesh = meshInstance->getMesh();
         const auto& meshSurfaces{mesh->getSurfaces()};
         const auto& meshIndices{mesh->getIndices()};
         const auto memoryBlock{instancesDataArray.alloc(meshSurfaces.size())};
-        const auto startIndex{opaqueInstancesIndex.size()};
+        const auto startIndex{instancesIndex.size()};
         for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
             const auto& meshSurface = meshSurfaces[surfaceIndex];
             const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
             for (int i = 0; i < meshSurface->indexCount; i++) {
-                opaqueInstancesIndex.push_back({
+                instancesIndex.push_back({
                    .index = meshIndices[meshSurface->firstIndex + i],
                    .surfaceIndex = instanceDataIndex
                 });
             }
         }
-        opaqueInstancesIndexBuffer->write(
-            &opaqueInstancesIndex[startIndex],
+        instancesIndexBuffer->write(
+            &instancesIndex[startIndex],
             mesh->getIndices().size() * sizeof(Index),
             startIndex * sizeof(Index));
-        instancesDataMemoryBlocks[meshInstance] = memoryBlock;
-        opaqueInstancesIndexUpdated = true;
+        instancesIndexUpdated = true;
+        return memoryBlock;
+    }
+
+    void Scene::ModelsData::removeNode(
+        const std::shared_ptr<MeshInstance>& meshInstance,
+        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
+        models.remove(meshInstance);
+        rebuildInstancesIndex(instancesDataMemoryBlocks);
     }
 
     void Scene::ModelsData::rebuildInstancesIndex(
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
-        opaqueInstancesIndex.clear();
-        for (const auto& meshInstance : opaqueModels) {
+        instancesIndex.clear();
+        for (const auto& meshInstance : models) {
             const auto& mesh = meshInstance->getMesh();
             const auto& meshSurfaces = mesh->getSurfaces();
             for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                 const auto& meshSurface = meshSurfaces[surfaceIndex];
                 const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
                 for (int i = 0; i < meshSurface->indexCount; i++) {
-                    opaqueInstancesIndex.push_back({
+                    instancesIndex.push_back({
                         .index = mesh->getIndices()[meshSurface->firstIndex + i],
                         .surfaceIndex = instanceDataIndex
                     });
                 }
             }
         }
-        opaqueInstancesIndexBuffer->write(opaqueInstancesIndex.data(), opaqueInstancesIndex.size() * sizeof(Index));
-        opaqueInstancesIndexUpdated = true;
+        instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index));
+        instancesIndexUpdated = true;
     }
 
 }
