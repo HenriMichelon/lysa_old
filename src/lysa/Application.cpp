@@ -6,6 +6,7 @@
 */
 module lysa.application;
 
+import lysa.input;
 import lysa.scene;
 import lysa.nodes.node;
 
@@ -22,6 +23,10 @@ namespace lysa {
         commandList{commandAllocator->createCommandList()}{
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
+        if constexpr (isLoggingEnabled()) {
+            log = std::make_shared<Log>();
+            Log::open(log);
+        }
         Scene::createDescriptorLayouts();
     }
 
@@ -33,12 +38,17 @@ namespace lysa {
         Scene::destroyDescriptorLayouts();
         resources.cleanup();
         vireo.reset();
+        if constexpr (isLoggingEnabled()) {
+            Log::close();
+        }
     }
 
     void Application::run() {
+        Input::initInput();
         onReady();
         mainLoop();
         onQuit();
+        Input::closeInput();
     }
 
     void Application::addWindow(const std::shared_ptr<Window>& window) {

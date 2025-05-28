@@ -20,6 +20,10 @@ export namespace lysa {
     struct ApplicationConfiguration {
         //! Directory to search for resources and compiled shaders for the app:// URI
         std::filesystem::path  appDir{L"."};
+        //! Where to log message using log()
+        int                    loggingMode{LOGGING_MODE_NONE};
+        //! Monitor index for the logging Window
+        LogLevel               logLevelMin{LogLevel::INFO};
         //! Graphic API
         vireo::Backend         backend{vireo::Backend::VULKAN};
         ResourcesConfiguration resourcesConfig;
@@ -38,7 +42,7 @@ export namespace lysa {
         //! MSAA samples count
         vireo::MSAA        msaa{vireo::MSAA::NONE};
         //! Presentation mode
-        vireo::PresentMode presentMode = {vireo::PresentMode::IMMEDIATE};
+        vireo::PresentMode presentMode{vireo::PresentMode::IMMEDIATE};
         //! Frame buffer clear color
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
@@ -62,7 +66,9 @@ export namespace lysa {
         std::wstring            title{};
         //! State of the display Window
         WindowMode              mode{WindowMode::WINDOWED};
+        //! Startup X position (top-left corner)
         int32                   x{-1};
+        //! Startup Y position (top-left corner)
         int32                   y{-1};
         //! Width in pixels of the display Window
         uint32                  width{1280};

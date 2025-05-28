@@ -14,18 +14,19 @@ import lysa.input;
 namespace lysa {
 
     bool Window::resettingMousePosition{false};
-    std::map<MouseCursor, HCURSOR> Window::_mouseCursors;
+
+    std::map<MouseCursor, HCURSOR> Window::mouseCursors;
 
     void Window::show() const {
         ShowWindow(static_cast<HWND>(windowHandle), SW_SHOW);
     }
 
     void* Window::createWindow() {
-        if (_mouseCursors.empty()) {
-            _mouseCursors[MouseCursor::ARROW]    = LoadCursor(nullptr, IDC_ARROW);
-            _mouseCursors[MouseCursor::WAIT]     = LoadCursor(nullptr, IDC_WAIT);
-            _mouseCursors[MouseCursor::RESIZE_H] = LoadCursor(nullptr, IDC_SIZEWE);
-            _mouseCursors[MouseCursor::RESIZE_V] = LoadCursor(nullptr, IDC_SIZENS);
+        if (mouseCursors.empty()) {
+            mouseCursors[MouseCursor::ARROW]    = LoadCursor(nullptr, IDC_ARROW);
+            mouseCursors[MouseCursor::WAIT]     = LoadCursor(nullptr, IDC_WAIT);
+            mouseCursors[MouseCursor::RESIZE_H] = LoadCursor(nullptr, IDC_SIZEWE);
+            mouseCursors[MouseCursor::RESIZE_V] = LoadCursor(nullptr, IDC_SIZENS);
         }
 
         const auto hInstance = GetModuleHandle(nullptr);
@@ -101,8 +102,6 @@ namespace lysa {
     }
 
     LRESULT CALLBACK Window::windowProcedure(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam) {
-        static float lastMouseX = -1.0f;
-        static float lastMouseY = -1.0f;
         auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         switch (message) {
             case WM_SIZE:
@@ -153,7 +152,7 @@ namespace lysa {
     }
 
     void Window::setMouseCursor(const MouseCursor cursor) const {
-        SetCursor(_mouseCursors[cursor]);
+        SetCursor(mouseCursors[cursor]);
         PostMessage(reinterpret_cast<HWND>(windowHandle), WM_SETCURSOR, 0, 0);
     }
 
@@ -164,7 +163,7 @@ namespace lysa {
     }
 
     void Window::setMouseMode(const MouseMode mode) const {
-        MSG   msg;
+        MSG msg;
         while (PeekMessageW(&msg, reinterpret_cast<HWND>(windowHandle), 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);

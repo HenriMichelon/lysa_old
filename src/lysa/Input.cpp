@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present Henri Michelon
+ * Copyright (c) 2024-present Henri Michelon
  * 
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
@@ -34,58 +34,58 @@ namespace lysa {
     }
 
     bool Input::isKeyPressed(const Key key) {
-        return _keyPressedStates[key];
+        return keyPressedStates[key];
     }
 
     bool Input::isKeyJustPressed(const Key key) {
-        const auto result          = _keyJustPressedStates[key];
-        _keyJustPressedStates[key] = false;
+        const auto result          = keyJustPressedStates[key];
+        keyJustPressedStates[key] = false;
         return result;
     }
 
     bool Input::isKeyJustReleased(const Key key) {
-        const auto result           = _keyJustReleasedStates[key];
-        _keyJustReleasedStates[key] = false;
+        const auto result           = keyJustReleasedStates[key];
+        keyJustReleasedStates[key] = false;
         return result;
     }
 
     bool Input::isGamepadButtonJustPressed(const GamepadButton button) {
-        const auto result = _gamepadButtonJustPressedStates[button];
-        _gamepadButtonJustPressedStates[button] = false;
+        const auto result = gamepadButtonJustPressedStates[button];
+        gamepadButtonJustPressedStates[button] = false;
         return result;
     }
 
     bool Input::isGamepadButtonJustReleased(const GamepadButton button) {
-        const auto result = _gamepadButtonJustReleasedStates[button];
-        _gamepadButtonJustReleasedStates[button] = false;
+        const auto result = gamepadButtonJustReleasedStates[button];
+        gamepadButtonJustReleasedStates[button] = false;
         return result;
     }
 
     bool Input::isMouseButtonPressed(const MouseButton mouseButton) {
-        return _mouseButtonPressedStates[mouseButton];
+        return mouseButtonPressedStates[mouseButton];
     }
 
     bool Input::isMouseButtonJustPressed(const MouseButton mouseButton) {
-        const auto result                          = _mouseButtonJustPressedStates[mouseButton];
-        _mouseButtonJustPressedStates[mouseButton] = false;
+        const auto result = mouseButtonJustPressedStates[mouseButton];
+        mouseButtonJustPressedStates[mouseButton] = false;
         return result;
     }
 
     bool Input::isMouseButtonJustReleased(const MouseButton mouseButton) {
-        const auto result                           = _mouseButtonJustReleasedStates[mouseButton];
-        _mouseButtonJustReleasedStates[mouseButton] = false;
+        const auto result = mouseButtonJustReleasedStates[mouseButton];
+        mouseButtonJustReleasedStates[mouseButton] = false;
         return result;
     }
 
-    std::unordered_map<Key, bool>           Input::_keyPressedStates;
-    std::unordered_map<Key, bool>           Input::_keyJustPressedStates;
-    std::unordered_map<Key, bool>           Input::_keyJustReleasedStates;
-    std::unordered_map<MouseButton, bool>   Input::_mouseButtonPressedStates;
-    std::unordered_map<MouseButton, bool>   Input::_mouseButtonJustPressedStates;
-    std::unordered_map<MouseButton, bool>   Input::_mouseButtonJustReleasedStates;
-    std::unordered_map<GamepadButton, bool> Input::_gamepadButtonPressedStates;
-    std::unordered_map<GamepadButton, bool> Input::_gamepadButtonJustPressedStates;
-    std::unordered_map<GamepadButton, bool> Input::_gamepadButtonJustReleasedStates;
+    std::unordered_map<Key, bool>           Input::keyPressedStates;
+    std::unordered_map<Key, bool>           Input::keyJustPressedStates;
+    std::unordered_map<Key, bool>           Input::keyJustReleasedStates;
+    std::unordered_map<MouseButton, bool>   Input::mouseButtonPressedStates;
+    std::unordered_map<MouseButton, bool>   Input::mouseButtonJustPressedStates;
+    std::unordered_map<MouseButton, bool>   Input::mouseButtonJustReleasedStates;
+    std::unordered_map<GamepadButton, bool> Input::gamepadButtonPressedStates;
+    std::unordered_map<GamepadButton, bool> Input::gamepadButtonJustPressedStates;
+    std::unordered_map<GamepadButton, bool> Input::gamepadButtonJustReleasedStates;
 
     static std::map<Key, OsKey> _keyMap{
             {KEY_SPACE, OS_KEY_SPACE},

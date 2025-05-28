@@ -141,7 +141,7 @@ export namespace lysa {
 
         RECT rect;
         static bool resettingMousePosition;
-        static std::map<MouseCursor, HCURSOR> _mouseCursors;
+        static std::map<MouseCursor, HCURSOR> mouseCursors;
 #endif
     };
 

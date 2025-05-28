@@ -1,12 +1,14 @@
 /*
- * Copyright (c) 2025-present Henri Michelon
+ * Copyright (c) 2024-present Henri Michelon
  * 
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
 module;
 #ifdef _WIN32
+#define DIRECTINPUT_VERSION 0x0800
 #include <windows.h>
+#include <dinput.h>
 #endif
 export module lysa.input;
 
@@ -108,31 +110,39 @@ export namespace lysa {
     private:
         static inline std::map<std::string, InputAction> inputActions;
 
-        static float applyDeadzone(float value, float deadzonePercent);
-        static void generateGamepadButtonEvent(Window&, GamepadButton, bool);
+        static std::unordered_map<Key, bool> keyPressedStates;
+        static std::unordered_map<Key, bool> keyJustPressedStates;
+        static std::unordered_map<Key, bool> keyJustReleasedStates;
+        static std::unordered_map<MouseButton, bool> mouseButtonPressedStates;
+        static std::unordered_map<MouseButton, bool> mouseButtonJustPressedStates;
+        static std::unordered_map<MouseButton, bool> mouseButtonJustReleasedStates;
+        static std::unordered_map<GamepadButton, bool> gamepadButtonPressedStates;
+        static std::unordered_map<GamepadButton, bool> gamepadButtonJustPressedStates;
+        static std::unordered_map<GamepadButton, bool> gamepadButtonJustReleasedStates;
 
-    public:
-        static std::unordered_map<Key, bool> _keyPressedStates;
-        static std::unordered_map<Key, bool> _keyJustPressedStates;
-        static std::unordered_map<Key, bool> _keyJustReleasedStates;
-        static std::unordered_map<MouseButton, bool> _mouseButtonPressedStates;
-        static std::unordered_map<MouseButton, bool> _mouseButtonJustPressedStates;
-        static std::unordered_map<MouseButton, bool> _mouseButtonJustReleasedStates;
-        static std::unordered_map<GamepadButton, bool> _gamepadButtonPressedStates;
-        static std::unordered_map<GamepadButton, bool> _gamepadButtonJustPressedStates;
-        static std::unordered_map<GamepadButton, bool> _gamepadButtonJustReleasedStates;
+        static void initInput();
+
+        static void closeInput();
 
         static OsKey keyToOsKey(Key key);
+
         static Key osKeyToKey(OsKey key);
+
+        static float applyDeadzone(float value, float deadzonePercent);
+
+        static void generateGamepadButtonEvent(Window&, GamepadButton,bool);
+
+        friend class Window;
+        friend class Application;
 
 #ifdef _WIN32
         static const int DI_AXIS_RANGE;
         static const float DI_AXIS_RANGE_DIV;
-        static bool _useXInput;
-        static void _initInput();
-        static void _closeInput();
-        static void _updateInputStates(Window&);
+        static bool useXInput;
+        static void updateInputStates(Window&);
         static LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+        static BOOL CALLBACK deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW *doi, void *user);
+        static BOOL CALLBACK enumGamepadsCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *pContext);
 #endif
     };
 

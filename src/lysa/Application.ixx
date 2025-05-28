@@ -10,6 +10,7 @@ import std;
 import vireo;
 import lysa.configuration;
 import lysa.global;
+import lysa.log;
 import lysa.resources;
 import lysa.window;
 
@@ -70,6 +71,7 @@ export namespace lysa {
         std::shared_ptr<vireo::CommandAllocator> commandAllocator;
         std::shared_ptr<vireo::CommandList> commandList;
         bool quit{false};
+        std::shared_ptr<Log> log;
 
         // Fixed delta time for the physics
         static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};

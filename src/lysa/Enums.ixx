@@ -535,4 +535,42 @@ export namespace lysa {
         RESIZE_V = 3,
     };
 
+    /**
+     * Where to log messages
+     */
+    enum LoggingMode : uint32 {
+        //! Disable logging
+        LOGGING_MODE_NONE = 0,
+        /**
+        * Open an external Window (on the first screen if you have multiple screen) to display the log messages.
+        * Log message appearance in the Window can be deferred to the next frame if the log message is sent from a thread different from the main thread
+        */
+        LOGGING_MODE_WINDOW = 0x001,
+        /**
+         * Log the messages into a file named 'log.txt'
+         */
+        LOGGING_MODE_FILE = 0x010,
+        /**
+         * Log the messages to std::cout. WIN32 applications needs to be linked with `-mconsole`
+         */
+        LOGGING_MODE_STDOUT = 0x100
+    };
+
+    /**
+     * Log levels
+     */
+    enum class LogLevel : int32 {
+        TRACE       = -1,
+        DEBUG       = 0,
+        INFO        = 1,
+        GAME1       = 2,
+        GAME2       = 3,
+        GAME3       = 4,
+        WARNING     = 5,
+        ERROR       = 6,
+        CRITICAL    = 7,
+        INTERNAL    = 100,
+    };
+
+
 }

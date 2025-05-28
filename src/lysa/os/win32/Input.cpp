@@ -16,9 +16,9 @@ module lysa.input;
 
 namespace lysa {
 
-    bool        Input::_useXInput{false};
-    const int   Input::DI_AXIS_RANGE     = 1000;
-    const float Input::DI_AXIS_RANGE_DIV = 1000.5f;
+    bool        Input::useXInput{false};
+    const int   Input::DI_AXIS_RANGE{1000};
+    const float Input::DI_AXIS_RANGE_DIV{1000.5f};
 
     struct _DirectInputState {
         LPDIRECTINPUTDEVICE8 device;
@@ -35,7 +35,7 @@ namespace lysa {
 
     static std::map<uint32_t, _DirectInputState> _directInputStates{};
     static std::map<uint32_t, XINPUT_STATE>      _xinputStates{};
-    static LPDIRECTINPUT8                   _directInput = nullptr;
+    static LPDIRECTINPUT8                        _directInput = nullptr;
 
     static std::map<GamepadButton, int> GAMEPABUTTON2XINPUT{
             {GamepadButton::A, XINPUT_GAMEPAD_A},
@@ -55,8 +55,7 @@ namespace lysa {
             {GamepadButton::DPAD_RIGHT, XINPUT_GAMEPAD_DPAD_RIGHT},
     };
 
-    static BOOL CALLBACK _deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW *doi,
-                                               void *                         user) {
+    BOOL CALLBACK Input::deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW *doi, void *user) {
         const auto *data = reinterpret_cast<_DirectInputState *>(user);
         if (DIDFT_GETTYPE(doi->dwType) & DIDFT_AXIS) {
             DIPROPRANGE dipr;
@@ -74,7 +73,7 @@ namespace lysa {
         return DIENUM_CONTINUE;
     }
 
-    BOOL CALLBACK _enumGamepadsCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *pContext) {
+    BOOL CALLBACK Input::enumGamepadsCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *) {
         if (_directInput) {
             _DirectInputState state{
                     .device = nullptr,
@@ -95,7 +94,7 @@ namespace lysa {
                 return DIENUM_CONTINUE;
             }
 
-            if (FAILED(state.device->EnumObjects(_deviceObjectCallback,
+            if (FAILED(state.device->EnumObjects(deviceObjectCallback,
                 &state,
                 DIDFT_AXIS | DIDFT_BUTTON | DIDFT_POV))) {
                 state.device->Release();
@@ -188,7 +187,7 @@ namespace lysa {
         return DIENUM_CONTINUE;
     }
 
-    void Input::_initInput() {
+    void Input::initInput() {
         for (uint32_t i = 0; i < XUSER_MAX_COUNT; ++i) {
             XINPUT_STATE state;
             ZeroMemory(&state, sizeof(XINPUT_STATE));
@@ -196,8 +195,8 @@ namespace lysa {
                 _xinputStates[i] = state;
             }
         }
-        _useXInput = !_xinputStates.empty();
-        if (!_useXInput) {
+        useXInput = !_xinputStates.empty();
+        if (!useXInput) {
             if (FAILED(DirectInput8Create(GetModuleHandle(nullptr),
                 DIRECTINPUT_VERSION,
                 IID_IDirectInput8,
@@ -205,13 +204,13 @@ namespace lysa {
                 throw Exception("DirectInput8Create failed");
             }
             _directInput->EnumDevices(DI8DEVCLASS_GAMECTRL,
-                                      _enumGamepadsCallback,
+                                      enumGamepadsCallback,
                                       nullptr,
                                       DIEDFL_ATTACHEDONLY);
         }
     }
 
-    void Input::_closeInput() {
+    void Input::closeInput() {
         if (_directInput) {
             for (const auto entry : _directInputStates) {
                 entry.second.device->Release();
@@ -224,7 +223,7 @@ namespace lysa {
 
     uint32_t Input::getConnectedJoypads() {
         uint32_t count = 0;
-        if (_useXInput) {
+        if (useXInput) {
             count = _xinputStates.size();
         } else {
             count = _directInputStates.size();
@@ -233,7 +232,7 @@ namespace lysa {
     }
 
     bool Input::isGamepad(const uint32_t index) {
-        if (_useXInput) {
+        if (useXInput) {
             if (_xinputStates.contains(index)) {
                 XINPUT_CAPABILITIES xinputCapabilities;
                 ZeroMemory(&xinputCapabilities, sizeof(XINPUT_CAPABILITIES));
@@ -248,23 +247,23 @@ namespace lysa {
     }
 
     void Input::generateGamepadButtonEvent(Window& window, const GamepadButton button, const bool pressed) {
-        if (pressed && (!_gamepadButtonPressedStates[button])) {
-            _gamepadButtonJustPressedStates[button] = true;
-            _gamepadButtonJustReleasedStates[button] = false;
+        if (pressed && (!gamepadButtonPressedStates[button])) {
+            gamepadButtonJustPressedStates[button] = true;
+            gamepadButtonJustReleasedStates[button] = false;
             auto event = InputEventGamepadButton(button, pressed);
             window.input(event);
         }
-        if ((!pressed) && (_gamepadButtonPressedStates[button])) {
-            _gamepadButtonJustPressedStates[button] = false;
-            _gamepadButtonJustReleasedStates[button] = true;
+        if ((!pressed) && (gamepadButtonPressedStates[button])) {
+            gamepadButtonJustPressedStates[button] = false;
+            gamepadButtonJustReleasedStates[button] = true;
             auto event = InputEventGamepadButton(button, pressed);
             window.input(event);
         }
-        _gamepadButtonPressedStates[button] = pressed;
+        gamepadButtonPressedStates[button] = pressed;
     }
 
-    void Input::_updateInputStates(Window& window) {
-        if (_useXInput) {
+    void Input::updateInputStates(Window& window) {
+        if (useXInput) {
             _xinputStates.clear();
             for (uint32_t i = 0; i < XUSER_MAX_COUNT; ++i) {
                 XINPUT_STATE state;
@@ -315,7 +314,7 @@ namespace lysa {
     }
 
     bool Input::isGamepadButtonPressed(const uint32_t index, const GamepadButton gamepadButton) {
-        if (_useXInput && _xinputStates.contains(index)) {
+        if (useXInput && _xinputStates.contains(index)) {
             return _xinputStates[index].Gamepad.wButtons & GAMEPABUTTON2XINPUT[gamepadButton];
         } else if (_directInputStates.contains(index)) {
             const auto &gamepad = _directInputStates[index];
@@ -325,7 +324,7 @@ namespace lysa {
     }
 
     float2 Input::getGamepadVector(const uint32_t index, const GamepadAxisJoystick axisJoystick) {
-        if (_useXInput && _xinputStates.contains(index)) {
+        if (useXInput && _xinputStates.contains(index)) {
             const auto gamepad        = _xinputStates[index].Gamepad;
             const auto xAxis          = axisJoystick == GamepadAxisJoystick::LEFT ? gamepad.sThumbLX : gamepad.sThumbRX;
             const auto yAxis          = axisJoystick == GamepadAxisJoystick::LEFT ? gamepad.sThumbLY : gamepad.sThumbRY;
@@ -354,7 +353,7 @@ namespace lysa {
     }
 
     std::string Input::getJoypadName(const uint32_t index) {
-        if (_useXInput) {
+        if (useXInput) {
             return "XInput";
         }
         if (_directInputStates.contains(index)) {
@@ -364,8 +363,8 @@ namespace lysa {
     }
 
     float2 Input::getKeyboardVector(const Key keyNegX, const Key keyPosX, const Key keyNegY, const Key keyPosY) {
-        const auto  x = _keyPressedStates[keyNegX] ? -1 : _keyPressedStates[keyPosX] ? 1 : 0;
-        const auto  y = _keyPressedStates[keyNegY] ? -1 : _keyPressedStates[keyPosY] ? 1 : 0;
+        const auto  x = keyPressedStates[keyNegX] ? -1 : keyPressedStates[keyPosX] ? 1 : 0;
+        const auto  y = keyPressedStates[keyNegY] ? -1 : keyPressedStates[keyPosY] ? 1 : 0;
         const float2  vector{x, y};
         const float l = length(vector);
         return (l > 1.0f) ? vector / l : vector;
@@ -397,10 +396,10 @@ namespace lysa {
             case WM_KEYDOWN:{
                 const auto scanCode = static_cast<OsKey>((lParam & 0x00FF0000) >> 16);
                 const auto key = osKeyToKey(scanCode);
-                _keyJustPressedStates[key] = !_keyPressedStates[key];
-                _keyPressedStates[key] = true;
-                _keyJustReleasedStates[key] = false;
-                if (_keyJustPressedStates[key]) {
+                keyJustPressedStates[key] = !keyPressedStates[key];
+                keyPressedStates[key] = true;
+                keyJustReleasedStates[key] = false;
+                if (keyJustPressedStates[key]) {
                     auto event = InputEventKey{key, true, static_cast<int>(lParam & 0xFFFF), _getKeyboardModifiers()};
                     window->input(event);
                 }
@@ -409,17 +408,17 @@ namespace lysa {
             case WM_KEYUP: {
                 auto scanCode = static_cast<OsKey>((lParam & 0x00FF0000) >> 16);
                 auto key = osKeyToKey(scanCode);
-                _keyPressedStates[key] = false;
-                _keyJustPressedStates[key] = false;
-                _keyJustReleasedStates[key] = true;
+                keyPressedStates[key] = false;
+                keyJustPressedStates[key] = false;
+                keyJustReleasedStates[key] = true;
                 auto event = InputEventKey{key, false, static_cast<int>(lParam & 0xFFFF), _getKeyboardModifiers()};
                 window->input(event);
                 break;
             }
             case WM_LBUTTONDOWN: {
-                _mouseButtonJustPressedStates[MouseButton::LEFT] = !_mouseButtonPressedStates[MouseButton::LEFT];
-                _mouseButtonPressedStates[MouseButton::LEFT] = true;
-                _mouseButtonJustReleasedStates[MouseButton::LEFT] = false;
+                mouseButtonJustPressedStates[MouseButton::LEFT] = !mouseButtonPressedStates[MouseButton::LEFT];
+                mouseButtonPressedStates[MouseButton::LEFT] = true;
+                mouseButtonJustReleasedStates[MouseButton::LEFT] = false;
                 auto event = InputEventMouseButton(MouseButton::LEFT,
                                                        true,
                                                        _getKeyboardModifiers(),
@@ -430,9 +429,9 @@ namespace lysa {
                 break;
             }
             case WM_LBUTTONUP: {
-                _mouseButtonJustPressedStates[MouseButton::LEFT] = false;
-                _mouseButtonPressedStates[MouseButton::LEFT] = false;
-                _mouseButtonJustReleasedStates[MouseButton::LEFT] = false;
+                mouseButtonJustPressedStates[MouseButton::LEFT] = false;
+                mouseButtonPressedStates[MouseButton::LEFT] = false;
+                mouseButtonJustReleasedStates[MouseButton::LEFT] = false;
                 auto event = InputEventMouseButton(MouseButton::LEFT,
                                                        false,
                                                        _getKeyboardModifiers(),
@@ -443,9 +442,9 @@ namespace lysa {
                 break;
             }
             case WM_RBUTTONDOWN: {
-                _mouseButtonJustPressedStates[MouseButton::RIGHT] = !_mouseButtonPressedStates[MouseButton::RIGHT];
-                _mouseButtonPressedStates[MouseButton::RIGHT] = true;
-                _mouseButtonJustReleasedStates[MouseButton::RIGHT] = false;
+                mouseButtonJustPressedStates[MouseButton::RIGHT] = !mouseButtonPressedStates[MouseButton::RIGHT];
+                mouseButtonPressedStates[MouseButton::RIGHT] = true;
+                mouseButtonJustReleasedStates[MouseButton::RIGHT] = false;
                 auto event = InputEventMouseButton(MouseButton::RIGHT,
                                                        true,
                                                        _getKeyboardModifiers(),
@@ -456,9 +455,9 @@ namespace lysa {
                 break;
             }
             case WM_RBUTTONUP: {
-                _mouseButtonJustPressedStates[MouseButton::RIGHT] = false;
-                _mouseButtonPressedStates[MouseButton::RIGHT] = false;
-                _mouseButtonJustReleasedStates[MouseButton::RIGHT] = false;
+                mouseButtonJustPressedStates[MouseButton::RIGHT] = false;
+                mouseButtonPressedStates[MouseButton::RIGHT] = false;
+                mouseButtonJustReleasedStates[MouseButton::RIGHT] = false;
                 auto event = InputEventMouseButton(MouseButton::RIGHT,
                                                        false,
                                                        _getKeyboardModifiers(),
@@ -469,9 +468,9 @@ namespace lysa {
                 break;
             }
             case WM_MBUTTONDOWN: {
-                _mouseButtonJustPressedStates[MouseButton::MIDDLE] = !_mouseButtonPressedStates[MouseButton::MIDDLE];
-                _mouseButtonPressedStates[MouseButton::MIDDLE] = true;
-                _mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
+                mouseButtonJustPressedStates[MouseButton::MIDDLE] = !mouseButtonPressedStates[MouseButton::MIDDLE];
+                mouseButtonPressedStates[MouseButton::MIDDLE] = true;
+                mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
                 auto event = InputEventMouseButton(MouseButton::MIDDLE,
                                                        true,
                                                        _getKeyboardModifiers(),
@@ -482,9 +481,9 @@ namespace lysa {
                 break;
             }
             case WM_MBUTTONUP: {
-                _mouseButtonJustPressedStates[MouseButton::MIDDLE] = false;
-                _mouseButtonPressedStates[MouseButton::MIDDLE] = false;
-                _mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
+                mouseButtonJustPressedStates[MouseButton::MIDDLE] = false;
+                mouseButtonPressedStates[MouseButton::MIDDLE] = false;
+                mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
                 auto event = InputEventMouseButton(MouseButton::MIDDLE,
                                                        false,
                                                        _getKeyboardModifiers(),
@@ -495,9 +494,9 @@ namespace lysa {
                 break;
             }
             case WM_MOUSEWHEEL: {
-                _mouseButtonJustPressedStates[MouseButton::MIDDLE] = false;
-                _mouseButtonPressedStates[MouseButton::MIDDLE] = false;
-                _mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
+                mouseButtonJustPressedStates[MouseButton::MIDDLE] = false;
+                mouseButtonPressedStates[MouseButton::MIDDLE] = false;
+                mouseButtonJustReleasedStates[MouseButton::MIDDLE] = false;
                 auto event = InputEventMouseButton(MouseButton::WHEEL,
                                                        GET_WHEEL_DELTA_WPARAM(wParam) < 0,
                                                        _getKeyboardModifiers(),

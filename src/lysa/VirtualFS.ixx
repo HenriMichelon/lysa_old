@@ -11,7 +11,7 @@ import lysa.global;
 export namespace lysa {
 
     /**
-     * Virtual file system<br>Currently under heavy construction, do not use.
+     * Virtual file system for file path portability
      */
     class VirtualFS {
     public:
