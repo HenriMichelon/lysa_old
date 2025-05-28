@@ -188,16 +188,8 @@ namespace lysa {
                 modelsData->descriptorSet,
                 SET_DRAW_COMMAND);
             commandList.drawIndirect( modelsData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
-            // draw(commandList, pipeline, samplers, modelsData->drawCommandsBuffer);
         }
     }
-
-    // void Scene::draw(
-        // vireo::CommandList& commandList,
-        // const vireo::Pipeline& pipeline,
-        // const Samplers& samplers,
-        // const std::shared_ptr<vireo::Buffer>& drawCommand) const {
-    // }
 
     void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {
         if (currentCamera != nullptr)

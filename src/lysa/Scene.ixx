@@ -133,12 +133,6 @@ export namespace lysa {
 
         std::unordered_map<uint32, std::unique_ptr<ModelsData>> opaqueModels;
 
-        // void draw(
-           // vireo::CommandList& commandList,
-           // const vireo::Pipeline& pipeline,
-           // const Samplers& samplers,
-           // const std::shared_ptr<vireo::Buffer>& drawCommand) const;
-
     };
 
 }
