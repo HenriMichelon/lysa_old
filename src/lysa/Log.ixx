@@ -49,9 +49,6 @@ export namespace lysa {
 
 #endif
 
-    /**
-     * Logging streams
-     */
     struct Log {
         LogStream trace{LogLevel::TRACE};
         LogStream _internal{LogLevel::INTERNAL};
@@ -70,7 +67,6 @@ export namespace lysa {
         static void close();
         static inline std::shared_ptr<Log> loggingStreams{nullptr};
     };
-
 
     consteval bool isLoggingEnabled() {
         return ENABLE_LOG;

@@ -66,16 +66,16 @@ namespace lysa {
             std::string item = lysa::to_string(std::format(L"{:02}:{:02}:{:02}", tm.tm_hour, tm.tm_min, tm.tm_sec));
             item.append(" ");
             switch (level) {
-                case LogLevel::TRACE:     item.append("TRACE"); break;
-                case LogLevel::DEBUG:     item.append("DEBUG"); break;
-                case LogLevel::INFO:      item.append("INFO "); break;
-                case LogLevel::GAME1:     item.append("GAME1"); break;
-                case LogLevel::GAME2:     item.append("GAME2"); break;
-                case LogLevel::GAME3:     item.append("GAME3"); break;
-                case LogLevel::WARNING:   item.append("WARN "); break;
-                case LogLevel::ERROR:     item.append("ERROR"); break;
-                case LogLevel::CRITICAL:  item.append("CRIT "); break;
-                case LogLevel::INTERNAL:  item.append("====="); break;
+                case LogLevel::TRACE:    item.append("TRACE"); break;
+                case LogLevel::DEBUG:    item.append("DEBUG"); break;
+                case LogLevel::INFO:     item.append("INFO "); break;
+                case LogLevel::GAME1:    item.append("GAME1"); break;
+                case LogLevel::GAME2:    item.append("GAME2"); break;
+                case LogLevel::GAME3:    item.append("GAME3"); break;
+                case LogLevel::WARNING:  item.append("WARN "); break;
+                case LogLevel::ERROR:    item.append("ERROR"); break;
+                case LogLevel::CRITICAL: item.append("CRIT "); break;
+                case LogLevel::INTERNAL: item.append("====="); break;
             }
             item.append(" ");
             if (config.loggingMode & LOGGING_MODE_STDOUT) {
