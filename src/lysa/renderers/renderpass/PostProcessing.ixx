@@ -74,6 +74,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer>              dataUniform{nullptr};
         std::vector<FrameData>                      framesData;
         std::shared_ptr<vireo::DescriptorLayout>    descriptorLayout;
+        std::shared_ptr<vireo::GraphicPipeline>     pipeline;
 
     };
 }

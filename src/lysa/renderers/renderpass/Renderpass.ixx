@@ -32,7 +32,6 @@ export namespace lysa {
         const std::wstring                      name;
         const RenderingConfiguration&           config;
         const Samplers&                         samplers;
-        std::shared_ptr<vireo::GraphicPipeline> defaultPipeline;
 
     };
 }

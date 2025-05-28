@@ -120,13 +120,18 @@ namespace lysa {
             meshInstance->framesInFlight = framesInFlight;
             meshInstance->setUpdated();
 
-            auto pipelineIds = std::list<uint32>{};
+            auto nodePipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
                 material->framesInFlight = framesInFlight;
-                pipelineIds.push_back(material->getPipelineId());
+                auto id = material->getPipelineId();
+                nodePipelineIds.push_back(id);
+                if (!materials.contains(id)) {
+                    materials[id] = material;
+                    materialsUpdated = true;
+                }
             }
 
-            for (const auto& pipelineId : pipelineIds) {
+            for (const auto& pipelineId : nodePipelineIds) {
                 if (!opaqueModels.contains(pipelineId)) {
                     opaqueModels[pipelineId] = std::make_unique<ModelsData>(ModelsData{config, pipelineId});
                 }
@@ -166,33 +171,21 @@ namespace lysa {
 
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
-        const vireo::Pipeline& pipeline,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
         const Samplers& samplers) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.bindDescriptors(pipeline, {
+        commandList.bindDescriptors(pipelines.at(0), {
             Application::getResources().getDescriptorSet(),
             samplers.getDescriptorSet(),
             descriptorSet
         });
-        // commandList.bindDescriptor(
-        //     pipeline,
-        //     *Application::getResources().getDescriptorSet(),
-        //     Application::getResources().SET_RESOURCES);
-        // commandList.bindDescriptor(
-        //     pipeline,
-        //     *samplers.getDescriptorSet(),
-        //     samplers.SET_SAMPLERS);
-        // commandList.bindDescriptor(
-        //     pipeline,
-        //     *descriptorSet,
-        //     SET_SCENE);
         for (const auto& [pipelineId, modelsData] : opaqueModels) {
             if (modelsData->instancesIndex.empty()) { return; }
-            commandList.bindPipeline(pipeline);
+            commandList.bindPipeline(pipelines.at(pipelineId));
             commandList.bindDescriptor(
-                pipeline,
-                *modelsData->descriptorSet,
+                pipelines.at(pipelineId),
+                modelsData->descriptorSet,
                 SET_DRAW_COMMAND);
             commandList.drawIndirect( modelsData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
             // draw(commandList, pipeline, samplers, modelsData->drawCommandsBuffer);

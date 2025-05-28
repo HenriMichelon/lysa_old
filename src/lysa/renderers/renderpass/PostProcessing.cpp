@@ -40,7 +40,7 @@ namespace lysa {
             name);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/quad.vert");
         pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
-        defaultPipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
+        pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
@@ -78,8 +78,8 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         commandList.setViewport(viewport);
         commandList.setScissors(scissor);
-        commandList.bindPipeline(defaultPipeline);
-        commandList.bindDescriptors(defaultPipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
+        commandList.bindPipeline(pipeline);
+        commandList.bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
         commandList.draw(3);
         commandList.endRendering();
         commandList.barrier(

@@ -12,12 +12,12 @@ import lysa.global;
 import lysa.configuration;
 import lysa.samplers;
 import lysa.scene;
+import lysa.resources.material;
 import lysa.renderers.renderpass.post_processing;
 
 export namespace lysa {
     class Renderer {
     public:
-
         struct FrameData {
             std::shared_ptr<vireo::RenderTarget> colorAttachment;
         };
@@ -27,6 +27,8 @@ export namespace lysa {
             const std::wstring& name);
 
         virtual void resize(const vireo::Extent& extent);
+
+        virtual void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) = 0;
 
         std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
 

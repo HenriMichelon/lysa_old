@@ -23,14 +23,32 @@ namespace lysa {
             Scene::sceneDescriptorLayout,
             Scene::drawCommandDescriptorLayout},
             {}, name);
-        pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/" + DEFAULT_VERTEX_SHADER);
-        pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + DEFAULT_FRAGMENT_SHADER);
-        defaultPipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,
             config.clearColor.b,
             1.0f};
+    }
+
+    void ForwardColor::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+        for (const auto& [pipelineId, material] : materials) {
+            if (!pipelines.contains(pipelineId)) {
+                std::string vertShaderName = DEFAULT_VERTEX_SHADER;
+                std::string fragShaderName = DEFAULT_FRAGMENT_SHADER;
+                if (pipelineId != 0) {
+                    const auto& shaderMaterial = dynamic_pointer_cast<const ShaderMaterial>(material);
+                    if (!shaderMaterial->getVertFileName().empty()) {
+                        vertShaderName = to_string(shaderMaterial->getVertFileName());
+                    }
+                    if (!shaderMaterial->getFragFileName().empty()) {
+                        fragShaderName = to_string(shaderMaterial->getFragFileName());
+                    }
+                }
+                pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/" + vertShaderName);
+                pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + fragShaderName);
+                pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
+            }
+        }
     }
 
     void ForwardColor::render(
@@ -43,9 +61,9 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
-            commandList,
-            *defaultPipeline,
-            samplers);
+          commandList,
+          pipelines,
+          samplers);
         commandList.endRendering();
     }
 }

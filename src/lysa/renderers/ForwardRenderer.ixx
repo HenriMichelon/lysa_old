@@ -10,6 +10,7 @@ import std;
 import vireo;
 import lysa.configuration;
 import lysa.scene;
+import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.renderpass.forward_color;
 
@@ -19,6 +20,8 @@ export namespace lysa {
         ForwardRenderer(
             const RenderingConfiguration& config,
             const std::wstring& name);
+
+        void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) override;
 
         void resize(const vireo::Extent& extent) override;
 

@@ -75,8 +75,11 @@ export namespace lysa {
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
-           const vireo::Pipeline& pipeline,
+           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
            const Samplers& samplers) const;
+
+        const auto& getMaterials() const { return materials; }
+        auto isMaterialsUpdated() const { return materialsUpdated; }
 
         virtual ~Scene() = default;
         Scene(Scene&) = delete;
@@ -95,6 +98,9 @@ export namespace lysa {
         DeviceMemoryArray instancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};
+
+        std::unordered_map<uint32, std::shared_ptr<Material>> materials;
+        bool materialsUpdated{false};
 
         struct ModelsData {
             uint32 pipelineId;

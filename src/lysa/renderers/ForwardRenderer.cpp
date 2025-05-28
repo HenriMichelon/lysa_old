@@ -22,6 +22,10 @@ namespace lysa {
         forwardColorPass.update(frameIndex);
     }
 
+    void ForwardRenderer::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+        forwardColorPass.updatePipelines(materials);
+    }
+
     void ForwardRenderer::mainColorPass(
         vireo::CommandList& commandList,
         const Scene& scene,

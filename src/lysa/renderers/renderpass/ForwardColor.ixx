@@ -11,6 +11,7 @@ import vireo;
 import lysa.configuration;
 import lysa.samplers;
 import lysa.scene;
+import lysa.resources.material;
 import lysa.renderers.renderpass;
 
 export namespace lysa {
@@ -19,6 +20,8 @@ export namespace lysa {
         ForwardColor(
             const RenderingConfiguration& config,
             const Samplers& samplers);
+
+        void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials);
 
         void render(
             vireo::CommandList& commandList,
@@ -42,6 +45,8 @@ export namespace lysa {
             .depthTestEnable = pipelineConfig.depthTestEnable,
             .discardDepthStencilAfterRender = true,
         };
+
+        std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
 
     };
 }
