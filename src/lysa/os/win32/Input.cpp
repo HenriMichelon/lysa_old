@@ -349,7 +349,7 @@ namespace lysa {
             const float l = length(vector);
             return (l > 1.0f) ? vector / l : vector;
         }
-        return VEC2ZERO;
+        return FLOAT2ZERO;
     }
 
     std::string Input::getJoypadName(const uint32_t index) {

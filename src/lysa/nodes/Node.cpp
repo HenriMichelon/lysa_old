@@ -92,7 +92,7 @@ namespace lysa {
         updateGlobalTransform();
     }
 
-    void Node::rotateGlobalY(float angle) {
+    void Node::rotateGlobalY(const float angle) {
         localTransform = mul(localTransform, float4x4::rotation_y(angle));
         updateGlobalTransform();
     }
@@ -105,7 +105,7 @@ namespace lysa {
         children.push_back(child);
         child->updateGlobalTransform();
         if (viewport) {
-            viewport->addNode(child, false);
+            viewport->addNode(child, async);
             child->ready(viewport);
         }
         // child->visible = visible && child->visible;

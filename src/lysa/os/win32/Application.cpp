@@ -23,8 +23,12 @@ namespace lysa {
 
 }
 
+#ifndef LYSA_CONSOLE
+
 extern int lysaMain();
 
 int WINAPI WinMain(HINSTANCE , HINSTANCE , LPSTR , int ) {
     return lysaMain();
 }
+
+#endif

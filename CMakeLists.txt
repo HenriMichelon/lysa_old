@@ -17,7 +17,7 @@ if (NOT DEFINED VIREO_PROJECT_DIR)
 endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
-set(DIRECTX_BACKEND ON)
+#set(DIRECTX_BACKEND ON)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
@@ -33,6 +33,7 @@ endif()
 if(WIN32)
     add_compile_definitions(WIN32_LEAN_AND_MEAN UNICODE _UNICODE)
 endif ()
+
 
 #######################################################
 include(FetchContent)

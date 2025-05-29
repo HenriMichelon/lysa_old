@@ -67,12 +67,12 @@ export namespace lysa {
     /**
     * 2D zero initialized vector
     */
-    const float2 VEC2ZERO{0.0};
+    const float2 FLOAT2ZERO{0.0};
 
     /**
     * 3D zero initialized vector
     */
-    const float3 VEC3ZERO{0.0};
+    const float3 FLOAT3ZERO{0.0};
 
     /**
     * Unit quaternion with no rotation

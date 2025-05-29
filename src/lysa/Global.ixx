@@ -46,7 +46,9 @@ export namespace lysa {
 
     float4 to_float4(const std::string& str);
 
-    class Exception : public std::exception {
+    float3 eulerAngles(quaternion q);
+
+    class Exception final : public std::exception {
     public:
         template <typename... Args>
         explicit Exception(Args&&... args) {
