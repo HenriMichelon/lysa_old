@@ -7,12 +7,10 @@
 module lysa.resources.image;
 
 namespace lysa {
-    Image::Image(
-        const uint32 width,
-        const uint32 height,
-        const std::wstring & name):
+
+    Image::Image(const std::shared_ptr<vireo::Image>& image, const std::wstring & name):
         Resource{name},
-        width{width},
-        height{height} {
-    };
+        image{image} {
+    }
+
 }

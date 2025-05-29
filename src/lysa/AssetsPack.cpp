@@ -7,11 +7,14 @@
 module lysa.assets_pack;
 
 import vireo;
+import lysa.application;
 import lysa.virtual_fs;
+import lysa.log;
 import lysa.nodes.animation_player;
 import lysa.nodes.mesh_instance;
 import lysa.resources.animation;
 import lysa.resources.animation_library;
+import lysa.resources.image;
 import lysa.resources.material;
 import lysa.resources.mesh;
 import lysa.resources.resource;
@@ -329,6 +332,73 @@ namespace lysa {
                 rootNode.addChild(node);
             }
         }
+    }
+
+    void AssetsPack::loadImagesAndTextures(
+        std::ifstream &stream,
+        const std::vector<ImageHeader>& imageHeaders,
+        const std::vector<std::vector<MipLevelInfo>>&levelHeaders,
+        const std::vector<TextureHeader>& textureHeaders,
+        const uint64 totalImageSize) {
+        const auto& vireo = Application::getVireo();
+
+        // Upload all images into VRAM using one big staging buffer
+        const auto& textureStagingBuffer = vireo.createBuffer(vireo::BufferType::IMAGE_UPLOAD, totalImageSize);
+        textureStagingBuffer->map();
+        const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto commandList = commandAllocator->createCommandList();
+        commandList->begin();
+        static constexpr size_t BLOCK_SIZE = 64 * 1024;
+        auto transferBuffer = std::vector<char> (BLOCK_SIZE);
+        auto transferOffset = size_t{0};
+        while (stream.read(transferBuffer.data(), BLOCK_SIZE) || stream.gcount() > 0) {
+            const auto bytesRead = stream.gcount();
+            textureStagingBuffer->write(transferBuffer.data(), bytesRead, transferOffset);
+            transferOffset += bytesRead;
+        }
+        std::printf("%llu bytes read\n", transferOffset);
+
+        // Create all images from this staging buffer
+        std::vector<std::shared_ptr<vireo::Image>> images;
+        for (auto textureIndex = 0; textureIndex < header.texturesCount; ++textureIndex) {
+            const auto& texture = textureHeaders[textureIndex];
+            if (texture.imageIndex != -1) {
+                const auto& imageHeader = imageHeaders[texture.imageIndex];
+                INFO("Loaded image ", imageHeader.name, imageHeader.width, "x", imageHeader.height, imageHeader.format);
+                print(imageHeader);
+                const auto name = to_wstring(imageHeader.name);
+                const auto image = vireo.createImage(
+                    static_cast<vireo::ImageFormat>(imageHeader.format),
+                    imageHeader.width,
+                    imageHeader.height,
+                    imageHeader.mipLevels,
+                    1,
+                    name);
+                commandList->barrier(
+                    image,
+                    vireo::ResourceState::UNDEFINED,
+                    vireo::ResourceState::COPY_DST,
+                    0,
+                    imageHeader.mipLevels);
+                for (uint32 mip_level = 0; mip_level < imageHeader.mipLevels; mip_level++) {
+                    commandList->copy(
+                        textureStagingBuffer,
+                        image,
+                        imageHeader.dataOffset + levelHeaders[texture.imageIndex][mip_level].offset,
+                        mip_level);
+                }
+                commandList->barrier(
+                    image,
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::UNDEFINED,
+                    0,
+                    imageHeader.mipLevels);
+                textures.push_back(std::make_shared<ImageTexture>(std::make_shared<Image>(image, name)));
+            }
+        }
+        commandList->end();
+        Application::getGraphicQueue()->submit({commandList});
+        Application::getGraphicQueue()->waitIdle();
     }
 
     void AssetsPack::print(const Header& header) {

@@ -12,9 +12,9 @@ namespace lysa {
         Resource{name} {
     }
 
-    ImageTexture::ImageTexture(const std::shared_ptr<Image> &img):
-        Texture{img->getName()},
-        image{img} {
+    ImageTexture::ImageTexture(const std::shared_ptr<Image> &image):
+        Texture{image->getName()},
+        image{image} {
     }
 
     // ImageTexture::ImageTexture(const std::wstring &filename, const vireo::ImageFormat imageFormat):

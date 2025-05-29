@@ -93,8 +93,8 @@ export namespace lysa {
          */
         struct ImageHeader {
             //! Image name, copied from the original file name
-            char     name[NAME_SIZE];
-            //! Image format, [VkFormat format](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFormat.html)
+            char   name[NAME_SIZE];
+            //! Image format (vireo::ImageFormat)
             uint32 format;
             //! Width in pixels
             uint32 width;

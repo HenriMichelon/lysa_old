@@ -49,12 +49,12 @@ export namespace lysa {
         /**
          * Creates an ImageTexture from an existing Image
          */
-        ImageTexture(const std::shared_ptr<Image> &img);
+        ImageTexture(const std::shared_ptr<Image> &image);
 
         /**
          * Creates an ImageTexture from an image resource
          */
-        ImageTexture(const std::wstring &filename, vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
+        // ImageTexture(const std::wstring &filename, vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
 
         /**
          * Returns the attached Image
