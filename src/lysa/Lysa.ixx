@@ -10,6 +10,7 @@ export import std;
 export import vireo;
 
 export import lysa.application;
+export import lysa.assets_pack;
 export import lysa.configuration;
 export import lysa.global;
 export import lysa.input;
