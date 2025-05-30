@@ -380,14 +380,6 @@ namespace lysa {
                     textureStagingBuffer,
                     image,
                     sourceOffsets);
-                // // We must copy mip level per mip level because of memory alignment for compressed formats
-                // for (uint32 mip_level = 0; mip_level < imageHeader.mipLevels; mip_level++) {
-                //     commandList->copy(
-                //         textureStagingBuffer,
-                //         image,
-                //         imageHeader.dataOffset + levelHeaders[texture.imageIndex][mip_level].offset,
-                //         mip_level);
-                // }
                 commandList->barrier(
                     image,
                     vireo::ResourceState::COPY_DST,
