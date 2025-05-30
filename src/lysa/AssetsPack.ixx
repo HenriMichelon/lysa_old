@@ -58,7 +58,7 @@ export namespace lysa {
         /*
          * Magic header thing
          */
-        static constexpr char MAGIC[]{ 'L', 'Y', 'S', 'A', '_', 'A', 'P' };
+        static constexpr char MAGIC[]{ 'A', 'S', 'S', 'E', 'T', 'S' };
 
         /*
          * Current format version
@@ -70,7 +70,7 @@ export namespace lysa {
          */
         struct Header {
             //! Magic header thing
-            char     magic[7];
+            char   magic[6];
             //! Format version
             uint32 version{0};
             //! Total number of images
@@ -151,35 +151,35 @@ export namespace lysa {
          */
         struct MaterialHeader {
             //! Material name
-            char         name[NAME_SIZE];
+            char        name[NAME_SIZE];
             //! Culling mode CullMode format
-            uint32     cullMode;
+            uint32      cullMode;
             //! Transparency, Transparency format
-            uint32     transparency;
+            uint32      transparency;
             //! Alpha scissor for transparency
-            float        alphaScissor;
+            float       alphaScissor;
             //! Albedo color
-            float4       albedoColor;
+            float4      albedoColor;
             //! Optional albedo texture
-            TextureInfo  albedoTexture;
+            TextureInfo albedoTexture;
             //! Metallic factor
-            float        metallicFactor;
+            float       metallicFactor;
             //! Optional metallic texture
-            TextureInfo  metallicTexture;
+            TextureInfo metallicTexture;
             //! Roughness factor
-            float        roughnessFactor;
+            float       roughnessFactor;
             //! Optional roughness texture
-            TextureInfo  roughnessTexture;
+            TextureInfo roughnessTexture;
             //! Emissive factor
-            float3       emissiveFactor;
+            float3      emissiveFactor;
             //! Emissive streng
-            float        emissiveStrength;
+            float       emissiveStrength;
             //! Optional emissive texture
-            TextureInfo  emissiveTexture;
+            TextureInfo emissiveTexture;
             //! Optional normal texture
-            TextureInfo  normalTexture;
+            TextureInfo normalTexture;
             //! Normal scale
-            float        normalScale;
+            float       normalScale;
         };
 
         /*
@@ -188,7 +188,7 @@ export namespace lysa {
         struct DataInfo {
             //! First index in the array
             uint32 first;
-            //! Number of element
+            //! Number of elements
             uint32 count;
         };
 
@@ -197,7 +197,7 @@ export namespace lysa {
          */
         struct SurfaceInfo {
             //! Attached material, -1 if no material
-            int32   materialIndex{-1};
+            int32    materialIndex{-1};
             //! Indices array
             DataInfo indices;
             //! Vertices positions array
@@ -240,7 +240,7 @@ export namespace lysa {
         };
 
         struct TrackInfo {
-            int32 nodeIndex{-1};
+            int32  nodeIndex{-1};
             uint32 type;
             uint32 interpolation;
             uint32 keysCount;

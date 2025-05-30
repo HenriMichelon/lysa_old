@@ -5,7 +5,6 @@
  * https://opensource.org/licenses/MIT
 */
 export module lysa.resources.mesh;
-#include <cstddef>
 
 import vireo;
 import lysa.aabb;
@@ -27,7 +26,7 @@ export namespace lysa {
         //! UV coordinates in the surface
         float2 uv;
         //! UV-based tangents
-        float3 tangent;
+        float4 tangent;
 
         inline bool operator==(const Vertex &other) const {
             return all(position == other.position) &&

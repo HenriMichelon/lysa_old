@@ -37,7 +37,9 @@ namespace lysa {
         if (header.magic[0] != MAGIC[0] &&
             header.magic[1] != MAGIC[1] &&
             header.magic[2] != MAGIC[2] &&
-            header.magic[3] != MAGIC[3]) {
+            header.magic[3] != MAGIC[3] &&
+            header.magic[4] != MAGIC[4] &&
+            header.magic[5] != MAGIC[5]) {
             throw Exception("Assets pack bad magic");
         }
         if (header.version != VERSION) {
@@ -52,7 +54,6 @@ namespace lysa {
         for (auto imageIndex = 0; imageIndex < header.imagesCount; ++imageIndex) {
             stream.read(reinterpret_cast<std::istream::char_type *>(&imageHeaders[imageIndex]), sizeof(ImageHeader));
             // print(imageHeaders[imageIndex]);
-            // log(format("{} : {}x{}", std::string(imageHeaders[imageIndex].name), imageHeaders[imageIndex].width, imageHeaders[imageIndex].height));
             levelHeaders[imageIndex].resize(imageHeaders[imageIndex].mipLevels);
             stream.read(reinterpret_cast<std::istream::char_type *>(levelHeaders[imageIndex].data()), sizeof(MipLevelInfo) * imageHeaders[imageIndex].mipLevels);
             totalImageSize += imageHeaders[imageIndex].dataSize;
@@ -92,7 +93,6 @@ namespace lysa {
             stream.read(reinterpret_cast<std::istream::char_type *>(&nodeHeaders.at(nodeIndex)), sizeof(NodeHeader));
             childrenIndexes.at(nodeIndex).resize(nodeHeaders.at(nodeIndex).childrenCount);
             stream.read(reinterpret_cast<std::istream::char_type *>(childrenIndexes.at(nodeIndex).data()), sizeof(uint32) * childrenIndexes[nodeIndex].size());
-            // log("Node ", nodeHeaders[nodeIndex].name, " ", to_string(nodeHeaders[nodeIndex].childrenCount), "children");
         }
 
         auto animationHeaders = std::vector<AnimationHeader>(header.animationsCount);
@@ -101,38 +101,31 @@ namespace lysa {
             stream.read(reinterpret_cast<std::istream::char_type *>(&animationHeaders.at(animationIndex)), sizeof(AnimationHeader));
             tracksInfos[animationIndex].resize(animationHeaders[animationIndex].tracksCount);
             stream.read(reinterpret_cast<std::istream::char_type *>(tracksInfos[animationIndex].data()), sizeof(TrackInfo) * tracksInfos[animationIndex].size());
-            // log("Animation ", animationHeaders[animationIndex].name, " ", to_string(animationHeaders[animationIndex].tracksCount), "tracks");
         }
 
-        // Skip padding
-        // auto pad = std::vector<uint8_t>(std::vector<uint8_t>::size_type(32), 0);
-        // if (header.headersPadding > 0) {
-            // stream.read(reinterpret_cast<std::istream::char_type *>(pad.data()), header.headersPadding);
-        // }
-
         // Read the meshes data
-        uint32 count;
+        uint32 count{0};
         stream.read(reinterpret_cast<std::istream::char_type *>(&count), sizeof(uint32));
         std::vector<uint32> indices(count);
         stream.read(reinterpret_cast<std::istream::char_type *>(indices.data()), count * sizeof(uint32));
 
         stream.read(reinterpret_cast<std::istream::char_type *>(&count), sizeof(uint32));
-        std::vector<float3> positions{count};
+        std::vector<float3> positions(count);
         stream.read(reinterpret_cast<std::istream::char_type *>(positions.data()), count * sizeof(float3));
 
         stream.read(reinterpret_cast<std::istream::char_type *>(&count), sizeof(uint32));
-        std::vector<float3> normals{count};
+        std::vector<float3> normals(count);
         stream.read(reinterpret_cast<std::istream::char_type *>(normals.data()), count * sizeof(float3));
 
         stream.read(reinterpret_cast<std::istream::char_type *>(&count), sizeof(uint32));
-        std::vector<float2> uvs{count};
+        std::vector<float2> uvs(count);
         stream.read(reinterpret_cast<std::istream::char_type *>(uvs.data()), count * sizeof(float2));
 
         stream.read(reinterpret_cast<std::istream::char_type *>(&count), sizeof(uint32));
-        std::vector<float3> tangents{count};
-        stream.read(reinterpret_cast<std::istream::char_type *>(tangents.data()), count * sizeof(float3));
+        std::vector<float4> tangents(count);
+        stream.read(reinterpret_cast<std::istream::char_type *>(tangents.data()), count * sizeof(float4));
 
-        // log(format("{} indices, {} positions, {} normals, {} uvs, {} tangents",
+        // INFO(std::format("{} indices, {} positions, {} normals, {} uvs, {} tangents",
             // indices.size(), positions.size(), normals.size(), uvs.size(), tangents.size()));
         // for(auto& pos : positions) {
         //     log(to_string(pos));
@@ -166,7 +159,7 @@ namespace lysa {
             }
         }
 
-        // Read, upload and create the Image and Texture objets (Vulkan specific)
+        // Read, upload and create the Image and Texture objets (Vireo specific)
         if (header.imagesCount > 0) {
             loadImagesAndTextures(stream, imageHeaders, levelHeaders, textureHeaders, totalImageSize);
         }
@@ -220,7 +213,6 @@ namespace lysa {
                 meshIndices.reserve(meshIndices.size() + info.indices.count);
                 for(auto i = 0; i < info.indices.count; ++i) {
                     meshIndices.push_back(indices[info.indices.first + i]);
-                    // log(format("mesh {} surface {} index {}", meshIndex, surfaceIndex, indices[info.indices.first + i]));
                 }
                 // Load positions
                 meshVertices.resize(meshVertices.size() + info.positions.count);
@@ -228,17 +220,14 @@ namespace lysa {
                     meshVertices[firstVertex + i] = {
                         .position = positions[info.positions.first + i],
                     };
-                    // log(format("mesh {} surface {} position {}", meshIndex, surfaceIndex, to_string(positions[info.positions.first + i])));
                 }
                 // Load normals
                 for(auto i = 0; i < info.normals.count; ++i) {
                     meshVertices[firstVertex + i].normal = normals[info.normals.first + i];
-                    // log(format("mesh {} surface {} normal  {}", meshIndex, surfaceIndex, to_string(normals[info.normals.first + i])));
                 }
                 // Load tangents
                 for(auto i = 0; i < info.tangents.count; ++i) {
                     meshVertices[firstVertex + i].tangent = tangents[info.tangents.first + i];
-                    // log(format("mesh {} surface {} tangents  {}", meshIndex, surfaceIndex, to_string(tangents[info.tangents.first + i])));
                 }
                 if (info.materialIndex != -1) {
                     // associate material to surface & mesh
@@ -253,7 +242,6 @@ namespace lysa {
                     const auto& texCoordInfo = uvsInfos.at(meshIndex)[surfaceIndex][texCoord];
                     for(auto i = 0; i < texCoordInfo.count; i++) {
                         meshVertices[firstVertex + i].uv = uvs[texCoordInfo.first + i];
-                        // log(format("mesh {} surface {} uvs {} uv {}", meshIndex, surfaceIndex, texCoord, to_string(uvs[texCoordInfo.first + i])));
                     }
                 } else {
                     // Mesh have no material, use a default one
@@ -267,10 +255,10 @@ namespace lysa {
                         auto &vertex1  = meshVertices[meshIndices[i]];
                         auto &vertex2  = meshVertices[meshIndices[i + 1]];
                         auto &vertex3  = meshVertices[meshIndices[i + 2]];
-                        float3  edge1    = vertex2.position - vertex1.position;
-                        float3  edge2    = vertex3.position - vertex1.position;
-                        float2  deltaUV1 = vertex2.uv - vertex1.uv;
-                        float2  deltaUV2 = vertex3.uv - vertex1.uv;
+                        float3 edge1    = vertex2.position - vertex1.position;
+                        float3 edge2    = vertex3.position - vertex1.position;
+                        float2 deltaUV1 = vertex2.uv - vertex1.uv;
+                        float2 deltaUV2 = vertex3.uv - vertex1.uv;
 
                         float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
                         float3  tangent{
@@ -278,9 +266,9 @@ namespace lysa {
                             f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
                             f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z),
                         };
-                        vertex1.tangent = tangent;
-                        vertex2.tangent = tangent;
-                        vertex3.tangent = tangent;
+                        vertex1.tangent = float4{tangent, 1.0};
+                        vertex2.tangent = float4{tangent, 1.0};
+                        vertex3.tangent = float4{tangent, 1.0};
                     }
                 }
                 mesh->getSurfaces().push_back(surface);
@@ -340,10 +328,14 @@ namespace lysa {
         const std::vector<std::vector<MipLevelInfo>>&levelHeaders,
         const std::vector<TextureHeader>& textureHeaders,
         const uint64 totalImageSize) {
-        const auto& vireo = Application::getVireo();
+        auto& vireo = Application::getVireo();
 
         // Upload all images into VRAM using one big staging buffer
-        const auto& textureStagingBuffer = vireo.createBuffer(vireo::BufferType::IMAGE_UPLOAD, totalImageSize);
+        const auto& textureStagingBuffer = vireo.createBuffer(
+            vireo::BufferType::IMAGE_UPLOAD,
+            totalImageSize,
+            1,
+            L"textureStagingBuffer");
         textureStagingBuffer->map();
         const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = commandAllocator->createCommandList();
@@ -364,7 +356,7 @@ namespace lysa {
             const auto& texture = textureHeaders[textureIndex];
             if (texture.imageIndex != -1) {
                 const auto& imageHeader = imageHeaders[texture.imageIndex];
-                INFO("Loaded image ", imageHeader.name, imageHeader.width, "x", imageHeader.height, imageHeader.format);
+                INFO("Loading image ", imageHeader.name, " ", imageHeader.width, "x", imageHeader.height, " ", imageHeader.format);
                 print(imageHeader);
                 const auto name = to_wstring(imageHeader.name);
                 const auto image = vireo.createImage(
@@ -380,13 +372,22 @@ namespace lysa {
                     vireo::ResourceState::COPY_DST,
                     0,
                     imageHeader.mipLevels);
-                for (uint32 mip_level = 0; mip_level < imageHeader.mipLevels; mip_level++) {
-                    commandList->copy(
-                        textureStagingBuffer,
-                        image,
-                        imageHeader.dataOffset + levelHeaders[texture.imageIndex][mip_level].offset,
-                        mip_level);
+                auto sourceOffsets = std::vector<size_t>(imageHeader.mipLevels);
+                for (int mipLevel = 0; mipLevel < imageHeader.mipLevels; ++mipLevel) {
+                    sourceOffsets[mipLevel] = levelHeaders[texture.imageIndex][mipLevel].offset;
                 }
+                commandList->copy(
+                    textureStagingBuffer,
+                    image,
+                    sourceOffsets);
+                // // We must copy mip level per mip level because of memory alignment for compressed formats
+                // for (uint32 mip_level = 0; mip_level < imageHeader.mipLevels; mip_level++) {
+                //     commandList->copy(
+                //         textureStagingBuffer,
+                //         image,
+                //         imageHeader.dataOffset + levelHeaders[texture.imageIndex][mip_level].offset,
+                //         mip_level);
+                // }
                 commandList->barrier(
                     image,
                     vireo::ResourceState::COPY_DST,

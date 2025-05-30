@@ -13,7 +13,7 @@ struct Vertex {
     float _pad1;
     float2 uv;
     float2 _pad2;
-    float3 tangent;
+    float4 tangent;
     float _pad3;
 };
 
@@ -76,7 +76,7 @@ VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {
     float3 normalW = mul((float3x3)model, input.normal);
     output.normal = normalize(normalW);
 
-    float3 tangentW = mul((float3x3)model, input.tangent);
+    float3 tangentW = mul((float3x3)model, input.tangent.xyz);
     output.tangent = normalize(tangentW);
     output.bitangent = normalize(cross(normalW, tangentW));
 
