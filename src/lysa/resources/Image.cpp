@@ -6,11 +6,14 @@
 */
 module lysa.resources.image;
 
+import lysa.application;
+
 namespace lysa {
 
     Image::Image(const std::shared_ptr<vireo::Image>& image, const std::wstring & name):
         Resource{name},
-        image{image} {
+        image{image},
+        index{Application::getResources().addTexture(*this)} {
     }
 
 }

@@ -14,13 +14,11 @@ namespace lysa {
 
     Application* Application::instance{nullptr};
 
-    Application::Application(ApplicationConfiguration& config):
+    Application::Application(ApplicationConfiguration& config) :
         config{config},
         vireo{vireo::Vireo::create(config.backend)},
-        resources{*vireo, config.resourcesConfig},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
-        commandAllocator{vireo->createCommandAllocator(vireo::CommandType::GRAPHIC)},
-        commandList{commandAllocator->createCommandList()}{
+        resources{*vireo, config.resourcesConfig, *graphicQueue} {
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
         if constexpr (isLoggingEnabled()) {
@@ -32,8 +30,6 @@ namespace lysa {
 
     Application::~Application() {
         graphicQueue->waitIdle();
-        commandList.reset();
-        commandAllocator.reset();
         windows.clear();
         Scene::destroyDescriptorLayouts();
         resources.cleanup();

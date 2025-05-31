@@ -112,14 +112,14 @@ export namespace lysa {
         void setAlbedoColor(const float4 &color);
 
         /**
-         * Returns the albedo texture (texture to multiply by albedo color. Used for basic texturing of objects).
+         * Returns the diffuse texture (texture to multiply by albedo color. Used for basic texturing of objects).
          */
-        const auto& getAlbedoTexture() const { return albedoTexture; }
+        const auto& getDiffuseTexture() const { return diffuseTexture; }
 
         /**
-         * Sets the albedo texture (texture to multiply by albedo color. Used for basic texturing of objects).
+         * Sets the diffuse texture (texture to multiply by albedo color. Used for basic texturing of objects).
          */
-        void setAlbedoTexture(const TextureInfo &texture);
+        void setDiffuseTexture(const TextureInfo &texture);
 
         /**
          * Returns the normal texture
@@ -219,7 +219,7 @@ export namespace lysa {
 
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
-        TextureInfo  albedoTexture{};
+        TextureInfo  diffuseTexture{};
         float        metallicFactor{-1.0f}; // -1 -> non PBR material
         TextureInfo  metallicTexture{};
         float        roughnessFactor{1.0f};

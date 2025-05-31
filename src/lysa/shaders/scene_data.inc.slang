@@ -58,8 +58,11 @@ struct Index {
 
 [[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<Material> materials : register(t1, space0);
+[[vk::binding(2, 0)]] Texture2D textures[200] : register(t2, space0); // Resources::MAX_TEXTURES
+
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<InstanceData> instancesData : register(t1, space2);
+
 [[vk::binding(0, 3)]] StructuredBuffer<Index> indices : register(t0, space3);
 
 VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {

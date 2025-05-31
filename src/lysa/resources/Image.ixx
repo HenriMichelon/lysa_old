@@ -35,11 +35,15 @@ export namespace lysa {
          */
         auto getSize() const { return float2{getWidth(), getHeight()}; }
 
+        auto getImage() const { return image; }
+
+        auto getIndex() const { return index; }
 
         ~Image() override = default;
+
     protected:
         std::shared_ptr<vireo::Image> image;
-
+        uint32 index;
     };
 
 }

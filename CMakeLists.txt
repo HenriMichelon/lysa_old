@@ -42,7 +42,6 @@ include(cmake/libraries.cmake)
 
 #######################################################
 add_subdirectory(${VIREO_PROJECT_DIR} external_lib_build)
-set(VIREO_INCLUDE_DIR ${VIREO_PROJECT_DIR}/include)
 set(VIREO_TARGET "vireo_rhi")
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -144,7 +143,9 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
+
         ${WIN32_SRC}
+        ${SRC_DIR}/stb/stb.cpp
 )
 target_sources(${LYSA_TARGET}
     PUBLIC
@@ -196,7 +197,7 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${VIREO_INCLUDE_DIR} ${xxhash_SOURCE_DIR})
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR})
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE

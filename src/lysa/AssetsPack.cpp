@@ -201,7 +201,7 @@ namespace lysa {
             material->setTransparency(static_cast<Transparency>(header.transparency));
             material->setAlphaScissor(header.alphaScissor);
             material->setAlbedoColor(header.albedoColor);
-            material->setAlbedoTexture(textureInfo(header.albedoTexture));
+            material->setDiffuseTexture(textureInfo(header.albedoTexture));
             material->setMetallicFactor(header.metallicFactor);
             material->setMetallicTexture(textureInfo(header.metallicTexture));
             material->setRoughnessFactor(header.roughnessFactor);
@@ -354,6 +354,8 @@ namespace lysa {
         const std::vector<std::vector<MipLevelInfo>>&levelHeaders,
         const std::vector<TextureHeader>& textureHeaders) {
         const auto& vireo = Application::getVireo();
+
+        // Create images upload buffer
         static constexpr size_t BLOCK_SIZE = 64 * 1024;
         auto transferBuffer = std::vector<char> (BLOCK_SIZE);
         auto transferOffset = size_t{0};
@@ -364,7 +366,7 @@ namespace lysa {
         }
         // std::printf("%llu bytes read\n", transferOffset);
 
-        // Create all images from this staging buffer
+        // Create all images from this upload buffer
         std::vector<std::shared_ptr<vireo::Image>> images;
         for (auto textureIndex = 0; textureIndex < header.texturesCount; ++textureIndex) {
             const auto& texture = textureHeaders[textureIndex];
@@ -388,7 +390,7 @@ namespace lysa {
                     imageHeader.mipLevels);
                 auto sourceOffsets = std::vector<size_t>(imageHeader.mipLevels);
                 for (int mipLevel = 0; mipLevel < imageHeader.mipLevels; ++mipLevel) {
-                    sourceOffsets[mipLevel] = levelHeaders[texture.imageIndex][mipLevel].offset;
+                    sourceOffsets[mipLevel] = imageHeader.dataOffset + levelHeaders[texture.imageIndex][mipLevel].offset;
                 }
                 commandList.copy(
                     stagingBuffer,
@@ -397,7 +399,7 @@ namespace lysa {
                 commandList.barrier(
                     image,
                     vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::UNDEFINED,
+                    vireo::ResourceState::SHADER_READ,
                     0,
                     imageHeader.mipLevels);
                 textures.push_back(std::make_shared<ImageTexture>(std::make_shared<Image>(image, name)));

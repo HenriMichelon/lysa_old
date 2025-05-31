@@ -65,11 +65,9 @@ export namespace lysa {
         static Application* instance;
         ApplicationConfiguration& config;
         std::shared_ptr<vireo::Vireo> vireo;
+        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         Resources resources;
         std::list<std::shared_ptr<Window>> windows;
-        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
-        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
-        std::shared_ptr<vireo::CommandList> commandList;
         bool quit{false};
         std::shared_ptr<Log> log;
 

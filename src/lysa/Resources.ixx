@@ -10,6 +10,7 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.memory;
+import lysa.resources.image;
 import lysa.resources.mesh;
 
 export namespace lysa {
@@ -23,16 +24,24 @@ export namespace lysa {
 
     class Resources {
     public:
+        static constexpr auto MAX_TEXTURES{200};
+
         static constexpr uint32_t SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
         static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
+        static constexpr vireo::DescriptorIndex BINDING_TEXTURE{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
-        Resources(const vireo::Vireo& vireo, ResourcesConfiguration& config);
+        Resources(
+            const vireo::Vireo& vireo,
+            ResourcesConfiguration& config,
+            vireo::SubmitQueue& graphicQueue);
 
         auto& getVertexArray() { return vertexArray; }
 
         auto& getMaterialArray() { return materialArray; }
+
+        uint32 addTexture(const Image& image);
 
         const auto& getDescriptorSet() const { return descriptorSet; }
 
@@ -49,15 +58,22 @@ export namespace lysa {
         auto& getMutex() { return mutex; }
 
         Resources(Resources&) = delete;
-        Resources& operator=(Resources&) = delete;
+        Resources& operator = (Resources&) = delete;
 
     private:
         const ResourcesConfiguration& config;
         DeviceMemoryArray vertexArray;
         DeviceMemoryArray materialArray;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        std::vector<std::shared_ptr<vireo::Image>> textures;
+        std::shared_ptr<vireo::Image> blankImage;
         bool updated{false};
+        bool textureUpdated{false};
         std::mutex mutex;
+
+        static std::vector<uint8> createBlankJPEG();
+
+        static void stb_write_func(void *context, void *data, int size);
     };
 
 }

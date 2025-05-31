@@ -6,13 +6,15 @@
 */
 module lysa.resources.texture;
 
+import lysa.application;
+
 namespace lysa {
 
     Texture::Texture(const std::wstring &name):
         Resource{name} {
     }
 
-    ImageTexture::ImageTexture(const std::shared_ptr<Image> &image):
+    ImageTexture::ImageTexture(const std::shared_ptr<Image> &image) :
         Texture{image->getName()},
         image{image} {
     }

@@ -271,6 +271,12 @@ namespace lysa {
     }*/
 
 
+    std::wstring Node::getPath() const {
+        if (parent) {
+            return parent->getPath() + L"/" + getName();
+        }
+        return  L"/" + name;
+    }
 
     void Node::setProperty(const std::string &property, const std::string &value) {
         if (property == "position") {

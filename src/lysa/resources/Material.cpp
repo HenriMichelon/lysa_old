@@ -27,17 +27,8 @@ namespace lysa {
     MaterialData StandardMaterial::getMaterialData() const {
         return {
             .albedoColor = albedoColor,
-        };
-    }
-
-    MaterialData ShaderMaterial::getMaterialData() const {
-        return {
-            .parameters = {
-                parameters[0],
-                parameters[1],
-                parameters[2],
-                parameters[3],
-            }
+            .diffuseTextureIndex = diffuseTexture.texture ?
+                static_cast<int32>(diffuseTexture.texture->getImage()->getIndex()) : -1
         };
     }
 
@@ -50,8 +41,8 @@ namespace lysa {
         setUpdated();
     }
 
-    void StandardMaterial::setAlbedoTexture(const TextureInfo &texture) {
-        albedoTexture = texture;
+    void StandardMaterial::setDiffuseTexture(const TextureInfo &texture) {
+        diffuseTexture = texture;
         setUpdated();
     }
 
@@ -128,4 +119,14 @@ namespace lysa {
         return XXH32(name.c_str(), name.size(), 0);
     }
 
+    MaterialData ShaderMaterial::getMaterialData() const {
+        return {
+            .parameters = {
+                parameters[0],
+                parameters[1],
+                parameters[2],
+                parameters[3],
+            }
+        };
+    }
 }

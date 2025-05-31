@@ -470,8 +470,13 @@ export namespace lysa {
         const std::wstring &getName() const { return name; }
 
         /**
-        * Sets a property by is name and value.
-        * Currently, not all properties in all nodes classes are supported.
+         * Returns the node path
+         */
+        std::wstring getPath() const;
+
+        /**
+        * Sets a property by its name and value.
+        * Currently, not all properties in all node classes are supported.
         */
         virtual void setProperty(const std::string &property, const std::string &value);
 
