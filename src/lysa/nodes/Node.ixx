@@ -465,6 +465,11 @@ export namespace lysa {
         auto getViewport() const { return viewport; }
 
         /**
+         * Returns the node name
+         */
+        const std::wstring &getName() const { return name; }
+
+        /**
         * Sets a property by is name and value.
         * Currently, not all properties in all nodes classes are supported.
         */

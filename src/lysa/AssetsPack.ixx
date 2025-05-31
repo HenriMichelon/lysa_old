@@ -6,6 +6,7 @@
 */
 export module lysa.assets_pack;
 
+import vireo;
 import lysa.global;
 import lysa.nodes.node;
 import lysa.resources.texture;
@@ -276,11 +277,12 @@ export namespace lysa {
         void loadScene(Node& rootNode, std::ifstream& stream);
 
         void loadImagesAndTextures(
+            const vireo::Buffer& stagingBuffer,
+            const vireo::CommandList& commandList,
             std::ifstream& stream,
             const std::vector<ImageHeader>&,
             const std::vector<std::vector<MipLevelInfo>>&,
-            const std::vector<TextureHeader>&,
-            uint64 totalImageSize);
+            const std::vector<TextureHeader>&);
     };
 
 }
