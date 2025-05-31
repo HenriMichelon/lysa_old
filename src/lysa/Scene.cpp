@@ -129,7 +129,6 @@ namespace lysa {
             meshInstance->framesInFlight = framesInFlight;
             mesh->framesInFlight = framesInFlight;
             meshInstance->setUpdated();
-            INFO("Adding Node ", lysa::to_string(meshInstance->getName()));
 
             auto nodePipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {

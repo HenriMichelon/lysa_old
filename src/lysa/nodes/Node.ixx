@@ -174,7 +174,7 @@ export namespace lysa {
         /**
          * Rotates the local transformation around the X axis by angle in radians.
          */
-        // void rotateX(float angle);
+        void rotateX(float angle);
     
         /**
          * Rotates the local transformation around the Y axis by angle in radians.
@@ -184,7 +184,7 @@ export namespace lysa {
         /**
          * Rotates the local transformation around the Z axis by angle in radians.
          */
-        // void rotateZ(float angle);
+        void rotateZ(float angle);
     
         /**
          * Rotates the local transformation

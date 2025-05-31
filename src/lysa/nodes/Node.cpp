@@ -87,8 +87,18 @@ namespace lysa {
         }
     }
 
+    void Node::rotateX(const float angle) {
+        localTransform = mul(float4x4::rotation_x(angle), localTransform);
+        updateGlobalTransform();
+    }
+
     void Node::rotateY(const float angle) {
         localTransform = mul(float4x4::rotation_y(angle), localTransform);
+        updateGlobalTransform();
+    }
+
+    void Node::rotateZ(const float angle) {
+        localTransform = mul(float4x4::rotation_z(angle), localTransform);
         updateGlobalTransform();
     }
 

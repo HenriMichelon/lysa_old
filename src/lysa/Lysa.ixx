@@ -18,6 +18,7 @@ export import lysa.input_event;
 export import lysa.log;
 export import lysa.math;
 export import lysa.memory;
+export import lysa.types;
 export import lysa.viewport;
 export import lysa.window;
 

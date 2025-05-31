@@ -14,7 +14,6 @@ struct Vertex {
     float2 uv;
     float2 _pad2;
     float4 tangent;
-    float _pad3;
 };
 
 struct VertexOutput {
