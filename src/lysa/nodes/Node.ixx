@@ -197,6 +197,11 @@ export namespace lysa {
         void rotateGlobalY(float angle);
 
         /**
+         * Scale the local transformation
+         */
+        void scale(float scale);
+
+        /**
          * Sets the local transformation
          */
         // void setRotation(const quaternion& quat);

@@ -102,6 +102,11 @@ namespace lysa {
         updateGlobalTransform();
     }
 
+    void Node::scale(const float scale) {
+        localTransform = mul(float4x4::scale(scale), localTransform);
+        updateGlobalTransform();
+    }
+
     void Node::rotateGlobalY(const float angle) {
         localTransform = mul(localTransform, float4x4::rotation_y(angle));
         updateGlobalTransform();
