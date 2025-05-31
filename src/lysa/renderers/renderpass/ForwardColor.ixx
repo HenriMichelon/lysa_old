@@ -27,6 +27,7 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             bool clearAttachment,
             uint32 frameIndex);
 
@@ -36,8 +37,8 @@ export namespace lysa {
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc   = { { .blendEnable = true } },
-            .depthTestEnable  = false,
-            .depthWriteEnable = false,
+            .depthTestEnable  = true,
+            .depthWriteEnable = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {

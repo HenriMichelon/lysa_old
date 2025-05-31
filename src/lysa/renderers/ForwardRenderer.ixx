@@ -32,6 +32,7 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             bool clearAttachment,
             uint32 frameIndex) override;
 

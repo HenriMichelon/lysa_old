@@ -39,6 +39,8 @@ export namespace lysa {
     struct RenderingConfiguration {
         //! Swap chain image format
         vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
+        //! Depth and stencil buffer format
+        vireo::ImageFormat depthStencilFormat{vireo::ImageFormat::D32_SFLOAT};
         //! MSAA samples count
         vireo::MSAA        msaa{vireo::MSAA::NONE};
         //! Presentation mode

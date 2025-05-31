@@ -37,8 +37,12 @@ namespace lysa {
                 frame.colorAttachment,
                 vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::RENDER_TARGET_COLOR);
-        }
-        mainColorPass(commandList, scene, frame.colorAttachment, clearAttachment, frameIndex);
+            commandList.barrier(
+                frame.depthAttachment,
+                vireo::ResourceState::UNDEFINED,
+                vireo::ResourceState::RENDER_TARGET_DEPTH);
+                }
+        mainColorPass(commandList, scene, frame.colorAttachment,frame.depthAttachment, clearAttachment, frameIndex);
     }
 
     void Renderer::postprocess(
@@ -71,6 +75,10 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::UNDEFINED);
         }
+        commandList.barrier(
+            frame.depthAttachment,
+            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            vireo::ResourceState::UNDEFINED);
     }
 
     std::shared_ptr<vireo::Image> Renderer::getColorAttachment(const uint32 frameIndex) const {
@@ -90,6 +98,13 @@ namespace lysa {
                 {config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f},
                 config.msaa,
                 name);
+            frame.depthAttachment = Application::getVireo().createRenderTarget(
+                config.depthStencilFormat,
+                extent.width, extent.height,
+                vireo::RenderTargetType::DEPTH,
+                { .depthStencil = { .depth = 1.0f, .stencil = 0 } },
+                config.msaa,
+                name + L" DepthStencil");
         }
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->resize(extent);

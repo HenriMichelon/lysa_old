@@ -20,6 +20,7 @@ export namespace lysa {
     public:
         struct FrameData {
             std::shared_ptr<vireo::RenderTarget> colorAttachment;
+            std::shared_ptr<vireo::RenderTarget> depthAttachment;
         };
 
         Renderer(
@@ -63,6 +64,7 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             bool clearAttachment,
             uint32 frameIndex) = 0;
 
