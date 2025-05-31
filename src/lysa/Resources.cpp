@@ -9,6 +9,7 @@ module;
 module lysa.resources;
 
 import lysa.application;
+import lysa.log;
 import lysa.resources.material;
 
 namespace lysa {
@@ -83,10 +84,15 @@ namespace lysa {
         throw Exception("Out of memory for textures");
     }
 
-    void Resources::reset() {
-        auto lock = std::unique_lock(mutex, std::try_to_lock);
+    void Resources::restart() {
+        auto lock = std::lock_guard(mutex);
         vertexArray.restart();
         materialArray.restart();
+        if (textureUpdated) {
+            Application::getGraphicQueue()->waitIdle();
+            descriptorSet->update(BINDING_TEXTURE, textures);
+            textureUpdated = false;
+        }
     }
 
     void Resources::cleanup() {
@@ -102,7 +108,6 @@ namespace lysa {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
-        if (textureUpdated) { descriptorSet->update(BINDING_TEXTURE, textures); }
         updated = false;
     }
 

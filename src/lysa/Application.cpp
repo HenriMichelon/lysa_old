@@ -64,7 +64,7 @@ namespace lysa {
     }
 
     void Application::drawFrame() {
-        resources.reset();
+        resources.restart();
 
         for (const auto& window : windows) {
             window->update();

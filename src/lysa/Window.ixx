@@ -29,8 +29,7 @@ export namespace lysa {
 
         virtual void onReady() {}
         virtual void onClose() {}
-
-        void resize() const;
+        virtual void onResize() {}
 
         std::shared_ptr<Viewport> addViewport(const std::shared_ptr<Viewport>& viewport);
 
@@ -130,14 +129,16 @@ export namespace lysa {
         // Propagate input event to the UI Window manager and to the current scene tree
         void input(InputEvent &inputEvent);
 
+        void resize();
+
 #ifdef _WIN32
         struct MonitorEnumData {
             int  enumIndex{0};
             int  monitorIndex{0};
             RECT monitorRect{};
         };
-        static BOOL CALLBACK monitorEnumProc(HMONITOR, HDC , LPRECT lprcMonitor, LPARAM dwData);
-        static LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+        static BOOL CALLBACK monitorEnumProc(HMONITOR, HDC, LPRECT, LPARAM);
+        static LRESULT CALLBACK windowProcedure(HWND, UINT, WPARAM, LPARAM);
 
         RECT rect;
         static bool resettingMousePosition;

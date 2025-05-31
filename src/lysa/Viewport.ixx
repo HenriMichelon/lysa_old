@@ -52,8 +52,6 @@ export namespace lysa {
         // Remove a node from the current scene
         void removeNode(const std::shared_ptr<Node> &node, bool async);
 
-        void resize(const vireo::Extent &extent);
-
         auto getAspectRatio() const { return viewport.width / viewport.height; }
 
         /**
@@ -137,6 +135,8 @@ export namespace lysa {
         void render(uint32 frameIndex) const;
 
         void processDeferredUpdates(uint32 frameIndex);
+
+        void resize(const vireo::Extent &extent);
 
     };
 

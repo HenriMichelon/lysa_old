@@ -132,10 +132,11 @@ namespace lysa {
         swapChain->nextFrameIndex();
     }
 
-    void Window::resize() const {
+    void Window::resize() {
         if (closing) { return; }
         const auto oldExtent = swapChain->getExtent();
         swapChain->recreate();
+        onResize();
         const auto newExtent = swapChain->getExtent();
         if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
             for (const auto& viewport : viewports) {
