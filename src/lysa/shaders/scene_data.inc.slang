@@ -7,13 +7,9 @@
 #include "samplers.inc.slang"
 
 struct Vertex {
-    float3 position;
-    float _pad0;
-    float3 normal;
-    float _pad1;
-    float2 uv;
-    float2 _pad2;
-    float4 tangent;
+    float4 position; // position + uv.x
+    float4 normal;   // normal + uv.y
+    float4 tangent;  // tangent + sign
 };
 
 struct VertexOutput {
@@ -58,7 +54,7 @@ struct Index {
 
 [[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<Material> materials : register(t1, space0);
-[[vk::binding(2, 0)]] Texture2D textures[200] : register(t2, space0); // Resources::MAX_TEXTURES
+[[vk::binding(2, 0)]] Texture2D textures[500] : register(t2, space0); // Resources::MAX_TEXTURES
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<InstanceData> instancesData : register(t1, space2);
@@ -69,20 +65,20 @@ VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {
     VertexOutput output;
     float4x4 model = instanceData.transform;
 
-    float4 localPos = float4(input.position, 1.0);
-    float4 worldPos = mul(model, localPos);
-    output.worldPos = worldPos.xyz;
+    float4 position = float4(input.position.xyz, 1.0);
+    float4 positionW = mul(model, position);
+    output.worldPos = positionW.xyz;
 
-    output.position = mul(scene.projection, mul(scene.view, worldPos));
+    output.position = mul(scene.projection, mul(scene.view, positionW));
 
-    float3 normalW = mul((float3x3)model, input.normal);
+    float3 normalW = mul((float3x3)model, input.normal.xyz);
     output.normal = normalize(normalW);
 
     float3 tangentW = mul((float3x3)model, input.tangent.xyz);
     output.tangent = normalize(tangentW);
     output.bitangent = normalize(cross(normalW, tangentW));
 
-    output.uv = input.uv;
+    output.uv = float2(input.position.w, input.normal.w);
     output.materialIndex = instanceData.materialIndex;
     return output;
 }

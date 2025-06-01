@@ -115,6 +115,7 @@ export namespace lysa {
             std::vector<Index> instancesIndex;
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
+            const SceneConfiguration& config;
 
             PipelineData::PipelineData(const SceneConfiguration& config, uint32 pipelineId);
 

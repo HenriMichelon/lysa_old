@@ -12,7 +12,7 @@ import lysa.global;
 export namespace lysa {
 
     struct ResourcesConfiguration {
-        uint32 maxVertexInstances{1000000};
+        uint32 maxVertexInstances{5000000};
         uint32 maxIndexInstances{1000000};
         uint32 maxMaterialInstances{1000};
     };
@@ -33,7 +33,7 @@ export namespace lysa {
         //! Number of nodes updates per frame for asynchronous scene updates
         uint32 maxAsyncNodesUpdatedPerFrame{20};
         uint32 maxMeshSurfacePerFrame{100000};
-        uint32 maxVertexPerFrame{1000000};
+        uint32 maxVertexPerFrame{10000000};
     };
 
     struct RenderingConfiguration {

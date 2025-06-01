@@ -224,15 +224,16 @@ namespace lysa {
     }
 
     Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId):
+        config{config},
         pipelineId{pipelineId},
-        drawCommandsStagingBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::BUFFER_UPLOAD,
-            sizeof(vireo::DrawIndexedIndirectCommand), 1,
-            L"Draw commands upload")},
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands")},
+        drawCommandsStagingBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::BUFFER_UPLOAD,
+            sizeof(vireo::DrawIndexedIndirectCommand), 1,
+            L"Draw commands upload")},
         instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
@@ -289,6 +290,9 @@ namespace lysa {
                     }
                     surfaceIndex++;
                 }
+            }
+            if ((startIndex + mesh->getIndices().size() > config.maxVertexPerFrame)) {
+                throw Exception("Too many vertices in a single frame");
             }
             instancesIndexBuffer->write(
                 &instancesIndex[startIndex],

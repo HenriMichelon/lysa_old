@@ -112,7 +112,7 @@ export namespace lysa {
         /**
          * Returns the local space transformation matrix
          */
-        const float4x4 &getTransformLocal() const { return localTransform; }
+        // const float4x4 &getTransformLocal() const { return localTransform; }
 
         void setTransformLocal(const float4x4 &transform);
 
@@ -191,11 +191,6 @@ export namespace lysa {
          */
         // void rotate(quat quater);
     
-        /**
-         * Rotates the local transformation around the Y axis by angle in radians.
-         */
-        void rotateGlobalY(float angle);
-
         /**
          * Scale the local transformation
          */
@@ -484,6 +479,17 @@ export namespace lysa {
         * Currently, not all properties in all node classes are supported.
         */
         virtual void setProperty(const std::string &property, const std::string &value);
+
+        /**
+         * Recursively prints the node tree in the log system
+         */
+        void printTree(int tab = 0) const;
+
+        /**
+         * Duplicates a node. Warning : not implemented on all node types, check documentation for the node type before using it.
+         */
+        std::shared_ptr<Node> duplicate() const;
+
 
         ~Node() override = default;
     

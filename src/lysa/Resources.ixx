@@ -15,16 +15,9 @@ import lysa.resources.mesh;
 
 export namespace lysa {
 
-    struct VertexData {
-        float3 position;
-        float3 normal;
-        float2 uv;
-        float3 tangent;
-    };
-
     class Resources {
     public:
-        static constexpr auto MAX_TEXTURES{200};
+        static constexpr auto MAX_TEXTURES{500};
 
         static constexpr uint32_t SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
@@ -35,7 +28,7 @@ export namespace lysa {
         Resources(
             const vireo::Vireo& vireo,
             ResourcesConfiguration& config,
-            vireo::SubmitQueue& graphicQueue);
+            const vireo::SubmitQueue& graphicQueue);
 
         auto& getVertexArray() { return vertexArray; }
 

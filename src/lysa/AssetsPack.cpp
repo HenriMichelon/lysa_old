@@ -90,8 +90,8 @@ namespace lysa {
         auto nodeHeaders = std::vector<NodeHeader>(header.nodesCount);
         auto childrenIndexes = std::vector<std::vector<uint32>>(header.nodesCount);
         for (auto nodeIndex = 0; nodeIndex < header.nodesCount; ++nodeIndex) {
-            stream.read(reinterpret_cast<std::istream::char_type *>(&nodeHeaders.at(nodeIndex)), sizeof(NodeHeader));
-            childrenIndexes.at(nodeIndex).resize(nodeHeaders.at(nodeIndex).childrenCount);
+            stream.read(reinterpret_cast<std::istream::char_type *>(&nodeHeaders[nodeIndex]), sizeof(NodeHeader));
+            childrenIndexes.at(nodeIndex).resize(nodeHeaders[nodeIndex].childrenCount);
             stream.read(reinterpret_cast<std::istream::char_type *>(childrenIndexes.at(nodeIndex).data()), sizeof(uint32) * childrenIndexes[nodeIndex].size());
         }
 
@@ -217,7 +217,7 @@ namespace lysa {
         // Create the Mesh, Surface & Vertex objects
         std::vector<std::shared_ptr<Mesh>> meshes{header.meshesCount};
         for (auto meshIndex = 0; meshIndex < header.meshesCount; ++meshIndex) {
-            auto& header   = meshesHeaders.at(meshIndex);
+            auto& header   = meshesHeaders[meshIndex];
             auto  mesh     = std::make_shared<Mesh>(to_wstring(header.name));
             auto &meshVertices = mesh->getVertices();
             auto &meshIndices  = mesh->getIndices();
@@ -305,12 +305,12 @@ namespace lysa {
             // find if the node has a mesh, and if it does hook it to the mesh pointer and allocate it with the
             // MeshInstance class
             if (nodeHeaders[nodeIndex].meshIndex != -1) {
-                auto mesh = meshes[nodeHeaders.at(nodeIndex).meshIndex];
+                auto mesh = meshes[nodeHeaders[nodeIndex].meshIndex];
                 newNode = std::make_shared<MeshInstance>(mesh, name);
             } else {
                 newNode = std::make_shared<Node>(name);
             }
-            newNode->setTransformLocal(nodeHeaders.at(nodeIndex).transform);
+            newNode->setTransformLocal(nodeHeaders[nodeIndex].transform);
             nodes[nodeIndex] = newNode;
         }
 
@@ -329,8 +329,8 @@ namespace lysa {
         // Build the scene tree
         for (auto nodeIndex = 0; nodeIndex < header.nodesCount; ++nodeIndex) {
             auto& sceneNode = nodes[nodeIndex];
-            for (auto i = 0; i < nodeHeaders.at(nodeIndex).childrenCount; i++) {
-                sceneNode->addChild(nodes[childrenIndexes.at(nodeIndex)[i]]);
+            for (auto i = 0; i < nodeHeaders[nodeIndex].childrenCount; i++) {
+                sceneNode->addChild(nodes[childrenIndexes[nodeIndex][i]]);
             }
         }
 

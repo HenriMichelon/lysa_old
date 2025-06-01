@@ -7,6 +7,7 @@
 module lysa.nodes.node;
 
 import lysa.global;
+import lysa.log;
 import lysa.viewport;
 
 namespace lysa {
@@ -65,11 +66,8 @@ namespace lysa {
     }
 
     void Node::updateGlobalTransform() {
-        if (parent) {
-            globalTransform = mul(parent->globalTransform, localTransform);
-        } else {
-            globalTransform = localTransform;
-        }
+        const auto parentMatrix = parent == nullptr ? float4x4::identity() : parent->globalTransform;
+        globalTransform = mul(localTransform, parentMatrix);
         setUpdated();
         for (const auto& child : children) {
             child->updateGlobalTransform();
@@ -107,15 +105,12 @@ namespace lysa {
         updateGlobalTransform();
     }
 
-    void Node::rotateGlobalY(const float angle) {
-        localTransform = mul(localTransform, float4x4::rotation_y(angle));
-        updateGlobalTransform();
-    }
-
-
     bool Node::addChild(const std::shared_ptr<Node> child, const bool async) {
         if (haveChild(child, false)) { return false; }
-        assert([&]{return child->parent == nullptr; }, "Remove child from parent first");
+        // assert([&]{return child->parent == nullptr; }, "Remove child from parent first");
+        if (child->parent) {
+            child->parent->removeChild(child, async);
+        }
         child->parent = this;
         children.push_back(child);
         child->updateGlobalTransform();
@@ -310,6 +305,31 @@ namespace lysa {
             // setName(value);
         } else  if (property == "cast_shadows") {
             // setCastShadows(value == "true");
+        }
+    }
+
+    std::shared_ptr<Node> Node::duplicate() const {
+        std::shared_ptr<Node> dup = duplicateInstance();
+        dup->children.clear();
+        for (const auto &child : children) {
+            dup->addChild(child->duplicate());
+        }
+        dup->id   = currentId++;
+        dup->name = name;
+        return dup;
+    }
+
+    void Node::printTree(const int tab) const {
+        std::stringstream sstream;
+        for (int i = 0; i < (tab * 2); i++) {
+            sstream << " ";
+        }
+        sstream << " " << lysa::to_string(name) << " (" << to_string(TypeNames[type]) << ") #" << getId();
+        const auto& pos = getPosition();
+        sstream << " (" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+        INFO(sstream.str());
+        for (auto &child : children) {
+            child->printTree(tab + 1);
         }
     }
 

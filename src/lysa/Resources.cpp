@@ -16,7 +16,7 @@ namespace lysa {
     Resources::Resources(
         const vireo::Vireo& vireo,
         ResourcesConfiguration& config,
-        vireo::SubmitQueue& graphicQueue):
+        const vireo::SubmitQueue& graphicQueue):
         config{config},
         vertexArray {
             vireo,

@@ -45,7 +45,14 @@ namespace lysa {
         if (!isUploaded()) {
             vertexMemoryBloc = resources.getVertexArray().alloc(vertices.size());
         }
-        resources.getVertexArray().write(vertexMemoryBloc, vertices.data());
+        auto vertexData = std::vector<VertexData>(vertices.size());
+        for (int i = 0; i < vertices.size(); i++) {
+            const auto& v = vertices[i];
+            vertexData[i].position = float4(v.position.x, v.position.y, v.position.z, v.uv.x);
+            vertexData[i].normal = float4(v.normal.x, v.normal.y, v.normal.z, v.uv.y);
+            vertexData[i].tangent = v.tangent;
+        }
+        resources.getVertexArray().write(vertexMemoryBloc, vertexData.data());
         for (int i = 0; i < surfaces.size(); i++) {
         const auto& material = surfaces[i]->material;
             if (!material->isUploaded()) {

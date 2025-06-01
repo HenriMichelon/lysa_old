@@ -14,4 +14,5 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     }
     return color * scene.ambientLight;
 //     return float4(input.uv.x, input.uv.y, material.parameters[0].r, 1.0) * scene.ambientLight;
+//     return float4(1.0, 0.0, material.parameters[0].r, 1.0) * scene.ambientLight;
 }
