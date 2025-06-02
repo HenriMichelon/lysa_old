@@ -495,6 +495,35 @@ export namespace lysa {
          */
         std::shared_ptr<Node> duplicate() const;
 
+        /**
+         * Returns the normalized right vector
+         */
+        float3 getRightVector() const {  return normalize(globalTransform[0].xyz); }
+
+        /**
+         * Returns the normalized left vector
+         */
+        float3 getLeftVector() const {  return -normalize(globalTransform[0].xyz); }
+
+        /**
+         * Returns the normalized front vector
+         */
+        float3 getFrontVector() const {  return -normalize(globalTransform[2].xyz); }
+
+        /**
+         * Returns the normalized back vector
+         */
+        float3 getBackVector() const {  return normalize(globalTransform[2].xyz); }
+
+        /**
+         * Returns the normalized up vector
+         */
+        float3 getUpVector() const {  return normalize(globalTransform[1].xyz); }
+
+        /**
+         * Returns the normalized down vector
+         */
+        float3 getDownVector() const {  return -normalize(globalTransform[1].xyz); }
 
         ~Node() override = default;
     
