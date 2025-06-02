@@ -165,14 +165,15 @@ namespace lysa {
         auto& vireo = Application::getVireo();
 
         // Upload all images into VRAM using one big staging buffer
-        const auto& textureStagingBuffer = vireo.createBuffer(
-            vireo::BufferType::IMAGE_UPLOAD,
-            totalImageSize,
-            1,
-            L"textureStagingBuffer");
+        std::shared_ptr<vireo::Buffer> textureStagingBuffer;
 
         // Read, upload and create the Image and Texture objets (Vireo specific)
         if (header.imagesCount > 0) {
+           textureStagingBuffer = vireo.createBuffer(
+               vireo::BufferType::IMAGE_UPLOAD,
+               totalImageSize,
+               1,
+               L"textureStagingBuffer");
             textureStagingBuffer->map();
             loadImagesAndTextures(
                 *textureStagingBuffer,
@@ -258,10 +259,11 @@ namespace lysa {
                     if (materialsTexCoords.contains(material->getId())) {
                         texCoord = materialsTexCoords.at(material->getId());
                     }
-                    const auto& texCoordInfo = uvsInfos.at(meshIndex)[surfaceIndex][texCoord];
-                    for(auto i = 0; i < texCoordInfo.count; i++) {
-                        meshVertices[firstVertex + i].uv = uvs[texCoordInfo.first + i];
-                        const auto uv = uvs[texCoordInfo.first + i];
+                    if (!uvsInfos.at(meshIndex)[surfaceIndex].empty()) {
+                        const auto& texCoordInfo = uvsInfos.at(meshIndex)[surfaceIndex][texCoord];
+                        for(auto i = 0; i < texCoordInfo.count; i++) {
+                            meshVertices[firstVertex + i].uv = uvs[texCoordInfo.first + i];
+                        }
                     }
                 } else {
                     // Mesh have no material, use a default one

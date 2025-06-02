@@ -21,7 +21,7 @@ namespace lysa {
 
         addSampler(vireo::Filter::NEAREST, vireo::Filter::NEAREST, vireo::AddressMode::CLAMP_TO_BORDER, vireo::AddressMode::CLAMP_TO_BORDER);
         addSampler(vireo::Filter::LINEAR, vireo::Filter::LINEAR, vireo::AddressMode::CLAMP_TO_EDGE, vireo::AddressMode::CLAMP_TO_EDGE);
-        // addSampler(vireo::Filter::LINEAR, vireo::Filter::LINEAR, vireo::AddressMode::REPEAT, vireo::AddressMode::REPEAT);
+        addSampler(vireo::Filter::LINEAR, vireo::Filter::LINEAR, vireo::AddressMode::REPEAT, vireo::AddressMode::REPEAT);
         for (int i = samplerCount; i < samplers.size(); i++) {
             samplers[i] = samplers[0];
         }
