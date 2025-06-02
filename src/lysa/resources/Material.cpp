@@ -29,12 +29,20 @@ namespace lysa {
             .albedoColor = albedoColor,
             .transparency = static_cast<int>(getTransparency()),
             .alphaScissor = getAlphaScissor(),
+            .normalScale = normalScale,
         };
         if (diffuseTexture.texture) {
             data.diffuseTexture = {
                 .index = static_cast<int32>(diffuseTexture.texture->getImage()->getIndex()),
                 .samplerIndex = diffuseTexture.texture->getSamplerIndex(),
                 .transform = float4x4{diffuseTexture.transform},
+            };
+        }
+        if (normalTexture.texture) {
+            data.normalTexture = {
+                .index = static_cast<int32>(normalTexture.texture->getImage()->getIndex()),
+                .samplerIndex = normalTexture.texture->getSamplerIndex(),
+                .transform = float4x4{normalTexture.transform},
             };
         }
         return data;

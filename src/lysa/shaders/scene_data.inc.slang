@@ -54,8 +54,10 @@ struct Material {
     float4 albedoColor;
     int    transparency;
     float  alphaScissor;
-    float2 _pad0;
+    float  normalScale;
+    float  _pad0;
     TextureInfo diffuseTexture;
+    TextureInfo normalTexture;
     float4 parameters[4];
 }
 

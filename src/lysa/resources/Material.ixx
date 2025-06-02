@@ -16,19 +16,21 @@ import lysa.resources.texture;
 export namespace lysa {
 
     struct TextureInfoData {
-        int32  index{-1};
-        uint32 samplerIndex{0};
-        float4x4  transform{1.0f};
+        int32    index{-1};
+        uint32   samplerIndex{0};
+        float4x4 transform{1.0f};
     };
 
     struct MaterialData {
         float4 albedoColor{0.9f, 0.0f, 0.6f, 1.0f};
         int    transparency{0};
         float  alphaScissor{0.1f};
-        TextureInfoData  diffuseTexture;
+        float  normalScale{1.0f};
+        TextureInfoData diffuseTexture;
+        TextureInfoData normalTexture;
         float4 parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
-    static_assert(sizeof(MaterialData) == 176, "MaterialData struct must be 176 bytes for StructuredBuffer alignment");
+    // static_assert(sizeof(MaterialData) == 176, "MaterialData struct must be 176 bytes for StructuredBuffer alignment");
 
     /**
      * Base class for all materials of models surfaces

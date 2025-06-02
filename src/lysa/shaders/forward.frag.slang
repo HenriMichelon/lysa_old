@@ -7,19 +7,39 @@
 #include "scene_data.inc.slang"
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    Material material = materials[input.materialIndex];
-    float4 color = material.albedoColor;
-    if (material.diffuseTexture.index != -1) {
-//         color *= textures[material.diffuseTexture.index].Sample(sampler2, uvTransform(material.diffuseTexture, input.uv));
-        color *= textures[material.diffuseTexture.index].Sample(samplers[material.diffuseTexture.samplerIndex], input.uv);
+    Material mat = materials[input.materialIndex];
+    float4 color = mat.albedoColor;
+    if (mat.diffuseTexture.index != -1) {
+        color *= textures[mat.diffuseTexture.index].Sample(
+            samplers[mat.diffuseTexture.samplerIndex],
+            uvTransform(mat.diffuseTexture, input.uv));
     }
-    if (((material.transparency == TRANSPARENCY_SCISSOR) || (material.transparency == TRANSPARENCY_SCISSOR_ALPHA)) && (color.a < material.alphaScissor)) {
+
+    if (((mat.transparency == TRANSPARENCY_SCISSOR) ||
+        (mat.transparency == TRANSPARENCY_SCISSOR_ALPHA))
+        && (color.a < mat.alphaScissor)) {
         discard;
     }
-    const float transparency = (material.transparency == TRANSPARENCY_ALPHA || material.transparency == TRANSPARENCY_SCISSOR_ALPHA) ? color.a : 1.0f;
+    const float transparency = (
+        mat.transparency == TRANSPARENCY_ALPHA ||
+        mat.transparency == TRANSPARENCY_SCISSOR_ALPHA) ? color.a : 1.0;
     float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;
 
+    float3 normal;
+    if (mat.normalTexture.index != -1) {
+        // Get current fragment's normal and transform to world space.
+        normal = normalize(
+            2.0 * textures[mat.normalTexture.index].Sample(
+                samplers[mat.normalTexture.samplerIndex],
+                uvTransform(mat.normalTexture, input.uv)).rgb - 1.0);
+        // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_normaltextureinfo_scale
+        float3x3 TBN = float3x3(input.tangent, input.bitangent, input.normal);
+        normal = normalize(mul(TBN, normal)) * float3(mat.normalScale, mat.normalScale, 1.0f);
+    } else {
+        // We don't have a texture, get the calculated normal
+        normal = input.normal;
+    }
+//     return float4(normal, 1.0); // debug normals
+
     return float4(color.rgb * ambient, transparency);
-//     return float4(input.uv.x, input.uv.y, material.parameters[0].r, transparency);
-//     return float4(1.0, 0.0, material.parameters[0].r, 1.0) * scene.ambientLight;
 }

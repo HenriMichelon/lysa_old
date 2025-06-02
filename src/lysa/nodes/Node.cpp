@@ -214,23 +214,6 @@ namespace lysa {
         return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
     }
 
-    void Node::setPositionGlobal(const float3& position) {
-        if (any(position != getPositionGlobal())) {
-            if (parent == nullptr) {
-                setPosition(position);
-                return;
-            }
-            localTransform[3] = mul(inverse(parent->globalTransform), float4{position, 1.0});
-            updateGlobalTransform();
-        }
-    }
-
-    float3 Node::getRotation() const {
-    }
-    
-    float3 Node::getRotationGlobal() const {
-    }
-    
     void Node::setScale(const float3& scale) {
         if (any(scale != getScale())) {
             float3 x = normalize(localTransform[0].xyz);
@@ -270,12 +253,6 @@ namespace lysa {
     }
     
     void Node::setRotationZ(const float angle) {
-    }
-    
-    void Node::setRotation(const float3& rot) {
-        if (any(rot != getRotation())) {
-            setRotation(quaternion(rot));
-        }
     }
 
     float3 Node::getScaleGlobal() const {
