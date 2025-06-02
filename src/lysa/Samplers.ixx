@@ -17,6 +17,7 @@ export namespace lysa {
         enum class SamplerIndex {
             NEAREST_NEAREST_BORDER_LINEAR = 0,
             LINEAR_LINEAR_EDGE_LINEAR     = 1,
+            LINEAR_LINEAR_REPEAT_LINEAR   = 2,
         };
 
         Samplers();
@@ -26,7 +27,7 @@ export namespace lysa {
         const auto& getDescriptorSet() const { return descriptorSet; }
 
     private:
-        std::vector<std::shared_ptr<vireo::Sampler>> samplers{2};
+        std::vector<std::shared_ptr<vireo::Sampler>> samplers{3};
         std::shared_ptr<vireo::DescriptorLayout>     descriptorLayout;
         std::shared_ptr<vireo::DescriptorSet>        descriptorSet;
     };

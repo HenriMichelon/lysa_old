@@ -261,6 +261,7 @@ namespace lysa {
                     const auto& texCoordInfo = uvsInfos.at(meshIndex)[surfaceIndex][texCoord];
                     for(auto i = 0; i < texCoordInfo.count; i++) {
                         meshVertices[firstVertex + i].uv = uvs[texCoordInfo.first + i];
+                        const auto uv = uvs[texCoordInfo.first + i];
                     }
                 } else {
                     // Mesh have no material, use a default one

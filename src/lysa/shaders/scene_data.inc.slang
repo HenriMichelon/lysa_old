@@ -38,18 +38,33 @@ struct InstanceData {
     float _pad1;
 };
 
+struct TextureInfo {
+    int index;
+    float3x3 transform;
+};
+
+#define TRANSPARENCY_DISABLED      0
+#define TRANSPARENCY_ALPHA         1
+#define TRANSPARENCY_SCISSOR       2
+#define TRANSPARENCY_SCISSOR_ALPHA 3
+
 struct Material {
     float4 albedoColor;
     float  shininess;
-    int    diffuseTextureIndex;
-    float _pad0;
-    float _pad1;
+    int    transparency;
+    float  alphaScissor;
+    TextureInfo diffuseTexture;
     float4 parameters[4];
 }
 
 struct Index {
     uint index;
     uint surfaceIndex;
+}
+
+// Apply texture UV transforms
+float2 uvTransform(const TextureInfo texture, const float2 UV) {
+    return mul(texture.transform, float3(UV, 1)).xy;
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);

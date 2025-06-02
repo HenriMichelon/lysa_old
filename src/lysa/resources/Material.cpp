@@ -27,8 +27,12 @@ namespace lysa {
     MaterialData StandardMaterial::getMaterialData() const {
         return {
             .albedoColor = albedoColor,
-            .diffuseTextureIndex = diffuseTexture.texture ?
-                static_cast<int32>(diffuseTexture.texture->getImage()->getIndex()) : -1
+            .transparency = static_cast<int>(getTransparency()),
+            .alphaScissor = getAlphaScissor(),
+            .diffuseTexture = {
+                .index = diffuseTexture.texture ? static_cast<int32>(diffuseTexture.texture->getImage()->getIndex()) : -1,
+                .transform = diffuseTexture.transform,
+            },
         };
     }
 

@@ -30,6 +30,16 @@ namespace lysa {
             vireo::Sampler::LOD_CLAMP_NONE,
             true,
             vireo::MipMapMode::LINEAR);
+        samplers[static_cast<int>(SamplerIndex::LINEAR_LINEAR_REPEAT_LINEAR)] = Application::getVireo().createSampler(
+            vireo::Filter::LINEAR,
+            vireo::Filter::LINEAR,
+            vireo::AddressMode::REPEAT,
+            vireo::AddressMode::REPEAT,
+            vireo::AddressMode::REPEAT,
+            0.0f,
+            vireo::Sampler::LOD_CLAMP_NONE,
+            true,
+            vireo::MipMapMode::LINEAR);
 
         descriptorLayout = Application::getVireo().createSamplerDescriptorLayout(L"Static Samplers");
         for (int i = 0; i < samplers.size(); i++) {
