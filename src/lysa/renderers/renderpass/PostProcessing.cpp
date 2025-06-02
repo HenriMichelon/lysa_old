@@ -12,12 +12,11 @@ import lysa.global;
 namespace lysa {
     PostProcessing::PostProcessing(
         const RenderingConfiguration& config,
-        const Samplers& samplers,
         const std::wstring& fragShaderName,
         void* data,
         const uint32 dataSize,
         const std::wstring& name):
-        Renderpass{config, samplers, name},
+        Renderpass{config, name},
         fragShaderName{fragShaderName},
         data{data},
         descriptorLayout{Application::getVireo().createDescriptorLayout(name)} {
@@ -35,7 +34,7 @@ namespace lysa {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             descriptorLayout,
-            samplers.getDescriptorLayout()},
+            Application::getResources().getSamplers().getDescriptorLayout()},
             {},
             name);
         pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/quad.vert");
@@ -79,7 +78,9 @@ namespace lysa {
         commandList.setViewport(viewport);
         commandList.setScissors(scissor);
         commandList.bindPipeline(pipeline);
-        commandList.bindDescriptors(pipeline, {frame.descriptorSet, samplers.getDescriptorSet()});
+        commandList.bindDescriptors(pipeline, {
+            frame.descriptorSet,
+            Application::getResources().getSamplers().getDescriptorSet()});
         commandList.draw(3);
         commandList.endRendering();
         commandList.barrier(

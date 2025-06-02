@@ -403,7 +403,12 @@ namespace lysa {
                     vireo::ResourceState::SHADER_READ,
                     0,
                     imageHeader.mipLevels);
-                textures.push_back(std::make_shared<ImageTexture>(std::make_shared<Image>(image, name)));
+                auto samplerIndex = Application::getResources().getSamplers().addSampler(
+                    static_cast<vireo::Filter>(texture.minFilter),
+                    static_cast<vireo::Filter>(texture.magFilter),
+                    static_cast<vireo::AddressMode>(texture.samplerAddressModeU),
+                    static_cast<vireo::AddressMode>(texture.samplerAddressModeV));
+                textures.push_back(std::make_shared<ImageTexture>(std::make_shared<Image>(image, name), samplerIndex));
             }
         }
     }

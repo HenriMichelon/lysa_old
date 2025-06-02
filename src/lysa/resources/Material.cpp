@@ -31,6 +31,7 @@ namespace lysa {
             .alphaScissor = getAlphaScissor(),
             .diffuseTexture = {
                 .index = diffuseTexture.texture ? static_cast<int32>(diffuseTexture.texture->getImage()->getIndex()) : -1,
+                .samplerIndex = diffuseTexture.texture->getSamplerIndex(),
                 .transform = float4x4{diffuseTexture.transform},
             },
         };

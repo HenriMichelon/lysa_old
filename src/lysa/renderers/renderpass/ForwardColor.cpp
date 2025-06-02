@@ -14,13 +14,12 @@ import lysa.renderers.renderer;
 
 namespace lysa {
     ForwardColor::ForwardColor(
-        const RenderingConfiguration& config,
-        const Samplers& samplers):
-        Renderpass{config, samplers, L"Forward Color"} {
+        const RenderingConfiguration& config):
+        Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
-            samplers.getDescriptorLayout(),
+            Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
             Scene::drawCommandDescriptorLayout},
             {}, name);
@@ -72,8 +71,7 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
           commandList,
-          pipelines,
-          samplers);
+          pipelines);
         commandList.endRendering();
     }
 }

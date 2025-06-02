@@ -56,7 +56,6 @@ export namespace lysa {
     protected:
         const RenderingConfiguration& config;
         const std::wstring            name;
-        const Samplers                samplers;
 
         virtual void update(uint32 frameIndex);
 

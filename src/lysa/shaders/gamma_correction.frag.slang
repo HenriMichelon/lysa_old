@@ -27,6 +27,6 @@ float3 linearToSrgb(
 }
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    float4 color = inputImage.Sample(sampler0, input.uv);
+    float4 color = inputImage.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     return float4(linearToSrgb(color.rgb, data.gamma), color.a);
 }

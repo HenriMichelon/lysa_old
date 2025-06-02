@@ -45,7 +45,8 @@ struct InstanceData {
 
 struct TextureInfo {
     int index;
-    float3 _pad0;
+    uint samplerIndex;
+    float2 _pad0;
     float4x4 transform;
 };
 

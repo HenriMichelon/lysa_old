@@ -49,12 +49,7 @@ export namespace lysa {
         /**
          * Creates an ImageTexture from an existing Image
          */
-        ImageTexture(const std::shared_ptr<Image> &image);
-
-        /**
-         * Creates an ImageTexture from an image resource
-         */
-        // ImageTexture(const std::wstring &filename, vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
+        ImageTexture(const std::shared_ptr<Image> &image, uint32 samplerIndex);
 
         /**
          * Returns the attached Image
@@ -65,8 +60,11 @@ export namespace lysa {
 
         uint32 getHeight() const override { return image->getHeight(); }
 
+        auto getSamplerIndex() const { return samplerIndex; }
+
     protected:
         std::shared_ptr<Image> image{nullptr};
+        uint32 samplerIndex{0};
     };
 
 }

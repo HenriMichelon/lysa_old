@@ -9,10 +9,8 @@ module lysa.renderers.renderpass;
 namespace lysa {
     Renderpass::Renderpass(
         const RenderingConfiguration& config,
-        const Samplers& samplers,
         const std::wstring& name):
         name{name},
-        config{config},
-        samplers{samplers} {
+        config{config} {
     }
 }

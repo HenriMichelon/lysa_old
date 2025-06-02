@@ -193,8 +193,7 @@ namespace lysa {
 
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
-        const Samplers& samplers) const {
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
@@ -203,7 +202,7 @@ namespace lysa {
                 commandList.bindPipeline(pipeline);
                 commandList.bindDescriptors(pipeline, {
                     Application::getResources().getDescriptorSet(),
-                    samplers.getDescriptorSet(),
+                    Application::getResources().getSamplers().getDescriptorSet(),
                     descriptorSet,
                     pipelineData->descriptorSet,
                 });

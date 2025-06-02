@@ -17,6 +17,7 @@ export namespace lysa {
 
     struct TextureInfoData {
         int32  index{-1};
+        uint32 samplerIndex{0};
         float4x4  transform{1.0f};
     };
 

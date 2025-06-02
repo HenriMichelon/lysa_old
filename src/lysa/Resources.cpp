@@ -32,6 +32,7 @@ namespace lysa {
             config.maxMaterialInstances,
             vireo::BufferType::DEVICE_STORAGE,
             L"Material Array"},
+        samplers{vireo},
         textures(MAX_TEXTURES) {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
@@ -96,6 +97,7 @@ namespace lysa {
     }
 
     void Resources::cleanup() {
+        samplers.cleanup();
         textures.clear();
         blankImage.reset();
         vertexArray.cleanup();

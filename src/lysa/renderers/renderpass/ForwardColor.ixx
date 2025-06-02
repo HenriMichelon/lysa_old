@@ -9,7 +9,6 @@ export module lysa.renderers.renderpass.forward_color;
 import std;
 import vireo;
 import lysa.configuration;
-import lysa.samplers;
 import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderpass;
@@ -17,9 +16,7 @@ import lysa.renderers.renderpass;
 export namespace lysa {
     class ForwardColor : public Renderpass {
     public:
-        ForwardColor(
-            const RenderingConfiguration& config,
-            const Samplers& samplers);
+        ForwardColor(const RenderingConfiguration& config);
 
         void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials);
 

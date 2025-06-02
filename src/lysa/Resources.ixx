@@ -10,6 +10,7 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.memory;
+import lysa.samplers;
 import lysa.resources.image;
 import lysa.resources.mesh;
 
@@ -34,6 +35,8 @@ export namespace lysa {
 
         auto& getMaterialArray() { return materialArray; }
 
+        auto& getSamplers() { return samplers; }
+
         uint32 addTexture(const Image& image);
 
         const auto& getDescriptorSet() const { return descriptorSet; }
@@ -57,6 +60,7 @@ export namespace lysa {
         const ResourcesConfiguration& config;
         DeviceMemoryArray vertexArray;
         DeviceMemoryArray materialArray;
+        Samplers samplers;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::vector<std::shared_ptr<vireo::Image>> textures;
         std::shared_ptr<vireo::Image> blankImage;

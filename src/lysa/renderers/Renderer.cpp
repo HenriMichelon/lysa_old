@@ -114,7 +114,6 @@ namespace lysa {
     void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) {
         const auto postProcessingPass = std::make_shared<PostProcessing>(
             config,
-            samplers,
             fragShaderName,
             data,
             dataSize,

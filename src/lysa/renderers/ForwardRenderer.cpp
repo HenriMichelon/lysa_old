@@ -14,7 +14,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, name},
-        forwardColorPass{config, samplers} {
+        forwardColorPass{config} {
     }
 
     void ForwardRenderer::update(const uint32 frameIndex) {

@@ -18,7 +18,6 @@ export namespace lysa {
     public:
         Renderpass(
             const RenderingConfiguration& config,
-            const Samplers& samplers,
             const std::wstring& name);
 
         virtual void resize(const vireo::Extent& extent) { }
@@ -31,7 +30,5 @@ export namespace lysa {
     protected:
         const std::wstring                      name;
         const RenderingConfiguration&           config;
-        const Samplers&                         samplers;
-
     };
 }

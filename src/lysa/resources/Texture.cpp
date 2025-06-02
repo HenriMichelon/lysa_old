@@ -14,14 +14,10 @@ namespace lysa {
         Resource{name} {
     }
 
-    ImageTexture::ImageTexture(const std::shared_ptr<Image> &image) :
+    ImageTexture::ImageTexture(const std::shared_ptr<Image> &image, const uint32 samplerIndex) :
         Texture{image->getName()},
-        image{image} {
+        image{image},
+        samplerIndex{samplerIndex} {
     }
-
-    // ImageTexture::ImageTexture(const std::wstring &filename, const vireo::ImageFormat imageFormat):
-    //     Texture{filename},
-    //     image{Image::load(filename, imageFormat)} {
-    // }
 
 }

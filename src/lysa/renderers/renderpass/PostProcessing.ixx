@@ -10,7 +10,6 @@ import std;
 import vireo;
 import lysa.global;
 import lysa.configuration;
-import lysa.samplers;
 import lysa.scene;
 import lysa.renderers.renderpass;
 
@@ -19,7 +18,6 @@ export namespace lysa {
     public:
         PostProcessing(
             const RenderingConfiguration& config,
-            const Samplers& samplers,
             const std::wstring& fragShaderName,
             void* data,
             uint32 dataSize,

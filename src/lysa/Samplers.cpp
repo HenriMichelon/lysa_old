@@ -6,51 +6,69 @@
 module lysa.samplers;
 
 import lysa.application;
+import lysa.global;
 
 namespace lysa {
 
-    Samplers::Samplers() {
-        samplers[static_cast<int>(SamplerIndex::NEAREST_NEAREST_BORDER_LINEAR)] = Application::getVireo().createSampler(
-            vireo::Filter::NEAREST,
-            vireo::Filter::NEAREST,
-            vireo::AddressMode::CLAMP_TO_BORDER,
-            vireo::AddressMode::CLAMP_TO_BORDER,
-            vireo::AddressMode::CLAMP_TO_BORDER,
-            0.0f,
-            vireo::Sampler::LOD_CLAMP_NONE,
-            true,
-            vireo::MipMapMode::LINEAR);
-        samplers[static_cast<int>(SamplerIndex::LINEAR_LINEAR_EDGE_LINEAR)] = Application::getVireo().createSampler(
-            vireo::Filter::LINEAR,
-            vireo::Filter::LINEAR,
-            vireo::AddressMode::CLAMP_TO_EDGE,
-            vireo::AddressMode::CLAMP_TO_EDGE,
-            vireo::AddressMode::CLAMP_TO_EDGE,
-            0.0f,
-            vireo::Sampler::LOD_CLAMP_NONE,
-            true,
-            vireo::MipMapMode::LINEAR);
-        samplers[static_cast<int>(SamplerIndex::LINEAR_LINEAR_REPEAT_LINEAR)] = Application::getVireo().createSampler(
-            vireo::Filter::LINEAR,
-            vireo::Filter::LINEAR,
-            vireo::AddressMode::REPEAT,
-            vireo::AddressMode::REPEAT,
-            vireo::AddressMode::REPEAT,
-            0.0f,
-            vireo::Sampler::LOD_CLAMP_NONE,
-            true,
-            vireo::MipMapMode::LINEAR);
-
-        descriptorLayout = Application::getVireo().createSamplerDescriptorLayout(L"Static Samplers");
-        for (int i = 0; i < samplers.size(); i++) {
-            descriptorLayout->add(i, vireo::DescriptorType::SAMPLER);
-        }
+    Samplers::Samplers(const vireo::Vireo& vireo):
+        vireo{vireo},
+        samplers(MAX_SAMPLERS),
+        samplersInfo(MAX_SAMPLERS) {
+        descriptorLayout = vireo.createSamplerDescriptorLayout(L"Static Samplers");
+        descriptorLayout->add(0, vireo::DescriptorType::SAMPLER, MAX_SAMPLERS);
         descriptorLayout->build();
+        descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Static Samplers");
 
-        descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, L"Static Samplers");
-        for (int i = 0; i < samplers.size(); i++) {
-            descriptorSet->update(i, samplers[i]);
+        addSampler(vireo::Filter::NEAREST, vireo::Filter::NEAREST, vireo::AddressMode::CLAMP_TO_BORDER, vireo::AddressMode::CLAMP_TO_BORDER);
+        addSampler(vireo::Filter::LINEAR, vireo::Filter::LINEAR, vireo::AddressMode::CLAMP_TO_EDGE, vireo::AddressMode::CLAMP_TO_EDGE);
+        // addSampler(vireo::Filter::LINEAR, vireo::Filter::LINEAR, vireo::AddressMode::REPEAT, vireo::AddressMode::REPEAT);
+        for (int i = samplerCount; i < samplers.size(); i++) {
+            samplers[i] = samplers[0];
         }
+    }
+
+    void Samplers::update() {
+        auto lock = std::lock_guard{mutex};
+        descriptorSet->update(0, samplers);
+        samplersUpdated = false;
+    }
+
+    uint32 Samplers::addSampler(
+           const vireo::Filter minFilter,
+           const vireo::Filter maxFilter,
+           const vireo::AddressMode samplerAddressModeU,
+           const vireo::AddressMode samplerAddressModeV) {
+        auto lock = std::lock_guard{mutex};
+        if (samplerCount >= MAX_SAMPLERS) {
+            throw Exception("Too many samplers");
+        }
+        const auto samplerInfo = SamplerInfo{minFilter, maxFilter, samplerAddressModeU, samplerAddressModeV};
+        for (int i = 0; i < samplerCount; i++) {
+            if (samplersInfo[i] == samplerInfo) {
+                return i;
+            }
+        }
+        const auto index = samplerCount;
+        samplers[index] = vireo.createSampler(
+            minFilter,
+            maxFilter,
+            samplerAddressModeU,
+            samplerAddressModeV,
+            samplerAddressModeV,
+            0.0f,
+            vireo::Sampler::LOD_CLAMP_NONE,
+            true,
+            vireo::MipMapMode::LINEAR);
+        samplersInfo[index] = samplerInfo;
+        samplersUpdated = true;
+        samplerCount++;
+        return index;
+    }
+
+    void Samplers::cleanup() {
+        samplers.clear();
+        descriptorSet.reset();
+        descriptorLayout.reset();
     }
 
 }

@@ -10,7 +10,6 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.memory;
-import lysa.samplers;
 import lysa.nodes.camera;
 import lysa.nodes.environment;
 import lysa.nodes.mesh_instance;
@@ -76,8 +75,7 @@ export namespace lysa {
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
-           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
-           const Samplers& samplers) const;
+           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
         const auto& getMaterials() const { return materials; }
         auto isMaterialsUpdated() const { return materialsUpdated; }

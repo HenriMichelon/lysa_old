@@ -65,6 +65,9 @@ namespace lysa {
 
     void Application::drawFrame() {
         resources.restart();
+        if (resources.getSamplers().ipUpdated()) {
+            resources.getSamplers().update();
+        }
 
         for (const auto& window : windows) {
             window->update();
