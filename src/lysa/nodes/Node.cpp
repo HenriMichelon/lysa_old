@@ -85,6 +85,15 @@ namespace lysa {
         }
     }
 
+    void Node::translate(const float3& localOffset) {
+        localTransform = mul(localTransform, float4x4::translation(localOffset));
+        updateGlobalTransform();
+    }
+
+    void Node::translate(const float x, const float y, const float z) {
+        translate(float3{x, y, z});
+    }
+
     void Node::rotateX(const float angle) {
         localTransform = mul(float4x4::rotation_x(angle), localTransform);
         updateGlobalTransform();
@@ -99,6 +108,10 @@ namespace lysa {
         localTransform = mul(float4x4::rotation_z(angle), localTransform);
         updateGlobalTransform();
     }
+
+    // quaternion Node::getRotationQuaternion() const {
+
+    // }
 
     void Node::scale(const float scale) {
         localTransform = mul(float4x4::scale(scale), localTransform);
@@ -186,11 +199,6 @@ namespace lysa {
     }
     
     float3 Node::getRotationGlobal() const {
-    }
-    
-    void Node::translate(const float3& localOffset) {
-        localTransform = mul(localTransform, float4x4::translation(localOffset));
-        updateGlobalTransform();
     }
     
     void Node::setScale(const float3& scale) {

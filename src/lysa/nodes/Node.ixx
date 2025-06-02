@@ -149,8 +149,13 @@ export namespace lysa {
         /**
          * Changes the node's position by the given offset vector in local space.
          */
-        // void translate(const float3& localOffset);
+        void translate(const float3& localOffset);
     
+        /**
+         * Changes the node's position by the given offset vector in local space.
+         */
+        void translate(float x, float y, float z);
+
         /**
          * Sets the world space position
          */
@@ -185,7 +190,12 @@ export namespace lysa {
          * Rotates the local transformation around the Z axis by angle in radians.
          */
         void rotateZ(float angle);
-    
+
+        /**
+         * Returns the rotation of the local transformation
+         */
+        quaternion getRotationQuaternion() const;
+
         /**
          * Rotates the local transformation
          */
@@ -235,11 +245,6 @@ export namespace lysa {
          * Returns the rotation of the world transformation, in euler angles in radians
          */
         // float3 getRotationGlobal() const;
-    
-        /**
-         * Returns the rotation of the local transformation
-         */
-        // quaternion getRotationQuaternion() const;
     
         /**
          * Returns the rotation of the world transformation
