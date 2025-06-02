@@ -10,7 +10,8 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     Material material = materials[input.materialIndex];
     float4 color = material.albedoColor;
     if (material.diffuseTexture.index != -1) {
-        color *= textures[material.diffuseTexture.index].Sample(sampler2, uvTransform(material.diffuseTexture, input.uv));
+//         color *= textures[material.diffuseTexture.index].Sample(sampler2, uvTransform(material.diffuseTexture, input.uv));
+        color *= textures[material.diffuseTexture.index].Sample(sampler2, input.uv);
     }
     if (((material.transparency == TRANSPARENCY_SCISSOR) || (material.transparency == TRANSPARENCY_SCISSOR_ALPHA)) && (color.a < material.alphaScissor)) {
         discard;
