@@ -159,8 +159,13 @@ export namespace lysa {
         /**
          * Sets the world space position
          */
-        // virtual void setPositionGlobal(const float3& position);
-    
+        virtual void setPositionGlobal(const float3& position);
+
+        /**
+         * Sets the world space position
+         */
+        virtual void setPositionGlobal(const float x, const float y, const float z) { setPositionGlobal(float3{x, y, z}); }
+
         /**
          * Returns the world space position
          */
@@ -194,7 +199,22 @@ export namespace lysa {
         /**
          * Returns the rotation of the local transformation
          */
-        quaternion getRotationQuaternion() const;
+        quaternion getRotation() const;
+
+        /**
+         * Returns the rotation of the world transformation
+         */
+        quaternion getRotationGlobal() const;
+
+        /**
+         * Returns the rotation of the local transformation, in euler angles in radians
+         */
+        float3 getRotationEulerAngles() const;
+
+        /**
+         * Returns the rotation of the world transformation, in euler angles in radians
+         */
+        float3 getRotationEulerAnglesGlobal() const;
 
         /**
          * Rotates the local transformation
@@ -209,12 +229,12 @@ export namespace lysa {
         /**
          * Sets the local transformation
          */
-        // void setRotation(const quaternion& quat);
+        void setRotation(const quaternion& quat);
     
         /**
          * Sets the world transformation
          */
-        // void setRotationGlobal(const quaternion& quat);
+        void setRotationGlobal(const quaternion& quat);
     
         /**
          * Sets the local transformation
@@ -235,22 +255,7 @@ export namespace lysa {
          * Sets the Z axis rotation of the local transformation by angle in radians.
          */
         // void setRotationZ(float angle);
-    
-        /**
-         * Returns the rotation of the local transformation, in euler angles in radians
-         */
-        // float3 getRotation() const;
-    
-        /**
-         * Returns the rotation of the world transformation, in euler angles in radians
-         */
-        // float3 getRotationGlobal() const;
-    
-        /**
-         * Returns the rotation of the world transformation
-         */
-        // quaternion getRotationQuaternionGlobal() const;
-    
+
         /**
          * Returns the X axis rotation of the local transformation
          */
@@ -279,13 +284,12 @@ export namespace lysa {
         /**
          * Returns the scale part of the local transformation.
          */
-        // float3 getScale() const;
+        float3 getScale() const;
     
         /**
          * Returns the scale part of the global transformation.
          */
-        // float3 getScaleGlobal() const;
-
+        float3 getScaleGlobal() const;
 
         /**
          * Returns the node's parent in the scene tree

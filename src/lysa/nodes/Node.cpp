@@ -85,6 +85,25 @@ namespace lysa {
         }
     }
 
+    void Node::setPositionGlobal(const float3& position) {
+        if (any(position != getPositionGlobal())) {
+            if (parent == nullptr) {
+                setPosition(position);
+                return;
+            }
+            localTransform[3] = mul(inverse(parent->globalTransform), float4{position, 1.0});
+            updateGlobalTransform();
+        }
+    }
+
+    float3 Node::getRotationEulerAngles() const {
+        return eulerAngles(getRotation());
+    }
+
+    float3 Node::getRotationEulerAnglesGlobal() const {
+        return eulerAngles(getRotation());
+    }
+
     void Node::translate(const float3& localOffset) {
         localTransform = mul(localTransform, float4x4::translation(localOffset));
         updateGlobalTransform();
@@ -108,10 +127,6 @@ namespace lysa {
         localTransform = mul(float4x4::rotation_z(angle), localTransform);
         updateGlobalTransform();
     }
-
-    // quaternion Node::getRotationQuaternion() const {
-
-    // }
 
     void Node::scale(const float scale) {
         localTransform = mul(float4x4::scale(scale), localTransform);
@@ -174,6 +189,21 @@ namespace lysa {
                 (mode == ProcessMode::ALWAYS);
     }
 
+    float3 Node::getScale() const {
+        return {
+            length(localTransform[0].xyz),
+            length(localTransform[1].xyz),
+            length(localTransform[2].xyz),
+        };
+    }
+
+    float3 Node::getScaleGlobal() const {
+        return {
+            length(globalTransform[0].xyz),
+            length(globalTransform[1].xyz),
+            length(globalTransform[2].xyz),
+        };
+    }
 
     /*
     float3 Node::toGlobal(const float3& local) const {
@@ -216,15 +246,7 @@ namespace lysa {
     void Node::setScale(const float scale) {
         setScale(float3{scale, scale, scale});
     }
-    
-    float3 Node::getScale() const {
-        float3 scale;
-        scale.x = length(localTransform[0].xyz);
-        scale.y = length(localTransform[1].xyz);
-        scale.z = length(localTransform[2].xyz);
-        return scale;
-    }
-    
+
     void Node::rotateTowards(const quaternion& targetRotation, const float maxAngle) {
         updateGlobalTransform();
     }
@@ -256,10 +278,6 @@ namespace lysa {
         }
     }
 
-    void Node::setRotation(const quaternion& quat) {
-
-    }
-
     float3 Node::getScaleGlobal() const {
         float3 scale;
         scale.x = length(globalTransform[0].xyz);
@@ -267,17 +285,37 @@ namespace lysa {
         scale.z = length(globalTransform[2].xyz);
         return scale;
     }
+*/
+
+    void Node::setRotation(const quaternion& quat) {
+        auto tm = float4x4::translation(getPosition());
+        auto rm = float4x4{quat};
+        auto sm = float4x4::scale(getScale());
+        localTransform = mul(tm, mul(rm, sm));
+        updateGlobalTransform();
+    }
 
     void Node::setRotationGlobal(const quaternion& quat) {
-
+        if (!parent) {
+            setRotation(quat);
+            return;
+        }
+        auto quatParent = quaternion{float3x3{parent->globalTransform}};
+        auto quatLocal = mul(quaternion(-quatParent.xyz, quatParent.w), quat);
+        auto tm = float4x4::translation(getPosition());
+        auto rm = float4x4{quatLocal};
+        auto sm = float4x4::scale(getScale());
+        localTransform = mul(tm, mul(rm, sm));
+        updateGlobalTransform();
     }
 
-    quaternion Node::getRotationQuaternion() const {
+    quaternion Node::getRotation() const {
+        return quaternion{float3x3{localTransform}};
     }
 
-    quaternion Node::getRotationQuaternionGlobal() const {
-    }*/
-
+    quaternion Node::getRotationGlobal() const {
+        return quaternion{float3x3{globalTransform}};
+    }
 
     std::wstring Node::getPath() const {
         if (parent) {
@@ -288,8 +326,11 @@ namespace lysa {
 
     void Node::setProperty(const std::string &property, const std::string &value) {
         if (property == "position") {
+            setPosition(to_float3(value));
         } else if (property == "rotation") {
+            // setRotation(to_float3(value));
         } else if (property == "scale") {
+            // setScale(to_float3(value));
         } else if (property == "groups") {
             for(const auto groupName : split(value, ';')) {
                 addToGroup(to_wstring(groupName.data()));
