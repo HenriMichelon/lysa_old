@@ -45,7 +45,7 @@ struct InstanceData {
 
 struct TextureInfo {
     int index;
-float3 pad;
+    float3 _pad0;
     float4x4 transform;
 };
 
@@ -53,7 +53,7 @@ struct Material {
     float4 albedoColor;
     int    transparency;
     float  alphaScissor;
-float2 pad;
+    float2 _pad0;
     TextureInfo diffuseTexture;
     float4 parameters[4];
 }

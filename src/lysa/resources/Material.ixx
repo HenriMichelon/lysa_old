@@ -27,7 +27,7 @@ export namespace lysa {
         TextureInfoData  diffuseTexture;
         float4 parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
-    // static_assert(sizeof(MaterialData) == 160, "MaterialData struct must be 160 bytes for StructuredBuffer alignment");
+    static_assert(sizeof(MaterialData) == 176, "MaterialData struct must be 176 bytes for StructuredBuffer alignment");
 
     /**
      * Base class for all materials of models surfaces
