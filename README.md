@@ -1,8 +1,6 @@
 # Lysa
 
-A 3D game engine.
-
-## Features
+## (Futures) Features
 
 - GPU-driven rendering
 - Node-based (heavily inspired by [Godot](https://godotengine.org/))
