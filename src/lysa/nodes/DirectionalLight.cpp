@@ -30,7 +30,7 @@ namespace lysa {
 
     LightData DirectionalLight::getLightData() const {
         auto data = Light::getLightData();
-        data.direction = getFrontVector();
+        data.direction = float4{getFrontVector(), 0.0f};
         return data;
     }
 

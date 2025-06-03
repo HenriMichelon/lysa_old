@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene_data.inc.slang"
+#include "lighting.inc.slang"
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
     Material mat = materials[input.materialIndex];
@@ -28,11 +28,10 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     float3 normal;
     if (mat.normalTexture.index != -1) {
         // Get current fragment's normal and transform to world space.
-        normal = normalize(
-            2.0 * textures[mat.normalTexture.index].Sample(
-                samplers[mat.normalTexture.samplerIndex],
-                uvTransform(mat.normalTexture, input.uv)).rgb - 1.0);
-        // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_normaltextureinfo_scale
+        normal = textures[mat.normalTexture.index].Sample(
+                     samplers[mat.normalTexture.samplerIndex],
+                     uvTransform(mat.normalTexture, input.uv)).rgb;
+        normal = normalize(normal * 2.0 - 1.0);
         float3x3 TBN = float3x3(input.tangent, input.bitangent, input.normal);
         normal = normalize(mul(TBN, normal)) * float3(mat.normalScale, mat.normalScale, 1.0f);
     } else {
@@ -41,5 +40,10 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     }
 //     return float4(normal, 1.0); // debug normals
 
-    return float4(color.rgb * ambient, transparency);
+    float3 lit = 0.0f;
+    for (uint i = 0; i < scene.lightsCount; i++) {
+        lit += calcDirectionalLight(lights.light[i], input.worldPos, normal, 128.0);
+    }
+
+    return float4(color.rgb * (lit + ambient), transparency);
 }

@@ -14,17 +14,17 @@ export namespace lysa {
     struct LightData {
         // light params
         int32 type{0}; // Light::LightType
-        float3 position{0.0f, 0.0f, 0.0f};
-        float3 direction{0.0f};
-        float4 color{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + Intensity;
         float range{0.0f};
         float cutOff{0.0f};
         float outerCutOff{0.0f};
+        float4 position{0.0f};
+        float4 direction{0.0f};
+        float4 color{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + Intensity;
         // shadow map params
         int32 mapIndex{-1};
-        float farPlane{0.0};
+        float farPlane{0.0f};
         uint32 cascadesCount{0};
-        float4 cascadeSplitDepth;
+        float4 cascadeSplitDepth{0.0f};
         float4x4 lightSpace[6];
     };
 
@@ -33,6 +33,7 @@ export namespace lysa {
      */
     class Light : public Node {
     public:
+        static constexpr auto MAX_LIGHTS{100};
 
         /**
          * Light type, mainly used by the fragment shader

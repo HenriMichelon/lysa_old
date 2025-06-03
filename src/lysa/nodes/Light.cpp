@@ -26,7 +26,7 @@ namespace lysa {
     LightData Light::getLightData() const {
         return {
             .type = lightType,
-            .position = getPositionGlobal(),
+            .position = float4{getPositionGlobal(), 0.0f},
             .color = colorAndIntensity
         };
     }

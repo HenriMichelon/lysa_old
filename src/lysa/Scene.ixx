@@ -12,6 +12,7 @@ import lysa.configuration;
 import lysa.memory;
 import lysa.nodes.camera;
 import lysa.nodes.environment;
+import lysa.nodes.light;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
 import lysa.resources.material;
@@ -24,6 +25,7 @@ export namespace lysa {
         float4x4    view;
         float4x4    viewInverse;
         float4      ambientLight{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + strength
+        uint32      lightsCount{0};
     };
 
     struct MeshSurfaceInstanceData {
@@ -44,6 +46,7 @@ export namespace lysa {
         static constexpr uint32_t SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
+        static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
         static constexpr uint32_t SET_DRAW_COMMAND{3};
@@ -101,6 +104,10 @@ export namespace lysa {
 
         std::unordered_map<uint32, std::shared_ptr<Material>> materials;
         bool materialsUpdated{false};
+
+        std::list<std::shared_ptr<Light>> lights;
+        std::shared_ptr<vireo::Buffer> lightsBuffer;
+        uint32 lightsBufferCount{1};
 
         struct PipelineData {
             uint32 pipelineId;

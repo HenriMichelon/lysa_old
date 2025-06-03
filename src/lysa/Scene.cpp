@@ -16,6 +16,7 @@ namespace lysa {
         sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
+        sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
         drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
         drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
@@ -33,42 +34,47 @@ namespace lysa {
         const vireo::Viewport& viewport,
         const vireo::Rect& scissors) :
         config{config},
-        framesInFlight{framesInFlight},
-        viewport{viewport},
-        scissors{scissors},
-        sceneUniformBuffer{Application::getVireo().createBuffer(
+        lightsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
-            sizeof(SceneData), 1,
-            L"Scene Data")},
+            sizeof(LightData),
+            1,
+            L"Scene Lights")},
         instancesDataArray{Application::getVireo(),
             sizeof(MeshSurfaceInstanceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurface Instance Data"} {
+            L"MeshSurface Instance Data"},
+        sceneUniformBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::UNIFORM,
+            sizeof(SceneData), 1,
+            L"Scene Data")},
+        scissors{scissors},
+        viewport{viewport},
+        framesInFlight{framesInFlight} {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
+        descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         sceneUniformBuffer->map();
+        lightsBuffer->map();
 
         opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(PipelineData{config, DEFAULT_PIPELINE_ID});
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
         instancesDataArray.restart();
-        if (currentCamera && currentCamera->isUpdated()) {
-            auto sceneUniform = SceneData {
-                .cameraPosition = currentCamera->getPositionGlobal(),
-                .projection = currentCamera->getProjection(),
-                .view = inverse(currentCamera->getTransformGlobal()),
-                .viewInverse = currentCamera->getTransformGlobal(),
-            };
-            if (currentEnvironment) {
-                sceneUniform.ambientLight = currentEnvironment->getAmbientColorAndIntensity();
-            }
-            sceneUniformBuffer->write(&sceneUniform);
-            currentCamera->updated--;
+        auto sceneUniform = SceneData {
+            .cameraPosition = currentCamera->getPositionGlobal(),
+            .projection = currentCamera->getProjection(),
+            .view = inverse(currentCamera->getTransformGlobal()),
+            .viewInverse = currentCamera->getTransformGlobal(),
+            .lightsCount = static_cast<uint32>(lights.size())
+        };
+        if (currentEnvironment) {
+            sceneUniform.ambientLight = currentEnvironment->getAmbientColorAndIntensity();
         }
+        sceneUniformBuffer->write(&sceneUniform);
 
         for (const auto& meshInstance : models) {
             const auto& mesh = meshInstance->getMesh();
@@ -105,6 +111,30 @@ namespace lysa {
         if (Application::getResources().isUpdated()) {
             Application::getResources().flush(commandList);
         }
+
+        if (!lights.empty()) {
+            if (lights.size() > lightsBufferCount) {
+                if (lightsBufferCount >= Light::MAX_LIGHTS) {
+                    throw Exception("Too many lights");
+                }
+                lightsBufferCount = lights.size();
+                lightsBuffer = Application::getVireo().createBuffer(
+                    vireo::BufferType::UNIFORM,
+                    sizeof(LightData) * lightsBufferCount, 1,
+                    L"Scene Lights");
+                lightsBuffer->map();
+                descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
+            }
+            auto lightIndex = 0;
+            auto lightsArray = std::vector<LightData>(lightsBufferCount);
+            for (const auto& light : lights) {
+                // if (!light->isVisible()) { continue; }
+                lightsArray[lightIndex] = light->getLightData();
+                lightIndex++;
+            }
+            lightsBuffer->write(lightsArray.data(), lightsArray.size() * sizeof(LightData));
+        }
+
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {
@@ -149,6 +179,9 @@ namespace lysa {
             }
             break;
         }
+        case Node::DIRECTIONAL_LIGHT:
+            lights.push_back(static_pointer_cast<Light>(node));
+            break;
         default:
             break;
         }
@@ -186,6 +219,9 @@ namespace lysa {
             }
             break;
         }
+        case Node::DIRECTIONAL_LIGHT:
+            lights.remove(static_pointer_cast<Light>(node));
+            break;
         default:
             break;
         }

@@ -23,7 +23,9 @@ export import lysa.viewport;
 export import lysa.window;
 
 export import lysa.nodes.camera;
+export import lysa.nodes.directional_light;
 export import lysa.nodes.environment;
+export import lysa.nodes.light;
 export import lysa.nodes.mesh_instance;
 export import lysa.nodes.node;
 

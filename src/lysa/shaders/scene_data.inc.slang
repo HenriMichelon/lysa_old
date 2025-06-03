@@ -28,6 +28,7 @@ struct Scene {
     float4x4 view;
     float4x4 viewInverse;
     float4   ambientLight;
+    uint     lightsCount;
 }
 
 struct InstanceData {
@@ -37,6 +38,29 @@ struct InstanceData {
     float _pad0;
     float _pad1;
 };
+
+struct Light {
+    // light params
+    int type; // Light::LightType
+    float range;
+    float cutOff;
+    float outerCutOff;
+    float4 position;
+    float4 direction;
+    float4 color; // RGB + Intensity;
+    // shadow map params
+    int mapIndex;
+    float farPlane;
+    uint cascadesCount;
+	float _pad0;
+    float4 cascadeSplitDepth;
+    float4x4 lightSpace[6];
+};
+
+struct Lights {
+    Light[100] light;
+}
+
 
 #define TRANSPARENCY_DISABLED      0
 #define TRANSPARENCY_ALPHA         1
@@ -77,6 +101,7 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<InstanceData> instancesData : register(t1, space2);
+[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
 
 [[vk::binding(0, 3)]] StructuredBuffer<Index> indices : register(t0, space3);
 
@@ -93,7 +118,7 @@ VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {
     float3 normalW = mul((float3x3)model, input.normal.xyz);
     output.normal = normalize(normalW);
 
-    float3 tangentW = mul((float3x3)model, input.tangent.xyz);
+    float3 tangentW = mul((float3x3)model, input.tangent.xyz * input.tangent.w);
     output.tangent = normalize(tangentW);
     output.bitangent = normalize(cross(normalW, tangentW));
 
