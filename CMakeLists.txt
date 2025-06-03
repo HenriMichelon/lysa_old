@@ -126,7 +126,9 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.cpp
         ${ENGINE_SRC_DIR}/nodes/Camera.cpp
+        ${ENGINE_SRC_DIR}/nodes/DirectionalLight.cpp
         ${ENGINE_SRC_DIR}/nodes/Environment.cpp
+        ${ENGINE_SRC_DIR}/nodes/Light.cpp
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
 
@@ -175,7 +177,9 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.ixx
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
+        ${ENGINE_SRC_DIR}/nodes/DirectionalLight.ixx
         ${ENGINE_SRC_DIR}/nodes/Environment.ixx
+        ${ENGINE_SRC_DIR}/nodes/Light.ixx
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
 
