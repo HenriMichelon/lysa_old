@@ -45,6 +45,12 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurface Instance Data"},
+        modelDataArray{Application::getVireo(),
+            sizeof(ModelData),
+            config.maxModelsPerFrame,
+            config.maxModelsPerFrame,
+            vireo::BufferType::DEVICE_STORAGE,
+            L"Models Data"},
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
@@ -89,7 +95,10 @@ namespace lysa {
                 }
                 instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
                 instancesDataUpdated = true;
-                if (meshInstance->isUpdated()) { meshInstance->updated--; }
+                if (meshInstance->isUpdated()) {
+
+                    meshInstance->updated--;
+                }
                 if (mesh->isUpdated()) { mesh->updated--; }
             }
             for (const auto& material : mesh->getMaterials()) {
@@ -352,26 +361,17 @@ namespace lysa {
             const auto& mesh = meshInstance->getMesh();
             const auto& meshSurfaces = mesh->getSurfaces();
 
-            auto surfaceCount{0};
+            auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
                 if (meshSurface->material->getPipelineId() == pipelineId) {
-                    surfaceCount++;
-                }
-            }
-
-            if (surfaceCount > 0) {
-                auto surfaceIndex{0};
-                for (const auto& meshSurface : meshSurfaces) {
-                    if (meshSurface->material->getPipelineId() == pipelineId) {
-                        const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
-                        for (int i = 0; i < meshSurface->indexCount; i++) {
-                            instancesIndex.push_back({
-                                .index = mesh->getIndices()[meshSurface->firstIndex + i],
-                                .surfaceIndex = instanceDataIndex
-                            });
-                        }
-                        surfaceIndex++;
+                    const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
+                    for (int i = 0; i < meshSurface->indexCount; i++) {
+                        instancesIndex.push_back({
+                            .index = mesh->getIndices()[meshSurface->firstIndex + i],
+                            .surfaceIndex = instanceDataIndex
+                        });
                     }
+                    surfaceIndex++;
                 }
             }
         }

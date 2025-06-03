@@ -17,14 +17,14 @@ namespace lysa {
         mesh{mesh} {
     }
 
-    // MeshInstance::MeshInstance(const MeshInstance & original):
-    //     Node{original.name, MESH_INSTANCE},
-    //     mesh{original.mesh},
-    //     worldAABB{original.worldAABB},
-    //     outlined{original.outlined},
-    //     outlineMaterial{original.outlineMaterial} {
-    //     log("mesh instance copy");
-    // }
+    ModelData MeshInstance::getModelData() const {
+        return {
+            .transform = globalTransform,
+            .visible = 1,
+            .aabbMin = worldAABB.min,
+            .aabbMax = worldAABB.max,
+        };
+    }
 
     std::shared_ptr<Node> MeshInstance::duplicateInstance() const {
         return std::make_shared<MeshInstance>(*this);

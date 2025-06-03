@@ -98,6 +98,8 @@ export namespace lysa {
         std::shared_ptr<Environment> currentEnvironment{};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
+        DeviceMemoryArray modelDataArray;
+
         DeviceMemoryArray instancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
         bool instancesDataUpdated{false};

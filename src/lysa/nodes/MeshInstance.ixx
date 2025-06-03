@@ -14,6 +14,13 @@ import lysa.resources.mesh;
 
 export namespace lysa {
 
+    struct ModelData {
+        float4x4 transform;
+        uint     visible;
+        float3   aabbMin;
+        float3   aabbMax;
+    };
+
     /**
      * Node that holds a Mesh.
      */
@@ -53,6 +60,8 @@ export namespace lysa {
          * Returns the world space axis aligned bounding box
          */
         const auto& getAABB() const { return worldAABB; }
+
+        ModelData getModelData() const;
 
         friend inline bool operator<(const MeshInstance& a, const MeshInstance& b) {
             return a.mesh < b.mesh;
