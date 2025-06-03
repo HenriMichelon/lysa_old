@@ -1,0 +1,86 @@
+/*
+ * Copyright (c) 2024-present Henri Michelon
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+*/
+module lysa.frustum_culling;
+
+import lysa.aabb;
+import lysa.global;
+
+namespace lysa {
+
+    /*
+     * https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling
+    */
+
+    Frustum::Frustum(const float aspectRatio, const std::shared_ptr<Node>& node, const float fovY, const float zNear, const float zFar):
+        Frustum(aspectRatio, node, node->getPositionGlobal(), fovY, zNear, zFar) {
+    }
+
+    Frustum::Frustum(const float aspectRatio, const std::shared_ptr<Node>& node, const float3& position, const float fovY, const float zNear, const float zFar):
+        Frustum(aspectRatio, position, node->getFrontVector(), node->getRightVector(), node->getUpVector(), fovY, zNear, zFar) {
+    }Fru
+
+    Frustum::Frustum(const float aspectRatio, const float3& position, const float3& front, const float3& right, const float3&up, float fovY, float zNear, float zFar) {
+        const float halfVSide = zFar * tanf(radians(fovY) * .5f);
+        const float halfHSide = halfVSide *  aspectRatio;
+        const float3 frontMultFar = zFar * front;
+
+        nearFace = { position + zNear * front, front };
+        farFace = { position + frontMultFar, -front };
+        rightFace = { position,cross(frontMultFar - right * halfHSide, up) };
+        leftFace = { position, cross(up,frontMultFar + right * halfHSide) };
+        topFace = { position, cross(right, frontMultFar - up * halfVSide) };
+        bottomFace = { position, cross(frontMultFar + up * halfVSide, right) };
+    }
+
+    bool isOnOrForwardPlane(const Frustum::Plane& plane, const float3& position) {
+        return plane.getSignedDistanceToPlane(position) > -.0f;
+    }
+
+    bool Frustum::isOnFrustum(const std::shared_ptr<MeshInstance>& meshInstance) const {
+        const auto & aabb = meshInstance->getAABB(); // get the world space AABB
+        bool ret = true;
+        for (int i = 0; i < 6; ++i) {
+            float3 vmin;
+            float3 vmax;
+            const auto& plane = getPlane(i);
+            // X axis
+            if (plane.normal.x < 0) {
+                vmin.x = aabb.min.x;
+                vmax.x = aabb.max.x;
+            } else {
+                vmin.x = aabb.max.x;
+                vmax.x = aabb.min.x;
+            }
+            // Y axis
+            if (plane.normal.y < 0) {
+                vmin.y = aabb.min.y;
+                vmax.y = aabb.max.y;
+            } else {
+                vmin.y = aabb.max.y;
+                vmax.y = aabb.min.y;
+            }
+            // Z axis
+            if (plane.normal.z < 0) {
+                vmin.z = aabb.min.z;
+                vmax.z = aabb.max.z;
+            } else {
+                vmin.z = aabb.max.z;
+                vmax.z = aabb.min.z;
+            }
+            if (plane.getSignedDistanceToPlane(vmin) < 0) {
+                return false;
+            }
+            if (plane.getSignedDistanceToPlane(vmax) <= 0) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+
+
+
+}

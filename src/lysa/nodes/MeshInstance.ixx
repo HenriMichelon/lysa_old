@@ -62,7 +62,7 @@ export namespace lysa {
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
-        AABB                  worldAABB;
+        AABB worldAABB;
         std::shared_ptr<Mesh> mesh;
 
         // bool                            outlined{false};

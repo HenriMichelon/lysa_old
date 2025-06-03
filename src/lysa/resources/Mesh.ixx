@@ -150,15 +150,15 @@ export namespace lysa {
 
         void upload();
 
+        void buildAABB();
+
     protected:
-        AABB                localAABB;
+        AABB localAABB;
         std::vector<Vertex> vertices;
         std::vector<uint32> indices;
 
         std::vector<std::shared_ptr<MeshSurface>>     surfaces{};
         std::unordered_set<std::shared_ptr<Material>> materials{};
-
-        void buildAABB();
 
     private:
         MemoryBlock vertexMemoryBloc;

@@ -112,6 +112,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/AssetsPack.cpp
+        ${ENGINE_SRC_DIR}/FrustumCulling.cpp
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Log.cpp
         ${ENGINE_SRC_DIR}/Input.cpp
@@ -163,6 +164,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Enums.ixx
         ${ENGINE_SRC_DIR}/Input.ixx
         ${ENGINE_SRC_DIR}/InputEvent.ixx
+        ${ENGINE_SRC_DIR}/FrustumCulling.ixx
         ${ENGINE_SRC_DIR}/Global.ixx
         ${ENGINE_SRC_DIR}/Log.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx

@@ -295,6 +295,7 @@ namespace lysa {
                 }
                 mesh->getSurfaces().push_back(surface);
             }
+            mesh->buildAABB();
             mesh->upload();
             meshes[meshIndex] = mesh;
         }
