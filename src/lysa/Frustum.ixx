@@ -28,21 +28,13 @@ export namespace lysa {
 
             Plane() = default;
             inline Plane(const float3& p1, const float3& norm) : normal(normalize(norm)), distance(dot(normal, p1)){}
-
-            inline float getSignedDistanceToPlane(const float3& point) const { return dot(normal, point) - distance; }
         };
 
-        //! Far plane
         Plane farFace;
-        //! Near plane
         Plane nearFace;
-        //! Left plane
         Plane leftFace;
-        //! Right plane
         Plane rightFace;
-        //! Top plane
         Plane topFace;
-        //! Bottom plane
         Plane bottomFace;
 
         inline const auto& getPlane(const int i) const {
@@ -96,11 +88,6 @@ export namespace lysa {
          * \param zFar Far clipping distance
          */
         Frustum(float aspectRatio, const float3& position, const float3& front, const float3& right, const float3&up, float fovY, float zNear, float zFar);
-
-        /**
-         * Returns `true` if the MeshInstance is in the frustum
-         */
-        bool isOnFrustum(const std::shared_ptr<MeshInstance>& meshInstance) const;
 
     };
 
