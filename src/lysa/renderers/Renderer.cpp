@@ -32,17 +32,37 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         scene.update(commandList);
         update(frameIndex);
+        commandList.barrier(
+            frame.depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_DEPTH);
+        if (config.forwardDepthPrepass) {
+            depthPrepass(commandList, scene, frame.depthAttachment);
+        }
         if (clearAttachment) {
             commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::RENDER_TARGET_COLOR);
+        }
+        if (config.forwardDepthPrepass) {
             commandList.barrier(
                 frame.depthAttachment,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::RENDER_TARGET_DEPTH);
-                }
-        mainColorPass(commandList, scene, frame.colorAttachment,frame.depthAttachment, clearAttachment, frameIndex);
+                vireo::ResourceState::RENDER_TARGET_DEPTH,
+                vireo::ResourceState::RENDER_TARGET_DEPTH_READ);
+        }
+        mainColorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
+        if (config.forwardDepthPrepass) {
+            commandList.barrier(
+                frame.depthAttachment,
+                vireo::ResourceState::RENDER_TARGET_DEPTH_READ,
+                vireo::ResourceState::UNDEFINED);
+        } else {
+            commandList.barrier(
+                frame.depthAttachment,
+                vireo::ResourceState::RENDER_TARGET_DEPTH,
+                vireo::ResourceState::UNDEFINED);
+        }
     }
 
     void Renderer::postprocess(
@@ -75,10 +95,6 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::UNDEFINED);
         }
-        commandList.barrier(
-            frame.depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
-            vireo::ResourceState::UNDEFINED);
     }
 
     std::shared_ptr<vireo::Image> Renderer::getColorAttachment(const uint32 frameIndex) const {

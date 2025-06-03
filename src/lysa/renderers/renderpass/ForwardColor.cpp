@@ -17,6 +17,8 @@ namespace lysa {
         const RenderingConfiguration& config):
         Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
+        pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
+        pipelineConfig.depthWriteEnable = !config.forwardDepthPrepass;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
@@ -28,6 +30,7 @@ namespace lysa {
             config.clearColor.g,
             config.clearColor.b,
             1.0f};
+        renderingConfig.clearDepthStencil = !config.forwardDepthPrepass;
     }
 
     void ForwardColor::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
@@ -66,7 +69,6 @@ namespace lysa {
         const uint32) {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
-        renderingConfig.clearDepthStencil = clearAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(

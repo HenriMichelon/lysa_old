@@ -62,6 +62,7 @@ file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 #)
 set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/default.vert.slang"
+        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
         "${SHADERS_SRC_DIR}/forward.frag.slang"
         "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/quad.vert.slang"
@@ -142,6 +143,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
 
+        ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
@@ -194,6 +196,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
 
+        ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx

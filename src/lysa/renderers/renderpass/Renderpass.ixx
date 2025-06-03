@@ -28,7 +28,7 @@ export namespace lysa {
         Renderpass(Renderpass&) = delete;
         Renderpass& operator=(Renderpass&) = delete;
     protected:
-        const std::wstring                      name;
-        const RenderingConfiguration&           config;
+        const std::wstring name;
+        const RenderingConfiguration& config;
     };
 }

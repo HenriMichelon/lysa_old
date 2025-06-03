@@ -95,6 +95,8 @@ export namespace lysa {
             std::shared_ptr<vireo::Fence> inFlightFence;
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             std::shared_ptr<vireo::CommandList> commandList;
+            // Depth pre-pass synchronization
+            // std::shared_ptr<vireo::Semaphore> semaphore;
         };
 
         WindowConfiguration&  config;

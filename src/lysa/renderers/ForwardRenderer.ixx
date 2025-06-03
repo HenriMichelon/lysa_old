@@ -12,6 +12,7 @@ import lysa.configuration;
 import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderer;
+import lysa.renderers.renderpass.depth_prepass;
 import lysa.renderers.renderpass.forward_color;
 
 export namespace lysa {
@@ -36,7 +37,13 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex) override;
 
+        void depthPrepass(
+            vireo::CommandList& commandList,
+            const Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment) override;
+
     private:
+        DepthPrepass depthPrePass;
         ForwardColor forwardColorPass;
     };
 }

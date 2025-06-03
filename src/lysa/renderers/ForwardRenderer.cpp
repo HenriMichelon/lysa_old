@@ -14,16 +14,26 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, name},
+        depthPrePass{config},
         forwardColorPass{config} {
     }
 
     void ForwardRenderer::update(const uint32 frameIndex) {
         Renderer::update(frameIndex);
+        depthPrePass.update(frameIndex);
         forwardColorPass.update(frameIndex);
     }
 
     void ForwardRenderer::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+        depthPrePass.updatePipelines(materials);
         forwardColorPass.updatePipelines(materials);
+    }
+
+    void ForwardRenderer::depthPrepass(
+        vireo::CommandList& commandList,
+        const Scene& scene,
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment) {
+        depthPrePass.render(commandList, scene, depthAttachment);
     }
 
     void ForwardRenderer::mainColorPass(
