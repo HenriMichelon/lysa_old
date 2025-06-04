@@ -31,6 +31,17 @@ struct Scene {
     uint     lightsCount;
 }
 
+struct ModelData {
+    float4x4 transform;
+    float3 aabbMin;
+    float  _pad0;
+    float3 aabbMax;
+    float  _pad1;
+    uint   visible;
+    float3 _pad2;
+};
+
+
 struct InstanceData {
     float4x4 transform;
     uint firstVertex;

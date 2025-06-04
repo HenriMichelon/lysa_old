@@ -40,6 +40,12 @@ export namespace lysa {
          */
         virtual std::shared_ptr<Resource> duplicate() const;
 
+        void decrementUpdated() { updated--; }
+
+        void setMaxUpdates(const uint32 framesInFlight) { this->framesInFlight = framesInFlight; }
+
+        auto isUpdated() const { return updated > 0;}
+
     protected:
         void setUpdated() { updated = framesInFlight; }
 
@@ -48,11 +54,8 @@ export namespace lysa {
         static unique_id   currentId;
         const std::wstring name;
 
-        friend class Scene;
         uint32 updated{0};
         uint32 framesInFlight{0};
-
-        auto isUpdated() const { return updated > 0;}
     };
 
 }

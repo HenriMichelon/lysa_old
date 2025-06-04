@@ -21,7 +21,8 @@ export namespace lysa {
         void render(
             vireo::CommandList& commandList,
             const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment);
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+            uint32 frameIndex);
 
         void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials);
 

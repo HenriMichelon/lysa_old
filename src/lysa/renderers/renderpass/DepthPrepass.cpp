@@ -43,12 +43,14 @@ namespace lysa {
     void DepthPrepass::render(
             vireo::CommandList& commandList,
             const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment) {
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+            const uint32 frameIndex) {
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
           commandList,
-          pipelines);
+          pipelines,
+          frameIndex);
         commandList.endRendering();
     }
 }

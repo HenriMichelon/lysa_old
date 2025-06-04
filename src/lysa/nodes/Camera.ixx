@@ -77,13 +77,12 @@ export namespace lysa {
         */
         void setFov(float fov);
 
+        void setActive(bool isActive);
 
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
-        friend class Scene;
-
         // Field of view in degrees
         float fov{75.0};
         // Nearest clipping distance
@@ -101,8 +100,6 @@ export namespace lysa {
         float right;
         float top;
         float bottom;
-
-        void setActive(bool isActive);
     };
 
 } // namespace z0

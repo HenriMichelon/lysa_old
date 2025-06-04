@@ -30,14 +30,14 @@ namespace lysa {
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         const auto& frame = framesData[frameIndex];
-        scene.update(commandList);
+        scene.update(commandList, frameIndex);
         update(frameIndex);
         commandList.barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_DEPTH);
         if (config.forwardDepthPrepass) {
-            depthPrepass(commandList, scene, frame.depthAttachment);
+            depthPrepass(commandList, scene, frame.depthAttachment, frameIndex);
         }
         if (clearAttachment) {
             commandList.barrier(

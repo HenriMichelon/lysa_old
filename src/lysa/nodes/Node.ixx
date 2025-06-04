@@ -530,7 +530,15 @@ export namespace lysa {
         float3 getDownVector() const {  return -normalize(globalTransform[1].xyz); }
 
         ~Node() override = default;
-    
+
+        void decrementUpdated() { updated--; }
+
+        void setMaxUpdates(const uint32 framesInFlight) { this->framesInFlight = framesInFlight; }
+
+        void setUpdated() { updated = framesInFlight; }
+
+        auto isUpdated() const { return updated > 0;}
+
     protected:
         float4x4 localTransform{};
         float4x4 globalTransform{};
@@ -549,8 +557,6 @@ export namespace lysa {
 
         virtual void exitScene() { onExitScene(); }
 
-        void setUpdated() { updated = framesInFlight; }
-
     private:
         friend class Window;
         friend class Viewport;
@@ -565,11 +571,9 @@ export namespace lysa {
         std::list<std::wstring>          groups;
         ProcessMode                      processMode{ProcessMode::INHERIT};
 
-        friend class Scene;
         uint32   updated{0};
         uint32   framesInFlight{0};
 
-        auto isUpdated() const { return updated > 0;}
     };
 
 }

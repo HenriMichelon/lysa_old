@@ -32,8 +32,9 @@ namespace lysa {
     void ForwardRenderer::depthPrepass(
         vireo::CommandList& commandList,
         const Scene& scene,
-        const std::shared_ptr<vireo::RenderTarget>& depthAttachment) {
-        depthPrePass.render(commandList, scene, depthAttachment);
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+        const uint32 frameIndex) {
+        depthPrePass.render(commandList, scene, depthAttachment, frameIndex);
     }
 
     void ForwardRenderer::mainColorPass(

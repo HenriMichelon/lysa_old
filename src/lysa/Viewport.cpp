@@ -123,7 +123,7 @@ namespace lysa {
             // Immediate removes
             if (!data.removedNodes.empty()) {
                 for (const auto &node : data.removedNodes) {
-                    data.scene->removeNode(node);
+                    data.scene->removeNode(node, frameIndex);
                 }
                 data.removedNodes.clear();
             }
@@ -131,7 +131,7 @@ namespace lysa {
             if (!data.removedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
-                    data.scene->removeNode(*it);
+                    data.scene->removeNode(*it, frameIndex);
                     it = data.removedNodesAsync.erase(it);
                     count += 1;
                     if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
@@ -141,7 +141,7 @@ namespace lysa {
             // Immediate additions
             if (!data.addedNodes.empty()) {
                 for (const auto &node : data.addedNodes) {
-                    data.scene->addNode(node);
+                    data.scene->addNode(node, frameIndex);
                 }
                 data.addedNodes.clear();
             }
@@ -149,7 +149,7 @@ namespace lysa {
             if (!data.addedNodesAsync.empty()) {
                 auto count = 0;
                 for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
-                    data.scene->addNode(*it);
+                    data.scene->addNode(*it, frameIndex);
                     it = data.addedNodesAsync.erase(it);
                     count += 1;
                     if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
@@ -157,7 +157,7 @@ namespace lysa {
             }
             // Change the current camera if needed
             if (data.cameraChanged) {
-                data.scene->activateCamera(data.activeCamera);
+                data.scene->activateCamera(data.activeCamera, frameIndex);
                 // if (applicationConfig.debug) {
                     // debugRenderer->activateCamera(data.activeCamera, currentFrame);
                 // }
@@ -165,10 +165,10 @@ namespace lysa {
                 data.cameraChanged = false;
             }
             // Search for a camera in the scene tree if there is no current camera
-            if (data.scene->getCurrentCamera() == nullptr) {
+            if (data.scene->getCurrentCamera(frameIndex) == nullptr) {
                 const auto &camera = rootNode->findFirstChild<Camera>(true);
                 if (camera && camera->isProcessed()) {
-                    data.scene->activateCamera(camera);
+                    data.scene->activateCamera(camera, frameIndex);
                     // if (applicationConfig.debug) {
                         // debugRenderer->activateCamera(camera, currentFrame);
                     // }

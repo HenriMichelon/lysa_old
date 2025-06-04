@@ -40,7 +40,8 @@ export namespace lysa {
         void depthPrepass(
             vireo::CommandList& commandList,
             const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment) override;
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+            uint32 frameIndex) override;
 
     private:
         DepthPrepass depthPrePass;
