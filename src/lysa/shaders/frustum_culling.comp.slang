@@ -16,39 +16,48 @@ struct Plane {
 
 struct Global {
     uint  pipelineId;
-    uint  surfacesCount;
+    uint  indexCount;
     Plane planes[6];
 };
 
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<Model> models : register(t1, space0);
-[[vk::binding(2, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t2, space0);
-
-[[vk::binding(0, 1)]] AppendStructuredBuffer<Index> indices : register(t0, space1);
+[[vk::binding(2, 0)]] StructuredBuffer<Material> materials : register(t2, space0);
+[[vk::binding(3, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t3, space0);
+[[vk::binding(4, 0)]] StructuredBuffer<Index> input : register(t4, space0);
+[[vk::binding(5, 0)]] AppendStructuredBuffer<Index> output : register(t5, space0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {
-    uint index = id.x;
-    if (index >= global.surfacesCount) {
+    if (id.x >= global.indexCount) {
         return;
     }
-//
-//     AABB box = aabbBuffer[index];
-//
-//     [unroll]
-//     for (int i = 0; i < 6; ++i) {
-//         Plane plane = global.planes[i];
-//
-//         float3 positiveVertex = float3(
-//             (plane.normal.x >= 0.0f) ? box.max.x : box.min.x,
-//             (plane.normal.y >= 0.0f) ? box.max.y : box.min.y,
-//             (plane.normal.z >= 0.0f) ? box.max.z : box.min.z
-//         );
-//
-//         if (plane.signedDistance(positiveVertex) < 0.0f) {
-//             return;
-//         }
-//     }
-//
-//     visibleIndices.Append(index);
+
+    Index index = input[id.x];
+    MeshSurface surface = surfaces[index.surfaceIndex];
+    Material material = materials[surface.materialIndex];
+
+    if (material.pipelineId != global.pipelineId) {
+        return;
+    }
+
+    Model model = models[surface.modelIndex];
+
+    [unroll]
+    for (int i = 0; i < 6; ++i) {
+        Plane plane = global.planes[i];
+        float3 positiveVertex = float3(
+            (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
+            (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
+            (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
+        );
+        if (plane.signedDistance(positiveVertex) < 0.0f) {
+            return;
+        }
+    }
+
+    for (int i = 0; i < surface.indexCount; i++) {
+        output.Append(index);
+    }
+
 }

@@ -135,6 +135,8 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
 
+        ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.cpp
+
         ${ENGINE_SRC_DIR}/resources/Animation.cpp
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp

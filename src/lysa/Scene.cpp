@@ -15,12 +15,12 @@ namespace lysa {
     void Scene::createDescriptorLayouts() {
         sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
-        sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::STORAGE);
-        sceneDescriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::STORAGE);
+        sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
+        sceneDescriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
         drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
-        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::STORAGE);
+        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::DEVICE_STORAGE);
         drawCommandDescriptorLayout->build();
     }
 
@@ -58,7 +58,8 @@ namespace lysa {
             L"Scene Data")},
         scissors{scissors},
         viewport{viewport},
-        framesInFlight{framesInFlight} {
+        framesInFlight{framesInFlight},
+        frustumCullingPipeline{ modelsDataArray,surfacesDataArray } {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, modelsDataArray.getBuffer());
@@ -68,6 +69,19 @@ namespace lysa {
         lightsBuffer->map();
 
         opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(PipelineData{config, DEFAULT_PIPELINE_ID});
+    }
+
+    void Scene::compute(vireo::CommandList& commandList) {
+        const auto aspectRatio = viewport.width / viewport.height;
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            // frustumCullingPipeline.dispatch(
+            //     commandList,
+            //     aspectRatio,
+            //     pipelineId,
+            //     pipelineData->instancesIndex.size(),
+            //     *currentCamera,
+            //     *pipelineData->instancesIndexBuffer);
+        }
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
@@ -156,7 +170,6 @@ namespace lysa {
             }
             lightsBuffer->write(lightsArray.data(), lightsArray.size() * sizeof(LightData));
         }
-
     }
 
     void Scene::addNode(const std::shared_ptr<Node>& node) {

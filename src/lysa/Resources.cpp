@@ -36,8 +36,8 @@ namespace lysa {
         textures(MAX_TEXTURES) {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
-            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::STORAGE);
-            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::STORAGE);
+            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::DEVICE_STORAGE);
+            descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_TEXTURE, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
             descriptorLayout->build();
         }

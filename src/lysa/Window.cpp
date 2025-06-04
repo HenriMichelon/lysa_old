@@ -104,9 +104,11 @@ namespace lysa {
 
         commandList->begin();
         for (const auto& viewport : viewports) {
+            auto& scene = *viewport->getScene(frameIndex);
+            renderer->update(commandList, scene);
             renderer->render(
                 *commandList,
-                *viewport->getScene(frameIndex),
+                scene,
                 viewport == mainViewport,
                 swapChain->getCurrentFrameIndex());
         }

@@ -78,6 +78,7 @@ export namespace lysa {
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
         void update(const vireo::CommandList& commandList);
+        void compute(vireo::CommandList& commandList);
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
@@ -115,6 +116,8 @@ export namespace lysa {
         std::list<std::shared_ptr<Light>> lights;
         std::shared_ptr<vireo::Buffer> lightsBuffer;
         uint32 lightsBufferCount{1};
+
+        FrustumCulling frustumCullingPipeline;
 
         struct PipelineData {
             pipeline_id pipelineId;

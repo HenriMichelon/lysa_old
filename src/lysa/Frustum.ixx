@@ -4,7 +4,7 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-export module lysa.frustum_culling;
+export module lysa.frustum;
 
 import std;
 import lysa.math;
@@ -65,7 +65,7 @@ export namespace lysa {
          * \param zNear Near clipping distance
          * \param zFar Far clipping distance
          */
-        Frustum(float aspectRatio, const std::shared_ptr<Node>&node, float fovY, float zNear, float zFar);
+        Frustum(float aspectRatio, const Node&node, float fovY, float zNear, float zFar);
 
         /**
          * Creates a frustum
@@ -75,7 +75,7 @@ export namespace lysa {
          * \param zNear Near clipping distance
          * \param zFar Far clipping distance
          */
-        Frustum(float aspectRatio, const std::shared_ptr<Node>&node, const float3& position, float fovY, float zNear, float zFar);
+        Frustum(float aspectRatio, const Node&node, const float3& position, float fovY, float zNear, float zFar);
 
         /**
          * Creates a frustum

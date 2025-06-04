@@ -33,9 +33,13 @@ export namespace lysa {
 
         std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
 
+        void update(
+            const std::shared_ptr<vireo::CommandList>& commandList,
+            Scene& scene) const;
+
         void render(
             vireo::CommandList& commandList,
-            Scene& scene,
+            const Scene& scene,
             bool clearAttachment,
             uint32 frameIndex);
 

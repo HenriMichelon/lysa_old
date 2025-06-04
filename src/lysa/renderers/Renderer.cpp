@@ -23,15 +23,25 @@ namespace lysa {
         }
     }
 
+    void Renderer::update(
+        const std::shared_ptr<vireo::CommandList>& commandList,
+        Scene& scene) const {
+        scene.update(*commandList);
+        scene.compute(*commandList);
+        commandList->end();
+        Application::getGraphicQueue()->submit({commandList});
+        Application::getGraphicQueue()->waitIdle();
+        commandList->begin();
+    }
+
     void Renderer::render(
         vireo::CommandList& commandList,
-        Scene& scene,
+        const Scene& scene,
         const bool clearAttachment,
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
-        const auto& frame = framesData[frameIndex];
-        scene.update(commandList);
         update(frameIndex);
+        const auto& frame = framesData[frameIndex];
         commandList.barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
