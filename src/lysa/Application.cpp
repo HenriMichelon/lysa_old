@@ -18,7 +18,8 @@ namespace lysa {
     Application::Application(ApplicationConfiguration& config) :
         config{config},
         vireo{vireo::Vireo::create(config.backend)},
-        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main Queue")},
+        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
+        computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
         resources{*vireo, config.resourcesConfig, *graphicQueue} {
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;

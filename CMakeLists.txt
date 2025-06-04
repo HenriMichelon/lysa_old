@@ -188,6 +188,8 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
 
+        ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.ixx
+
         ${ENGINE_SRC_DIR}/resources/Animation.ixx
         ${ENGINE_SRC_DIR}/resources/AnimationLibrary.ixx
         ${ENGINE_SRC_DIR}/resources/Image.ixx

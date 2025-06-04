@@ -29,7 +29,7 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent);
 
-        virtual void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) = 0;
+        virtual void updatePipelines(const std::unordered_map<pipeline_id, std::shared_ptr<Material>>& materials) = 0;
 
         std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
 

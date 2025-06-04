@@ -27,6 +27,7 @@ namespace lysa {
     MaterialData StandardMaterial::getMaterialData() const {
         auto data = MaterialData {
             .albedoColor = albedoColor,
+            .pipelineId = getPipelineId(),
             .transparency = static_cast<int>(getTransparency()),
             .alphaScissor = getAlphaScissor(),
             .normalScale = normalScale,
@@ -137,6 +138,7 @@ namespace lysa {
 
     MaterialData ShaderMaterial::getMaterialData() const {
         return {
+            .pipelineId = getPipelineId(),
             .parameters = {
                 parameters[0],
                 parameters[1],

@@ -21,4 +21,6 @@ export namespace lysa {
 
     using unique_id = uint64;
 
+    using pipeline_id = uint32;
+
 }

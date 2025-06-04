@@ -18,7 +18,7 @@ export namespace lysa {
     public:
         ForwardColor(const RenderingConfiguration& config);
 
-        void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials);
+        void updatePipelines(const std::unordered_map<pipeline_id, std::shared_ptr<Material>>& materials);
 
         void render(
             vireo::CommandList& commandList,
@@ -43,7 +43,7 @@ export namespace lysa {
             .discardDepthStencilAfterRender = true,
         };
 
-        std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
+        std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
 
     };
 }

@@ -16,6 +16,7 @@ import lysa.nodes.light;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
 import lysa.resources.material;
+import lysa.pipelines.frustum_culling;
 
 export namespace lysa {
 
@@ -29,9 +30,10 @@ export namespace lysa {
     };
 
     struct MeshSurfaceData {
-        uint32 modelIndex{0};
-        uint32 vertexIndex{0};
-        uint32 materialIndex{0};
+        uint32 modelIndex;
+        uint32 vertexIndex;
+        uint32 materialIndex;
+        uint32 indexCount;
     };
     // static_assert(sizeof(MeshSurfaceInstanceData) == 80, "MeshSurfaceInstanceData must be 80 bytes for StructuredBuffer alignment");
 
@@ -107,7 +109,7 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> surfacesDataMemoryBlocks{};
         bool surfacesDataUpdated{false};
 
-        std::unordered_map<uint32, std::shared_ptr<Material>> materials;
+        std::unordered_map<pipeline_id, std::shared_ptr<Material>> materials;
         bool materialsUpdated{false};
 
         std::list<std::shared_ptr<Light>> lights;
@@ -115,7 +117,9 @@ export namespace lysa {
         uint32 lightsBufferCount{1};
 
         struct PipelineData {
-            uint32 pipelineId;
+            pipeline_id pipelineId;
+            const SceneConfiguration& config;
+
             std::list<std::shared_ptr<MeshInstance>> models{};
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
@@ -125,9 +129,10 @@ export namespace lysa {
             std::vector<Index> instancesIndex;
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
-            const SceneConfiguration& config;
 
-            PipelineData::PipelineData(const SceneConfiguration& config, uint32 pipelineId);
+            PipelineData::PipelineData(
+                const SceneConfiguration& config,
+                uint32 pipelineId);
 
             void update(const vireo::CommandList& commandList);
 

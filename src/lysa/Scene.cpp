@@ -45,7 +45,7 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurface Instance Data"},
+            L"MeshSurfaces Data"},
         modelsDataArray{Application::getVireo(),
             sizeof(ModelData),
             config.maxModelsPerFrame,
@@ -103,6 +103,7 @@ namespace lysa {
                     surfaceDatas[surfaceIndex].modelIndex = modelsDataMemoryBlocks[meshInstance].instanceIndex;
                     surfaceDatas[surfaceIndex].vertexIndex = mesh->getVertexIndex();
                     surfaceDatas[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
+                    surfaceDatas[surfaceIndex].indexCount = meshSurface->indexCount;
                 }
                 surfacesDataArray.write(surfacesDataMemoryBlocks[meshInstance], surfaceDatas.data());
                 surfacesDataUpdated = true;
@@ -121,7 +122,6 @@ namespace lysa {
             surfacesDataUpdated = false;
         }
         if (modelsDataUpdated) {
-            INFO("Flush models ", models.size());
             modelsDataArray.flush(commandList);
             modelsDataUpdated = false;
         }
@@ -284,9 +284,9 @@ namespace lysa {
         }
     }
 
-    Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId):
-        config{config},
+    Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId) :
         pipelineId{pipelineId},
+        config{config},
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
@@ -337,23 +337,24 @@ namespace lysa {
         }
 
         if (surfaceCount > 0) {
-            const auto memoryBlock{surfacesDataArray.alloc(surfaceCount)};
             const auto startIndex{instancesIndex.size()};
+            if ((startIndex + mesh->getIndices().size() > config.maxVertexPerFrame)) {
+                throw Exception("Too many vertices in a single frame");
+            }
+
+            const auto memoryBlock{surfacesDataArray.alloc(surfaceCount)};
             auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
                 if (meshSurface->material->getPipelineId() == pipelineId) {
-                    const auto instanceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
+                    const auto surfaceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
                     for (int i = 0; i < meshSurface->indexCount; i++) {
                         instancesIndex.push_back({
                            .index = meshIndices[meshSurface->firstIndex + i],
-                           .surfaceIndex = instanceDataIndex
+                           .surfaceIndex = surfaceDataIndex
                         });
                     }
                     surfaceIndex++;
                 }
-            }
-            if ((startIndex + mesh->getIndices().size() > config.maxVertexPerFrame)) {
-                throw Exception("Too many vertices in a single frame");
             }
             instancesIndexBuffer->write(
                 &instancesIndex[startIndex],
@@ -381,19 +382,21 @@ namespace lysa {
             auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
                 if (meshSurface->material->getPipelineId() == pipelineId) {
-                    const auto instanceDataIndex = surfacesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
+                    const auto surfaceDataIndex = surfacesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
                     for (int i = 0; i < meshSurface->indexCount; i++) {
                         instancesIndex.push_back({
                             .index = mesh->getIndices()[meshSurface->firstIndex + i],
-                            .surfaceIndex = instanceDataIndex
+                            .surfaceIndex = surfaceDataIndex
                         });
                     }
                     surfaceIndex++;
                 }
             }
         }
-        instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index));
-        instancesIndexUpdated = true;
+        if (instancesIndex.size() > 0) {
+            instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index));
+            instancesIndexUpdated = true;
+        }
     }
 
 }

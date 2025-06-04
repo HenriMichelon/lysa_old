@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene_data.inc.slang"
+#include "scene.inc.slang"
 
 float3 calcDirectionalLight(Light light, float3 worldPos, float3 normal, float shininess) {
     float3 L = -light.direction.xyz;

@@ -24,7 +24,7 @@ namespace lysa {
         forwardColorPass.update(frameIndex);
     }
 
-    void ForwardRenderer::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+    void ForwardRenderer::updatePipelines(const std::unordered_map<pipeline_id, std::shared_ptr<Material>>& materials) {
         depthPrePass.updatePipelines(materials);
         forwardColorPass.updatePipelines(materials);
     }

@@ -12,14 +12,16 @@ import lysa.global;
 export namespace lysa {
     class FrustumCulling {
     public:
-        const vireo::DescriptorIndex BINDING_GLOBAL{0};
-        const vireo::DescriptorIndex BINDING_AABB{1};
-        const vireo::DescriptorIndex BINDING_OUTPUT{1};
 
-        struct AABB {
-            float3 min;
-            float3 max;
-        };
+        virtual ~FrustumCulling() = default;
+        FrustumCulling(FrustumCulling&) = delete;
+        FrustumCulling& operator=(FrustumCulling&) = delete;
+
+    private:
+        static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
+        static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
+        static constexpr vireo::DescriptorIndex BINDING_SURFACES{2};
+        static constexpr vireo::DescriptorIndex BINDING_OUTPUT{0};
 
         struct Plane {
             float3 normal;
@@ -27,24 +29,16 @@ export namespace lysa {
         };
 
         struct Global {
-            uint objectCount;
-            Plane planes[6];
+            uint32 pipelineId;
+            uint32 surfaceCount;
+            Plane  planes[6];
         };
 
-        struct FrameData {
-            std::shared_ptr<vireo::CommandAllocator> commandAllocator;
-            std::shared_ptr<vireo::CommandList>      commandList;
-            std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
-            std::shared_ptr<vireo::Buffer>           globalBuffer;
-        };
-
-        virtual ~FrustumCulling() = default;
-        FrustumCulling(FrustumCulling&) = delete;
-        FrustumCulling& operator=(FrustumCulling&) = delete;
-
-    private:
-        std::vector<FrameData> framesData;
+        std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+        std::shared_ptr<vireo::CommandList>      commandList;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-        std::shared_ptr<vireo::Pipeline> pipeline;
+        std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
+        std::shared_ptr<vireo::Buffer>           globalBuffer;
+        std::shared_ptr<vireo::Pipeline>         pipeline;
     };
 }

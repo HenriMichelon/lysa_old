@@ -49,6 +49,11 @@ export namespace lysa {
             return instance->graphicQueue;
         }
 
+        static auto& getComputeQueue() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->computeQueue;
+        }
+
         static auto& getInstance() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return *instance;
@@ -66,6 +71,7 @@ export namespace lysa {
         ApplicationConfiguration& config;
         std::shared_ptr<vireo::Vireo> vireo;
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
+        std::shared_ptr<vireo::SubmitQueue> computeQueue;
         Resources resources;
         std::list<std::shared_ptr<Window>> windows;
         bool quit{false};

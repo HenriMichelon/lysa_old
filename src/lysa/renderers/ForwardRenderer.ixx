@@ -22,7 +22,7 @@ export namespace lysa {
             const RenderingConfiguration& config,
             const std::wstring& name);
 
-        void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) override;
+        void updatePipelines(const std::unordered_map<pipeline_id, std::shared_ptr<Material>>& materials) override;
 
         void resize(const vireo::Extent& extent) override;
 

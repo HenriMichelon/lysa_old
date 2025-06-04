@@ -93,7 +93,7 @@ export namespace lysa {
      */
     constexpr int SHADER_MATERIAL_MAX_PARAMETERS{4};
 
-    constexpr uint32 DEFAULT_PIPELINE_ID{0};
+    constexpr pipeline_id DEFAULT_PIPELINE_ID{0};
 
 
 }
