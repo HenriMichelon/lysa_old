@@ -15,7 +15,7 @@ export namespace lysa {
     /**
      * Base class for all 3D nodes
      */
-    class Node : public Object {
+    class Node : public Object, public Updatable {
     public:
         friend class Viewport;
 
@@ -549,8 +549,6 @@ export namespace lysa {
 
         virtual void exitScene() { onExitScene(); }
 
-        void setUpdated() { updated = framesInFlight; }
-
     private:
         friend class Window;
         friend class Viewport;
@@ -565,11 +563,6 @@ export namespace lysa {
         std::list<std::wstring>          groups;
         ProcessMode                      processMode{ProcessMode::INHERIT};
 
-        friend class Scene;
-        uint32   updated{0};
-        uint32   framesInFlight{0};
-
-        auto isUpdated() const { return updated > 0;}
     };
 
 }

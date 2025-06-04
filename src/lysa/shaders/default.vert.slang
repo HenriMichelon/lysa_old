@@ -8,8 +8,8 @@
 
 VertexOutput vertexMain(uint vertexId: SV_VertexID ) {
     Index index = indices[vertexId];
-    InstanceData instanceData = instancesData[index.surfaceIndex];
+    MeshSurface surface = surfaces[index.surfaceIndex];
     return vertexMVP(
-        instanceData,
-        vertices[index.index + instanceData.firstVertex]);
+        surface,
+        vertices[index.index + surface.firstVertex]);
 }

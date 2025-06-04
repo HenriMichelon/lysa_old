@@ -6,6 +6,11 @@
 */
 #include "samplers.inc.slang"
 
+#define TRANSPARENCY_DISABLED      0
+#define TRANSPARENCY_ALPHA         1
+#define TRANSPARENCY_SCISSOR       2
+#define TRANSPARENCY_SCISSOR_ALPHA 3
+
 struct Vertex {
     float4 position; // position + uv.x
     float4 normal;   // normal + uv.y
@@ -31,41 +36,21 @@ struct Scene {
     uint     lightsCount;
 }
 
-struct InstanceData {
+struct Model {
     float4x4 transform;
+    float3   aabbMin;
+    float   _pad0;
+    float3   aabbMax;
+    float   _pad1;
+    uint     visible;
+    float3  _pad2;
+};
+
+struct MeshSurface {
+    uint modelIndex;
     uint firstVertex;
     uint materialIndex;
-    float _pad0;
-    float _pad1;
 };
-
-struct Light {
-    // light params
-    int type; // Light::LightType
-    float range;
-    float cutOff;
-    float outerCutOff;
-    float4 position;
-    float4 direction;
-    float4 color; // RGB + Intensity;
-    // shadow map params
-    int mapIndex;
-    float farPlane;
-    uint cascadesCount;
-	float _pad0;
-    float4 cascadeSplitDepth;
-    float4x4 lightSpace[6];
-};
-
-struct Lights {
-    Light[100] light;
-}
-
-
-#define TRANSPARENCY_DISABLED      0
-#define TRANSPARENCY_ALPHA         1
-#define TRANSPARENCY_SCISSOR       2
-#define TRANSPARENCY_SCISSOR_ALPHA 3
 
 struct TextureInfo {
     int index;
@@ -90,6 +75,28 @@ struct Index {
     uint surfaceIndex;
 }
 
+struct Light {
+    // light params
+    int type; // Light::LightType
+    float range;
+    float cutOff;
+    float outerCutOff;
+    float4 position;
+    float4 direction;
+    float4 color; // RGB + Intensity;
+    // shadow map params
+    int mapIndex;
+    float farPlane;
+    uint cascadesCount;
+	float _pad0;
+    float4 cascadeSplitDepth;
+    float4x4 lightSpace[6];
+};
+
+struct Lights {
+    Light[100] light;
+}
+
 // Apply texture UV transforms
 float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;
@@ -100,14 +107,15 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 [[vk::binding(2, 0)]] Texture2D textures[500] : register(t2, space0); // Resources::MAX_TEXTURES
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
-[[vk::binding(1, 2)]] StructuredBuffer<InstanceData> instancesData : register(t1, space2);
-[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
+[[vk::binding(1, 2)]] StructuredBuffer<Model> models : register(t1, space2);
+[[vk::binding(2, 2)]] StructuredBuffer<MeshSurface> surfaces : register(t2, space2);
+[[vk::binding(3, 2)]] ConstantBuffer<Lights> lights : register(b3, space2);
 
 [[vk::binding(0, 3)]] StructuredBuffer<Index> indices : register(t0, space3);
 
-VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {
+VertexOutput vertexMVP(MeshSurface surface, Vertex input) {
     VertexOutput output;
-    float4x4 model = instanceData.transform;
+    float4x4 model = models[surface.modelIndex].transform;
 
     float4 position = float4(input.position.xyz, 1.0);
     float4 positionW = mul(model, position);
@@ -123,6 +131,6 @@ VertexOutput vertexMVP(InstanceData instanceData, Vertex input) {
     output.bitangent = normalize(cross(normalW, tangentW));
 
     output.uv = float2(input.position.w, input.normal.w);
-    output.materialIndex = instanceData.materialIndex;
+    output.materialIndex = surface.materialIndex;
     return output;
 }

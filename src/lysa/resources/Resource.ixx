@@ -14,7 +14,7 @@ export namespace lysa {
     /**
      * Base class for resources.
      */
-    class Resource : public Object {
+    class Resource : public Object, public Updatable  {
     public:
 
         Resource(const std::wstring& name);
@@ -40,19 +40,10 @@ export namespace lysa {
          */
         virtual std::shared_ptr<Resource> duplicate() const;
 
-    protected:
-        void setUpdated() { updated = framesInFlight; }
-
     private:
         unique_id          id;
         static unique_id   currentId;
         const std::wstring name;
-
-        friend class Scene;
-        uint32 updated{0};
-        uint32 framesInFlight{0};
-
-        auto isUpdated() const { return updated > 0;}
     };
 
 }

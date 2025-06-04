@@ -28,25 +28,26 @@ export namespace lysa {
         uint32      lightsCount{0};
     };
 
-    struct MeshSurfaceInstanceData {
-        float4x4 transform;
+    struct MeshSurfaceData {
+        uint32 modelIndex{0};
         uint32 vertexIndex{0};
         uint32 materialIndex{0};
     };
-    static_assert(sizeof(MeshSurfaceInstanceData) == 80, "MeshSurfaceInstanceData must be 80 bytes for StructuredBuffer alignment");
+    // static_assert(sizeof(MeshSurfaceInstanceData) == 80, "MeshSurfaceInstanceData must be 80 bytes for StructuredBuffer alignment");
 
     struct alignas(8) Index {
         uint index;
         uint surfaceIndex;
     };
-    static_assert(sizeof(Index) == 8, "Index must be 8 bytes for StructuredBuffer alignment");
+    // static_assert(sizeof(Index) == 8, "Index must be 8 bytes for StructuredBuffer alignment");
 
     class Scene {
     public:
         static constexpr uint32_t SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCE_DATA{1};
-        static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
+        static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
+        static constexpr vireo::DescriptorIndex BINDING_SURFACES{2};
+        static constexpr vireo::DescriptorIndex BINDING_LIGHTS{3};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
         static constexpr uint32_t SET_DRAW_COMMAND{3};
@@ -98,11 +99,13 @@ export namespace lysa {
         std::shared_ptr<Environment> currentEnvironment{};
 
         std::list<std::shared_ptr<MeshInstance>> models{};
-        DeviceMemoryArray modelDataArray;
+        DeviceMemoryArray modelsDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> modelsDataMemoryBlocks{};
+        bool modelsDataUpdated{false};
 
-        DeviceMemoryArray instancesDataArray;
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesDataMemoryBlocks{};
-        bool instancesDataUpdated{false};
+        DeviceMemoryArray surfacesDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> surfacesDataMemoryBlocks{};
+        bool surfacesDataUpdated{false};
 
         std::unordered_map<uint32, std::shared_ptr<Material>> materials;
         bool materialsUpdated{false};
@@ -130,15 +133,15 @@ export namespace lysa {
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,
-                DeviceMemoryArray& instancesDataArray,
-                std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
+                DeviceMemoryArray& surfacesDataArray,
+                std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks);
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,
-                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks);
 
             void rebuildInstancesIndex(
-                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks);
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks);
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;

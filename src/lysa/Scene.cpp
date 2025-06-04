@@ -15,7 +15,8 @@ namespace lysa {
     void Scene::createDescriptorLayouts() {
         sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
-        sceneDescriptorLayout->add(BINDING_INSTANCE_DATA, vireo::DescriptorType::STORAGE);
+        sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::STORAGE);
+        sceneDescriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
         drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
@@ -39,13 +40,13 @@ namespace lysa {
             sizeof(LightData),
             1,
             L"Scene Lights")},
-        instancesDataArray{Application::getVireo(),
-            sizeof(MeshSurfaceInstanceData),
+        surfacesDataArray{Application::getVireo(),
+            sizeof(MeshSurfaceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurface Instance Data"},
-        modelDataArray{Application::getVireo(),
+        modelsDataArray{Application::getVireo(),
             sizeof(ModelData),
             config.maxModelsPerFrame,
             config.maxModelsPerFrame,
@@ -60,7 +61,8 @@ namespace lysa {
         framesInFlight{framesInFlight} {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
-        descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
+        descriptorSet->update(BINDING_MODELS, modelsDataArray.getBuffer());
+        descriptorSet->update(BINDING_SURFACES, surfacesDataArray.getBuffer());
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         sceneUniformBuffer->map();
         lightsBuffer->map();
@@ -69,7 +71,9 @@ namespace lysa {
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
-        instancesDataArray.restart();
+        surfacesDataArray.restart();
+        modelsDataArray.restart();
+
         auto sceneUniform = SceneData {
             .cameraPosition = currentCamera->getPositionGlobal(),
             .projection = currentCamera->getProjection(),
@@ -85,32 +89,41 @@ namespace lysa {
         for (const auto& meshInstance : models) {
             const auto& mesh = meshInstance->getMesh();
             if (meshInstance->isUpdated() || mesh->isUpdated()) {
+                if (meshInstance->isUpdated()) {
+                    const auto modelData = meshInstance->getModelData();
+                    // INFO("model ", lysa::to_string(meshInstance->getName()), " : ", meshInstance->pendingUpdates);
+                    modelsDataArray.write(modelsDataMemoryBlocks[meshInstance], &modelData);
+                    modelsDataUpdated = true;
+                    meshInstance->decrementUpdates();
+                }
                 const auto& meshSurfaces = mesh->getSurfaces();
-                auto instancesData = std::vector<MeshSurfaceInstanceData>{meshSurfaces.size()};
+                auto surfaceDatas = std::vector<MeshSurfaceData>{meshSurfaces.size()};
                 for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                     const auto& meshSurface = meshSurfaces[surfaceIndex];
-                    instancesData[surfaceIndex].transform = meshInstance->getTransformGlobal();
-                    instancesData[surfaceIndex].vertexIndex = mesh->getVertexIndex();
-                    instancesData[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
+                    surfaceDatas[surfaceIndex].modelIndex = modelsDataMemoryBlocks[meshInstance].instanceIndex;
+                    surfaceDatas[surfaceIndex].vertexIndex = mesh->getVertexIndex();
+                    surfaceDatas[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                 }
-                instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
-                instancesDataUpdated = true;
-                if (meshInstance->isUpdated()) {
-
-                    meshInstance->updated--;
-                }
-                if (mesh->isUpdated()) { mesh->updated--; }
+                surfacesDataArray.write(surfacesDataMemoryBlocks[meshInstance], surfaceDatas.data());
+                surfacesDataUpdated = true;
+                if (mesh->isUpdated()) { mesh->decrementUpdates(); }
             }
             for (const auto& material : mesh->getMaterials()) {
                 if (material->isUpdated()) {
                     material->upload();
                     Application::getResources().setUpdated();
+                    material->decrementUpdates();
                 }
             }
         }
-        if (instancesDataUpdated) {
-            instancesDataArray.flush(commandList);
-            instancesDataUpdated = false;
+        if (surfacesDataUpdated) {
+            surfacesDataArray.flush(commandList);
+            surfacesDataUpdated = false;
+        }
+        if (modelsDataUpdated) {
+            INFO("Flush models ", models.size());
+            modelsDataArray.flush(commandList);
+            modelsDataUpdated = false;
         }
 
         for (auto& [pipelineId, pipelineData] : opaquePipelinesData) {
@@ -149,11 +162,11 @@ namespace lysa {
     void Scene::addNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
-            node->framesInFlight = framesInFlight;
+            node->setMaxUpdates(framesInFlight);
             activateCamera(static_pointer_cast<Camera>(node));
             break;
         case Node::ENVIRONMENT:
-            node->framesInFlight = framesInFlight;
+            node->setMaxUpdates(framesInFlight);
             currentEnvironment = static_pointer_cast<Environment>(node);
             break;
         case Node::MESH_INSTANCE:{
@@ -165,13 +178,14 @@ namespace lysa {
                 Application::getResources().setUpdated();
             }
             models.push_back(meshInstance);
-            meshInstance->framesInFlight = framesInFlight;
-            mesh->framesInFlight = framesInFlight;
-            meshInstance->setUpdated();
+            modelsDataMemoryBlocks[meshInstance] = modelsDataArray.alloc(1);
+            meshInstance->setMaxUpdates(framesInFlight);
+            mesh->setMaxUpdates(framesInFlight);
+            if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
             auto nodePipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
-                material->framesInFlight = framesInFlight;
+                material->setMaxUpdates(framesInFlight);
                 auto id = material->getPipelineId();
                 nodePipelineIds.push_back(id);
                 if (!materials.contains(id)) {
@@ -184,7 +198,7 @@ namespace lysa {
                 if (!opaquePipelinesData.contains(pipelineId)) {
                     opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(PipelineData{config, pipelineId});
                 }
-                opaquePipelinesData[pipelineId]->addNode(meshInstance, instancesDataArray, instancesDataMemoryBlocks);
+                opaquePipelinesData[pipelineId]->addNode(meshInstance, surfacesDataArray, surfacesDataMemoryBlocks);
             }
             break;
         }
@@ -211,19 +225,22 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            if (instancesDataMemoryBlocks.contains(meshInstance)) {
+            models.remove(meshInstance);
+            if (modelsDataMemoryBlocks.contains(meshInstance)) {
+                modelsDataArray.free(modelsDataMemoryBlocks.at(meshInstance));
+                modelsDataMemoryBlocks.erase(meshInstance);
+            }
+            if (surfacesDataMemoryBlocks.contains(meshInstance)) {
+                surfacesDataArray.free(surfacesDataMemoryBlocks.at(meshInstance));
+                surfacesDataMemoryBlocks.erase(meshInstance);
                 const auto& mesh = meshInstance->getMesh();
-                const auto& memoryBlock = instancesDataMemoryBlocks[meshInstance];
-                instancesDataArray.free(memoryBlock);
-                instancesDataMemoryBlocks.erase(meshInstance);
-                models.remove(meshInstance);
                 auto nodePipelineIds = std::list<uint32>{};
                 for (const auto& material : mesh->getMaterials()) {
                     auto id = material->getPipelineId();
                     nodePipelineIds.push_back(id);
                 }
                 for (const auto& pipelineId : nodePipelineIds) {
-                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, instancesDataMemoryBlocks);
+                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, surfacesDataMemoryBlocks);
                 }
             }
             break;
@@ -305,8 +322,8 @@ namespace lysa {
 
     void Scene::PipelineData::addNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
-        DeviceMemoryArray& instancesDataArray,
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
+        DeviceMemoryArray& surfacesDataArray,
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
         models.push_back(meshInstance);
         const auto& mesh = meshInstance->getMesh();
         const auto& meshSurfaces{mesh->getSurfaces()};
@@ -320,7 +337,7 @@ namespace lysa {
         }
 
         if (surfaceCount > 0) {
-            const auto memoryBlock{instancesDataArray.alloc(surfaceCount)};
+            const auto memoryBlock{surfacesDataArray.alloc(surfaceCount)};
             const auto startIndex{instancesIndex.size()};
             auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
@@ -343,19 +360,19 @@ namespace lysa {
                 mesh->getIndices().size() * sizeof(Index),
                 startIndex * sizeof(Index));
             instancesIndexUpdated = true;
-            instancesDataMemoryBlocks[meshInstance] = memoryBlock;
+            surfacesDataMemoryBlocks[meshInstance] = memoryBlock;
         }
     }
 
     void Scene::PipelineData::removeNode(
         const std::shared_ptr<MeshInstance>& meshInstance,
-        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
+        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
         models.remove(meshInstance);
-        rebuildInstancesIndex(instancesDataMemoryBlocks);
+        rebuildInstancesIndex(surfacesDataMemoryBlocks);
     }
 
     void Scene::PipelineData::rebuildInstancesIndex(
-        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& instancesDataMemoryBlocks) {
+        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
         instancesIndex.clear();
         for (const auto& meshInstance : models) {
             const auto& mesh = meshInstance->getMesh();
@@ -364,7 +381,7 @@ namespace lysa {
             auto surfaceIndex{0};
             for (const auto& meshSurface : meshSurfaces) {
                 if (meshSurface->material->getPipelineId() == pipelineId) {
-                    const auto instanceDataIndex = instancesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
+                    const auto instanceDataIndex = surfacesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
                     for (int i = 0; i < meshSurface->indexCount; i++) {
                         instancesIndex.push_back({
                             .index = mesh->getIndices()[meshSurface->firstIndex + i],

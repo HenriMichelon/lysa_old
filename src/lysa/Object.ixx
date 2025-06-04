@@ -8,6 +8,7 @@ export module lysa.object;
 
 import std;
 import lysa.signal;
+import lysa.types;
 
 export namespace lysa {
 
@@ -52,6 +53,20 @@ export namespace lysa {
 
     private:
         std::map<std::string, Signal> signals;
+    };
+
+    class Updatable {
+    public:
+        auto isUpdated() const { return pendingUpdates > 0;}
+
+        void decrementUpdates() { pendingUpdates -= 1; }
+
+        void setUpdated() { pendingUpdates = maxUpdates; }
+
+        void setMaxUpdates(const uint32 maxUpdates) { this->maxUpdates = maxUpdates; }
+
+        uint32 pendingUpdates{0};
+        uint32 maxUpdates{0};
     };
 
 }

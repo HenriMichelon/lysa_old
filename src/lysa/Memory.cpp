@@ -8,6 +8,7 @@ module lysa.memory;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 
 namespace lysa {
 
