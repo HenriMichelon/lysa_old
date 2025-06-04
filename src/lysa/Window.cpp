@@ -71,8 +71,8 @@ namespace lysa {
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
-            if (viewport->getScene(frameIndex)->isMaterialsUpdated(frameIndex)) {
-                renderer->updatePipelines(viewport->getScene(frameIndex)->getMaterials(frameIndex));
+            if (viewport->getScene(frameIndex)->isMaterialsUpdated()) {
+                renderer->updatePipelines(viewport->getScene(frameIndex)->getMaterials());
             }
         }
     }

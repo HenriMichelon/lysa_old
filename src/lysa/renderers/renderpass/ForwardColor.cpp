@@ -66,15 +66,14 @@ namespace lysa {
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const bool clearAttachment,
-        const uint32 frameIndex) {
+        const uint32) {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
           commandList,
-          pipelines,
-          frameIndex);
+          pipelines);
         commandList.endRendering();
     }
 }

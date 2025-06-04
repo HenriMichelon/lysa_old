@@ -20,9 +20,9 @@ namespace lysa {
     ModelData MeshInstance::getModelData() const {
         return {
             .transform = globalTransform,
+            .visible = 1,
             .aabbMin = worldAABB.min,
             .aabbMax = worldAABB.max,
-            .visible = 1,
         };
     }
 

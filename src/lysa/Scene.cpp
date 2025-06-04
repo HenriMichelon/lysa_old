@@ -34,25 +34,42 @@ namespace lysa {
         const vireo::Viewport& viewport,
         const vireo::Rect& scissors) :
         config{config},
-        framesInFlight{framesInFlight},
+        lightsBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::UNIFORM,
+            sizeof(LightData),
+            1,
+            L"Scene Lights")},
+        instancesDataArray{Application::getVireo(),
+            sizeof(MeshSurfaceInstanceData),
+            config.maxMeshSurfacePerFrame,
+            config.maxMeshSurfacePerFrame,
+            vireo::BufferType::DEVICE_STORAGE,
+            L"MeshSurface Instance Data"},
+        modelDataArray{Application::getVireo(),
+            sizeof(ModelData),
+            config.maxModelsPerFrame,
+            config.maxModelsPerFrame,
+            vireo::BufferType::DEVICE_STORAGE,
+            L"Models Data"},
+        sceneUniformBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::UNIFORM,
+            sizeof(SceneData), 1,
+            L"Scene Data")},
+        scissors{scissors},
         viewport{viewport},
-        scissors{scissors} {
-        for (int i = 0; i < framesInFlight; i++) {
-            framesData.push_back(std::make_unique<FrameData>(config));
-        }
+        framesInFlight{framesInFlight} {
+        descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
+        descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
+        descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
+        descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
+        sceneUniformBuffer->map();
+        lightsBuffer->map();
+
+        opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(PipelineData{config, DEFAULT_PIPELINE_ID});
     }
 
-    void Scene::update(const vireo::CommandList& commandList, const uint32 frameIndex) {
-        framesData[frameIndex]->update(commandList);
-        if (Application::getResources().isUpdated()) {
-            Application::getResources().flush(commandList);
-        }
-    }
-
-    void Scene::FrameData::update(const vireo::CommandList& commandList) {
+    void Scene::update(const vireo::CommandList& commandList) {
         instancesDataArray.restart();
-        modelsDataArray.restart();
-
         auto sceneUniform = SceneData {
             .cameraPosition = currentCamera->getPositionGlobal(),
             .projection = currentCamera->getProjection(),
@@ -79,18 +96,15 @@ namespace lysa {
                 instancesDataArray.write(instancesDataMemoryBlocks[meshInstance], instancesData.data());
                 instancesDataUpdated = true;
                 if (meshInstance->isUpdated()) {
-                    const auto modelData = meshInstance->getModelData();
-                    modelsDataArray.write(modelsDataMemoryBlocks[meshInstance], &modelData);
-                    modelsDataUpdated = true;
-                    meshInstance->decrementUpdated();
+
+                    meshInstance->updated--;
                 }
-                if (mesh->isUpdated()) { mesh->decrementUpdated(); }
+                if (mesh->isUpdated()) { mesh->updated--; }
             }
             for (const auto& material : mesh->getMaterials()) {
                 if (material->isUpdated()) {
                     material->upload();
                     Application::getResources().setUpdated();
-                    material->decrementUpdated();
                 }
             }
         }
@@ -98,13 +112,13 @@ namespace lysa {
             instancesDataArray.flush(commandList);
             instancesDataUpdated = false;
         }
-        if (modelsDataUpdated) {
-            modelsDataArray.flush(commandList);
-            modelsDataUpdated = false;
-        }
 
         for (auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             pipelineData->update(commandList);
+        }
+
+        if (Application::getResources().isUpdated()) {
+            Application::getResources().flush(commandList);
         }
 
         if (!lights.empty()) {
@@ -129,89 +143,17 @@ namespace lysa {
             }
             lightsBuffer->write(lightsArray.data(), lightsArray.size() * sizeof(LightData));
         }
+
     }
 
-    void Scene::addNode(const std::shared_ptr<Node>& node, const uint32 frameIndex) {
-        node->setMaxUpdates(framesInFlight);
-        if (node->getType() == Node::MESH_INSTANCE) {
-            const auto& mesh = static_pointer_cast<MeshInstance>(node)->getMesh();
-            mesh->setMaxUpdates(framesInFlight);
-            for (const auto& material : mesh->getMaterials()) {
-                material->setMaxUpdates(framesInFlight);
-            }
-        }
-        framesData[frameIndex]->addNode(node);
-    }
-
-    void Scene::removeNode(const std::shared_ptr<Node>& node, const uint32 frameIndex) {
-        framesData[frameIndex]->removeNode(node);
-    }
-
-    void Scene::drawOpaquesModels(
-        vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
-        const uint32 frameIndex) const {
-        const auto& data = framesData[frameIndex];
-        commandList.setViewport(viewport);
-        commandList.setScissors(scissors);
-        for (const auto& [pipelineId, pipelineData] : data->opaquePipelinesData) {
-            if (!pipelineData->instancesIndex.empty()) {
-                const auto& pipeline = pipelines.at(pipelineId);
-                commandList.bindPipeline(pipeline);
-                commandList.bindDescriptors(pipeline, {
-                    Application::getResources().getDescriptorSet(),
-                    Application::getResources().getSamplers().getDescriptorSet(),
-                    data->descriptorSet,
-                    pipelineData->descriptorSet,
-                });
-                commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
-            }
-        }
-    }
-
-    void Scene::activateCamera(const std::shared_ptr<Camera>& camera, const uint32 frameIndex) {
-        framesData[frameIndex]->activateCamera(camera);
-    }
-
-    Scene::FrameData::FrameData(
-        const SceneConfiguration& config) :
-        config{config},
-        lightsBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::UNIFORM,
-            sizeof(LightData),
-            1,
-            L"Scene Lights")},
-        instancesDataArray{Application::getVireo(),
-            sizeof(MeshSurfaceInstanceData),
-            config.maxMeshSurfacePerFrame,
-            config.maxMeshSurfacePerFrame,
-            vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurface Instance Data"},
-        modelsDataArray{Application::getVireo(),
-            sizeof(ModelData),
-            config.maxModelsPerFrame,
-            config.maxModelsPerFrame,
-            vireo::BufferType::DEVICE_STORAGE,
-            L"Models Data"},
-        sceneUniformBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::UNIFORM,
-            sizeof(SceneData), 1,
-            L"Scene Data")} {
-        descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
-        descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
-        descriptorSet->update(BINDING_INSTANCE_DATA, instancesDataArray.getBuffer());
-        descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
-        sceneUniformBuffer->map();
-        lightsBuffer->map();
-        opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(PipelineData{config, DEFAULT_PIPELINE_ID});
-    }
-
-    void Scene::FrameData::addNode(const std::shared_ptr<Node>& node) {
+    void Scene::addNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
+            node->framesInFlight = framesInFlight;
             activateCamera(static_pointer_cast<Camera>(node));
             break;
         case Node::ENVIRONMENT:
+            node->framesInFlight = framesInFlight;
             currentEnvironment = static_pointer_cast<Environment>(node);
             break;
         case Node::MESH_INSTANCE:{
@@ -223,11 +165,13 @@ namespace lysa {
                 Application::getResources().setUpdated();
             }
             models.push_back(meshInstance);
-            modelsDataMemoryBlocks[meshInstance] = modelsDataArray.alloc(1);
+            meshInstance->framesInFlight = framesInFlight;
+            mesh->framesInFlight = framesInFlight;
             meshInstance->setUpdated();
 
             auto nodePipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
+                material->framesInFlight = framesInFlight;
                 auto id = material->getPipelineId();
                 nodePipelineIds.push_back(id);
                 if (!materials.contains(id)) {
@@ -252,7 +196,7 @@ namespace lysa {
         }
     }
 
-    void Scene::FrameData::removeNode(const std::shared_ptr<Node>& node) {
+    void Scene::removeNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:
             if (node == currentCamera) {
@@ -267,15 +211,12 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            models.remove(meshInstance);
-            if (modelsDataMemoryBlocks.contains(meshInstance)) {
-                modelsDataArray.free(modelsDataMemoryBlocks.at(meshInstance));
-                modelsDataMemoryBlocks.erase(meshInstance);
-            }
             if (instancesDataMemoryBlocks.contains(meshInstance)) {
-                instancesDataArray.free(instancesDataMemoryBlocks.at(meshInstance));
-                instancesDataMemoryBlocks.erase(meshInstance);
                 const auto& mesh = meshInstance->getMesh();
+                const auto& memoryBlock = instancesDataMemoryBlocks[meshInstance];
+                instancesDataArray.free(memoryBlock);
+                instancesDataMemoryBlocks.erase(meshInstance);
+                models.remove(meshInstance);
                 auto nodePipelineIds = std::list<uint32>{};
                 for (const auto& material : mesh->getMaterials()) {
                     auto id = material->getPipelineId();
@@ -295,7 +236,27 @@ namespace lysa {
         }
     }
 
-    void Scene::FrameData::activateCamera(const std::shared_ptr<Camera>& camera) {
+    void Scene::drawOpaquesModels(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        commandList.setViewport(viewport);
+        commandList.setScissors(scissors);
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            if (!pipelineData->instancesIndex.empty()) {
+                const auto& pipeline = pipelines.at(pipelineId);
+                commandList.bindPipeline(pipeline);
+                commandList.bindDescriptors(pipeline, {
+                    Application::getResources().getDescriptorSet(),
+                    Application::getResources().getSamplers().getDescriptorSet(),
+                    descriptorSet,
+                    pipelineData->descriptorSet,
+                });
+                commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            }
+        }
+    }
+
+    void Scene::activateCamera(const std::shared_ptr<Camera>& camera) {
         if (currentCamera != nullptr)
             currentCamera->setActive(false);
         if (camera == nullptr) {

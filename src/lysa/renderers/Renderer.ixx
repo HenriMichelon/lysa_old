@@ -62,8 +62,7 @@ export namespace lysa {
         virtual void depthPrepass(
             vireo::CommandList& commandList,
             const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
-            uint32 frameIndex) = 0;
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment) = 0;
 
         virtual void mainColorPass(
             vireo::CommandList& commandList,

@@ -16,9 +16,9 @@ export namespace lysa {
 
     struct ModelData {
         float4x4 transform;
+        uint     visible;
         float3   aabbMin;
         float3   aabbMax;
-        uint     visible;
     };
 
     /**
