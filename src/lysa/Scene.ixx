@@ -35,6 +35,7 @@ export namespace lysa {
         uint32 firstIndex;
         uint32 materialIndex;
         uint32 indexCount;
+        uint32 surfaceDataIndex;
     };
     // static_assert(sizeof(MeshSurfaceInstanceData) == 80, "MeshSurfaceInstanceData must be 80 bytes for StructuredBuffer alignment");
 
@@ -137,8 +138,8 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
 
-            // std::shared_ptr<vireo::Buffer> instancesIndexCulledBuffer;
-            // std::shared_ptr<vireo::Buffer> instancesIndexCulledCounterBuffer;
+            std::shared_ptr<vireo::Buffer> instancesIndexCulledBuffer;
+            std::shared_ptr<vireo::Buffer> instancesIndexCulledCounterBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -148,9 +149,9 @@ export namespace lysa {
 
             void buildDrawCommand(const vireo::CommandList& commandList) const;
 
-            // auto getInstancesIndexCulledCounter() const {
-                // return *reinterpret_cast<uint32*>(instancesIndexCulledCounterBuffer->getMappedAddress());
-            // }
+            auto getInstancesIndexCulledCounter() const {
+                return *reinterpret_cast<uint32*>(instancesIndexCulledCounterBuffer->getMappedAddress());
+            }
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,

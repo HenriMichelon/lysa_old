@@ -21,6 +21,7 @@ struct MeshSurface {
     uint firstIndex;
     uint materialIndex;
     uint indexCount;
+    uint surfaceDataIndex;
 };
 
 struct TextureInfo {

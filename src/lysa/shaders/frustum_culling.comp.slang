@@ -25,9 +25,10 @@ struct Global {
 [[vk::binding(2, 0)]] StructuredBuffer<Model> models : register(t2, space0);
 [[vk::binding(3, 0)]] StructuredBuffer<Material> materials : register(t3, space0);
 [[vk::binding(4, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t4, space0);
-[[vk::binding(5, 0)]] AppendStructuredBuffer<Index> output : register(t5, space0);
+[[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
+[[vk::binding(6, 0)]] RWStructuredBuffer<uint> counter : register(u6, space0);
 
-[numthreads(64, 1, 1)]
+[numthreads(32, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {
     if (id.x >= global.surfaceCount) {
         return;
@@ -51,28 +52,11 @@ void main(uint3 id : SV_DispatchThreadID) {
         }
     }
 
-    Index index;
+    uint offset;
+    InterlockedAdd(counter[0], surface.indexCount, offset);
     for (int i = 0; i < surface.indexCount; i++) {
-        index.index = indices[surface.firstIndex + i];
-        index.surfaceIndex = id.x;
-        output.Append(index);
+        output[offset + i].index = indices[surface.firstIndex + i];
+        output[offset + i].surfaceIndex = surface.surfaceDataIndex;
     }
 
-
-//     Index index = input[id.x];
-//     MeshSurface surface = surfaces[index.surfaceIndex];
-//     Model model = models[surface.modelIndex];
-//     [unroll]
-//     for (int i = 0; i < 6; ++i) {
-//         Plane plane = global.planes[i];
-//         float3 positiveVertex = float3(
-//             (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
-//             (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
-//             (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
-//         );
-//         if (plane.signedDistance(positiveVertex) < 0.0f) {
-//             return;
-//         }
-//     }
-//     output.Append(index);
 }

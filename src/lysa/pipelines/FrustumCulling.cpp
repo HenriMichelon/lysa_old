@@ -62,7 +62,7 @@ namespace lysa {
         descriptorSet->update(BINDING_COUNTER, counterBuffer);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, { descriptorSet });
-        commandList.dispatch((surfaceCount + 63) / 64, 1, 1);
+        commandList.dispatch((surfaceCount + 31) / 32, 1, 1);
     }
 
 }

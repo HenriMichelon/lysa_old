@@ -46,6 +46,7 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurfaces Data"},
+        frustumCullingPipeline{ modelsDataArray,surfacesDataArray },
         modelsDataArray{Application::getVireo(),
             sizeof(ModelData),
             config.maxModelsPerFrame,
@@ -58,8 +59,7 @@ namespace lysa {
             L"Scene Data")},
         scissors{scissors},
         viewport{viewport},
-        framesInFlight{framesInFlight},
-        frustumCullingPipeline{ modelsDataArray,surfacesDataArray } {
+        framesInFlight{framesInFlight} {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, modelsDataArray.getBuffer());
@@ -72,15 +72,15 @@ namespace lysa {
     }
 
     void Scene::compute(vireo::CommandList& commandList) {
-        // for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-        //     frustumCullingPipeline.dispatch(
-        //         commandList,
-        //         pipelineId,
-        //         surfaceCount,
-        //         *currentCamera,
-        //         *pipelineData->instancesIndexCulledBuffer,
-        //         *pipelineData->instancesIndexCulledCounterBuffer);
-        // }
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            frustumCullingPipeline.dispatch(
+                commandList,
+                pipelineId,
+                surfaceCount,
+                *currentCamera,
+                *pipelineData->instancesIndexCulledBuffer,
+                *pipelineData->instancesIndexCulledCounterBuffer);
+        }
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
@@ -109,6 +109,7 @@ namespace lysa {
                     modelsDataUpdated = true;
                     meshInstance->decrementUpdates();
                 }
+                const auto& memoryBlock = surfacesDataMemoryBlocks[meshInstance];
                 const auto& meshSurfaces = mesh->getSurfaces();
                 auto surfaceDatas = std::vector<MeshSurfaceData>{meshSurfaces.size()};
                 for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
@@ -118,8 +119,9 @@ namespace lysa {
                     surfaceDatas[surfaceIndex].firstIndex = mesh->getIndicesIndex();
                     surfaceDatas[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                     surfaceDatas[surfaceIndex].indexCount = meshSurface->indexCount;
+                    surfaceDatas[surfaceIndex].surfaceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
                 }
-                surfacesDataArray.write(surfacesDataMemoryBlocks[meshInstance], surfaceDatas.data());
+                surfacesDataArray.write(memoryBlock, surfaceDatas.data());
                 surfacesDataUpdated = true;
                 surfaceCount += meshSurfaces.size();
                 if (mesh->isUpdated()) { mesh->decrementUpdates(); }
@@ -320,15 +322,15 @@ namespace lysa {
         instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
-            L"Draw indices")}
-        // instancesIndexCulledBuffer{Application::getVireo().createBuffer(
-        //     vireo::BufferType::READWRITE_STORAGE,
-        //     sizeof(Index) * config.maxVertexPerFrame, 1,
-        //     L"Culled draw indices")},
-        // instancesIndexCulledCounterBuffer{Application::getVireo().createBuffer(
-        //     vireo::BufferType::STORAGE,
-        //     sizeof(uint32), 1,
-        //     L"Culled draw indices counter")}
+            L"Draw indices")},
+        instancesIndexCulledBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::READWRITE_STORAGE,
+            sizeof(Index) * config.maxVertexPerFrame, 1,
+            L"Culled draw indices")},
+        instancesIndexCulledCounterBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::STORAGE,
+            sizeof(uint32), 1,
+            L"Culled draw indices counter")}
         {
         descriptorSet = Application::getVireo().createDescriptorSet(
             drawCommandDescriptorLayout,
@@ -336,12 +338,12 @@ namespace lysa {
         descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
         instancesIndexBuffer->map();
         drawCommandsStagingBuffer->map();
-        // instancesIndexCulledCounterBuffer->map();
+        instancesIndexCulledCounterBuffer->map();
     }
 
     void Scene::PipelineData::update() const {
         constexpr uint32 counter{0};
-        // instancesIndexCulledCounterBuffer->write(&counter);
+        instancesIndexCulledCounterBuffer->write(&counter);
     }
 
     void Scene::PipelineData::buildDrawCommand(const vireo::CommandList& commandList) const {
