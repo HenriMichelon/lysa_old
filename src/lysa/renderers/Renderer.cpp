@@ -41,6 +41,7 @@ namespace lysa {
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         update(frameIndex);
+        scene.buildDrawCommand(commandList);
         const auto& frame = framesData[frameIndex];
         commandList.barrier(
             frame.depthAttachment,

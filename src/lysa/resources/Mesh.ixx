@@ -142,11 +142,13 @@ export namespace lysa {
             return *a < *b;
         }
 
-        auto getVertexIndex() const { return vertexMemoryBloc.instanceIndex; }
+        auto getVerticesIndex() const { return verticesMemoryBloc.instanceIndex; }
+
+        auto getIndicesIndex() const { return indicesMemoryBloc.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 
-        auto isUploaded() const { return vertexMemoryBloc.size > 0; }
+        auto isUploaded() const { return verticesMemoryBloc.size > 0; }
 
         void upload();
 
@@ -161,7 +163,8 @@ export namespace lysa {
         std::unordered_set<std::shared_ptr<Material>> materials{};
 
     private:
-        MemoryBlock vertexMemoryBloc;
+        MemoryBlock verticesMemoryBloc;
+        MemoryBlock indicesMemoryBloc;
     };
 }
 

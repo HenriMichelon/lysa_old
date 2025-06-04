@@ -33,6 +33,8 @@ export namespace lysa {
 
         auto& getVertexArray() { return vertexArray; }
 
+        auto& getIndexArray() { return indexArray; }
+
         auto& getMaterialArray() { return materialArray; }
 
         auto& getSamplers() { return samplers; }
@@ -59,6 +61,7 @@ export namespace lysa {
     private:
         const ResourcesConfiguration& config;
         DeviceMemoryArray vertexArray;
+        DeviceMemoryArray indexArray;
         DeviceMemoryArray materialArray;
         Samplers samplers;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;

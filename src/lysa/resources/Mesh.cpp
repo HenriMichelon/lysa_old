@@ -44,18 +44,18 @@ namespace lysa {
     void Mesh::upload() {
         auto& resources = Application::getResources();
         if (!isUploaded()) {
-            vertexMemoryBloc = resources.getVertexArray().alloc(vertices.size());
+            verticesMemoryBloc = resources.getVertexArray().alloc(vertices.size());
+            indicesMemoryBloc = resources.getIndexArray().alloc(indices.size());
         }
         auto vertexData = std::vector<VertexData>(vertices.size());
         for (int i = 0; i < vertices.size(); i++) {
             const auto& v = vertices[i];
-            // assert([&]{return v.uv.x > 0.0 && v.uv.x < 1.0 && v.uv.y > 0 && v.uv.y < 1.0;},
-                // "UV out of range");
             vertexData[i].position = float4(v.position.x, v.position.y, v.position.z, v.uv.x);
             vertexData[i].normal = float4(v.normal.x, v.normal.y, v.normal.z, v.uv.y);
             vertexData[i].tangent = v.tangent;
         }
-        resources.getVertexArray().write(vertexMemoryBloc, vertexData.data());
+        resources.getVertexArray().write(verticesMemoryBloc, vertexData.data());
+        resources.getIndexArray().write(indicesMemoryBloc, indices.data());
         for (int i = 0; i < surfaces.size(); i++) {
         const auto& material = surfaces[i]->material;
             if (!material->isUploaded()) {

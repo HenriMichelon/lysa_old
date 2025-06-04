@@ -31,7 +31,8 @@ export namespace lysa {
 
     struct MeshSurfaceData {
         uint32 modelIndex;
-        uint32 vertexIndex;
+        uint32 firstVertex;
+        uint32 firstIndex;
         uint32 materialIndex;
         uint32 indexCount;
     };
@@ -80,6 +81,8 @@ export namespace lysa {
         void update(const vireo::CommandList& commandList);
         void compute(vireo::CommandList& commandList);
 
+        void buildDrawCommand(const vireo::CommandList& commandList) const;
+
         void drawOpaquesModels(
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
@@ -106,6 +109,7 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> modelsDataMemoryBlocks{};
         bool modelsDataUpdated{false};
 
+        uint32 surfaceCount{0};
         DeviceMemoryArray surfacesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> surfacesDataMemoryBlocks{};
         bool surfacesDataUpdated{false};
@@ -133,11 +137,20 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
             bool instancesIndexUpdated{false};
 
+            // std::shared_ptr<vireo::Buffer> instancesIndexCulledBuffer;
+            // std::shared_ptr<vireo::Buffer> instancesIndexCulledCounterBuffer;
+
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
                 uint32 pipelineId);
 
-            void update(const vireo::CommandList& commandList);
+            void update() const;
+
+            void buildDrawCommand(const vireo::CommandList& commandList) const;
+
+            // auto getInstancesIndexCulledCounter() const {
+                // return *reinterpret_cast<uint32*>(instancesIndexCulledCounterBuffer->getMappedAddress());
+            // }
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,

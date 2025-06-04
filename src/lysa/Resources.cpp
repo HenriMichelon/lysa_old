@@ -25,6 +25,13 @@ namespace lysa {
             config.maxVertexInstances,
             vireo::BufferType::DEVICE_STORAGE,
             L"Vertex Array"},
+        indexArray {
+            vireo,
+            sizeof(uint32),
+            config.maxVertexInstances * 2,
+            config.maxVertexInstances * 2,
+            vireo::BufferType::DEVICE_STORAGE,
+            L"Index Array"},
         materialArray {
             vireo,
             sizeof(MaterialData),
@@ -88,6 +95,7 @@ namespace lysa {
     void Resources::restart() {
         auto lock = std::lock_guard(mutex);
         vertexArray.restart();
+        indexArray.restart();
         materialArray.restart();
         if (textureUpdated) {
             Application::getGraphicQueue()->waitIdle();
@@ -100,6 +108,7 @@ namespace lysa {
         samplers.cleanup();
         textures.clear();
         blankImage.reset();
+        indexArray.cleanup();
         vertexArray.cleanup();
         materialArray.cleanup();
         descriptorLayout.reset();
@@ -108,6 +117,7 @@ namespace lysa {
 
     void Resources::flush(const vireo::CommandList& commandList) {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
+        indexArray.flush(commandList);
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
         updated = false;

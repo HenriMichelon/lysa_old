@@ -72,16 +72,15 @@ namespace lysa {
     }
 
     void Scene::compute(vireo::CommandList& commandList) {
-        const auto aspectRatio = viewport.width / viewport.height;
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            // frustumCullingPipeline.dispatch(
-            //     commandList,
-            //     aspectRatio,
-            //     pipelineId,
-            //     pipelineData->instancesIndex.size(),
-            //     *currentCamera,
-            //     *pipelineData->instancesIndexBuffer);
-        }
+        // for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+        //     frustumCullingPipeline.dispatch(
+        //         commandList,
+        //         pipelineId,
+        //         surfaceCount,
+        //         *currentCamera,
+        //         *pipelineData->instancesIndexCulledBuffer,
+        //         *pipelineData->instancesIndexCulledCounterBuffer);
+        // }
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
@@ -115,12 +114,14 @@ namespace lysa {
                 for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                     const auto& meshSurface = meshSurfaces[surfaceIndex];
                     surfaceDatas[surfaceIndex].modelIndex = modelsDataMemoryBlocks[meshInstance].instanceIndex;
-                    surfaceDatas[surfaceIndex].vertexIndex = mesh->getVertexIndex();
+                    surfaceDatas[surfaceIndex].firstVertex = mesh->getVerticesIndex();
+                    surfaceDatas[surfaceIndex].firstIndex = mesh->getIndicesIndex();
                     surfaceDatas[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
                     surfaceDatas[surfaceIndex].indexCount = meshSurface->indexCount;
                 }
                 surfacesDataArray.write(surfacesDataMemoryBlocks[meshInstance], surfaceDatas.data());
                 surfacesDataUpdated = true;
+                surfaceCount += meshSurfaces.size();
                 if (mesh->isUpdated()) { mesh->decrementUpdates(); }
             }
             for (const auto& material : mesh->getMaterials()) {
@@ -141,7 +142,7 @@ namespace lysa {
         }
 
         for (auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            pipelineData->update(commandList);
+            pipelineData->update();
         }
 
         if (Application::getResources().isUpdated()) {
@@ -255,6 +256,7 @@ namespace lysa {
                 for (const auto& pipelineId : nodePipelineIds) {
                     opaquePipelinesData[pipelineId]->removeNode(meshInstance, surfacesDataMemoryBlocks);
                 }
+                surfaceCount -= mesh->getSurfaces().size();
             }
             break;
         }
@@ -266,13 +268,20 @@ namespace lysa {
         }
     }
 
+    void Scene::buildDrawCommand(const vireo::CommandList& commandList) const {
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            pipelineData->buildDrawCommand(commandList);
+        }
+    }
+
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            if (!pipelineData->instancesIndex.empty()) {
+            // const auto& counter = pipelineData->getInstancesIndexCulledCounter();
+            // if (counter > 0) {
                 const auto& pipeline = pipelines.at(pipelineId);
                 commandList.bindPipeline(pipeline);
                 commandList.bindDescriptors(pipeline, {
@@ -282,7 +291,7 @@ namespace lysa {
                     pipelineData->descriptorSet,
                 });
                 commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
-            }
+            // }
         }
     }
 
@@ -311,17 +320,41 @@ namespace lysa {
         instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(Index) * config.maxVertexPerFrame, 1,
-            L"Draw indices")} {
+            L"Draw indices")}
+        // instancesIndexCulledBuffer{Application::getVireo().createBuffer(
+        //     vireo::BufferType::READWRITE_STORAGE,
+        //     sizeof(Index) * config.maxVertexPerFrame, 1,
+        //     L"Culled draw indices")},
+        // instancesIndexCulledCounterBuffer{Application::getVireo().createBuffer(
+        //     vireo::BufferType::STORAGE,
+        //     sizeof(uint32), 1,
+        //     L"Culled draw indices counter")}
+        {
         descriptorSet = Application::getVireo().createDescriptorSet(
             drawCommandDescriptorLayout,
             L"Draw Command");
         descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
         instancesIndexBuffer->map();
         drawCommandsStagingBuffer->map();
+        // instancesIndexCulledCounterBuffer->map();
     }
 
-    void Scene::PipelineData::update(const vireo::CommandList& commandList) {
-        if (instancesIndexUpdated) {
+    void Scene::PipelineData::update() const {
+        constexpr uint32 counter{0};
+        // instancesIndexCulledCounterBuffer->write(&counter);
+    }
+
+    void Scene::PipelineData::buildDrawCommand(const vireo::CommandList& commandList) const {
+        // const auto counter = getInstancesIndexCulledCounter();
+        // if (counter > 0) {
+        //     INFO(counter);
+        //     const auto drawCommand = vireo::DrawIndirectCommand {
+        //         .vertexCount = counter
+        //     };
+        //     drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
+        //     commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
+        // }
+        // if (instancesIndexUpdated) {
             if (instancesIndex.size() > 0) {
                 const auto drawCommand = vireo::DrawIndirectCommand {
                     .vertexCount = static_cast<uint32>(instancesIndex.size())
@@ -329,8 +362,8 @@ namespace lysa {
                 drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
                 commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
             }
-            instancesIndexUpdated = false;
-        }
+            // instancesIndexUpdated = false;
+        // }
     }
 
     void Scene::PipelineData::addNode(

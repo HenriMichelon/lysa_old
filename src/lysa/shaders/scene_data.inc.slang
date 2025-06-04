@@ -18,6 +18,7 @@ struct Model {
 struct MeshSurface {
     uint modelIndex;
     uint firstVertex;
+    uint firstIndex;
     uint materialIndex;
     uint indexCount;
 };
