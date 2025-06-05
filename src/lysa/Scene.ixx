@@ -82,8 +82,6 @@ export namespace lysa {
         void update(const vireo::CommandList& commandList);
         void compute(vireo::CommandList& commandList);
 
-        void buildDrawCommand(const vireo::CommandList& commandList) const;
-
         void drawOpaquesModels(
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
@@ -130,22 +128,12 @@ export namespace lysa {
 
             std::list<std::shared_ptr<MeshInstance>> models{};
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            std::shared_ptr<vireo::Buffer> drawCommandsStagingBuffer;
-
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
-            std::shared_ptr<vireo::Buffer> instancesIndexCounterBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
                 uint32 pipelineId);
-
-            void buildDrawCommand(const vireo::CommandList& commandList) const;
-
-            auto getInstancesIndexCounter() const {
-                return *reinterpret_cast<uint32*>(instancesIndexCounterBuffer->getMappedAddress());
-            }
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,

@@ -16,6 +16,11 @@ namespace lysa {
         const auto& vireo = Application::getVireo();
         globalBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Global), 1, DEBUG_NAME);
         globalBuffer->map();
+        commandClearBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(vireo::DrawIndirectCommand));
+        constexpr auto clearValue = vireo::DrawIndirectCommand{};
+        commandClearBuffer->map();
+        commandClearBuffer->write(&clearValue);
+        commandClearBuffer->unmap();
 
         descriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
         descriptorLayout->add(BINDING_GLOBAL, vireo::DescriptorType::UNIFORM);
@@ -24,7 +29,7 @@ namespace lysa {
         descriptorLayout->add(BINDING_MATERIALS, vireo::DescriptorType::DEVICE_STORAGE);
         descriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
         descriptorLayout->add(BINDING_OUTPUT, vireo::DescriptorType::READWRITE_STORAGE);
-        descriptorLayout->add(BINDING_COUNTER, vireo::DescriptorType::READWRITE_STORAGE);
+        descriptorLayout->add(BINDING_COMMAND, vireo::DescriptorType::READWRITE_STORAGE);
         descriptorLayout->build();
 
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, DEBUG_NAME);
@@ -51,17 +56,16 @@ namespace lysa {
         const uint32 surfaceCount,
         const Camera& camera,
         const vireo::Buffer& output,
-        const vireo::Buffer& counterBuffer) {
+        const vireo::Buffer& command) {
         auto global = Global{
             .pipelineId = pipelineId,
             .surfaceCount = surfaceCount,
         };
         Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
         globalBuffer->write(&global);
-        constexpr uint32 counter{0};
-        counterBuffer.write(&counter);
+        commandList.copy(*commandClearBuffer, command);
         descriptorSet->update(BINDING_OUTPUT, output);
-        descriptorSet->update(BINDING_COUNTER, counterBuffer);
+        descriptorSet->update(BINDING_COMMAND, command);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, { descriptorSet });
         commandList.dispatch((surfaceCount + 31) / 32, 1, 1);

@@ -25,7 +25,7 @@ export namespace lysa {
             uint32 surfaceCount,
             const Camera& camera,
             const vireo::Buffer& output,
-            const vireo::Buffer& counterBuffer) ;
+            const vireo::Buffer& command) ;
 
         virtual ~FrustumCulling() = default;
         FrustumCulling(FrustumCulling&) = delete;
@@ -38,7 +38,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_MATERIALS{3};
         static constexpr vireo::DescriptorIndex BINDING_SURFACES{4};
         static constexpr vireo::DescriptorIndex BINDING_OUTPUT{5};
-        static constexpr vireo::DescriptorIndex BINDING_COUNTER{6};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND{6};
         const std::wstring DEBUG_NAME{L"FrustumCulling"};
 
         struct Global {
@@ -50,6 +50,7 @@ export namespace lysa {
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
         std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
         std::shared_ptr<vireo::Buffer>           globalBuffer;
+        std::shared_ptr<vireo::Buffer>           commandClearBuffer;
         std::shared_ptr<vireo::Pipeline>         pipeline;
     };
 }

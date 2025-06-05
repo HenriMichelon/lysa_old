@@ -20,7 +20,7 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
         drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
-        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::DEVICE_STORAGE);
+        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::READWRITE_STORAGE);
         drawCommandDescriptorLayout->build();
     }
 
@@ -79,7 +79,7 @@ namespace lysa {
                 surfaceCount,
                 *currentCamera,
                 *pipelineData->instancesIndexBuffer,
-                *pipelineData->instancesIndexCounterBuffer);
+                *pipelineData->drawCommandsBuffer);
         }
     }
 
@@ -266,12 +266,6 @@ namespace lysa {
         }
     }
 
-    void Scene::buildDrawCommand(const vireo::CommandList& commandList) const {
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            pipelineData->buildDrawCommand(commandList);
-        }
-    }
-
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
@@ -311,37 +305,15 @@ namespace lysa {
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands")},
-        drawCommandsStagingBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::BUFFER_UPLOAD,
-            sizeof(vireo::DrawIndexedIndirectCommand), 1,
-            L"Draw commands upload")},
         instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
             sizeof(Index) * config.maxVertexPerFramePerPipeline, 1,
-            L"Culled draw indices")},
-        instancesIndexCounterBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::STORAGE,
-            sizeof(uint32), 1,
-            L"Culled draw indices counter")}
+            L"Culled draw indices")}
         {
         descriptorSet = Application::getVireo().createDescriptorSet(
             drawCommandDescriptorLayout,
             L"Draw Command");
         descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
-        drawCommandsStagingBuffer->map();
-        instancesIndexCounterBuffer->map();
-    }
-
-    void Scene::PipelineData::buildDrawCommand(const vireo::CommandList& commandList) const {
-        const auto counter = getInstancesIndexCounter();
-        if (counter > 0) {
-            // INFO(counter);
-            const auto drawCommand = vireo::DrawIndirectCommand {
-                .vertexCount = counter
-                };
-            drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-            commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
-        }
     }
 
     void Scene::PipelineData::addNode(
