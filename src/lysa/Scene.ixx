@@ -145,8 +145,6 @@ export namespace lysa {
                 const SceneConfiguration& config,
                 uint32 pipelineId);
 
-            void update() const;
-
             void buildDrawCommand(const vireo::CommandList& commandList) const;
 
             auto getInstancesIndexCulledCounter() const {

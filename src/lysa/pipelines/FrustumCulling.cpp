@@ -47,6 +47,7 @@ namespace lysa {
 
     void FrustumCulling::dispatch(
         vireo::CommandList& commandList,
+        float aspectRatio,
         const pipeline_id pipelineId,
         const uint32 surfaceCount,
         const Camera& camera,
@@ -56,8 +57,10 @@ namespace lysa {
             .pipelineId = pipelineId,
             .surfaceCount = surfaceCount,
         };
-        Frustum::extractPlanes(global.planes, mul(camera.getProjection(), inverse(camera.getTransformGlobal())));
+        Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
         globalBuffer->write(&global);
+        constexpr uint32 counter{0};
+        counterBuffer.write(&counter);
         descriptorSet->update(BINDING_OUTPUT, output);
         descriptorSet->update(BINDING_COUNTER, counterBuffer);
         commandList.bindPipeline(pipeline);

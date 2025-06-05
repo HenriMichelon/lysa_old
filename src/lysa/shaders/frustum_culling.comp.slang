@@ -10,7 +10,7 @@ struct Plane {
     float3 normal;
     float  distance;
     float signedDistance(float3 point) {
-        return dot(normal, point) - distance;
+        return dot(normal, point) + distance;
     }
 };
 
@@ -39,24 +39,30 @@ void main(uint3 id : SV_DispatchThreadID) {
         return;
     }
     Model model = models[surface.modelIndex];
+    float3 aabbCenter = (model.aabbMin + model.aabbMax) * 0.5;
+    float3 aabbExtent = (model.aabbMax - model.aabbMin) * 0.5;
+
     [unroll]
     for (int i = 0; i < 6; ++i) {
         Plane plane = global.planes[i];
-        float3 positiveVertex = float3(
-            (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
-            (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
-            (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
-        );
-        if (plane.signedDistance(positiveVertex) < 0.0f) {
-            return;
-        }
+        float r =
+        abs(plane.normal.x) * aabbExtent.x +
+        abs(plane.normal.y) * aabbExtent.y +
+        abs(plane.normal.z) * aabbExtent.z;
+
+    float d = dot(plane.normal, aabbCenter) + plane.distance;
+
+    if (d + r < 0.0) {
+        return; // AABB totalement à l'extérieur du plan
+    }
     }
 
     uint offset;
     InterlockedAdd(counter[0], surface.indexCount, offset);
-    for (int i = 0; i < surface.indexCount; i++) {
-        output[offset + i].index = indices[surface.firstIndex + i];
-        output[offset + i].surfaceIndex = surface.surfaceDataIndex;
+    for (uint i = 0; i < surface.indexCount; i++) {
+        uint idx = offset + i;
+        output[idx].index = indices[surface.firstIndex + i];
+        output[idx].surfaceIndex = surface.surfaceDataIndex;
     }
 
 }

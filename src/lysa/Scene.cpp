@@ -75,6 +75,7 @@ namespace lysa {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             frustumCullingPipeline.dispatch(
                 commandList,
+                viewport.width / viewport.height,
                 pipelineId,
                 surfaceCount,
                 *currentCamera,
@@ -141,10 +142,6 @@ namespace lysa {
         if (modelsDataUpdated) {
             modelsDataArray.flush(commandList);
             modelsDataUpdated = false;
-        }
-
-        for (auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            pipelineData->update();
         }
 
         if (Application::getResources().isUpdated()) {
@@ -341,30 +338,22 @@ namespace lysa {
         instancesIndexCulledCounterBuffer->map();
     }
 
-    void Scene::PipelineData::update() const {
-        constexpr uint32 counter{0};
-        instancesIndexCulledCounterBuffer->write(&counter);
-    }
-
     void Scene::PipelineData::buildDrawCommand(const vireo::CommandList& commandList) const {
-        // const auto counter = getInstancesIndexCulledCounter();
-        // if (counter > 0) {
-        //     INFO(counter);
-        //     const auto drawCommand = vireo::DrawIndirectCommand {
-        //         .vertexCount = counter
-        //     };
-        //     drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-        //     commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
-        // }
-        // if (instancesIndexUpdated) {
-            if (instancesIndex.size() > 0) {
-                const auto drawCommand = vireo::DrawIndirectCommand {
-                    .vertexCount = static_cast<uint32>(instancesIndex.size())
+        const auto counter = getInstancesIndexCulledCounter();
+        if (counter > 0) {
+            INFO(counter);
+            const auto drawCommand = vireo::DrawIndirectCommand {
+                .vertexCount = counter
                 };
-                drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-                commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
-            }
-            // instancesIndexUpdated = false;
+            drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
+            commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
+        }
+        // if (instancesIndex.size() > 0) {
+            // const auto drawCommand = vireo::DrawIndirectCommand {
+                // .vertexCount = static_cast<uint32>(instancesIndex.size())
+            // };
+            // drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
+            // commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
         // }
     }
 

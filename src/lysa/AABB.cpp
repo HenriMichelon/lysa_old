@@ -14,14 +14,14 @@ namespace lysa {
     AABB AABB::toGlobal(const float4x4& transform) const {
         // First extract the 8 transformed corners of the box using vmin/vmax
         const float3 corners[8] = {
-            float3(mul(transform, float4(min.x, min.y, min.z, 1.0f)).xyz),
-            float3(mul(transform, float4(min.x, max.y, min.z, 1.0f)).xyz),
-            float3(mul(transform, float4(min.x, min.y, max.z, 1.0f)).xyz),
-            float3(mul(transform, float4(min.x, max.y, max.z, 1.0f)).xyz),
-            float3(mul(transform, float4(max.x, min.y, min.z, 1.0f)).xyz),
-            float3(mul(transform, float4(max.x, max.y, min.z, 1.0f)).xyz),
-            float3(mul(transform, float4(max.x, min.y, max.z, 1.0f)).xyz),
-            float3(mul(transform, float4(max.x, max.y, max.z, 1.0f)).xyz)
+            float3(mul(float4(min.x, min.y, min.z, 1.0f), transform).xyz),
+            float3(mul(float4(min.x, max.y, min.z, 1.0f), transform).xyz),
+            float3(mul(float4(min.x, min.y, max.z, 1.0f), transform).xyz),
+            float3(mul(float4(min.x, max.y, max.z, 1.0f), transform).xyz),
+            float3(mul(float4(max.x, min.y, min.z, 1.0f), transform).xyz),
+            float3(mul(float4(max.x, max.y, min.z, 1.0f), transform).xyz),
+            float3(mul(float4(max.x, min.y, max.z, 1.0f), transform).xyz),
+            float3(mul(float4(max.x, max.y, max.z, 1.0f), transform).xyz)
         };
 
         // Now apply the min/max algorithm from before using the 8 transformed
