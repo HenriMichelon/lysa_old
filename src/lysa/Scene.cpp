@@ -136,11 +136,19 @@ namespace lysa {
         }
         if (surfacesDataUpdated) {
             surfacesDataArray.flush(commandList);
+            commandList.barrier(
+                *surfacesDataArray.getBuffer(),
+                vireo::ResourceState::COPY_DST,
+                vireo::ResourceState::SHADER_READ);
             surfacesDataUpdated = false;
         }
         if (modelsDataUpdated) {
             modelsDataArray.flush(commandList);
             modelsDataUpdated = false;
+            commandList.barrier(
+                *modelsDataArray.getBuffer(),
+                vireo::ResourceState::COPY_DST,
+                vireo::ResourceState::SHADER_READ);
         }
 
         if (Application::getResources().isUpdated()) {
@@ -272,18 +280,15 @@ namespace lysa {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            // const auto& counter = pipelineData->getInstancesIndexCulledCounter();
-            // if (counter > 0) {
-                const auto& pipeline = pipelines.at(pipelineId);
-                commandList.bindPipeline(pipeline);
-                commandList.bindDescriptors(pipeline, {
-                    Application::getResources().getDescriptorSet(),
-                    Application::getResources().getSamplers().getDescriptorSet(),
-                    descriptorSet,
-                    pipelineData->descriptorSet,
-                });
-                commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
-            // }
+            const auto& pipeline = pipelines.at(pipelineId);
+            commandList.bindPipeline(pipeline);
+            commandList.bindDescriptors(pipeline, {
+                Application::getResources().getDescriptorSet(),
+                Application::getResources().getSamplers().getDescriptorSet(),
+                descriptorSet,
+                pipelineData->descriptorSet,
+            });
+            commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
         }
     }
 

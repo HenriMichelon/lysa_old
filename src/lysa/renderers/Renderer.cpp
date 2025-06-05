@@ -28,10 +28,6 @@ namespace lysa {
         Scene& scene) const {
         scene.update(*commandList);
         scene.compute(*commandList);
-        commandList->end();
-        Application::getGraphicQueue()->submit({commandList});
-        Application::getGraphicQueue()->waitIdle();
-        commandList->begin();
     }
 
     void Renderer::render(
@@ -49,12 +45,10 @@ namespace lysa {
         if (config.forwardDepthPrepass) {
             depthPrepass(commandList, scene, frame.depthAttachment);
         }
-        if (clearAttachment) {
-            commandList.barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::RENDER_TARGET_COLOR);
-        }
+        commandList.barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_COLOR);
         if (config.forwardDepthPrepass) {
             commandList.barrier(
                 frame.depthAttachment,
@@ -73,6 +67,10 @@ namespace lysa {
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
                 vireo::ResourceState::UNDEFINED);
         }
+        // commandList.barrier(
+            // frame.colorAttachment,
+            // vireo::ResourceState::RENDER_TARGET_COLOR,
+            // vireo::ResourceState::UNDEFINED);
     }
 
     void Renderer::postprocess(
@@ -83,9 +81,9 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         if (postProcessingPasses.empty()) {
             commandList.barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::RENDER_TARGET_COLOR,
-                vireo::ResourceState::UNDEFINED);
+            frame.colorAttachment,
+            vireo::ResourceState::RENDER_TARGET_COLOR,
+            vireo::ResourceState::UNDEFINED);
         } else {
             commandList.barrier(
                 frame.colorAttachment,

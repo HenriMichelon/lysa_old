@@ -63,12 +63,24 @@ namespace lysa {
         };
         Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
         globalBuffer->write(&global);
+        commandList.barrier(
+            command,
+            vireo::ResourceState::INDIRECT_DRAW,
+            vireo::ResourceState::COPY_DST);
         commandList.copy(*commandClearBuffer, command);
+        commandList.barrier(
+            command,
+            vireo::ResourceState::COPY_DST,
+            vireo::ResourceState::COMPUTE_WRITE);
         descriptorSet->update(BINDING_OUTPUT, output);
         descriptorSet->update(BINDING_COMMAND, command);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors(pipeline, { descriptorSet });
         commandList.dispatch((surfaceCount + 31) / 32, 1, 1);
+        commandList.barrier(
+            command,
+            vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::INDIRECT_DRAW);
     }
 
 }
