@@ -39,22 +39,18 @@ void main(uint3 id : SV_DispatchThreadID) {
         return;
     }
     Model model = models[surface.modelIndex];
-    float3 aabbCenter = (model.aabbMin + model.aabbMax) * 0.5;
-    float3 aabbExtent = (model.aabbMax - model.aabbMin) * 0.5;
 
     [unroll]
     for (int i = 0; i < 6; ++i) {
         Plane plane = global.planes[i];
-        float r =
-        abs(plane.normal.x) * aabbExtent.x +
-        abs(plane.normal.y) * aabbExtent.y +
-        abs(plane.normal.z) * aabbExtent.z;
-
-    float d = dot(plane.normal, aabbCenter) + plane.distance;
-
-    if (d + r < 0.0) {
-        return; // AABB totalement à l'extérieur du plan
-    }
+        float3 positiveVertex = float3(
+            (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
+            (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
+            (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
+        );
+        if (plane.signedDistance(positiveVertex) < 0.0f) {
+            return;
+        }
     }
 
     uint offset;

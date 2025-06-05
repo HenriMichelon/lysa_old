@@ -75,12 +75,11 @@ namespace lysa {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             frustumCullingPipeline.dispatch(
                 commandList,
-                viewport.width / viewport.height,
                 pipelineId,
                 surfaceCount,
                 *currentCamera,
-                *pipelineData->instancesIndexCulledBuffer,
-                *pipelineData->instancesIndexCulledCounterBuffer);
+                *pipelineData->instancesIndexBuffer,
+                *pipelineData->instancesIndexCounterBuffer);
         }
     }
 
@@ -317,14 +316,10 @@ namespace lysa {
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands upload")},
         instancesIndexBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::STORAGE,
-            sizeof(Index) * config.maxVertexPerFrame, 1,
-            L"Draw indices")},
-        instancesIndexCulledBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
-            sizeof(Index) * config.maxVertexPerFrame, 1,
+            sizeof(Index) * config.maxVertexPerFramePerPipeline, 1,
             L"Culled draw indices")},
-        instancesIndexCulledCounterBuffer{Application::getVireo().createBuffer(
+        instancesIndexCounterBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::STORAGE,
             sizeof(uint32), 1,
             L"Culled draw indices counter")}
@@ -333,28 +328,20 @@ namespace lysa {
             drawCommandDescriptorLayout,
             L"Draw Command");
         descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
-        instancesIndexBuffer->map();
         drawCommandsStagingBuffer->map();
-        instancesIndexCulledCounterBuffer->map();
+        instancesIndexCounterBuffer->map();
     }
 
     void Scene::PipelineData::buildDrawCommand(const vireo::CommandList& commandList) const {
-        const auto counter = getInstancesIndexCulledCounter();
+        const auto counter = getInstancesIndexCounter();
         if (counter > 0) {
-            INFO(counter);
+            // INFO(counter);
             const auto drawCommand = vireo::DrawIndirectCommand {
                 .vertexCount = counter
                 };
             drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
             commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
         }
-        // if (instancesIndex.size() > 0) {
-            // const auto drawCommand = vireo::DrawIndirectCommand {
-                // .vertexCount = static_cast<uint32>(instancesIndex.size())
-            // };
-            // drawCommandsStagingBuffer->write(&drawCommand, sizeof(drawCommand));
-            // commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer);
-        // }
     }
 
     void Scene::PipelineData::addNode(
@@ -364,40 +351,14 @@ namespace lysa {
         models.push_back(meshInstance);
         const auto& mesh = meshInstance->getMesh();
         const auto& meshSurfaces{mesh->getSurfaces()};
-        const auto& meshIndices{mesh->getIndices()};
-
         auto surfaceCount{0};
         for (const auto& meshSurface : meshSurfaces) {
             if (meshSurface->material->getPipelineId() == pipelineId) {
                 surfaceCount++;
             }
         }
-
         if (surfaceCount > 0) {
-            const auto startIndex{instancesIndex.size()};
-            if ((startIndex + mesh->getIndices().size() > config.maxVertexPerFrame)) {
-                throw Exception("Too many vertices in a single frame");
-            }
-
             const auto memoryBlock{surfacesDataArray.alloc(surfaceCount)};
-            auto surfaceIndex{0};
-            for (const auto& meshSurface : meshSurfaces) {
-                if (meshSurface->material->getPipelineId() == pipelineId) {
-                    const auto surfaceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
-                    for (int i = 0; i < meshSurface->indexCount; i++) {
-                        instancesIndex.push_back({
-                           .index = meshIndices[meshSurface->firstIndex + i],
-                           .surfaceIndex = surfaceDataIndex
-                        });
-                    }
-                    surfaceIndex++;
-                }
-            }
-            instancesIndexBuffer->write(
-                &instancesIndex[startIndex],
-                mesh->getIndices().size() * sizeof(Index),
-                startIndex * sizeof(Index));
-            instancesIndexUpdated = true;
             surfacesDataMemoryBlocks[meshInstance] = memoryBlock;
         }
     }
@@ -406,34 +367,7 @@ namespace lysa {
         const std::shared_ptr<MeshInstance>& meshInstance,
         const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
         models.remove(meshInstance);
-        rebuildInstancesIndex(surfacesDataMemoryBlocks);
     }
 
-    void Scene::PipelineData::rebuildInstancesIndex(
-        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
-        instancesIndex.clear();
-        for (const auto& meshInstance : models) {
-            const auto& mesh = meshInstance->getMesh();
-            const auto& meshSurfaces = mesh->getSurfaces();
-
-            auto surfaceIndex{0};
-            for (const auto& meshSurface : meshSurfaces) {
-                if (meshSurface->material->getPipelineId() == pipelineId) {
-                    const auto surfaceDataIndex = surfacesDataMemoryBlocks.at(meshInstance).instanceIndex + surfaceIndex;
-                    for (int i = 0; i < meshSurface->indexCount; i++) {
-                        instancesIndex.push_back({
-                            .index = mesh->getIndices()[meshSurface->firstIndex + i],
-                            .surfaceIndex = surfaceDataIndex
-                        });
-                    }
-                    surfaceIndex++;
-                }
-            }
-        }
-        if (instancesIndex.size() > 0) {
-            instancesIndexBuffer->write(instancesIndex.data(), instancesIndex.size() * sizeof(Index));
-            instancesIndexUpdated = true;
-        }
-    }
 
 }

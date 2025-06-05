@@ -33,7 +33,7 @@ export namespace lysa {
         uint32 maxAsyncNodesUpdatedPerFrame{20};
         uint32 maxModelsPerFrame{10000};
         uint32 maxMeshSurfacePerFrame{100000};
-        uint32 maxVertexPerFrame{2500000};
+        uint32 maxVertexPerFramePerPipeline{2500000};
     };
 
     struct RenderingConfiguration {

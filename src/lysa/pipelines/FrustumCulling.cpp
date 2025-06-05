@@ -47,7 +47,6 @@ namespace lysa {
 
     void FrustumCulling::dispatch(
         vireo::CommandList& commandList,
-        float aspectRatio,
         const pipeline_id pipelineId,
         const uint32 surfaceCount,
         const Camera& camera,

@@ -21,7 +21,6 @@ export namespace lysa {
 
         void dispatch(
             vireo::CommandList& commandList,
-            float aspectRatio,
             pipeline_id pipelineId,
             uint32 surfaceCount,
             const Camera& camera,

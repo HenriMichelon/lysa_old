@@ -134,12 +134,8 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
             std::shared_ptr<vireo::Buffer> drawCommandsStagingBuffer;
 
-            std::vector<Index> instancesIndex;
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
-            bool instancesIndexUpdated{false};
-
-            std::shared_ptr<vireo::Buffer> instancesIndexCulledBuffer;
-            std::shared_ptr<vireo::Buffer> instancesIndexCulledCounterBuffer;
+            std::shared_ptr<vireo::Buffer> instancesIndexCounterBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -147,8 +143,8 @@ export namespace lysa {
 
             void buildDrawCommand(const vireo::CommandList& commandList) const;
 
-            auto getInstancesIndexCulledCounter() const {
-                return *reinterpret_cast<uint32*>(instancesIndexCulledCounterBuffer->getMappedAddress());
+            auto getInstancesIndexCounter() const {
+                return *reinterpret_cast<uint32*>(instancesIndexCounterBuffer->getMappedAddress());
             }
 
             void addNode(
@@ -160,8 +156,6 @@ export namespace lysa {
                 const std::shared_ptr<MeshInstance>& meshInstance,
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks);
 
-            void rebuildInstancesIndex(
-                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks);
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
