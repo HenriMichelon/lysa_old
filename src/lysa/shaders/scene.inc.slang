@@ -66,14 +66,14 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 
 [[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<Material> materials : register(t1, space0);
-[[vk::binding(2, 0)]] Texture2D textures[498] : register(t2, space0); // Resources::MAX_TEXTURES
+[[vk::binding(2, 0)]] Texture2D textures[] : register(t2, space0);
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<Model> models : register(t1, space2);
 [[vk::binding(2, 2)]] StructuredBuffer<MeshSurface> surfaces : register(t2, space2);
 [[vk::binding(3, 2)]] ConstantBuffer<Lights> lights : register(b3, space2);
 
-[[vk::binding(0, 3)]] StructuredBuffer<Index> indices : register(u0, space3);
+[[vk::binding(0, 3)]] RWStructuredBuffer<Index> indices : register(u0, space3);
 
 VertexOutput vertexMVP(MeshSurface surface, Vertex input) {
     VertexOutput output;
