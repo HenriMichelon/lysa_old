@@ -130,6 +130,8 @@ export namespace lysa {
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
             std::shared_ptr<vireo::Buffer> instancesIndexBuffer;
+            std::shared_ptr<vireo::Buffer> culledSurfacesBuffer;
+            std::shared_ptr<vireo::Buffer> culledSurfacesCounterBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,

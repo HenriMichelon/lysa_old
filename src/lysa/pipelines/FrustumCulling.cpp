@@ -22,32 +22,53 @@ namespace lysa {
         commandClearBuffer->write(&clearValue);
         commandClearBuffer->unmap();
 
-        descriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
-        descriptorLayout->add(BINDING_GLOBAL, vireo::DescriptorType::UNIFORM);
-        descriptorLayout->add(BINDING_INDICES, vireo::DescriptorType::DEVICE_STORAGE);
-        descriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
-        descriptorLayout->add(BINDING_MATERIALS, vireo::DescriptorType::DEVICE_STORAGE);
-        descriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
-        descriptorLayout->add(BINDING_OUTPUT, vireo::DescriptorType::READWRITE_STORAGE);
-        descriptorLayout->add(BINDING_COMMAND, vireo::DescriptorType::READWRITE_STORAGE);
-        descriptorLayout->build();
+        cullingDescriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
+        cullingDescriptorLayout->add(BINDING_CULLING_GLOBAL, vireo::DescriptorType::UNIFORM);
+        cullingDescriptorLayout->add(BINDING_CULLING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
+        cullingDescriptorLayout->add(BINDING_CULLING_MATERIALS, vireo::DescriptorType::DEVICE_STORAGE);
+        cullingDescriptorLayout->add(BINDING_CULLING_SURFACE, vireo::DescriptorType::DEVICE_STORAGE);
+        cullingDescriptorLayout->add(BINDING_CULLING_OUTPUT, vireo::DescriptorType::READWRITE_STORAGE);
+        cullingDescriptorLayout->add(BINDING_CULLING_COUNTER, vireo::DescriptorType::READWRITE_STORAGE);
+        cullingDescriptorLayout->build();
 
-        descriptorSet = vireo.createDescriptorSet(descriptorLayout, DEBUG_NAME);
-        descriptorSet->update(BINDING_GLOBAL, globalBuffer);
-        descriptorSet->update(BINDING_MODELS, modelsArray.getBuffer());
-        descriptorSet->update(BINDING_INDICES, Application::getResources().getIndexArray().getBuffer());
-        descriptorSet->update(BINDING_MATERIALS, Application::getResources().getMaterialArray().getBuffer());
-        descriptorSet->update(BINDING_SURFACES, surfacesArray.getBuffer());
+        cullingDescriptorSet = vireo.createDescriptorSet(cullingDescriptorLayout, DEBUG_NAME);
+        cullingDescriptorSet->update(BINDING_CULLING_GLOBAL, globalBuffer);
+        cullingDescriptorSet->update(BINDING_CULLING_MODELS, modelsArray.getBuffer());
+        cullingDescriptorSet->update(BINDING_CULLING_MATERIALS, Application::getResources().getMaterialArray().getBuffer());
+        cullingDescriptorSet->update(BINDING_CULLING_SURFACE, surfacesArray.getBuffer());
 
-        const auto pipelineResources = vireo.createPipelineResources(
-            { descriptorLayout },
+        commandDescriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
+        commandDescriptorLayout->add(BINDING_COMMAND_INDICES, vireo::DescriptorType::DEVICE_STORAGE);
+        commandDescriptorLayout->add(BINDING_COMMAND_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
+        commandDescriptorLayout->add(BINDING_COMMAND_INPUT, vireo::DescriptorType::READWRITE_STORAGE);
+        commandDescriptorLayout->add(BINDING_COMMAND_COUNTER, vireo::DescriptorType::READWRITE_STORAGE);
+        commandDescriptorLayout->add(BINDING_COMMAND_OUTPUT, vireo::DescriptorType::READWRITE_STORAGE);
+        commandDescriptorLayout->add(BINDING_COMMAND_COMMAND, vireo::DescriptorType::READWRITE_STORAGE);
+        commandDescriptorLayout->build();
+
+        commandDescriptorSet = vireo.createDescriptorSet(commandDescriptorLayout, DEBUG_NAME);
+        commandDescriptorSet->update(BINDING_COMMAND_INDICES, Application::getResources().getIndexArray().getBuffer());
+        commandDescriptorSet->update(BINDING_COMMAND_SURFACES, surfacesArray.getBuffer());
+
+        const auto pipelineResourcesCulling = vireo.createPipelineResources(
+            { cullingDescriptorLayout },
             {},
-            DEBUG_NAME);
+            DEBUG_NAME + L" culling");
+        const auto pipelineResourcesCommand = vireo.createPipelineResources(
+            { commandDescriptorLayout },
+            {},
+            DEBUG_NAME + L" draw commands");
+
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
+
         VirtualFS::loadBinaryData(L"app://shaders/frustum_culling.comp" + ext, tempBuffer);
-        const auto shader = vireo.createShaderModule(tempBuffer);
-        pipeline = vireo.createComputePipeline(pipelineResources, shader, DEBUG_NAME);
+        auto shader = vireo.createShaderModule(tempBuffer);
+        pipelineCulling = vireo.createComputePipeline(pipelineResourcesCulling, shader, DEBUG_NAME + L" culling");
+
+        VirtualFS::loadBinaryData(L"app://shaders/draw_commands.comp" + ext, tempBuffer);
+        shader = vireo.createShaderModule(tempBuffer);
+        pipelineDrawCommand = vireo.createComputePipeline(pipelineResourcesCommand, shader, DEBUG_NAME + L" draw commands");
     }
 
     void FrustumCulling::dispatch(
@@ -55,14 +76,34 @@ namespace lysa {
         const pipeline_id pipelineId,
         const uint32 surfaceCount,
         const Camera& camera,
-        const vireo::Buffer& output,
+        const vireo::Buffer& outputSurfaces,
+        const vireo::Buffer& outputSurfacesCounter,
+        const vireo::Buffer& outputIndices,
         const vireo::Buffer& command) {
+
         auto global = Global{
             .pipelineId = pipelineId,
             .surfaceCount = surfaceCount,
         };
         Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
         globalBuffer->write(&global);
+
+        commandList.copy(*commandClearBuffer, outputSurfacesCounter);
+
+        commandList.barrier(
+            outputSurfaces,
+            vireo::ResourceState::SHADER_READ,
+            vireo::ResourceState::COMPUTE_WRITE);
+        cullingDescriptorSet->update(BINDING_CULLING_OUTPUT, outputSurfaces);
+        cullingDescriptorSet->update(BINDING_CULLING_COUNTER, outputSurfacesCounter);
+        commandList.bindPipeline(pipelineCulling);
+        commandList.bindDescriptors(pipelineCulling, { cullingDescriptorSet });
+        commandList.dispatch((surfaceCount + 63) / 64, 1, 1);
+        commandList.barrier(
+            outputSurfaces,
+            vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::SHADER_READ);
+
         commandList.barrier(
             command,
             vireo::ResourceState::INDIRECT_DRAW,
@@ -72,11 +113,23 @@ namespace lysa {
             command,
             vireo::ResourceState::COPY_DST,
             vireo::ResourceState::COMPUTE_WRITE);
-        descriptorSet->update(BINDING_OUTPUT, output);
-        descriptorSet->update(BINDING_COMMAND, command);
-        commandList.bindPipeline(pipeline);
-        commandList.bindDescriptors(pipeline, { descriptorSet });
-        commandList.dispatch((surfaceCount + 63) / 64, 1, 1);
+
+        commandList.barrier(
+            outputIndices,
+            vireo::ResourceState::SHADER_READ,
+            vireo::ResourceState::COMPUTE_WRITE);
+        commandDescriptorSet->update(BINDING_COMMAND_INPUT, outputSurfaces);
+        commandDescriptorSet->update(BINDING_COMMAND_COUNTER, outputSurfacesCounter);
+        commandDescriptorSet->update(BINDING_COMMAND_OUTPUT, outputIndices);
+        commandDescriptorSet->update(BINDING_COMMAND_COMMAND, command);
+        commandList.bindPipeline(pipelineDrawCommand);
+        commandList.bindDescriptors(pipelineDrawCommand, { commandDescriptorSet });
+        commandList.dispatch(1, 1, 1);
+        commandList.barrier(
+            outputIndices,
+            vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::SHADER_READ);
+
         commandList.barrier(
             command,
             vireo::ResourceState::COMPUTE_WRITE,

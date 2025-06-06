@@ -24,7 +24,9 @@ export namespace lysa {
             pipeline_id pipelineId,
             uint32 surfaceCount,
             const Camera& camera,
-            const vireo::Buffer& output,
+            const vireo::Buffer& outputSurfaces,
+            const vireo::Buffer& outputSurfacesCounter,
+            const vireo::Buffer& outputIndices,
             const vireo::Buffer& command) ;
 
         virtual ~FrustumCulling() = default;
@@ -32,13 +34,20 @@ export namespace lysa {
         FrustumCulling& operator=(FrustumCulling&) = delete;
 
     private:
-        static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
-        static constexpr vireo::DescriptorIndex BINDING_INDICES{1};
-        static constexpr vireo::DescriptorIndex BINDING_MODELS{2};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIALS{3};
-        static constexpr vireo::DescriptorIndex BINDING_SURFACES{4};
-        static constexpr vireo::DescriptorIndex BINDING_OUTPUT{5};
-        static constexpr vireo::DescriptorIndex BINDING_COMMAND{6};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_GLOBAL{0};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_MODELS{1};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_MATERIALS{2};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_SURFACE{3};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_OUTPUT{4};
+        static constexpr vireo::DescriptorIndex BINDING_CULLING_COUNTER{5};
+
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_INDICES{0};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_SURFACES{1};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_INPUT{2};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_COUNTER{3};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_OUTPUT{4};
+        static constexpr vireo::DescriptorIndex BINDING_COMMAND_COMMAND{5};
+
         const std::wstring DEBUG_NAME{L"FrustumCulling"};
 
         struct Global {
@@ -47,10 +56,13 @@ export namespace lysa {
             Frustum::Plane planes[6];
         };
 
-        std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-        std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
+        std::shared_ptr<vireo::DescriptorLayout> cullingDescriptorLayout;
+        std::shared_ptr<vireo::DescriptorSet>    cullingDescriptorSet;
+        std::shared_ptr<vireo::DescriptorLayout> commandDescriptorLayout;
+        std::shared_ptr<vireo::DescriptorSet>    commandDescriptorSet;
         std::shared_ptr<vireo::Buffer>           globalBuffer;
         std::shared_ptr<vireo::Buffer>           commandClearBuffer;
-        std::shared_ptr<vireo::Pipeline>         pipeline;
+        std::shared_ptr<vireo::Pipeline>         pipelineCulling;
+        std::shared_ptr<vireo::Pipeline>         pipelineDrawCommand;
     };
 }

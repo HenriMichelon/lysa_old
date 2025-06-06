@@ -20,20 +20,12 @@ struct Global {
     Plane planes[6];
 };
 
-struct DrawIndirectCommand {
-    uint vertexCount;
-    uint instanceCount;
-    uint firstVertex;
-    uint firstInstance;
-};
-
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
-[[vk::binding(1, 0)]] StructuredBuffer<uint> indices : register(t1, space0);
-[[vk::binding(2, 0)]] StructuredBuffer<Model> models : register(t2, space0);
-[[vk::binding(3, 0)]] StructuredBuffer<Material> materials : register(t3, space0);
-[[vk::binding(4, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t4, space0);
-[[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
-[[vk::binding(6, 0)]] RWStructuredBuffer<DrawIndirectCommand> command : register(u6, space0);
+[[vk::binding(1, 0)]] StructuredBuffer<Model> models : register(t1, space0);
+[[vk::binding(2, 0)]] StructuredBuffer<Material> materials : register(t2, space0);
+[[vk::binding(3, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t3, space0);
+[[vk::binding(4, 0)]] RWStructuredBuffer<uint> output : register(u4, space0);
+[[vk::binding(5, 0)]] RWStructuredBuffer<uint> surfaceCount : register(u5, space0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {
@@ -61,11 +53,7 @@ void main(uint3 id : SV_DispatchThreadID) {
     }
 
     uint offset;
-    InterlockedAdd(command[0].vertexCount, surface.indexCount, offset);
-    for (uint i = 0; i < surface.indexCount; i++) {
-        uint idx = offset + i;
-        output[idx].index = indices[surface.firstIndex + i];
-        output[idx].surfaceIndex = surface.surfaceDataIndex;
-    }
-
+    InterlockedAdd(surfaceCount[0], 1, offset);
+    uint tmp;
+    InterlockedExchange(output[offset], id.x, tmp);
 }

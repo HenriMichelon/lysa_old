@@ -64,6 +64,7 @@ set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/default.vert.slang"
         "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
         "${SHADERS_SRC_DIR}/forward.frag.slang"
+        "${SHADERS_SRC_DIR}/draw_commands.comp.slang"
         "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
         "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/quad.vert.slang"
