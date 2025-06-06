@@ -35,7 +35,7 @@ struct DrawIndirectCommand {
 [[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
 [[vk::binding(6, 0)]] RWStructuredBuffer<DrawIndirectCommand> command : register(u6, space0);
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {
     if (id.x >= global.surfaceCount) {
         return;

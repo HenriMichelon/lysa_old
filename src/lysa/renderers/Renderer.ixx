@@ -38,7 +38,7 @@ export namespace lysa {
             Scene& scene) const;
 
         void render(
-            vireo::CommandList& commandList,
+            const std::shared_ptr<vireo::CommandList>& commandList,
             const Scene& scene,
             bool clearAttachment,
             uint32 frameIndex);

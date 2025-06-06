@@ -31,6 +31,8 @@ namespace lysa {
             frame.inFlightFence = vireo.createFence(true, L"Present Fence");
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
+            frame.commandListUpdate = frame.commandAllocator->createCommandList();
+            frame.semaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
         }
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer");
         renderer->resize(swapChain->getExtent());
@@ -99,15 +101,26 @@ namespace lysa {
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
 
         frame.commandAllocator->reset();
-        auto& commandList = frame.commandList;
         const auto& mainViewport = viewports.front();
 
+        frame.commandListUpdate->begin();
+        for (const auto& viewport : viewports) {
+            auto& scene = *viewport->getScene(frameIndex);
+            renderer->update(frame.commandListUpdate, scene);
+        }
+        frame.commandListUpdate->end();
+        Application::getGraphicQueue()->submit(
+            vireo::WaitStage::COMPUTE_SHADER,
+            frame.semaphore,
+            {frame.commandListUpdate});
+        // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        auto& commandList = frame.commandList;
         commandList->begin();
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            renderer->update(commandList, scene);
             renderer->render(
-                *commandList,
+                commandList,
                 scene,
                 viewport == mainViewport,
                 swapChain->getCurrentFrameIndex());
@@ -125,8 +138,9 @@ namespace lysa {
         commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
-        // commandLists.push_back(commandList);
         Application::getGraphicQueue()->submit(
+            frame.semaphore,
+            vireo::WaitStage::PIPELINE_TOP,
             frame.inFlightFence,
             swapChain,
             {commandList});

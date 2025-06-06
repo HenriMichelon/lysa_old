@@ -19,7 +19,7 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
-        drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Draw Command");
+        drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
         drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::READWRITE_STORAGE);
         drawCommandDescriptorLayout->build();
     }
@@ -73,13 +73,22 @@ namespace lysa {
 
     void Scene::compute(vireo::CommandList& commandList) {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            const auto& cullingBuffer = *pipelineData->instancesIndexBuffer;
+            commandList.barrier(
+                cullingBuffer,
+                vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::COMPUTE_WRITE);
             frustumCullingPipeline.dispatch(
                 commandList,
                 pipelineId,
                 surfaceCount,
                 *currentCamera,
-                *pipelineData->instancesIndexBuffer,
+                cullingBuffer,
                 *pipelineData->drawCommandsBuffer);
+            commandList.barrier(
+                cullingBuffer,
+                vireo::ResourceState::COMPUTE_WRITE,
+                vireo::ResourceState::SHADER_READ);
         }
     }
 
@@ -313,8 +322,8 @@ namespace lysa {
         instancesIndexBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
             sizeof(Index) * config.maxVertexPerFramePerPipeline, 1,
-            L"Culled draw indices")}
-        {
+            L"Culling indices")}
+    {
         descriptorSet = Application::getVireo().createDescriptorSet(
             drawCommandDescriptorLayout,
             L"Draw Command");

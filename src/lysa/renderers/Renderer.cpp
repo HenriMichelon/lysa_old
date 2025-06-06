@@ -31,38 +31,38 @@ namespace lysa {
     }
 
     void Renderer::render(
-        vireo::CommandList& commandList,
+        const std::shared_ptr<vireo::CommandList>& commandList,
         const Scene& scene,
         const bool clearAttachment,
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         update(frameIndex);
         const auto& frame = framesData[frameIndex];
-        commandList.barrier(
+        commandList->barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_DEPTH);
         if (config.forwardDepthPrepass) {
-            depthPrepass(commandList, scene, frame.depthAttachment);
+            depthPrepass(*commandList, scene, frame.depthAttachment);
         }
-        commandList.barrier(
+        commandList->barrier(
             frame.colorAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         if (config.forwardDepthPrepass) {
-            commandList.barrier(
+            commandList->barrier(
                 frame.depthAttachment,
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
                 vireo::ResourceState::RENDER_TARGET_DEPTH_READ);
         }
-        mainColorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
+        mainColorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
         if (config.forwardDepthPrepass) {
-            commandList.barrier(
+            commandList->barrier(
                 frame.depthAttachment,
                 vireo::ResourceState::RENDER_TARGET_DEPTH_READ,
                 vireo::ResourceState::UNDEFINED);
         } else {
-            commandList.barrier(
+            commandList->barrier(
                 frame.depthAttachment,
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
                 vireo::ResourceState::UNDEFINED);
