@@ -19,7 +19,10 @@ export namespace lysa {
         float4 position; // position + uv.x
         float4 normal;   // normal + uv.y
         float4 tangent;  // tangent + sign
+
+        static const std::vector<vireo::VertexAttributeDesc> vertexAttributes;
     };
+
 
     /**
      * %A Mesh vertex
@@ -151,6 +154,8 @@ export namespace lysa {
         auto getVerticesIndex() const { return verticesMemoryBlock.instanceIndex; }
 
         auto getIndicesIndex() const { return indicesMemoryBlock.instanceIndex; }
+
+        auto getSurfacesIndex() const { return surfacesMemoryBlock.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 

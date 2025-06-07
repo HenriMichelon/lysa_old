@@ -21,10 +21,9 @@ export namespace lysa {
         static constexpr auto MAX_TEXTURES{500};
 
         static constexpr uint32_t SET_RESOURCES{0};
-        static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
-        static constexpr vireo::DescriptorIndex BINDING_SURFACES{2};
-        static constexpr vireo::DescriptorIndex BINDING_TEXTURE{3};
+        static constexpr vireo::DescriptorIndex BINDING_MATERIAL{0};
+        static constexpr vireo::DescriptorIndex BINDING_SURFACES{1};
+        static constexpr vireo::DescriptorIndex BINDING_TEXTURE{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Resources(
@@ -54,7 +53,7 @@ export namespace lysa {
 
         void setUpdated() { updated = true; }
 
-        auto isUpdated() const { return updated; }
+        bool isUpdated() const { return updated; }
 
         auto& getMutex() { return mutex; }
 

@@ -12,10 +12,11 @@
 #define TRANSPARENCY_SCISSOR       2
 #define TRANSPARENCY_SCISSOR_ALPHA 3
 
-struct Vertex {
-    float4 position; // position + uv.x
-    float4 normal;   // normal + uv.y
-    float4 tangent;  // tangent + sign
+struct VertexInput {
+    [[vk::location(0)]] float4 position : POSITION; // position + uv.x
+    [[vk::location(1)]] float4 normal   : NORMAL;   // normal + uv.y
+    [[vk::location(2)]] float4 tangent  : TANGENT;  // tangent + sign
+    uint instanceId : SV_InstanceID;
 };
 
 struct VertexOutput {
@@ -64,35 +65,12 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;
 }
 
-[[vk::binding(0, 0)]] StructuredBuffer<Vertex> vertices : register(t0, space0);
-[[vk::binding(1, 0)]] StructuredBuffer<Material> materials : register(t1, space0);
-[[vk::binding(3, 0)]] Texture2D textures[] : register(t3, space0);
+[[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);
+[[vk::binding(1, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t1, space0);
+[[vk::binding(2, 0)]] Texture2D textures[] : register(t2, space0);
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<Model> models : register(t1, space2);
-[[vk::binding(2, 2)]] StructuredBuffer<MeshSurface> surfaces : register(t2, space2);
-[[vk::binding(3, 2)]] ConstantBuffer<Lights> lights : register(b3, space2);
+[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
 
-[[vk::binding(0, 3)]] RWStructuredBuffer<Index> indices : register(u0, space3);
-
-VertexOutput vertexMVP(MeshSurface surface, Vertex input) {
-    VertexOutput output;
-    float4x4 model = models[surface.modelIndex].transform;
-
-    float4 position = float4(input.position.xyz, 1.0);
-    float4 positionW = mul(model, position);
-    output.worldPos = positionW.xyz;
-
-    output.position = mul(scene.projection, mul(scene.view, positionW));
-
-    float3 normalW = mul((float3x3)model, input.normal.xyz);
-    output.normal = normalize(normalW);
-
-    float3 tangentW = mul((float3x3)model, input.tangent.xyz * input.tangent.w);
-    output.tangent = normalize(tangentW);
-    output.bitangent = normalize(cross(normalW, tangentW));
-
-    output.uv = float2(input.position.w, input.normal.w);
-    output.materialIndex = surface.materialIndex;
-    return output;
-}
+[[vk::binding(0, 3)]] StructuredBuffer<Instance> instances : register(t0, space3);

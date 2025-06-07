@@ -22,14 +22,15 @@ namespace lysa {
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
-            Scene::sceneDescriptorLayout},
+            Scene::sceneDescriptorLayout,
+            Scene::pipelineDescriptorLayout},
             {}, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,
             config.clearColor.b,
             1.0f};
-        pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(IndexData), Scene::vertexAttributes);
+        pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
         renderingConfig.clearDepthStencil = !config.forwardDepthPrepass;
     }
 

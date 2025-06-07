@@ -4,7 +4,6 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-
 struct Model {
     float4x4 transform;
     float3   aabbMin;
@@ -13,15 +12,6 @@ struct Model {
     float   _pad1;
     uint     visible;
     float3  _pad2;
-};
-
-struct MeshSurface {
-    uint modelIndex;
-    uint firstVertex;
-    uint firstIndex;
-    uint materialIndex;
-    uint indexCount;
-    uint surfaceDataIndex;
 };
 
 struct TextureInfo {
@@ -42,7 +32,14 @@ struct Material {
     float4 parameters[4];
 }
 
-struct Index {
-    uint index;
+struct MeshSurface {
+    uint indexCount;
+    uint indicesIndex;
+    uint verticesIndex;
+    uint materialIndex;
+};
+
+struct Instance {
+    uint modelIndex;
     uint surfaceIndex;
 }

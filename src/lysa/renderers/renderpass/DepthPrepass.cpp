@@ -21,7 +21,8 @@ namespace lysa {
         pipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
-            Scene::sceneDescriptorLayout},
+            Scene::sceneDescriptorLayout,
+            Scene::pipelineDescriptorLayout},
             {}, name);
     }
 
@@ -35,7 +36,7 @@ namespace lysa {
                 const auto& ext = vireo.getShaderFileExtension();
                 VirtualFS::loadBinaryData(L"app://shaders/" + vertShaderName + ext, tempBuffer);
                 pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
-                pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(IndexData), Scene::vertexAttributes);
+                pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
                 pipelines[pipelineId] = vireo.createGraphicPipeline(pipelineConfig, name);
             }
         }

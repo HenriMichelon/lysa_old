@@ -16,6 +16,7 @@ import lysa.nodes.light;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
 import lysa.resources.material;
+import lysa.resources.mesh;
 import lysa.pipelines.frustum_culling;
 
 export namespace lysa {
@@ -29,8 +30,7 @@ export namespace lysa {
         uint32      lightsCount{0};
     };
 
-    struct IndexData {
-        uint32 index;
+    struct InstanceData {
         uint32 modelIndex;
         uint32 surfaceIndex;
     };
@@ -43,7 +43,9 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
-        static const std::vector<vireo::VertexAttributeDesc> vertexAttributes;
+        static constexpr uint32_t SET_PIPELINE{3};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{0};
+        inline static std::shared_ptr<vireo::DescriptorLayout> pipelineDescriptorLayout{nullptr};
 
         static void createDescriptorLayouts();
         static void destroyDescriptorLayouts();
@@ -66,7 +68,7 @@ export namespace lysa {
 
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
-        void update(const vireo::CommandList& commandList);
+        void update(vireo::CommandList& commandList);
         void compute(vireo::CommandList& commandList);
 
         void drawOpaquesModels(
@@ -107,18 +109,22 @@ export namespace lysa {
         struct PipelineData {
             pipeline_id pipelineId;
             const SceneConfiguration& config;
+            std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
-            std::list<std::shared_ptr<MeshInstance>> models{};
+            DeviceMemoryArray instancesArray;
+            std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
 
-            std::shared_ptr<vireo::Buffer> drawDataBuffer;
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
+            std::vector<vireo::DrawIndexedIndirectCommand> commandsData;
+            bool updated{false};
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
                 uint32 pipelineId);
 
             void addNode(
-                const std::shared_ptr<MeshInstance>& meshInstance);
+                const std::shared_ptr<MeshInstance>& meshInstance,
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& modelsDataMemoryBlocks);
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance);

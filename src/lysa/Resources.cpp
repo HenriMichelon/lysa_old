@@ -23,14 +23,14 @@ namespace lysa {
             sizeof(VertexData),
             config.maxVertexInstances,
             config.maxVertexInstances,
-            vireo::BufferType::DEVICE_STORAGE,
+            vireo::BufferType::VERTEX,
             L"Vertex Array"},
         indexArray {
             vireo,
             sizeof(uint32),
             config.maxIndexInstances,
             config.maxIndexInstances,
-            vireo::BufferType::DEVICE_STORAGE,
+            vireo::BufferType::INDEX,
             L"Index Array"},
         materialArray {
             vireo,
@@ -50,7 +50,6 @@ namespace lysa {
         textures(MAX_TEXTURES) {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
-            descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_TEXTURE, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
@@ -83,7 +82,6 @@ namespace lysa {
         }
 
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
-        descriptorSet->update(BINDING_VERTEX, vertexArray.getBuffer());
         descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
         descriptorSet->update(BINDING_SURFACES, meshSurfaceArray.getBuffer());
         descriptorSet->update(BINDING_TEXTURE, textures);

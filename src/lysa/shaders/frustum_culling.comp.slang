@@ -32,7 +32,7 @@ struct DrawIndirectCommand {
 [[vk::binding(2, 0)]] StructuredBuffer<Model> models : register(t2, space0);
 [[vk::binding(3, 0)]] StructuredBuffer<Material> materials : register(t3, space0);
 [[vk::binding(4, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t4, space0);
-[[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
+// [[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
 [[vk::binding(6, 0)]] RWStructuredBuffer<DrawIndirectCommand> command : register(u6, space0);
 
 [numthreads(64, 1, 1)]
@@ -45,27 +45,27 @@ void main(uint3 id : SV_DispatchThreadID) {
     if (materials[surface.materialIndex].pipelineId != global.pipelineId) {
         return;
     }
-    Model model = models[surface.modelIndex];
-
-    [unroll]
-    for (int i = 0; i < 6; ++i) {
-        Plane plane = global.planes[i];
-        float3 positiveVertex = float3(
-            (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
-            (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
-            (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
-        );
-        if (plane.signedDistance(positiveVertex) < 0.0f) {
-            return;
-        }
-    }
-
-    uint offset;
-    InterlockedAdd(command[0].vertexCount, surface.indexCount, offset);
-    for (uint i = 0; i < surface.indexCount; i++) {
-        uint idx = offset + i;
-        output[idx].index = indices[surface.firstIndex + i];
-        output[idx].surfaceIndex = surface.surfaceDataIndex;
-    }
+//     Model model = models[surface.modelIndex];
+//
+//     [unroll]
+//     for (int i = 0; i < 6; ++i) {
+//         Plane plane = global.planes[i];
+//         float3 positiveVertex = float3(
+//             (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
+//             (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
+//             (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
+//         );
+//         if (plane.signedDistance(positiveVertex) < 0.0f) {
+//             return;
+//         }
+//     }
+//
+//     uint offset;
+//     InterlockedAdd(command[0].vertexCount, surface.indexCount, offset);
+//     for (uint i = 0; i < surface.indexCount; i++) {
+//         uint idx = offset + i;
+//         output[idx].index = indices[surface.firstIndex + i];
+//         output[idx].surfaceIndex = surface.surfaceDataIndex;
+//     }
 
 }
