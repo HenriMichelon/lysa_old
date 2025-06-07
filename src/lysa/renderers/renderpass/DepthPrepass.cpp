@@ -21,21 +21,22 @@ namespace lysa {
         pipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
-            Scene::sceneDescriptorLayout,
-            Scene::drawCommandDescriptorLayout},
+            Scene::sceneDescriptorLayout},
             {}, name);
     }
 
     void DepthPrepass::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+        const auto& vireo = Application::getVireo();
         for (const auto& [pipelineId, material] : materials) {
             if (!pipelines.contains(pipelineId)) {
                 std::wstring vertShaderName = L"depth_prepass.vert";
                 pipelineConfig.cullMode = material->getCullMode();
                 auto tempBuffer = std::vector<char>{};
-                const auto& ext = Application::getVireo().getShaderFileExtension();
+                const auto& ext = vireo.getShaderFileExtension();
                 VirtualFS::loadBinaryData(L"app://shaders/" + vertShaderName + ext, tempBuffer);
-                pipelineConfig.vertexShader = Application::getVireo().createShaderModule(tempBuffer);
-                pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
+                pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
+                pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(IndexData), Scene::vertexAttributes);
+                pipelines[pipelineId] = vireo.createGraphicPipeline(pipelineConfig, name);
             }
         }
     }

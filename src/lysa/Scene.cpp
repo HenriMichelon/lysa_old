@@ -4,6 +4,8 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
+module;
+#include <cstddef>
 module lysa.scene;
 
 import vireo;
@@ -12,21 +14,22 @@ import lysa.log;
 
 namespace lysa {
 
+    const std::vector<vireo::VertexAttributeDesc> Scene::vertexAttributes{
+        {"INDEX",   vireo::AttributeFormat::R32_FLOAT, offsetof(IndexData, index)},
+        {"MODEL",   vireo::AttributeFormat::R32_FLOAT, offsetof(IndexData, modelIndex)},
+        {"SURFACE", vireo::AttributeFormat::R32_FLOAT, offsetof(IndexData, surfaceIndex)},
+    };
+
     void Scene::createDescriptorLayouts() {
         sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
-        sceneDescriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->build();
-        drawCommandDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
-        drawCommandDescriptorLayout->add(BINDING_INSTANCE_INDEX, vireo::DescriptorType::READWRITE_STORAGE);
-        drawCommandDescriptorLayout->build();
     }
 
     void Scene::destroyDescriptorLayouts() {
         sceneDescriptorLayout.reset();
-        drawCommandDescriptorLayout.reset();
     }
 
     Scene::Scene(
@@ -40,13 +43,7 @@ namespace lysa {
             sizeof(LightData),
             1,
             L"Scene Lights")},
-        surfacesDataArray{Application::getVireo(),
-            sizeof(InstanceSurfaceData),
-            config.maxMeshSurfacePerFrame,
-            config.maxMeshSurfacePerFrame,
-            vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurfaces Data"},
-        frustumCullingPipeline{ modelsDataArray,surfacesDataArray },
+        // frustumCullingPipeline{ modelsDataArray,surfacesDataArray },
         modelsDataArray{Application::getVireo(),
             sizeof(ModelData),
             config.maxModelsPerFrame,
@@ -63,7 +60,6 @@ namespace lysa {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, modelsDataArray.getBuffer());
-        descriptorSet->update(BINDING_SURFACES, surfacesDataArray.getBuffer());
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         sceneUniformBuffer->map();
         lightsBuffer->map();
@@ -72,28 +68,27 @@ namespace lysa {
     }
 
     void Scene::compute(vireo::CommandList& commandList) {
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            const auto& cullingBuffer = *pipelineData->instancesIndexBuffer;
-            commandList.barrier(
-                cullingBuffer,
-                vireo::ResourceState::SHADER_READ,
-                vireo::ResourceState::COMPUTE_WRITE);
-            frustumCullingPipeline.dispatch(
-                commandList,
-                pipelineId,
-                surfaceCount,
-                *currentCamera,
-                cullingBuffer,
-                *pipelineData->drawCommandsBuffer);
-            commandList.barrier(
-                cullingBuffer,
-                vireo::ResourceState::COMPUTE_WRITE,
-                vireo::ResourceState::SHADER_READ);
-        }
+        // for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+        //     const auto& cullingBuffer = *pipelineData->instancesIndexBuffer;
+        //     commandList.barrier(
+        //         cullingBuffer,
+        //         vireo::ResourceState::SHADER_READ,
+        //         vireo::ResourceState::COMPUTE_WRITE);
+        //     frustumCullingPipeline.dispatch(
+        //         commandList,
+        //         pipelineId,
+        //         surfaceCount,
+        //         *currentCamera,
+        //         cullingBuffer,
+        //         *pipelineData->drawCommandsBuffer);
+        //     commandList.barrier(
+        //         cullingBuffer,
+        //         vireo::ResourceState::COMPUTE_WRITE,
+        //         vireo::ResourceState::SHADER_READ);
+        // }
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
-        surfacesDataArray.restart();
         modelsDataArray.restart();
 
         auto sceneUniform = SceneData {
@@ -109,48 +104,23 @@ namespace lysa {
         sceneUniformBuffer->write(&sceneUniform);
 
         for (const auto& meshInstance : models) {
-            const auto& mesh = meshInstance->getMesh();
-            if (meshInstance->isUpdated() || mesh->isUpdated()) {
-                if (meshInstance->isUpdated()) {
-                    const auto modelData = meshInstance->getModelData();
-                    // INFO("model ", lysa::to_string(meshInstance->getName()), " : ", meshInstance->pendingUpdates);
-                    modelsDataArray.write(modelsDataMemoryBlocks[meshInstance], &modelData);
-                    modelsDataUpdated = true;
-                    meshInstance->decrementUpdates();
-                }
-                const auto& memoryBlock = surfacesDataMemoryBlocks[meshInstance];
-                const auto& meshSurfaces = mesh->getSurfaces();
-                auto surfaceDatas = std::vector<InstanceSurfaceData>{meshSurfaces.size()};
-                for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
-                    const auto& meshSurface = meshSurfaces[surfaceIndex];
-                    surfaceDatas[surfaceIndex].modelIndex = modelsDataMemoryBlocks[meshInstance].instanceIndex;
-                    surfaceDatas[surfaceIndex].firstVertex = mesh->getVerticesIndex();
-                    surfaceDatas[surfaceIndex].firstIndex = mesh->getIndicesIndex();
-                    surfaceDatas[surfaceIndex].materialIndex = meshSurface->material->getMaterialIndex();
-                    surfaceDatas[surfaceIndex].indexCount = meshSurface->indexCount;
-                    surfaceDatas[surfaceIndex].surfaceDataIndex = memoryBlock.instanceIndex + surfaceIndex;
-                }
-                surfacesDataArray.write(memoryBlock, surfaceDatas.data());
-                surfacesDataUpdated = true;
-                surfaceCount += meshSurfaces.size();
-                if (mesh->isUpdated()) { mesh->decrementUpdates(); }
-            }
-            for (const auto& material : mesh->getMaterials()) {
-                if (material->isUpdated()) {
-                    material->upload();
-                    Application::getResources().setUpdated();
-                    material->decrementUpdates();
+            if (meshInstance->isUpdated()) {
+                const auto modelData = meshInstance->getModelData();
+                modelsDataArray.write(modelsDataMemoryBlocks[meshInstance], &modelData);
+                modelsDataUpdated = true;
+                meshInstance->decrementUpdates();
+
+                const auto& mesh = meshInstance->getMesh();
+                for (const auto& material : mesh->getMaterials()) {
+                    if (material->isUpdated()) {
+                        material->upload();
+                        Application::getResources().setUpdated();
+                        material->decrementUpdates();
+                    }
                 }
             }
         }
-        if (surfacesDataUpdated) {
-            surfacesDataArray.flush(commandList);
-            commandList.barrier(
-                *surfacesDataArray.getBuffer(),
-                vireo::ResourceState::COPY_DST,
-                vireo::ResourceState::SHADER_READ);
-            surfacesDataUpdated = false;
-        }
+
         if (modelsDataUpdated) {
             modelsDataArray.flush(commandList);
             modelsDataUpdated = false;
@@ -227,7 +197,7 @@ namespace lysa {
                 if (!opaquePipelinesData.contains(pipelineId)) {
                     opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(PipelineData{config, pipelineId});
                 }
-                opaquePipelinesData[pipelineId]->addNode(meshInstance, surfacesDataArray, surfacesDataMemoryBlocks);
+                opaquePipelinesData[pipelineId]->addNode(meshInstance);
             }
             break;
         }
@@ -259,19 +229,15 @@ namespace lysa {
                 modelsDataArray.free(modelsDataMemoryBlocks.at(meshInstance));
                 modelsDataMemoryBlocks.erase(meshInstance);
             }
-            if (surfacesDataMemoryBlocks.contains(meshInstance)) {
-                surfacesDataArray.free(surfacesDataMemoryBlocks.at(meshInstance));
-                surfacesDataMemoryBlocks.erase(meshInstance);
-                const auto& mesh = meshInstance->getMesh();
-                auto nodePipelineIds = std::list<uint32>{};
-                for (const auto& material : mesh->getMaterials()) {
-                    auto id = material->getPipelineId();
-                    nodePipelineIds.push_back(id);
-                }
-                for (const auto& pipelineId : nodePipelineIds) {
-                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, surfacesDataMemoryBlocks);
-                }
-                surfaceCount -= mesh->getSurfaces().size();
+
+            const auto& mesh = meshInstance->getMesh();
+            auto nodePipelineIds = std::list<uint32>{};
+            for (const auto& material : mesh->getMaterials()) {
+                auto id = material->getPipelineId();
+                nodePipelineIds.push_back(id);
+            }
+            for (const auto& pipelineId : nodePipelineIds) {
+                opaquePipelinesData[pipelineId]->removeNode(meshInstance);
             }
             break;
         }
@@ -294,10 +260,9 @@ namespace lysa {
             commandList.bindDescriptors(pipeline, {
                 Application::getResources().getDescriptorSet(),
                 Application::getResources().getSamplers().getDescriptorSet(),
-                descriptorSet,
-                pipelineData->descriptorSet,
+                descriptorSet
             });
-            commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            // commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
         }
     }
 
@@ -319,39 +284,20 @@ namespace lysa {
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand), 1,
             L"Draw commands")},
-        instancesIndexBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::READWRITE_STORAGE,
-            sizeof(Index) * config.maxVertexPerFramePerPipeline, 1,
-            L"Culling indices")}
+        drawDataBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::VERTEX,
+            sizeof(IndexData) * config.maxVertexPerFramePerPipeline, 1,
+            L"Draw data")}
     {
-        descriptorSet = Application::getVireo().createDescriptorSet(
-            drawCommandDescriptorLayout,
-            L"Draw Command");
-        descriptorSet->update(BINDING_INSTANCE_INDEX, instancesIndexBuffer);
     }
 
     void Scene::PipelineData::addNode(
-        const std::shared_ptr<MeshInstance>& meshInstance,
-        DeviceMemoryArray& surfacesDataArray,
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
+        const std::shared_ptr<MeshInstance>& meshInstance) {
         models.push_back(meshInstance);
-        const auto& mesh = meshInstance->getMesh();
-        const auto& meshSurfaces{mesh->getSurfaces()};
-        auto surfaceCount{0};
-        for (const auto& meshSurface : meshSurfaces) {
-            if (meshSurface->material->getPipelineId() == pipelineId) {
-                surfaceCount++;
-            }
-        }
-        if (surfaceCount > 0) {
-            const auto memoryBlock{surfacesDataArray.alloc(surfaceCount)};
-            surfacesDataMemoryBlocks[meshInstance] = memoryBlock;
-        }
     }
 
     void Scene::PipelineData::removeNode(
-        const std::shared_ptr<MeshInstance>& meshInstance,
-        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& surfacesDataMemoryBlocks) {
+        const std::shared_ptr<MeshInstance>& meshInstance) {
         models.remove(meshInstance);
     }
 
