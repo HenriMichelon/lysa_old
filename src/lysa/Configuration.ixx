@@ -14,6 +14,8 @@ export namespace lysa {
     struct ResourcesConfiguration {
         uint32 maxVertexInstances{5000000};
         uint32 maxMaterialInstances{1000};
+        uint32 maxIndexInstances{5000000*2};
+        uint32 maxMeshSurfaceInstances{200000};
     };
 
     struct ApplicationConfiguration {

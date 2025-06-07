@@ -28,8 +28,8 @@ namespace lysa {
         indexArray {
             vireo,
             sizeof(uint32),
-            config.maxVertexInstances * 2,
-            config.maxVertexInstances * 2,
+            config.maxIndexInstances,
+            config.maxIndexInstances,
             vireo::BufferType::DEVICE_STORAGE,
             L"Index Array"},
         materialArray {
@@ -39,12 +39,20 @@ namespace lysa {
             config.maxMaterialInstances,
             vireo::BufferType::DEVICE_STORAGE,
             L"Material Array"},
+        meshSurfaceArray {
+            vireo,
+            sizeof(MeshSurfaceData),
+            config.maxMeshSurfaceInstances,
+            config.maxMeshSurfaceInstances,
+            vireo::BufferType::DEVICE_STORAGE,
+            L"MeshSurface Array"},
         samplers{vireo},
         textures(MAX_TEXTURES) {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
             descriptorLayout->add(BINDING_VERTEX, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::DEVICE_STORAGE);
+            descriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_TEXTURE, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
             descriptorLayout->build();
         }
@@ -77,6 +85,7 @@ namespace lysa {
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
         descriptorSet->update(BINDING_VERTEX, vertexArray.getBuffer());
         descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
+        descriptorSet->update(BINDING_SURFACES, meshSurfaceArray.getBuffer());
         descriptorSet->update(BINDING_TEXTURE, textures);
     }
 
@@ -97,6 +106,7 @@ namespace lysa {
         vertexArray.restart();
         indexArray.restart();
         materialArray.restart();
+        meshSurfaceArray.restart();
         if (textureUpdated) {
             Application::getGraphicQueue()->waitIdle();
             descriptorSet->update(BINDING_TEXTURE, textures);
@@ -111,6 +121,7 @@ namespace lysa {
         indexArray.cleanup();
         vertexArray.cleanup();
         materialArray.cleanup();
+        meshSurfaceArray.cleanup();
         descriptorLayout.reset();
         descriptorSet.reset();
     }
@@ -120,6 +131,7 @@ namespace lysa {
         indexArray.flush(commandList);
         vertexArray.flush(commandList);
         materialArray.flush(commandList);
+        meshSurfaceArray.flush(commandList);
         updated = false;
     }
 

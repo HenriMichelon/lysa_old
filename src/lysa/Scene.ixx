@@ -29,7 +29,7 @@ export namespace lysa {
         uint32      lightsCount{0};
     };
 
-    struct MeshSurfaceData {
+    struct InstanceSurfaceData {
         uint32 modelIndex;
         uint32 firstVertex;
         uint32 firstIndex;

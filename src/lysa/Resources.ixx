@@ -23,7 +23,8 @@ export namespace lysa {
         static constexpr uint32_t SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex BINDING_VERTEX{0};
         static constexpr vireo::DescriptorIndex BINDING_MATERIAL{1};
-        static constexpr vireo::DescriptorIndex BINDING_TEXTURE{2};
+        static constexpr vireo::DescriptorIndex BINDING_SURFACES{2};
+        static constexpr vireo::DescriptorIndex BINDING_TEXTURE{3};
         inline static std::shared_ptr<vireo::DescriptorLayout> descriptorLayout{nullptr};
 
         Resources(
@@ -36,6 +37,8 @@ export namespace lysa {
         auto& getIndexArray() { return indexArray; }
 
         auto& getMaterialArray() { return materialArray; }
+
+        auto& getMeshSurfaceArray() { return meshSurfaceArray; }
 
         auto& getSamplers() { return samplers; }
 
@@ -63,6 +66,7 @@ export namespace lysa {
         DeviceMemoryArray vertexArray;
         DeviceMemoryArray indexArray;
         DeviceMemoryArray materialArray;
+        DeviceMemoryArray meshSurfaceArray;
         Samplers samplers;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::vector<std::shared_ptr<vireo::Image>> textures;

@@ -41,7 +41,7 @@ namespace lysa {
             1,
             L"Scene Lights")},
         surfacesDataArray{Application::getVireo(),
-            sizeof(MeshSurfaceData),
+            sizeof(InstanceSurfaceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
@@ -120,7 +120,7 @@ namespace lysa {
                 }
                 const auto& memoryBlock = surfacesDataMemoryBlocks[meshInstance];
                 const auto& meshSurfaces = mesh->getSurfaces();
-                auto surfaceDatas = std::vector<MeshSurfaceData>{meshSurfaces.size()};
+                auto surfaceDatas = std::vector<InstanceSurfaceData>{meshSurfaces.size()};
                 for (int surfaceIndex = 0; surfaceIndex < meshSurfaces.size(); surfaceIndex++) {
                     const auto& meshSurface = meshSurfaces[surfaceIndex];
                     surfaceDatas[surfaceIndex].modelIndex = modelsDataMemoryBlocks[meshInstance].instanceIndex;

@@ -20,7 +20,6 @@ export namespace lysa {
         float4 normal;   // normal + uv.y
         float4 tangent;  // tangent + sign
     };
-    static_assert(sizeof(VertexData) == 48, "VertexData struct must be 48 bytes for StructuredBuffer alignment");
 
     /**
      * %A Mesh vertex
@@ -43,14 +42,21 @@ export namespace lysa {
         }
     };
 
+    struct MeshSurfaceData {
+        uint32 indexCount;
+        uint32 indicesIndex;
+        uint32 verticesIndex;
+        uint32 materialIndex;
+    };
+
     /**
      * %A Mesh surface, with counterclockwise triangles
      */
     struct MeshSurface {
         //! Index of the first vertex of the surface
-        uint32                    firstIndex{0};
+        uint32 firstIndex{0};
         //! Number of vertices
-        uint32                    indexCount{0};
+        uint32 indexCount{0};
         //! Material
         std::shared_ptr<Material> material{};
 
@@ -135,20 +141,20 @@ export namespace lysa {
         bool operator==(const Mesh &other) const;
 
         friend inline bool operator==(const std::shared_ptr<Mesh>& a, const std::shared_ptr<Mesh>& b) {
-            return (a == nullptr) ? false : *a == *b;
+            return (a.get() == nullptr) ? false : *a == *b;
         }
 
         friend inline bool operator<(const std::shared_ptr<Mesh>& a, const std::shared_ptr<Mesh>& b) {
             return *a < *b;
         }
 
-        auto getVerticesIndex() const { return verticesMemoryBloc.instanceIndex; }
+        auto getVerticesIndex() const { return verticesMemoryBlock.instanceIndex; }
 
-        auto getIndicesIndex() const { return indicesMemoryBloc.instanceIndex; }
+        auto getIndicesIndex() const { return indicesMemoryBlock.instanceIndex; }
 
         auto& getMaterials() { return materials; }
 
-        auto isUploaded() const { return verticesMemoryBloc.size > 0; }
+        auto isUploaded() const { return verticesMemoryBlock.size > 0; }
 
         void upload();
 
@@ -163,8 +169,9 @@ export namespace lysa {
         std::unordered_set<std::shared_ptr<Material>> materials{};
 
     private:
-        MemoryBlock verticesMemoryBloc;
-        MemoryBlock indicesMemoryBloc;
+        MemoryBlock verticesMemoryBlock;
+        MemoryBlock indicesMemoryBlock;
+        MemoryBlock surfacesMemoryBlock;
     };
 }
 

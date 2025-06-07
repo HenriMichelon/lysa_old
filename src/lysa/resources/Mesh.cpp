@@ -44,9 +44,12 @@ namespace lysa {
     void Mesh::upload() {
         auto& resources = Application::getResources();
         if (!isUploaded()) {
-            verticesMemoryBloc = resources.getVertexArray().alloc(vertices.size());
-            indicesMemoryBloc = resources.getIndexArray().alloc(indices.size());
+            verticesMemoryBlock = resources.getVertexArray().alloc(vertices.size());
+            indicesMemoryBlock = resources.getIndexArray().alloc(indices.size());
+            surfacesMemoryBlock = resources.getMeshSurfaceArray().alloc(surfaces.size());
         }
+
+        // Uploading all vertices
         auto vertexData = std::vector<VertexData>(vertices.size());
         for (int i = 0; i < vertices.size(); i++) {
             const auto& v = vertices[i];
@@ -54,14 +57,25 @@ namespace lysa {
             vertexData[i].normal = float4(v.normal.x, v.normal.y, v.normal.z, v.uv.y);
             vertexData[i].tangent = v.tangent;
         }
-        resources.getVertexArray().write(verticesMemoryBloc, vertexData.data());
-        resources.getIndexArray().write(indicesMemoryBloc, indices.data());
+        resources.getVertexArray().write(verticesMemoryBlock, vertexData.data());
+
+        // Uploading all indices
+        resources.getIndexArray().write(indicesMemoryBlock, indices.data());
+
+        // Uploading all surfaces & materials
+        auto surfaceData = std::vector<MeshSurfaceData>(surfaces.size());
         for (int i = 0; i < surfaces.size(); i++) {
-        const auto& material = surfaces[i]->material;
+            const auto& surface = surfaces[i];
+            const auto& material = surface->material;
             if (!material->isUploaded()) {
                material->upload();
             }
+            surfaceData[i].indexCount = surface->indexCount;
+            surfaceData[i].indicesIndex = indicesMemoryBlock.instanceIndex + surface->firstIndex;
+            surfaceData[i].verticesIndex = verticesMemoryBlock.instanceIndex;
+            surfaceData[i].materialIndex = material->getMaterialIndex();
         }
+        resources.getMeshSurfaceArray().write(surfacesMemoryBlock, surfaceData.data());
     }
 
     bool Mesh::operator==(const Mesh &other) const {
