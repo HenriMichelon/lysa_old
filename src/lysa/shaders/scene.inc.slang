@@ -38,28 +38,6 @@ struct Scene {
     uint     lightsCount;
 }
 
-struct Light {
-    // light params
-    int type; // Light::LightType
-    float range;
-    float cutOff;
-    float outerCutOff;
-    float4 position;
-    float4 direction;
-    float4 color; // RGB + Intensity;
-    // shadow map params
-    int mapIndex;
-    float farPlane;
-    uint cascadesCount;
-	float _pad0;
-    float4 cascadeSplitDepth;
-    float4x4 lightSpace[6];
-};
-
-struct Lights {
-    Light[100] light;
-}
-
 // Apply texture UV transforms
 float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;
@@ -71,6 +49,5 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<Model> models : register(t1, space2);
-[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
 
 [[vk::binding(0, 3)]] StructuredBuffer<Instance> instances : register(t0, space3);

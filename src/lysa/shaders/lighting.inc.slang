@@ -6,6 +6,31 @@
 */
 #include "scene.inc.slang"
 
+
+struct Light {
+    // light params
+    int type; // Light::LightType
+    float range;
+    float cutOff;
+    float outerCutOff;
+    float4 position;
+    float4 direction;
+    float4 color; // RGB + Intensity;
+    // shadow map params
+    int mapIndex;
+    float farPlane;
+    uint cascadesCount;
+	float _pad0;
+    float4 cascadeSplitDepth;
+    float4x4 lightSpace[6];
+};
+
+struct Lights {
+    Light[100] light;
+}
+
+[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
+
 float3 calcDirectionalLight(Light light, float3 worldPos, float3 normal, float shininess) {
     float3 L = -light.direction.xyz;
     float3 V = normalize(scene.cameraPosition - worldPos);

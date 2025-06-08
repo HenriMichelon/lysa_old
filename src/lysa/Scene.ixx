@@ -30,7 +30,7 @@ export namespace lysa {
         uint32      lightsCount{0};
     };
 
-    struct InstanceData {
+    struct alignas(8) InstanceData {
         uint32 modelIndex;
         uint32 surfaceIndex;
     };
@@ -113,10 +113,10 @@ export namespace lysa {
 
             DeviceMemoryArray instancesArray;
             std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
+            bool instancesUpdated{false};
 
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            std::vector<vireo::DrawIndexedIndirectCommand> commandsData;
-            bool updated{false};
+            uint32 drawCommandsCount{0};
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,

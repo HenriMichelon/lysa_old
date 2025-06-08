@@ -10,6 +10,7 @@ VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
 
     Instance instance = instances[input.instanceId];
+    MeshSurface surface = surfaces[instance.surfaceIndex];
     float4x4 model = models[instance.modelIndex].transform;
 
     float4 position = float4(input.position.xyz, 1.0);
@@ -26,6 +27,6 @@ VertexOutput vertexMain(VertexInput input) {
     output.bitangent = normalize(cross(normalW, tangentW));
 
     output.uv = float2(input.position.w, input.normal.w);
-    output.materialIndex = surfaces[instance.surfaceIndex].materialIndex;
+    output.materialIndex = surface.materialIndex;
     return output;
 }

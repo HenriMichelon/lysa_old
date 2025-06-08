@@ -19,8 +19,12 @@ namespace lysa {
         const vireo::BufferType bufferType,
         const std::wstring& name) :
         name{name},
-        instanceSize{instanceSize},
-        buffer{vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name)} {
+        instanceSize{instanceSize} {
+        if (bufferType == vireo::BufferType::VERTEX || bufferType == vireo::BufferType::INDEX) {
+            buffer = vireo.createBuffer(bufferType, instanceSize, instanceCount, name);
+        } else {
+            buffer = vireo.createBuffer(bufferType, instanceSize * instanceCount, 1, name);
+        }
         freeBlocs.push_back({0, 0, instanceSize * instanceCount});
     }
 

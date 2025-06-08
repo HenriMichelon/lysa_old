@@ -28,6 +28,7 @@ namespace lysa {
 
     void Scene::destroyDescriptorLayouts() {
         sceneDescriptorLayout.reset();
+        pipelineDescriptorLayout.reset();
     }
 
     Scene::Scene(
@@ -129,8 +130,25 @@ namespace lysa {
         }
 
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            if (pipelineData->updated) {
-                commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->commandsData.data());
+            if (pipelineData->instancesUpdated) {
+                pipelineData->drawCommandsCount = 0;
+                std::vector<vireo::DrawIndexedIndirectCommand> commandsData(config.maxMeshSurfacePerFrame);
+                for (const auto& meshInstance : models) {
+                    const auto& mesh = meshInstance->getMesh();
+                    for (uint32 i = 0; i < mesh->getSurfaces().size(); i++) {
+                        const auto& surface = mesh->getSurfaces()[i];
+                        if (surface->material->getPipelineId() == pipelineId) {
+                            commandsData[pipelineData->drawCommandsCount].indexCount = surface->indexCount;
+                            commandsData[pipelineData->drawCommandsCount].firstIndex = mesh->getIndicesIndex() + surface->firstIndex;
+                            commandsData[pipelineData->drawCommandsCount].vertexOffset = static_cast<int32>(mesh->getVerticesIndex());
+                            commandsData[pipelineData->drawCommandsCount].firstInstance = pipelineData->drawCommandsCount;
+                            pipelineData->drawCommandsCount++;
+                        }
+                    }
+                }
+                commandList.upload(pipelineData->drawCommandsBuffer, commandsData.data());
+                pipelineData->instancesArray.flush(commandList);
+                pipelineData->instancesUpdated = false;
             }
         }
 
@@ -269,7 +287,11 @@ namespace lysa {
                 descriptorSet,
                 pipelineData->descriptorSet
             });
-            // commandList.drawIndirect(pipelineData->drawCommandsBuffer, 0, 1, sizeof(vireo::DrawIndirectCommand));
+            commandList.drawIndexedIndirect(
+                pipelineData->drawCommandsBuffer,
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(vireo::DrawIndexedIndirectCommand));
         }
     }
 
@@ -293,11 +315,12 @@ namespace lysa {
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
-            L"Vertex Array"},
+            L"Pipeline instances Array"},
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
-            sizeof(vireo::DrawIndexedIndirectCommand), config.maxMeshSurfacePerFrame,
-            L"Draw commands")}
+            sizeof(vireo::DrawIndexedIndirectCommand),
+            config.maxMeshSurfacePerFrame,
+            L"Pipeline draw commands")}
     {
         descriptorSet = Application::getVireo().createDescriptorSet(pipelineDescriptorLayout, L"Pipeline");
         descriptorSet->update(BINDING_INSTANCES, instancesArray.getBuffer());
@@ -319,16 +342,10 @@ namespace lysa {
                     .modelIndex = modelsDataMemoryBlocks.at(meshInstance).instanceIndex,
                     .surfaceIndex = instanceMemoryBlock.instanceIndex + i,
                 };
-                commandsData.push_back({
-                    .indexCount = surface->indexCount,
-                    .firstIndex = mesh->getIndicesIndex() + surface->firstIndex,
-                    .vertexOffset = static_cast<int32>(mesh->getVerticesIndex()),
-                });
             }
         }
         instancesArray.write(instanceMemoryBlock, instancesData.data());
-
-        updated = true;
+        instancesUpdated = true;
     }
 
     void Scene::PipelineData::removeNode(
