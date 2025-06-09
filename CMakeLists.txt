@@ -37,8 +37,12 @@ endif ()
 
 #######################################################
 include(FetchContent)
-include(cmake/shaders.cmake)
 include(cmake/libraries.cmake)
+if (DIRECTX_BACKEND)
+    include(cmake/agilitysdk.cmake)
+    add_compile_definitions(AGILITY_SDK_VERSION=${AGILITYSDK_VERSION_MAJOR})
+endif()
+include(cmake/shaders.cmake)
 
 #######################################################
 add_subdirectory(${VIREO_PROJECT_DIR} external_lib_build)
@@ -219,7 +223,7 @@ target_precompile_headers(${LYSA_TARGET} PRIVATE
 )
 if(WIN32)
     if (DIRECTX_BACKEND)
-        target_link_libraries(${LYSA_TARGET} d3d12)
+        target_link_libraries(${LYSA_TARGET} d3d12 agilitysdk agilitysdk_d3dx12)
     endif ()
     if(MINGW)
         target_link_options(${LYSA_TARGET} PRIVATE "-mwindows")

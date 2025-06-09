@@ -10,10 +10,15 @@ module lysa.application;
 
 using namespace std::chrono;
 
+// DirectX Agility SDK setup
+// See https://devblogs.microsoft.com/directx/gettingstarted-dx12agility/ for more info
+// extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = AGILITY_SDK_VERSION; }
+// extern "C" { __declspec(dllexport) extern const char8_t* D3D12SDKPath = u8".\\D3D12\\"; }
+
 namespace lysa {
 
     void Application::mainLoop() {
-        std::vector<double> frameTimes; // en millisecondes
+        std::vector<double> frameTimes;
         auto lastTimeReport = steady_clock::now();
         auto msg = MSG{};
         while (!quit) {

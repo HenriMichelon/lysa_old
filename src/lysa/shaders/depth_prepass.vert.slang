@@ -6,9 +6,9 @@
 */
 #include "scene.inc.slang"
 
-VertexOutput vertexMain(VertexInput input) {
+VertexOutput vertexMain(VertexInput input, uint instanceId : SV_InstanceID) {
     VertexOutput output;
-    Instance instance = instances[input.instanceId];
+    Instance instance = instances[instanceId];
     float4x4 model = models[instance.modelIndex].transform;
     float4 position = float4(input.position.xyz, 1.0);
     float4 positionW = mul(model, position);

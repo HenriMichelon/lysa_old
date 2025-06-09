@@ -7,13 +7,18 @@
 ##### Compile Slang sources files into DXIL & SPIR-V
 
 # Use the Vulkan SDK version of the slangc executable
-find_program(SLANGC_EXECUTABLE NAMES slangc HINTS "${Vulkan_INSTALL_DIR}/bin")
+find_program(SLANGC_EXECUTABLE NAMES slangc)
 if(NOT SLANGC_EXECUTABLE)
-    message(FATAL_ERROR "slangc not found. Please ensure the Vulkan SDK is installed and slangc is available.")
+    find_program(SLANGC_EXECUTABLE NAMES slangc HINTS "${Vulkan_INSTALL_DIR}/bin")
+endif()
+if(NOT SLANGC_EXECUTABLE)
+    message(FATAL_ERROR "slangc executable not found.")
 endif()
 
 set(SHADER_COMMANDS)
 set(SHADER_PRODUCTS)
+
+message(NOTICE "Using ${SLANGC_EXECUTABLE} with ${DXC_BIN}")
 
 function(add_shader EXTENSION PROFILE ENTRY_POINT SHADER_SOURCE SHADER_BINARIES SHADER_INCLUDE_DIR)
     set(LOCAL_COMMANDS)
@@ -22,6 +27,8 @@ function(add_shader EXTENSION PROFILE ENTRY_POINT SHADER_SOURCE SHADER_BINARIES 
         # Compile shader to DXIL
         list(APPEND LOCAL_COMMANDS COMMAND)
         list(APPEND LOCAL_COMMANDS "${SLANGC_EXECUTABLE}")
+        list(APPEND LOCAL_COMMANDS "-dxc-path")
+        list(APPEND LOCAL_COMMANDS "${DXC_BIN}")
         list(APPEND LOCAL_COMMANDS "-profile")
         list(APPEND LOCAL_COMMANDS "${PROFILE}")
         list(APPEND LOCAL_COMMANDS "-entry")
@@ -77,7 +84,7 @@ function(add_shaders TARGET_NAME BUILD_DIR SHADER_INCLUDE_DIR)
         elseif (SHADER_SOURCE MATCHES ".geom.slang$")
             add_shader("domain" "gs_6_6" "main" ${SHADER_SOURCE} ${SHADER_BINARIES} ${SHADER_INCLUDE_DIR})
         elseif (SHADER_SOURCE MATCHES ".vert.slang$")
-            add_shader("vert" "vs_6_6" "vertexMain" ${SHADER_SOURCE} ${SHADER_BINARIES} ${SHADER_INCLUDE_DIR})
+            add_shader("vert" "vs_6_8" "vertexMain" ${SHADER_SOURCE} ${SHADER_BINARIES} ${SHADER_INCLUDE_DIR})
         elseif (SHADER_SOURCE MATCHES ".frag.slang$")
             add_shader("frag" "ps_6_6" "fragmentMain" ${SHADER_SOURCE} ${SHADER_BINARIES} ${SHADER_INCLUDE_DIR})
         elseif (NOT SHADER_SOURCE MATCHES ".inc.slang$")

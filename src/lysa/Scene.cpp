@@ -4,8 +4,6 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
-module;
-#include <cstddef>
 module lysa.scene;
 
 import vireo;
@@ -22,6 +20,7 @@ namespace lysa {
         sceneDescriptorLayout->build();
 
         pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
+        pipelineDescriptorLayout->add(BINDING_INSTANCES_COUNTER, vireo::DescriptorType::READWRITE_STORAGE);
         pipelineDescriptorLayout->add(BINDING_INSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
         pipelineDescriptorLayout->build();
     }
@@ -129,7 +128,9 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ);
         }
 
+        const uint32 clearValue{0};
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            commandList.upload(pipelineData->instancesCounterBuffer, &clearValue);
             if (pipelineData->instancesUpdated) {
                 pipelineData->drawCommandsCount = 0;
                 std::vector<vireo::DrawIndexedIndirectCommand> commandsData(config.maxMeshSurfacePerFrame);
@@ -309,13 +310,18 @@ namespace lysa {
     Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId) :
         pipelineId{pipelineId},
         config{config},
+        instancesCounterBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::READWRITE_STORAGE,
+            sizeof(uint32),
+            1,
+            L"Pipeline instance counter")},
         instancesArray{
             Application::getVireo(),
             sizeof(InstanceData),
             config.maxMeshSurfacePerFrame,
             config.maxMeshSurfacePerFrame,
             vireo::BufferType::DEVICE_STORAGE,
-            L"Pipeline instances Array"},
+            L"Pipeline instances array"},
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
             sizeof(vireo::DrawIndexedIndirectCommand),
@@ -323,6 +329,7 @@ namespace lysa {
             L"Pipeline draw commands")}
     {
         descriptorSet = Application::getVireo().createDescriptorSet(pipelineDescriptorLayout, L"Pipeline");
+        descriptorSet->update(BINDING_INSTANCES_COUNTER, instancesCounterBuffer);
         descriptorSet->update(BINDING_INSTANCES, instancesArray.getBuffer());
     }
 
