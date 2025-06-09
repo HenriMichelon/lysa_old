@@ -133,16 +133,16 @@ namespace lysa {
             commandList.upload(pipelineData->instancesCounterBuffer, &clearValue);
             if (pipelineData->instancesUpdated) {
                 pipelineData->drawCommandsCount = 0;
-                std::vector<vireo::DrawIndexedIndirectCommand> commandsData(config.maxMeshSurfacePerFrame);
+                std::vector<DrawCommand> commandsData(config.maxMeshSurfacePerFrame);
                 for (const auto& meshInstance : models) {
                     const auto& mesh = meshInstance->getMesh();
                     for (uint32 i = 0; i < mesh->getSurfaces().size(); i++) {
                         const auto& surface = mesh->getSurfaces()[i];
                         if (surface->material->getPipelineId() == pipelineId) {
-                            commandsData[pipelineData->drawCommandsCount].indexCount = surface->indexCount;
-                            commandsData[pipelineData->drawCommandsCount].firstIndex = mesh->getIndicesIndex() + surface->firstIndex;
-                            commandsData[pipelineData->drawCommandsCount].vertexOffset = static_cast<int32>(mesh->getVerticesIndex());
-                            commandsData[pipelineData->drawCommandsCount].firstInstance = pipelineData->drawCommandsCount;
+                            commandsData[pipelineData->drawCommandsCount].command.indexCount = surface->indexCount;
+                            commandsData[pipelineData->drawCommandsCount].command.firstIndex = mesh->getIndicesIndex() + surface->firstIndex;
+                            commandsData[pipelineData->drawCommandsCount].command.vertexOffset = static_cast<int32>(mesh->getVerticesIndex());
+                            commandsData[pipelineData->drawCommandsCount].instanceIndex = pipelineData->drawCommandsCount;
                             pipelineData->drawCommandsCount++;
                         }
                     }
@@ -292,7 +292,7 @@ namespace lysa {
                 pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
-                sizeof(vireo::DrawIndexedIndirectCommand));
+                sizeof(DrawCommand));
         }
     }
 
@@ -324,7 +324,7 @@ namespace lysa {
             L"Pipeline instances array"},
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::INDIRECT,
-            sizeof(vireo::DrawIndexedIndirectCommand),
+            sizeof(DrawCommand),
             config.maxMeshSurfacePerFrame,
             L"Pipeline draw commands")}
     {

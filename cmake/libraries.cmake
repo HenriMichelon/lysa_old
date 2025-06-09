@@ -50,11 +50,3 @@ FetchContent_Declare(
 )
 set(XXHASH_BUNDLED_MODE OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(xxhash)
-
-if (DIRECTX_BACKEND)
-    message(NOTICE "Fetching DirectXShaderCompiler from hhttps://github.com/microsoft/DirectXShaderCompiler...")
-    FetchContent_Declare(dxc_fetch URL https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2403.1/dxc_2024_03_22.zip)
-    FetchContent_MakeAvailable(dxc_fetch)
-    set(DXC_BIN ${dxc_fetch_SOURCE_DIR}/bin/x64)
-    set(ENV{SLANG_DXC_PATH} ${DXC_BIN})
-endif()

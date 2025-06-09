@@ -6,7 +6,7 @@
 */
 #include "scene.inc.slang"
 
-VertexOutput vertexMain(VertexInput input, uint instanceId : SV_StartInstanceLocation) {
+VertexOutput vertexMain(VertexInput input, uint instanceId : SV_InstanceID ) {
     VertexOutput output;
 
     Instance instance = instances[instanceId];

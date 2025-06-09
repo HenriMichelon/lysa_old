@@ -35,6 +35,11 @@ export namespace lysa {
         uint32 surfaceIndex;
     };
 
+    struct DrawCommand {
+        vireo::DrawIndexedIndirectCommand command;
+        uint32 instanceIndex;
+    };
+
     class Scene {
     public:
         static constexpr uint32_t SET_SCENE{2};
