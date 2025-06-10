@@ -35,6 +35,7 @@ export namespace lysa {
         struct PushConstant {
             uint32 instanceIndex;
         };
+
         static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
             .stage = vireo::ShaderStage::VERTEX,
             .size = sizeof(PushConstant),

@@ -282,7 +282,7 @@ namespace lysa {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
-            commandList.bindDescriptors(pipeline, {
+            commandList.bindDescriptors({
                 Application::getResources().getDescriptorSet(),
                 Application::getResources().getSamplers().getDescriptorSet(),
                 descriptorSet,

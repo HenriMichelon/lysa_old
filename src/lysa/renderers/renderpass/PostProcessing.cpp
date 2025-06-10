@@ -78,7 +78,7 @@ namespace lysa {
         commandList.setViewport(viewport);
         commandList.setScissors(scissor);
         commandList.bindPipeline(pipeline);
-        commandList.bindDescriptors(pipeline, {
+        commandList.bindDescriptors({
             frame.descriptorSet,
             Application::getResources().getSamplers().getDescriptorSet()});
         commandList.draw(3);
