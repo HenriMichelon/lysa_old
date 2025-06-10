@@ -16,7 +16,17 @@ struct VertexInput {
     [[vk::location(0)]] float4 position : POSITION; // position + uv.x
     [[vk::location(1)]] float4 normal   : NORMAL;   // normal + uv.y
     [[vk::location(2)]] float4 tangent  : TANGENT;  // tangent + sign
+#ifdef __SPIRV__
+    uint instanceId : SV_StartInstanceLocation;
+    #define instanceIndex input.instanceId
+#endif
 };
+
+#ifndef __SPIRV__
+cbuffer RootConstant : register(b0, space4) {
+    uint instanceIndex;
+};
+#endif
 
 struct VertexOutput {
     float4 position      : SV_POSITION;

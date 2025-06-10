@@ -6,10 +6,10 @@
 */
 #include "scene.inc.slang"
 
-VertexOutput vertexMain(VertexInput input, uint instanceId : SV_InstanceID ) {
+VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
 
-    Instance instance = instances[instanceId];
+    Instance instance = instances[instanceIndex];
     MeshSurface surface = surfaces[instance.surfaceIndex];
     float4x4 model = models[instance.modelIndex].transform;
 

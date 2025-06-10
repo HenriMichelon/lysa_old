@@ -23,7 +23,7 @@ namespace lysa {
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
             Scene::pipelineDescriptorLayout},
-            {}, name);
+            Scene::pushConstantsDesc, name);
     }
 
     void DepthPrepass::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {

@@ -36,8 +36,8 @@ export namespace lysa {
     };
 
     struct DrawCommand {
-        vireo::DrawIndexedIndirectCommand command;
         uint32 instanceIndex;
+        vireo::DrawIndexedIndirectCommand command;
     };
 
     class Scene {
@@ -55,6 +55,16 @@ export namespace lysa {
 
         static void createDescriptorLayouts();
         static void destroyDescriptorLayouts();
+
+        struct PushConstant {
+            uint32 instanceIndex;
+        };
+
+        static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
+            .stage = vireo::ShaderStage::VERTEX,
+            .size = sizeof(PushConstant),
+        };
+
 
         Scene(
             const SceneConfiguration& config,

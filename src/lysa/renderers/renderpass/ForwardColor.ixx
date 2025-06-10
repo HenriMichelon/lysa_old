@@ -32,15 +32,6 @@ export namespace lysa {
         const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
 
-        struct PushConstant {
-            uint32 instanceIndex;
-        };
-
-        static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
-            .stage = vireo::ShaderStage::VERTEX,
-            .size = sizeof(PushConstant),
-        };
-
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc   = { { .blendEnable = true } },
             .depthTestEnable  = true,

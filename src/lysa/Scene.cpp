@@ -128,7 +128,7 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ);
         }
 
-        const uint32 clearValue{0};
+        constexpr uint32 clearValue{0};
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             commandList.upload(pipelineData->instancesCounterBuffer, &clearValue);
             if (pipelineData->instancesUpdated) {
@@ -142,6 +142,7 @@ namespace lysa {
                             commandsData[pipelineData->drawCommandsCount].command.indexCount = surface->indexCount;
                             commandsData[pipelineData->drawCommandsCount].command.firstIndex = mesh->getIndicesIndex() + surface->firstIndex;
                             commandsData[pipelineData->drawCommandsCount].command.vertexOffset = static_cast<int32>(mesh->getVerticesIndex());
+                            commandsData[pipelineData->drawCommandsCount].command.firstInstance = pipelineData->drawCommandsCount;
                             commandsData[pipelineData->drawCommandsCount].instanceIndex = pipelineData->drawCommandsCount;
                             pipelineData->drawCommandsCount++;
                         }
@@ -292,7 +293,8 @@ namespace lysa {
                 pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
-                sizeof(DrawCommand));
+                sizeof(DrawCommand),
+                sizeof(uint32));
         }
     }
 
