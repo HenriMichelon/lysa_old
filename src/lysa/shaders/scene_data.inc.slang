@@ -15,9 +15,9 @@ struct Model {
 };
 
 struct TextureInfo {
-    int index;
-    uint samplerIndex;
-    float2 _pad0;
+    int      index;
+    uint     samplerIndex;
+    float2   _pad0;
     float4x4 transform;
 };
 

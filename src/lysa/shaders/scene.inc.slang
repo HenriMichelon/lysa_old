@@ -7,15 +7,17 @@
 #include "samplers.inc.slang"
 #include "scene_data.inc.slang"
 
-#define TRANSPARENCY_DISABLED      0
-#define TRANSPARENCY_ALPHA         1
-#define TRANSPARENCY_SCISSOR       2
-#define TRANSPARENCY_SCISSOR_ALPHA 3
+enum class Transparency {
+    DISABLED = 0,
+    ALPHA = 1,
+    SCISSOR = 2,
+    SCISSOR_ALPHA = 3,
+};
 
 struct VertexInput {
-    [[vk::location(0)]] float4 position : POSITION; // position + uv.x
-    [[vk::location(1)]] float4 normal   : NORMAL;   // normal + uv.y
-    [[vk::location(2)]] float4 tangent  : TANGENT;  // tangent + sign
+    float4 position : POSITION; // position + uv.x
+    float4 normal   : NORMAL;   // normal + uv.y
+    float4 tangent  : TANGENT;  // tangent + sign
 #ifdef __SPIRV__
     uint instanceId : SV_StartInstanceLocation;
     #define instanceIndex input.instanceId
@@ -23,18 +25,18 @@ struct VertexInput {
 };
 
 #ifndef __SPIRV__
-cbuffer RootConstant : register(b0, space4) {
+cbuffer IndirectRootConstant : register(b0, space4) {
     uint instanceIndex;
 };
 #endif
 
 struct VertexOutput {
-    float4 position      : SV_POSITION;
-    float3 worldPos      : TEXCOORD0;
-    float3 normal        : TEXCOORD1;
-    float2 uv            : TEXCOORD2;
-    float3 tangent       : TEXCOORD3;
-    float3 bitangent     : TEXCOORD4;
+    float4 position  : SV_POSITION;
+    float3 worldPos  : TEXCOORD0;
+    float3 normal    : TEXCOORD1;
+    float2 uv        : TEXCOORD2;
+    float3 tangent   : TEXCOORD3;
+    float3 bitangent : TEXCOORD4;
     nointerpolation uint materialIndex : TEXCOORD5;
 };
 

@@ -15,14 +15,14 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
             uvTransform(mat.diffuseTexture, input.uv));
     }
 
-    if (((mat.transparency == TRANSPARENCY_SCISSOR) ||
-        (mat.transparency == TRANSPARENCY_SCISSOR_ALPHA))
+    if (((mat.transparency == Transparency::SCISSOR) ||
+        (mat.transparency == Transparency::SCISSOR_ALPHA))
         && (color.a < mat.alphaScissor)) {
         discard;
     }
     const float transparency = (
-        mat.transparency == TRANSPARENCY_ALPHA ||
-        mat.transparency == TRANSPARENCY_SCISSOR_ALPHA) ? color.a : 1.0;
+        mat.transparency == Transparency::ALPHA ||
+        mat.transparency == Transparency::SCISSOR_ALPHA) ? color.a : 1.0;
     float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;
 
     float3 normal;
