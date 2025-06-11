@@ -11,8 +11,7 @@ import lysa.virtual_fs;
 
 namespace lysa {
     FrustumCulling::FrustumCulling(
-        const DeviceMemoryArray& meshInstancesArray,
-        const DeviceMemoryArray& meshSurfacesArray) {
+        const DeviceMemoryArray& meshInstancesArray) {
         const auto& vireo = Application::getVireo();
         globalBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Global), 1, DEBUG_NAME);
         globalBuffer->map();
@@ -24,9 +23,9 @@ namespace lysa {
 
         descriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
         descriptorLayout->add(BINDING_GLOBAL, vireo::DescriptorType::UNIFORM);
-        descriptorLayout->add(BINDING_INDICES, vireo::DescriptorType::DEVICE_STORAGE);
         descriptorLayout->add(BINDING_MESHINSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
-        descriptorLayout->add(BINDING_MESHSURFACES, vireo::DescriptorType::DEVICE_STORAGE);
+        descriptorLayout->add(BINDING_INSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
+        descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::DEVICE_STORAGE);
         descriptorLayout->add(BINDING_OUTPUT, vireo::DescriptorType::READWRITE_STORAGE);
         descriptorLayout->add(BINDING_COUNTER, vireo::DescriptorType::READWRITE_STORAGE);
         descriptorLayout->build();
@@ -34,8 +33,6 @@ namespace lysa {
         descriptorSet = vireo.createDescriptorSet(descriptorLayout, DEBUG_NAME);
         descriptorSet->update(BINDING_GLOBAL, globalBuffer);
         descriptorSet->update(BINDING_MESHINSTANCES, meshInstancesArray.getBuffer());
-        descriptorSet->update(BINDING_INDICES, Application::getResources().getIndexArray().getBuffer());
-        descriptorSet->update(BINDING_MESHSURFACES, meshSurfacesArray.getBuffer());
 
         const auto pipelineResources = vireo.createPipelineResources(
             { descriptorLayout },
@@ -50,33 +47,43 @@ namespace lysa {
 
     void FrustumCulling::dispatch(
         vireo::CommandList& commandList,
-        const pipeline_id pipelineId,
-        const uint32 surfaceCount,
+        const uint32 drawCommandsCount,
         const Camera& camera,
+        const vireo::Buffer& instances,
+        const vireo::Buffer& input,
         const vireo::Buffer& output,
-        const vireo::Buffer& command) {
-        // auto global = Global{
-        //     .pipelineId = pipelineId,
-        //     .surfaceCount = surfaceCount,
-        // };
-        // Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
-        // globalBuffer->write(&global);
-        // commandList.barrier(
-        //     command,
-        //     vireo::ResourceState::INDIRECT_DRAW,
-        //     vireo::ResourceState::COPY_DST);
-        // commandList.copy(*commandClearBuffer, command);
-        // commandList.barrier(
-        //     command,
-        //     vireo::ResourceState::COPY_DST,
-        //     vireo::ResourceState::COMPUTE_WRITE);
-        // descriptorSet->update(BINDING_OUTPUT, output);
-        // descriptorSet->update(BINDING_COMMAND, command);
+        const vireo::Buffer& counter) {
+        auto global = Global{
+            .drawCommandsCount = drawCommandsCount,
+        };
+        Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
+        globalBuffer->write(&global);
+        commandList.barrier(
+            counter,
+            vireo::ResourceState::INDIRECT_DRAW,
+            vireo::ResourceState::COPY_DST);
+        commandList.copy(*commandClearCounterBuffer, counter);
+        commandList.barrier(
+            counter,
+            vireo::ResourceState::COPY_DST,
+            vireo::ResourceState::COMPUTE_WRITE);
+        descriptorSet->update(BINDING_INSTANCES, instances);
+        descriptorSet->update(BINDING_INPUT, input);
+        descriptorSet->update(BINDING_OUTPUT, output, counter);
+        descriptorSet->update(BINDING_COUNTER, counter);
+        commandList.barrier(
+            output,
+            vireo::ResourceState::INDIRECT_DRAW,
+            vireo::ResourceState::COMPUTE_WRITE);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors({ descriptorSet });
-        commandList.dispatch((surfaceCount + 63) / 64, 1, 1);
+        commandList.dispatch((drawCommandsCount + 63) / 64, 1, 1);
         commandList.barrier(
-            command,
+            output,
+            vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::INDIRECT_DRAW);
+        commandList.barrier(
+            counter,
             vireo::ResourceState::COMPUTE_WRITE,
             vireo::ResourceState::INDIRECT_DRAW);
     }

@@ -40,7 +40,7 @@ namespace lysa {
             sizeof(LightData),
             1,
             L"Scene Lights")},
-        // frustumCullingPipeline{ modelsDataArray,surfacesDataArray },
+        frustumCullingPipeline{ meshInstancesDataArray},
         meshInstancesDataArray{Application::getVireo(),
             sizeof(MeshInstanceData),
             config.maxModelsPerFrame,
@@ -65,24 +65,17 @@ namespace lysa {
     }
 
     void Scene::compute(vireo::CommandList& commandList) {
-        // for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-        //     const auto& cullingBuffer = *pipelineData->instancesIndexBuffer;
-        //     commandList.barrier(
-        //         cullingBuffer,
-        //         vireo::ResourceState::SHADER_READ,
-        //         vireo::ResourceState::COMPUTE_WRITE);
-        //     frustumCullingPipeline.dispatch(
-        //         commandList,
-        //         pipelineId,
-        //         surfaceCount,
-        //         *currentCamera,
-        //         cullingBuffer,
-        //         *pipelineData->drawCommandsBuffer);
-        //     commandList.barrier(
-        //         cullingBuffer,
-        //         vireo::ResourceState::COMPUTE_WRITE,
-        //         vireo::ResourceState::SHADER_READ);
-        // }
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            const auto& cullingBuffer = *pipelineData->culledDrawCommandsBuffer;
+            frustumCullingPipeline.dispatch(
+                commandList,
+                pipelineData->drawCommandsCount,
+                *currentCamera,
+                *pipelineData->instancesArray.getBuffer(),
+                *pipelineData->drawCommandsBuffer,
+                cullingBuffer,
+                *pipelineData->culledDrawCommandsCountBuffer);
+        }
     }
 
     void Scene::update(vireo::CommandList& commandList) {
@@ -132,6 +125,18 @@ namespace lysa {
                 pipelineData->instancesArray.flush(commandList);
                 commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->drawCommands.data());
                 pipelineData->instancesUpdated = false;
+                commandList.barrier(
+                    *pipelineData->instancesArray.getBuffer(),
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::SHADER_READ);
+                commandList.barrier(
+                    *pipelineData->drawCommandsBuffer,
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::SHADER_READ);
+                commandList.barrier(
+                    *pipelineData->culledDrawCommandsBuffer,
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::INDIRECT_DRAW);
             }
         }
 
@@ -270,20 +275,20 @@ namespace lysa {
                 descriptorSet,
                 pipelineData->descriptorSet
             });
-            commandList.drawIndexedIndirect(
-                pipelineData->drawCommandsBuffer,
+            // commandList.drawIndexedIndirect(
+            //     pipelineData->drawCommandsBuffer,
+            //     0,
+            //     pipelineData->drawCommandsCount,
+            //     sizeof(DrawCommand),
+            //     sizeof(uint32));
+            commandList.drawIndexedIndirectCount(
+                pipelineData->culledDrawCommandsBuffer,
+                0,
+                pipelineData->culledDrawCommandsCountBuffer,
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
                 sizeof(uint32));
-            // commandList.drawIndexedIndirectCount(
-            //     pipelineData->culledDrawCommandsBuffer,
-            //     0,
-            //     pipelineData->culledDrawCommandsCountBuffer,
-            //     0,
-            //     config.maxMeshSurfacePerFrame,
-            //     sizeof(DrawCommand),
-            //     sizeof(uint32));
         }
     }
 
@@ -310,20 +315,20 @@ namespace lysa {
             L"Pipeline instances array"},
         drawCommands(config.maxMeshSurfacePerFrame),
         drawCommandsBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::INDIRECT,
-            sizeof(DrawCommand),
-            config.maxMeshSurfacePerFrame,
+            vireo::BufferType::DEVICE_STORAGE,
+            sizeof(DrawCommand) * config.maxMeshSurfacePerFrame,
+            1,
             L"Pipeline draw commands")},
-        culledDrawCommandsBuffer{Application::getVireo().createBuffer(
-            vireo::BufferType::INDIRECT,
-            sizeof(DrawCommand),
-            config.maxMeshSurfacePerFrame,
-            L"Pipeline culled draw commands")},
         culledDrawCommandsCountBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
             sizeof(uint32),
             1,
-            L"Pipeline draw commands counter")}
+            L"Pipeline draw commands counter")},
+        culledDrawCommandsBuffer{Application::getVireo().createBuffer(
+            vireo::BufferType::READWRITE_STORAGE,
+            sizeof(DrawCommand) * config.maxMeshSurfacePerFrame,
+            1,
+            L"Pipeline culled draw commands")}
     {
         descriptorSet = Application::getVireo().createDescriptorSet(pipelineDescriptorLayout, L"Pipeline");
         descriptorSet->update(BINDING_INSTANCES, instancesArray.getBuffer());
@@ -364,7 +369,6 @@ namespace lysa {
 
     void Scene::PipelineData::removeNode(
         const std::shared_ptr<MeshInstance>& meshInstance) {
-        // add a removed flag to instances
         throw Exception("Not implemented");
     }
 

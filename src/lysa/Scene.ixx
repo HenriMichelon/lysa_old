@@ -119,7 +119,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> lightsBuffer;
         uint32 lightsBufferCount{1};
 
-        // FrustumCulling frustumCullingPipeline;
+        FrustumCulling frustumCullingPipeline;
 
         struct PipelineData {
             pipeline_id pipelineId;
@@ -133,8 +133,8 @@ export namespace lysa {
             uint32 drawCommandsCount{0};
             std::vector<DrawCommand> drawCommands;
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            std::shared_ptr<vireo::Buffer> culledDrawCommandsBuffer;
             std::shared_ptr<vireo::Buffer> culledDrawCommandsCountBuffer;
+            std::shared_ptr<vireo::Buffer> culledDrawCommandsBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,

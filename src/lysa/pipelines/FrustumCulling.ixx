@@ -16,16 +16,16 @@ export namespace lysa {
     class FrustumCulling {
     public:
         FrustumCulling(
-            const DeviceMemoryArray& meshInstancesArray,
-            const DeviceMemoryArray& meshSurfacesArray);
+            const DeviceMemoryArray& meshInstancesArray);
 
         void dispatch(
             vireo::CommandList& commandList,
-            pipeline_id pipelineId,
-            uint32 surfaceCount,
+            uint32 drawCommandsCount,
             const Camera& camera,
+            const vireo::Buffer& instances,
+            const vireo::Buffer& input,
             const vireo::Buffer& output,
-            const vireo::Buffer& command) ;
+            const vireo::Buffer& counter) ;
 
         virtual ~FrustumCulling() = default;
         FrustumCulling(FrustumCulling&) = delete;
@@ -33,9 +33,9 @@ export namespace lysa {
 
     private:
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
-        static constexpr vireo::DescriptorIndex BINDING_INDICES{1};
-        static constexpr vireo::DescriptorIndex BINDING_MESHINSTANCES{2};
-        static constexpr vireo::DescriptorIndex BINDING_MESHSURFACES{3};
+        static constexpr vireo::DescriptorIndex BINDING_MESHINSTANCES{1};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{2};
+        static constexpr vireo::DescriptorIndex BINDING_INPUT{3};
         static constexpr vireo::DescriptorIndex BINDING_OUTPUT{4};
         static constexpr vireo::DescriptorIndex BINDING_COUNTER{5};
 

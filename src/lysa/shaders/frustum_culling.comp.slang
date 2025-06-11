@@ -35,7 +35,7 @@ struct DrawCommand {
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space0);
 [[vk::binding(2, 0)]] StructuredBuffer<Instance> instances : register(t2, space0);
-[[vk::binding(3, 0)]] StructuredBuffer<DrawCommand> input : register(u3, space0);
+[[vk::binding(3, 0)]] StructuredBuffer<DrawCommand> input : register(t3, space0);
 [[vk::binding(4, 0)]] AppendStructuredBuffer<DrawCommand> output : register(u4, space0);
 // [[vk::binding(5, 0)]] RWStructuredBuffer<uint32> counter : register(u5, space0);
 
