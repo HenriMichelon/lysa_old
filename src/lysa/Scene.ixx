@@ -131,7 +131,7 @@ export namespace lysa {
             bool instancesUpdated{false};
 
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            uint32 drawCommandsCount{0};
+            std::shared_ptr<vireo::Buffer> drawCommandsCountBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -143,7 +143,6 @@ export namespace lysa {
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance);
-
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
