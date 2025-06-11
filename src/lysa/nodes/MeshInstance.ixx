@@ -14,7 +14,7 @@ import lysa.resources.mesh;
 
 export namespace lysa {
 
-    struct ModelData {
+    struct MeshInstanceData {
         float4x4 transform;
         float3   aabbMin;
         float3   aabbMax;
@@ -61,7 +61,7 @@ export namespace lysa {
          */
         const auto& getAABB() const { return worldAABB; }
 
-        ModelData getModelData() const;
+        MeshInstanceData getModelData() const;
 
         friend inline bool operator<(const MeshInstance& a, const MeshInstance& b) {
             return a.mesh < b.mesh;

@@ -31,8 +31,8 @@ export namespace lysa {
     };
 
     struct alignas(8) InstanceData {
-        uint32 modelIndex;
-        uint32 surfaceIndex;
+        uint32 meshInstanceIndex;
+        uint32 meshSurfaceIndex;
     };
 
     struct DrawCommand {
@@ -49,20 +49,19 @@ export namespace lysa {
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
         static constexpr uint32_t SET_PIPELINE{3};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCES_COUNTER{0};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{1};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{0};
         inline static std::shared_ptr<vireo::DescriptorLayout> pipelineDescriptorLayout{nullptr};
 
         static void createDescriptorLayouts();
         static void destroyDescriptorLayouts();
 
-        struct PushConstant {
+        struct InstanceIndexConstant {
             uint32 instanceIndex;
         };
 
-        static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
+        static constexpr auto instanceIndexConstantDesc = vireo::PushConstantsDesc {
             .stage = vireo::ShaderStage::VERTEX,
-            .size = sizeof(PushConstant),
+            .size = sizeof(InstanceIndexConstant),
         };
 
 
@@ -127,14 +126,12 @@ export namespace lysa {
             const SceneConfiguration& config;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
-            std::shared_ptr<vireo::Buffer> instancesCounterBuffer;
-
             DeviceMemoryArray instancesArray;
             std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
             bool instancesUpdated{false};
 
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            uint32 drawCommandsCount{0};
+            std::shared_ptr<vireo::Buffer> drawCommandsCountBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -146,7 +143,6 @@ export namespace lysa {
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance);
-
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;

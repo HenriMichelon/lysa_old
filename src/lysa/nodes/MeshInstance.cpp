@@ -17,7 +17,7 @@ namespace lysa {
         mesh{mesh} {
     }
 
-    ModelData MeshInstance::getModelData() const {
+    MeshInstanceData MeshInstance::getModelData() const {
         return {
             .transform = globalTransform,
             .aabbMin = worldAABB.min,

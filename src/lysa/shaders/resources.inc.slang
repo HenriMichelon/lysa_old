@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-struct Model {
+struct MeshInstance {
     float4x4 transform;
     float3   aabbMin;
     float   _pad0;
@@ -40,6 +40,6 @@ struct MeshSurface {
 };
 
 struct Instance {
-    uint modelIndex;
-    uint surfaceIndex;
+    uint meshInstanceIndex;
+    uint meshSurfaceIndex;
 }

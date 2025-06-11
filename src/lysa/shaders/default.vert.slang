@@ -10,8 +10,8 @@ VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
 
     Instance instance = instances[instanceIndex];
-    MeshSurface surface = surfaces[instance.surfaceIndex];
-    float4x4 model = models[instance.modelIndex].transform;
+    MeshSurface surface = meshSurfaces[instance.meshSurfaceIndex];
+    float4x4 model = meshInstances[instance.meshInstanceIndex].transform;
 
     float4 position = float4(input.position.xyz, 1.0);
     float4 positionW = mul(model, position);

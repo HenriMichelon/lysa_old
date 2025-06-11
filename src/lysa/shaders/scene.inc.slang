@@ -5,7 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 #include "samplers.inc.slang"
-#include "scene_data.inc.slang"
+#include "resources.inc.slang"
 
 enum class Transparency {
     DISABLED = 0,
@@ -55,11 +55,10 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);
-[[vk::binding(1, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t1, space0);
+[[vk::binding(1, 0)]] StructuredBuffer<MeshSurface> meshSurfaces : register(t1, space0);
 [[vk::binding(2, 0)]] Texture2D textures[] : register(t2, space0);
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
-[[vk::binding(1, 2)]] StructuredBuffer<Model> models : register(t1, space2);
+[[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
 
-[[vk::binding(0, 3)]] RWStructuredBuffer<uint> instancesCounter : register(u0, space3);
-[[vk::binding(1, 3)]] StructuredBuffer<Instance> instances : register(t1, space3);
+[[vk::binding(0, 3)]] StructuredBuffer<Instance> instances : register(t0, space3);
