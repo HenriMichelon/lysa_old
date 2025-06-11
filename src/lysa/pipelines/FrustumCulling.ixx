@@ -16,8 +16,8 @@ export namespace lysa {
     class FrustumCulling {
     public:
         FrustumCulling(
-            const DeviceMemoryArray& modelsArray,
-            const DeviceMemoryArray& surfacesArray);
+            const DeviceMemoryArray& meshInstancesArray,
+            const DeviceMemoryArray& meshSurfacesArray);
 
         void dispatch(
             vireo::CommandList& commandList,
@@ -34,23 +34,22 @@ export namespace lysa {
     private:
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
         static constexpr vireo::DescriptorIndex BINDING_INDICES{1};
-        static constexpr vireo::DescriptorIndex BINDING_MODELS{2};
-        static constexpr vireo::DescriptorIndex BINDING_MATERIALS{3};
-        static constexpr vireo::DescriptorIndex BINDING_SURFACES{4};
-        static constexpr vireo::DescriptorIndex BINDING_OUTPUT{5};
-        static constexpr vireo::DescriptorIndex BINDING_COMMAND{6};
+        static constexpr vireo::DescriptorIndex BINDING_MESHINSTANCES{2};
+        static constexpr vireo::DescriptorIndex BINDING_MESHSURFACES{3};
+        static constexpr vireo::DescriptorIndex BINDING_OUTPUT{4};
+        static constexpr vireo::DescriptorIndex BINDING_COUNTER{5};
+
         const std::wstring DEBUG_NAME{L"FrustumCulling"};
 
         struct Global {
-            uint32 pipelineId;
-            uint32 surfaceCount;
+            uint32 drawCommandsCount;
             Frustum::Plane planes[6];
         };
 
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
         std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
         std::shared_ptr<vireo::Buffer>           globalBuffer;
-        std::shared_ptr<vireo::Buffer>           commandClearBuffer;
+        std::shared_ptr<vireo::Buffer>           commandClearCounterBuffer;
         std::shared_ptr<vireo::Pipeline>         pipeline;
     };
 }

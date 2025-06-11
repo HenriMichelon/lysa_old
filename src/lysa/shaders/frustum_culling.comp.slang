@@ -15,7 +15,7 @@ struct Plane {
 };
 
 struct Global {
-    uint surfaceCount;
+    uint drawCommandsCount;
     Plane planes[6];
 };
 
@@ -33,40 +33,34 @@ struct DrawCommand {
 };
 
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
-[[vk::binding(1, 0)]] StructuredBuffer<uint> indices : register(t1, space0);
-[[vk::binding(2, 0)]] StructuredBuffer<MeshInstance> meshInstances : register(t2, space0);
-[[vk::binding(3, 0)]] StructuredBuffer<MeshSurface> meshSurfaces : register(t3, space0);
-[[vk::binding(4, 0)]] RWStructuredBuffer<DrawCommand> commands : register(u4, space0);
+[[vk::binding(1, 0)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space0);
+[[vk::binding(2, 0)]] StructuredBuffer<Instance> instances : register(t2, space0);
+[[vk::binding(3, 0)]] StructuredBuffer<DrawCommand> input : register(u3, space0);
+[[vk::binding(4, 0)]] AppendStructuredBuffer<DrawCommand> output : register(u4, space0);
+// [[vk::binding(5, 0)]] RWStructuredBuffer<uint32> counter : register(u5, space0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {
-    if (id.x >= global.surfaceCount) {
+    if (id.x >= global.drawCommandsCount) {
         return;
     }
 
-    MeshSurface surface = surfaces[id.x];
-    }
-//     Model model = models[surface.modelIndex];
-//
-//     [unroll]
-//     for (int i = 0; i < 6; ++i) {
-//         Plane plane = global.planes[i];
-//         float3 positiveVertex = float3(
-//             (plane.normal.x >= 0.0f) ? model.aabbMax.x : model.aabbMin.x,
-//             (plane.normal.y >= 0.0f) ? model.aabbMax.y : model.aabbMin.y,
-//             (plane.normal.z >= 0.0f) ? model.aabbMax.z : model.aabbMin.z
-//         );
-//         if (plane.signedDistance(positiveVertex) < 0.0f) {
-//             return;
-//         }
-//     }
-//
-//     uint offset;
-//     InterlockedAdd(command[0].vertexCount, surface.indexCount, offset);
-//     for (uint i = 0; i < surface.indexCount; i++) {
-//         uint idx = offset + i;
-//         output[idx].index = indices[surface.firstIndex + i];
-//         output[idx].surfaceIndex = surface.surfaceDataIndex;
-//     }
+    DrawCommand command = input[id.x];
+    Instance instance = instances[command.instanceIndex];
+    MeshInstance meshInstance = meshInstances[instance.meshInstanceIndex];
 
+    [unroll]
+    for (int i = 0; i < 6; ++i) {
+        Plane plane = global.planes[i];
+        float3 positiveVertex = float3(
+            (plane.normal.x >= 0.0f) ? meshInstance.aabbMax.x : meshInstance.aabbMin.x,
+            (plane.normal.y >= 0.0f) ? meshInstance.aabbMax.y : meshInstance.aabbMin.y,
+            (plane.normal.z >= 0.0f) ? meshInstance.aabbMax.z : meshInstance.aabbMin.z
+        );
+        if (plane.signedDistance(positiveVertex) < 0.0f) {
+            return;
+        }
+    }
+
+    output.Append(command);
 }

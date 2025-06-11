@@ -107,10 +107,10 @@ export namespace lysa {
         std::shared_ptr<Camera> currentCamera{};
         std::shared_ptr<Environment> currentEnvironment{};
 
-        std::list<std::shared_ptr<MeshInstance>> models{};
-        DeviceMemoryArray modelsDataArray;
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> modelsDataMemoryBlocks{};
-        bool modelsDataUpdated{false};
+        std::list<std::shared_ptr<MeshInstance>> meshInstances{};
+        DeviceMemoryArray meshInstancesDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
+        bool meshInstancesDataUpdated{false};
 
         std::unordered_map<pipeline_id, std::shared_ptr<Material>> materials;
         bool materialsUpdated{false};
@@ -126,12 +126,15 @@ export namespace lysa {
             const SceneConfiguration& config;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
-            DeviceMemoryArray instancesArray;
-            std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
             bool instancesUpdated{false};
+            DeviceMemoryArray instancesArray; // ARRAY
+            std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
 
+            uint32 drawCommandsCount{0};
+            std::vector<DrawCommand> drawCommands;
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
-            std::shared_ptr<vireo::Buffer> drawCommandsCountBuffer;
+            std::shared_ptr<vireo::Buffer> culledDrawCommandsBuffer;
+            std::shared_ptr<vireo::Buffer> culledDrawCommandsCountBuffer;
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -139,7 +142,7 @@ export namespace lysa {
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,
-                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& modelsDataMemoryBlocks);
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
 
             void removeNode(
                 const std::shared_ptr<MeshInstance>& meshInstance);
