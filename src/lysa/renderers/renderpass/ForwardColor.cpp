@@ -24,7 +24,7 @@ namespace lysa {
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
             Scene::pipelineDescriptorLayout},
-            Scene::pushConstantsDesc, name);
+            Scene::instanceIndexConstantDesc, name);
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,

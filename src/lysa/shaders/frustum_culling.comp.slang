@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene_data.inc.slang"
+#include "resources.inc.slang"
 
 struct Plane {
     float3 normal;
@@ -29,11 +29,10 @@ struct DrawIndirectCommand {
 
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
 [[vk::binding(1, 0)]] StructuredBuffer<uint> indices : register(t1, space0);
-[[vk::binding(2, 0)]] StructuredBuffer<Model> models : register(t2, space0);
+[[vk::binding(2, 0)]] StructuredBuffer<MeshInstance> meshInstances : register(t2, space0);
 [[vk::binding(3, 0)]] StructuredBuffer<Material> materials : register(t3, space0);
 [[vk::binding(4, 0)]] StructuredBuffer<MeshSurface> surfaces : register(t4, space0);
-// [[vk::binding(5, 0)]] RWStructuredBuffer<Index> output : register(u5, space0);
-[[vk::binding(6, 0)]] RWStructuredBuffer<DrawIndirectCommand> command : register(u6, space0);
+[[vk::binding(5, 0)]] RWStructuredBuffer<DrawIndirectCommand> command : register(u5, space0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID) {

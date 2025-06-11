@@ -31,8 +31,8 @@ export namespace lysa {
     };
 
     struct alignas(8) InstanceData {
-        uint32 modelIndex;
-        uint32 surfaceIndex;
+        uint32 meshInstanceIndex;
+        uint32 meshSurfaceIndex;
     };
 
     struct DrawCommand {
@@ -56,13 +56,13 @@ export namespace lysa {
         static void createDescriptorLayouts();
         static void destroyDescriptorLayouts();
 
-        struct PushConstant {
+        struct InstanceIndexConstant {
             uint32 instanceIndex;
         };
 
-        static constexpr auto pushConstantsDesc = vireo::PushConstantsDesc {
+        static constexpr auto instanceIndexConstantDesc = vireo::PushConstantsDesc {
             .stage = vireo::ShaderStage::VERTEX,
-            .size = sizeof(PushConstant),
+            .size = sizeof(InstanceIndexConstant),
         };
 
 

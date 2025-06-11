@@ -43,7 +43,7 @@ namespace lysa {
             L"Scene Lights")},
         // frustumCullingPipeline{ modelsDataArray,surfacesDataArray },
         modelsDataArray{Application::getVireo(),
-            sizeof(ModelData),
+            sizeof(MeshInstanceData),
             config.maxModelsPerFrame,
             config.maxModelsPerFrame,
             vireo::BufferType::DEVICE_STORAGE,
@@ -348,8 +348,8 @@ namespace lysa {
             const auto& surface = mesh->getSurfaces()[i];
             if (surface->material->getPipelineId() == pipelineId) {
                 instancesData[i] = InstanceData {
-                    .modelIndex = modelsDataMemoryBlocks.at(meshInstance).instanceIndex,
-                    .surfaceIndex = instanceMemoryBlock.instanceIndex + i,
+                    .meshInstanceIndex = modelsDataMemoryBlocks.at(meshInstance).instanceIndex,
+                    .meshSurfaceIndex = instanceMemoryBlock.instanceIndex + i,
                 };
             }
         }
