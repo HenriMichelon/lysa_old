@@ -49,8 +49,7 @@ export namespace lysa {
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
         static constexpr uint32_t SET_PIPELINE{3};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCES_COUNTER{0};
-        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{1};
+        static constexpr vireo::DescriptorIndex BINDING_INSTANCES{0};
         inline static std::shared_ptr<vireo::DescriptorLayout> pipelineDescriptorLayout{nullptr};
 
         static void createDescriptorLayouts();
@@ -126,8 +125,6 @@ export namespace lysa {
             pipeline_id pipelineId;
             const SceneConfiguration& config;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-
-            std::shared_ptr<vireo::Buffer> instancesCounterBuffer;
 
             DeviceMemoryArray instancesArray;
             std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
