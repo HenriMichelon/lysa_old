@@ -102,7 +102,7 @@ export namespace lysa {
         WindowConfiguration&  config;
         // Opaque window handle for presenting
         void* windowHandle;
-        bool closing{false};
+        bool stopped{false};
 
         // Per frame data
         std::vector<FrameData>                 framesData;
@@ -129,7 +129,7 @@ export namespace lysa {
         bool mainWindow{false};
 
         // Propagate input event to the UI Window manager and to the current scene tree
-        void input(InputEvent &inputEvent);
+        void input(InputEvent &inputEvent) const;
 
         void resize();
 

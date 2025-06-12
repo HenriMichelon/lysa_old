@@ -8,6 +8,7 @@ module lysa.window;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.nodes.node;
 import lysa.renderers.forward_renderer;
 
@@ -49,7 +50,7 @@ namespace lysa {
     }
 
     void Window::close() {
-        closing = true;
+        stopped = true;
         Application::getInstance().removeWindow(this);
     }
 
@@ -60,8 +61,8 @@ namespace lysa {
         return viewport;
     }
 
-    void Window::input(InputEvent &inputEvent) {
-        if (closing) return;
+    void Window::input(InputEvent &inputEvent) const {
+        if (stopped) { return; }
         // if (windowManager->onInput(inputEvent)) return;
         for (const auto& viewport : viewports) {
             viewport->input(inputEvent);
@@ -69,7 +70,7 @@ namespace lysa {
     }
 
     void Window::update() const {
-        if (closing) { return; }
+        if (stopped) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
@@ -80,21 +81,21 @@ namespace lysa {
     }
 
     void Window::physicsProcess(const float delta) const {
-        if (closing) { return; }
+        if (stopped) { return; }
         for (const auto& viewport : viewports) {
             viewport->physicsProcess(delta);
         }
     }
 
     void Window::process(const float alpha) const {
-        if (closing) { return; }
+        if (stopped) { return; }
         for (const auto& viewport : viewports) {
             viewport->process(alpha);
         }
     }
 
     void Window::drawFrame() {
-        if (closing) { return; }
+        if (stopped) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
 
         const auto& frame = framesData[frameIndex];
@@ -149,7 +150,7 @@ namespace lysa {
     }
 
     void Window::resize() {
-        if (closing) { return; }
+        if (stopped) { return; }
         const auto oldExtent = swapChain->getExtent();
         swapChain->recreate();
         onResize();

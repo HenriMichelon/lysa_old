@@ -105,7 +105,10 @@ namespace lysa {
         auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         switch (message) {
             case WM_SIZE:
-                if (!IsIconic(hWnd)) {
+                if (IsIconic(hWnd)) {
+                    window->stopped = true;
+                } else {
+                    window->stopped = false;
                     window->resize();
                 }
                 return 0;
