@@ -1,4 +1,5 @@
 #pragma once
+#include <intrin.h>
 
 #if defined(__clang__) || defined(__GNUG__)
 
