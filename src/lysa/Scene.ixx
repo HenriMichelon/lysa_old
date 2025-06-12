@@ -84,13 +84,18 @@ export namespace lysa {
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
         void update(vireo::CommandList& commandList);
-        void compute(vireo::CommandList& commandList);
+        void compute(vireo::CommandList& commandList) const;
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
+        void drawTransparentModels(
+           vireo::CommandList& commandList,
+           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
+
         const auto& getPipelineIds() const { return pipelineIds; }
+
         auto isMaterialsUpdated() const { return materialsUpdated; }
 
         virtual ~Scene() = default;
@@ -149,6 +154,25 @@ export namespace lysa {
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
+        std::unordered_map<uint32, std::unique_ptr<PipelineData>> transparentPipelinesData;
+
+        void updatePipelineData(
+            vireo::CommandList& commandList,
+            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
+
+        void compute(
+            vireo::CommandList& commandList,
+            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
+
+        void addNode(
+            pipeline_id pipelineId,
+            const std::shared_ptr<MeshInstance>& meshInstance,
+            std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
+
+        void drawModels(
+           vireo::CommandList& commandList,
+           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
+           const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
     };
 
 }

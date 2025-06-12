@@ -61,8 +61,15 @@ namespace lysa {
         lightsBuffer->map();
     }
 
-    void Scene::compute(vireo::CommandList& commandList) {
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+    void Scene::compute(vireo::CommandList& commandList) const {
+        compute(commandList, opaquePipelinesData);
+        compute(commandList, transparentPipelinesData);
+    }
+
+    void Scene::compute(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
+        for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             const auto& cullingBuffer = *pipelineData->culledDrawCommandsBuffer;
             pipelineData->frustumCullingPipeline.dispatch(
                 commandList,
@@ -72,6 +79,30 @@ namespace lysa {
                 *pipelineData->drawCommandsBuffer,
                 cullingBuffer,
                 *pipelineData->culledDrawCommandsCountBuffer);
+        }
+    }
+
+    void Scene::updatePipelineData(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
+        for (const auto& [pipelineId, pipelineData] : pipelinesData) {
+            if (pipelineData->instancesUpdated) {
+                pipelineData->instancesArray.flush(commandList);
+                commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->drawCommands.data());
+                pipelineData->instancesUpdated = false;
+                commandList.barrier(
+                    *pipelineData->instancesArray.getBuffer(),
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::SHADER_READ);
+                commandList.barrier(
+                    *pipelineData->drawCommandsBuffer,
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::SHADER_READ);
+                commandList.barrier(
+                    *pipelineData->culledDrawCommandsBuffer,
+                    vireo::ResourceState::COPY_DST,
+                    vireo::ResourceState::INDIRECT_DRAW);
+            }
         }
     }
 
@@ -117,25 +148,8 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ);
         }
 
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            if (pipelineData->instancesUpdated) {
-                pipelineData->instancesArray.flush(commandList);
-                commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->drawCommands.data());
-                pipelineData->instancesUpdated = false;
-                commandList.barrier(
-                    *pipelineData->instancesArray.getBuffer(),
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::SHADER_READ);
-                commandList.barrier(
-                    *pipelineData->drawCommandsBuffer,
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::SHADER_READ);
-                commandList.barrier(
-                    *pipelineData->culledDrawCommandsBuffer,
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::INDIRECT_DRAW);
-            }
-        }
+        updatePipelineData(commandList, opaquePipelinesData);
+        updatePipelineData(commandList, transparentPipelinesData);
 
         if (Application::getResources().isUpdated()) {
             Application::getResources().flush(commandList);
@@ -189,9 +203,11 @@ namespace lysa {
             mesh->setMaxUpdates(framesInFlight);
             if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
+            auto haveTransparentMaterial{false};
             auto nodePipelineIds = std::list<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
                 material->setMaxUpdates(framesInFlight);
+                haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
                 auto id = material->getPipelineId();
                 nodePipelineIds.push_back(id);
                 if (!pipelineIds.contains(id)) {
@@ -201,10 +217,11 @@ namespace lysa {
             }
 
             for (const auto& pipelineId : nodePipelineIds) {
-                if (!opaquePipelinesData.contains(pipelineId)) {
-                    opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(config, pipelineId, meshInstancesDataArray);
+                if (haveTransparentMaterial) {
+                    addNode(pipelineId, meshInstance, transparentPipelinesData);
+                } else {
+                    addNode(pipelineId, meshInstance, opaquePipelinesData);
                 }
-                opaquePipelinesData[pipelineId]->addNode(meshInstance, meshInstancesDataMemoryBlocks);
             }
             break;
         }
@@ -215,6 +232,17 @@ namespace lysa {
             break;
         }
     }
+
+    void Scene::addNode(
+        pipeline_id pipelineId,
+        const std::shared_ptr<MeshInstance>& meshInstance,
+        std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
+        if (!pipelinesData.contains(pipelineId)) {
+            pipelinesData[pipelineId] = std::make_unique<PipelineData>(config, pipelineId, meshInstancesDataArray);
+        }
+        pipelinesData[pipelineId]->addNode(meshInstance, meshInstancesDataMemoryBlocks);
+    }
+
 
     void Scene::removeNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
@@ -259,11 +287,24 @@ namespace lysa {
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        drawModels(commandList, pipelines, opaquePipelinesData);
+    }
+
+    void Scene::drawTransparentModels(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        drawModels(commandList, pipelines, transparentPipelinesData);
+    }
+
+    void Scene::drawModels(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
-        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+        for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
             commandList.bindDescriptors({
@@ -272,12 +313,6 @@ namespace lysa {
                 descriptorSet,
                 pipelineData->descriptorSet
             });
-            // commandList.drawIndexedIndirect(
-            //     pipelineData->drawCommandsBuffer,
-            //     0,
-            //     pipelineData->drawCommandsCount,
-            //     sizeof(DrawCommand),
-            //     sizeof(uint32));
             commandList.drawIndexedIndirectCount(
                 pipelineData->culledDrawCommandsBuffer,
                 0,

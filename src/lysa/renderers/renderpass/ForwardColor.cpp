@@ -51,6 +51,7 @@ namespace lysa {
                 }
                 pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
                 pipelineConfig.cullMode = material->getCullMode();
+                pipelineConfig.depthWriteEnable = material->getTransparency() == Transparency::DISABLED;
                 auto tempBuffer = std::vector<char>{};
                 const auto& ext = Application::getVireo().getShaderFileExtension();
                 VirtualFS::loadBinaryData(L"app://shaders/" + vertShaderName + ext, tempBuffer);
@@ -72,8 +73,25 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
+        renderingConfig.discardDepthStencilAfterRender = true;
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
+          commandList,
+          pipelines);
+        // commandList.endRendering();
+        // commandList.barrier(
+        //    colorAttachment,
+        //    vireo::ResourceState::RENDER_TARGET_COLOR,
+        //    vireo::ResourceState::UNDEFINED);
+        // commandList.barrier(
+        //     colorAttachment,
+        //     vireo::ResourceState::UNDEFINED,
+        //     vireo::ResourceState::RENDER_TARGET_COLOR);
+        // renderingConfig.colorRenderTargets[0].clear = false;
+        // renderingConfig.clearDepthStencil = false;
+        // renderingConfig.discardDepthStencilAfterRender = true;
+        // commandList.beginRendering(renderingConfig);
+        scene.drawTransparentModels(
           commandList,
           pipelines);
         commandList.endRendering();

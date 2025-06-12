@@ -33,14 +33,13 @@ export namespace lysa {
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc   = { { .blendEnable = true } },
+            .colorBlendDesc   = { { } },
             .depthTestEnable  = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {
             .colorRenderTargets = {{ }},
             .depthTestEnable = true,
-            .discardDepthStencilAfterRender = true,
         };
 
         std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
