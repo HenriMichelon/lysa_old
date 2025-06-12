@@ -112,7 +112,6 @@ export namespace lysa {
         std::shared_ptr<Camera> currentCamera{};
         std::shared_ptr<Environment> currentEnvironment{};
 
-        std::list<std::shared_ptr<MeshInstance>> meshInstances{};
         DeviceMemoryArray meshInstancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
         bool meshInstancesDataUpdated{false};
@@ -150,7 +149,13 @@ export namespace lysa {
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
 
             void removeNode(
-                const std::shared_ptr<MeshInstance>& meshInstance);
+                const std::shared_ptr<MeshInstance>& meshInstance,
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
+
+            void addInstance(
+                const std::shared_ptr<Mesh>& mesh,
+                const MemoryBlock& instanceMemoryBlock,
+                const MemoryBlock& meshInstanceMemoryBlock);
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;

@@ -161,4 +161,18 @@ namespace lysa {
         return "{" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + "}";
     }
 
+    uint32 randomi(const uint32 max) {
+        static std::random_device rd;
+        static std::uniform_int_distribution distr(0, static_cast<int>(max));
+        std::mt19937 gen(rd());
+        return static_cast<uint32>(distr(gen));
+    }
+
+    float randomf(const float max) {
+        static std::random_device rd;
+        static std::uniform_real_distribution<> distr(0, max);
+        std::mt19937 gen(rd());
+        return static_cast<float>(distr(gen));
+    }
+
 }

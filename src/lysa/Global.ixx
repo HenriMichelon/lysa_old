@@ -72,6 +72,16 @@ export namespace lysa {
 
     std::string to_lower(const std::string& str);
 
+    /**
+    * Returns a random value in the range [0, max]
+    */
+    uint32 randomi(uint32 max);
+
+    /**
+    * Returns a random value in the range [0.0f, max]
+    */
+    float randomf(float max);
+
     class Exception final : public std::exception {
     public:
         template <typename... Args>

@@ -121,7 +121,7 @@ namespace lysa {
         }
         sceneUniformBuffer->write(&sceneUniform);
 
-        for (const auto& meshInstance : meshInstances) {
+        for (const auto& meshInstance : std::views::keys(meshInstancesDataMemoryBlocks)) {
             if (meshInstance->isUpdated()) {
                 const auto modelData = meshInstance->getModelData();
                 meshInstancesDataArray.write(meshInstancesDataMemoryBlocks[meshInstance], &modelData);
@@ -192,25 +192,29 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
+            if (meshInstancesDataMemoryBlocks.contains(meshInstance)) {
+                break;
+            }
+
             const auto& mesh = meshInstance->getMesh();
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
             if (!mesh->isUploaded()) {
                 mesh->upload();
                 Application::getResources().setUpdated();
             }
-            meshInstances.push_back(meshInstance);
+
             meshInstancesDataMemoryBlocks[meshInstance] = meshInstancesDataArray.alloc(1);
             meshInstance->setMaxUpdates(framesInFlight);
             mesh->setMaxUpdates(framesInFlight);
             if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
             auto haveTransparentMaterial{false};
-            auto nodePipelineIds = std::list<uint32>{};
+            auto nodePipelineIds = std::set<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
                 material->setMaxUpdates(framesInFlight);
                 haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
                 auto id = material->getPipelineId();
-                nodePipelineIds.push_back(id);
+                nodePipelineIds.insert(id);
                 if (!pipelineIds.contains(id)) {
                     pipelineIds[id].push_back(material);
                     materialsUpdated = true;
@@ -260,20 +264,27 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            meshInstances.remove(meshInstance);
-            if (meshInstancesDataMemoryBlocks.contains(meshInstance)) {
-                meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
-                meshInstancesDataMemoryBlocks.erase(meshInstance);
-            }
-
             const auto& mesh = meshInstance->getMesh();
-            auto nodePipelineIds = std::list<uint32>{};
+
+            if (!meshInstancesDataMemoryBlocks.contains(meshInstance)) {
+                break;
+            }
+            meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
+            meshInstancesDataMemoryBlocks.erase(meshInstance);
+
+            auto haveTransparentMaterial{false};
+            auto nodePipelineIds = std::set<uint32>{};
             for (const auto& material : mesh->getMaterials()) {
                 auto id = material->getPipelineId();
-                nodePipelineIds.push_back(id);
+                haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
+                nodePipelineIds.insert(id);
             }
             for (const auto& pipelineId : nodePipelineIds) {
-                opaquePipelinesData[pipelineId]->removeNode(meshInstance);
+                if (haveTransparentMaterial) {
+                    transparentPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                } else {
+                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                }
             }
             break;
         }
@@ -377,7 +388,13 @@ namespace lysa {
         const auto& mesh = meshInstance->getMesh();
         const auto instanceMemoryBlock = instancesArray.alloc(mesh->getSurfaces().size());
         instancesMemoryBlocks[meshInstance] = instanceMemoryBlock;
+        addInstance(mesh, instanceMemoryBlock, meshInstancesDataMemoryBlocks.at(meshInstance));
+    }
 
+    void Scene::PipelineData::addInstance(
+        const std::shared_ptr<Mesh>& mesh,
+        const MemoryBlock& instanceMemoryBlock,
+        const MemoryBlock& meshInstanceMemoryBlock) {
         auto instancesData = std::vector<InstanceData>{};
         for (uint32 i = 0; i < mesh->getSurfaces().size(); i++) {
             const auto& surface = mesh->getSurfaces()[i];
@@ -394,7 +411,7 @@ namespace lysa {
                     }
                 };
                 instancesData.push_back(InstanceData {
-                    .meshInstanceIndex = meshInstancesDataMemoryBlocks.at(meshInstance).instanceIndex,
+                    .meshInstanceIndex = meshInstanceMemoryBlock.instanceIndex,
                     .meshSurfaceIndex = mesh->getSurfacesIndex() + i,
                 });
                 drawCommandsCount++;
@@ -405,8 +422,19 @@ namespace lysa {
     }
 
     void Scene::PipelineData::removeNode(
-        const std::shared_ptr<MeshInstance>& meshInstance) {
-        throw Exception("Not implemented");
+        const std::shared_ptr<MeshInstance>& meshInstance,
+        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks) {
+        if (instancesMemoryBlocks.contains(meshInstance)) {
+            instancesArray.free(instancesMemoryBlocks.at(meshInstance));
+            instancesMemoryBlocks.erase(meshInstance);
+        }
+        drawCommandsCount = 0;
+        for (const auto& instance : std::views::keys(instancesMemoryBlocks)) {
+            addInstance(
+                instance->getMesh(),
+                instancesMemoryBlocks.at(instance),
+                meshInstancesDataMemoryBlocks.at(instance));
+        }
     }
 
 
