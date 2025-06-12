@@ -10,7 +10,7 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     Material mat = materials[input.materialIndex];
     float4 color = mat.albedoColor;
     if (mat.diffuseTexture.index != -1) {
-        color *= textures[mat.diffuseTexture.index].Sample(
+        color = textures[mat.diffuseTexture.index].Sample(
             samplers[mat.diffuseTexture.samplerIndex],
             uvTransform(mat.diffuseTexture, input.uv));
     }

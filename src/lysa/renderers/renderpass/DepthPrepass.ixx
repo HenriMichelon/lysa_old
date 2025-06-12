@@ -23,7 +23,7 @@ export namespace lysa {
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment);
 
-        void updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials);
+        void updatePipelines(const std::unordered_map<uint32, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
     private:
         vireo::GraphicPipelineConfiguration pipelineConfig {

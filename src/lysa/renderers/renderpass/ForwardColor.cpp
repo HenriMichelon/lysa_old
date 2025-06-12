@@ -34,12 +34,13 @@ namespace lysa {
         renderingConfig.clearDepthStencil = !config.forwardDepthPrepass;
     }
 
-    void ForwardColor::updatePipelines(const std::unordered_map<pipeline_id, std::shared_ptr<Material>>& materials) {
-        for (const auto& [pipelineId, material] : materials) {
+    void ForwardColor::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+        for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
+                const auto& material = materials.at(0);
                 std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
                 std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
-                if (pipelineId != 0) {
+                if (material->getType() == Material::SHADER) {
                     const auto& shaderMaterial = dynamic_pointer_cast<const ShaderMaterial>(material);
                     if (!shaderMaterial->getVertFileName().empty()) {
                         vertShaderName = shaderMaterial->getVertFileName();

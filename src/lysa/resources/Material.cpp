@@ -11,8 +11,8 @@ import lysa.application;
 
 namespace lysa {
 
-    Material::Material(const std::wstring &name):
-        Resource(name) {
+    Material::Material(const Type type, const std::wstring &name):
+        Resource{name}, type{type} {
     }
 
     void Material::upload() {
@@ -50,7 +50,7 @@ namespace lysa {
     }
 
     StandardMaterial::StandardMaterial(const std::wstring &name):
-        Material(name) {
+        Material(STANDARD, name) {
     }
 
     void StandardMaterial::setAlbedoColor(const float4 &color) {
@@ -109,8 +109,16 @@ namespace lysa {
         normalScale = scale;
     }
 
+    pipeline_id StandardMaterial::getPipelineId() const {
+        const auto name = std::format("{0}{1}{2}",
+            DEFAULT_PIPELINE_ID,
+            static_cast<uint32>(getTransparency()),
+            static_cast<uint32>(getCullMode()));
+        return XXH32(name.c_str(), name.size(), 0);
+    }
+
     ShaderMaterial::ShaderMaterial(const std::shared_ptr<ShaderMaterial> &orig):
-        Material{orig->getName()},
+        Material{SHADER, orig->getName()},
         fragFileName{orig->fragFileName},
         vertFileName{orig->vertFileName} {
         for (int i = 0; i < SHADER_MATERIAL_MAX_PARAMETERS; i++) {
@@ -121,7 +129,7 @@ namespace lysa {
     ShaderMaterial::ShaderMaterial(const std::wstring &fragShaderFileName,
                                    const std::wstring &vertShaderFileName,
                                    const std::wstring &name):
-        Material{name},
+        Material{SHADER, name},
         fragFileName{fragShaderFileName},
         vertFileName{vertShaderFileName} {
     }

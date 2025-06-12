@@ -38,6 +38,10 @@ export namespace lysa {
      */
     class Material : public Resource {
     public:
+        enum Type {
+            STANDARD,
+            SHADER
+        };
         /**
          * Returns the cull mode.
          */
@@ -83,10 +87,13 @@ export namespace lysa {
 
         const auto& getMaterialIndex() const { return memoryBloc.instanceIndex; }
 
+        auto getType() const { return type; }
+
     protected:
-        Material(const std::wstring &name);
+        Material(Type type, const std::wstring &name);
 
     private:
+        const Type       type;
         vireo::CullMode  cullMode{vireo::CullMode::NONE};
         Transparency     transparency{Transparency::DISABLED};
         float            alphaScissor{0.1f};
@@ -225,7 +232,7 @@ export namespace lysa {
 
         MaterialData getMaterialData() const override;
 
-        pipeline_id getPipelineId() const override { return DEFAULT_PIPELINE_ID; }
+        pipeline_id getPipelineId() const override;
 
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};

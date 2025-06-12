@@ -90,7 +90,7 @@ export namespace lysa {
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
-        const auto& getMaterials() const { return materials; }
+        const auto& getPipelineIds() const { return pipelineIds; }
         auto isMaterialsUpdated() const { return materialsUpdated; }
 
         virtual ~Scene() = default;
@@ -112,19 +112,18 @@ export namespace lysa {
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
         bool meshInstancesDataUpdated{false};
 
-        std::unordered_map<pipeline_id, std::shared_ptr<Material>> materials;
+        std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>> pipelineIds;
         bool materialsUpdated{false};
 
         std::list<std::shared_ptr<Light>> lights;
         std::shared_ptr<vireo::Buffer> lightsBuffer;
         uint32 lightsBufferCount{1};
 
-        FrustumCulling frustumCullingPipeline;
-
         struct PipelineData {
             pipeline_id pipelineId;
             const SceneConfiguration& config;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+            FrustumCulling frustumCullingPipeline;
 
             bool instancesUpdated{false};
             DeviceMemoryArray instancesArray; // ARRAY
@@ -138,7 +137,8 @@ export namespace lysa {
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
-                uint32 pipelineId);
+                uint32 pipelineId,
+                const DeviceMemoryArray& meshInstancesDataArray);
 
             void addNode(
                 const std::shared_ptr<MeshInstance>& meshInstance,

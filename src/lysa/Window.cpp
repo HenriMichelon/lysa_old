@@ -74,7 +74,7 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             viewport->update(frameIndex);
             if (viewport->getScene(frameIndex)->isMaterialsUpdated()) {
-                renderer->updatePipelines(viewport->getScene(frameIndex)->getMaterials());
+                renderer->updatePipelines(viewport->getScene(frameIndex)->getPipelineIds());
             }
         }
     }

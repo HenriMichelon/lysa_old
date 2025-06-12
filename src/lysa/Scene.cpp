@@ -40,7 +40,6 @@ namespace lysa {
             sizeof(LightData),
             1,
             L"Scene Lights")},
-        frustumCullingPipeline{ meshInstancesDataArray},
         meshInstancesDataArray{Application::getVireo(),
             sizeof(MeshInstanceData),
             config.maxModelsPerFrame,
@@ -60,14 +59,12 @@ namespace lysa {
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         sceneUniformBuffer->map();
         lightsBuffer->map();
-
-        opaquePipelinesData[DEFAULT_PIPELINE_ID] = std::make_unique<PipelineData>(config, DEFAULT_PIPELINE_ID);
     }
 
     void Scene::compute(vireo::CommandList& commandList) {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             const auto& cullingBuffer = *pipelineData->culledDrawCommandsBuffer;
-            frustumCullingPipeline.dispatch(
+            pipelineData->frustumCullingPipeline.dispatch(
                 commandList,
                 pipelineData->drawCommandsCount,
                 *currentCamera,
@@ -197,15 +194,15 @@ namespace lysa {
                 material->setMaxUpdates(framesInFlight);
                 auto id = material->getPipelineId();
                 nodePipelineIds.push_back(id);
-                if (!materials.contains(id)) {
-                    materials[id] = material;
+                if (!pipelineIds.contains(id)) {
+                    pipelineIds[id].push_back(material);
                     materialsUpdated = true;
                 }
             }
 
             for (const auto& pipelineId : nodePipelineIds) {
                 if (!opaquePipelinesData.contains(pipelineId)) {
-                    opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(config, pipelineId);
+                    opaquePipelinesData[pipelineId] = std::make_unique<PipelineData>(config, pipelineId, meshInstancesDataArray);
                 }
                 opaquePipelinesData[pipelineId]->addNode(meshInstance, meshInstancesDataMemoryBlocks);
             }
@@ -303,9 +300,13 @@ namespace lysa {
         }
     }
 
-    Scene::PipelineData::PipelineData(const SceneConfiguration& config, const uint32 pipelineId) :
+    Scene::PipelineData::PipelineData(
+        const SceneConfiguration& config,
+        const uint32 pipelineId,
+        const DeviceMemoryArray& meshInstancesDataArray) :
         pipelineId{pipelineId},
         config{config},
+        frustumCullingPipeline{ meshInstancesDataArray},
         instancesArray{
             Application::getVireo(),
             sizeof(InstanceData),

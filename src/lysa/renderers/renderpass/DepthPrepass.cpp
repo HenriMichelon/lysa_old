@@ -26,10 +26,11 @@ namespace lysa {
             Scene::instanceIndexConstantDesc, name);
     }
 
-    void DepthPrepass::updatePipelines(const std::unordered_map<uint32, std::shared_ptr<Material>>& materials) {
+    void DepthPrepass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         const auto& vireo = Application::getVireo();
-        for (const auto& [pipelineId, material] : materials) {
+        for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
+                const auto& material = materials.at(0);
                 std::wstring vertShaderName = L"depth_prepass.vert";
                 pipelineConfig.cullMode = material->getCullMode();
                 auto tempBuffer = std::vector<char>{};
