@@ -307,14 +307,17 @@ namespace lysa {
         drawModels(commandList, pipelines, transparentPipelinesData);
     }
 
-    void Scene::drawModels(
-        vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
-        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
+    void Scene::setInitialState(vireo::CommandList& commandList) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
+    }
+
+    void Scene::drawModels(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);

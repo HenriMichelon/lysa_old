@@ -38,6 +38,7 @@ namespace lysa {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         update(frameIndex);
         const auto& frame = framesData[frameIndex];
+        scene.setInitialState(*commandList);
         commandList->barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,

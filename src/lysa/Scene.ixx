@@ -84,7 +84,10 @@ export namespace lysa {
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
         void update(vireo::CommandList& commandList);
+
         void compute(vireo::CommandList& commandList) const;
+
+        void setInitialState(vireo::CommandList& commandList) const;
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
