@@ -51,7 +51,7 @@ namespace lysa {
                 }
                 pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
                 pipelineConfig.cullMode = material->getCullMode();
-                pipelineConfig.depthWriteEnable = material->getTransparency() == Transparency::DISABLED;
+                pipelineConfig.depthWriteEnable = true; //material->getTransparency() == Transparency::DISABLED;
                 auto tempBuffer = std::vector<char>{};
                 const auto& ext = Application::getVireo().getShaderFileExtension();
                 VirtualFS::loadBinaryData(L"app://shaders/" + vertShaderName + ext, tempBuffer);

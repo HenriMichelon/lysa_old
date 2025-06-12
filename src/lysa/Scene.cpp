@@ -127,14 +127,15 @@ namespace lysa {
                 meshInstancesDataArray.write(meshInstancesDataMemoryBlocks[meshInstance], &modelData);
                 meshInstancesDataUpdated = true;
                 meshInstance->decrementUpdates();
+            }
+        }
 
-                const auto& mesh = meshInstance->getMesh();
-                for (const auto& material : mesh->getMaterials()) {
-                    if (material->isUpdated()) {
-                        material->upload();
-                        Application::getResources().setUpdated();
-                        material->decrementUpdates();
-                    }
+        for (const auto& [pipelineId, materials] : pipelineIds) {
+            for (const auto& material : materials) {
+                if (material->isUpdated()) {
+                    material->upload();
+                    Application::getResources().setUpdated();
+                    material->decrementUpdates();
                 }
             }
         }
