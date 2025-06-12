@@ -8,6 +8,7 @@ module lysa.renderers.renderpass.post_processing;
 
 import lysa.application;
 import lysa.global;
+import lysa.virtual_fs;
 
 namespace lysa {
     PostProcessing::PostProcessing(
@@ -31,21 +32,26 @@ namespace lysa {
         }
         descriptorLayout->build();
 
+        const auto& vireo = Application::getVireo();
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
-        pipelineConfig.resources = Application::getVireo().createPipelineResources({
+        pipelineConfig.resources = vireo.createPipelineResources({
             descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout()},
             {},
             name);
-        pipelineConfig.vertexShader = Application::getVireo().createShaderModule("shaders/quad.vert");
-        pipelineConfig.fragmentShader = Application::getVireo().createShaderModule("shaders/" + std::to_string(fragShaderName) + ".frag");
-        pipeline = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
+        auto tempBuffer = std::vector<char>{};
+        const auto& ext = vireo.getShaderFileExtension();
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/quad.vert" + ext, tempBuffer);
+        pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + fragShaderName + L".frag" + ext, tempBuffer);
+        pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
+        pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
-            frame.paramsUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
+            frame.paramsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
-            frame.descriptorSet = Application::getVireo().createDescriptorSet(descriptorLayout, name);
+            frame.descriptorSet = vireo.createDescriptorSet(descriptorLayout, name);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);

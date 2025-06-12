@@ -35,7 +35,7 @@ namespace lysa {
                 pipelineConfig.cullMode = material->getCullMode();
                 auto tempBuffer = std::vector<char>{};
                 const auto& ext = vireo.getShaderFileExtension();
-                VirtualFS::loadBinaryData(L"app://shaders/" + vertShaderName + ext, tempBuffer);
+                VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + vertShaderName + ext, tempBuffer);
                 pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
                 pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
                 pipelines[pipelineId] = vireo.createGraphicPipeline(pipelineConfig, name);

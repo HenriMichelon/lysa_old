@@ -40,7 +40,7 @@ namespace lysa {
             DEBUG_NAME);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://shaders/frustum_culling.comp" + ext, tempBuffer);
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/frustum_culling.comp" + ext, tempBuffer);
         const auto shader = vireo.createShaderModule(tempBuffer);
         pipeline = vireo.createComputePipeline(pipelineResources, shader, DEBUG_NAME);
     }

@@ -248,7 +248,6 @@ namespace lysa {
         pipelinesData[pipelineId]->addNode(meshInstance, meshInstancesDataMemoryBlocks);
     }
 
-
     void Scene::removeNode(const std::shared_ptr<Node>& node) {
         switch (node->getType()) {
         case Node::CAMERA:

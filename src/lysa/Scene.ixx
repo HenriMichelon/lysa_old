@@ -130,7 +130,7 @@ export namespace lysa {
             FrustumCulling frustumCullingPipeline;
 
             bool instancesUpdated{false};
-            DeviceMemoryArray instancesArray; // ARRAY
+            DeviceMemoryArray instancesArray;
             std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
 
             uint32 drawCommandsCount{0};

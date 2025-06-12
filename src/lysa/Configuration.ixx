@@ -19,11 +19,13 @@ export namespace lysa {
     };
 
     struct ApplicationConfiguration {
-        //! Directory to search for resources and compiled shaders for the app:// URI
+        //! Directory to search for resources for the app:// URI
         std::filesystem::path  appDir{L"."};
-        //! Where to log message using log()
+        //! Directory to search for compiled shaders inside app://
+        std::wstring           shaderDir{L"shaders"};
+        //! Where to log a message using Logger
         int                    loggingMode{LOGGING_MODE_NONE};
-        //! Monitor index for the logging Window
+        //! Minimum level for the log messages
         LogLevel               logLevelMin{LogLevel::INFO};
         //! Graphic API
         vireo::Backend         backend{vireo::Backend::VULKAN};
