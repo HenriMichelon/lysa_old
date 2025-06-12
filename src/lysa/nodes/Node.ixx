@@ -449,6 +449,17 @@ export namespace lysa {
         void removeFromGroup(const std::wstring &group) { groups.remove(group); }
 
         /**
+         * Returns the visibility of the node.
+         */
+        inline bool isVisible() const { return visible; }
+
+        /**
+         * Changes the visibility of the node.<br>
+         * The node stays in the scene tree and the data in VRAM.
+         */
+        virtual void setVisible(bool visible = true);
+
+        /**
          * Returns true if this node has been added to the given group
          */
         auto isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
@@ -529,6 +540,11 @@ export namespace lysa {
          */
         float3 getDownVector() const {  return -normalize(globalTransform[1].xyz); }
 
+        /**
+         * Sets the node name (purely informative)
+         */
+        void setName(const std::wstring &nodeName) { name = nodeName; }
+
         ~Node() override = default;
     
     protected:
@@ -553,15 +569,21 @@ export namespace lysa {
         friend class Window;
         friend class Viewport;
 
-        static  unique_id                currentId;
-        unique_id                        id;
-        Type                             type;
-        std::wstring                     name;
-        Viewport*                        viewport{nullptr};
-        Node*                            parent{nullptr};
-        std::list<std::shared_ptr<Node>> children;
+        static unique_id currentId;
+        unique_id        id;
+        Type             type;
+        std::wstring     name;
+        Viewport*        viewport{nullptr};
+        Node*            parent{nullptr};
+        bool             visible{true};
+        ProcessMode      processMode{ProcessMode::INHERIT};
+
         std::list<std::wstring>          groups;
-        ProcessMode                      processMode{ProcessMode::INHERIT};
+        std::list<std::shared_ptr<Node>> children;
+
+        void lockViewportUpdates();
+
+        void unlockViewportUpdates();
 
     };
 

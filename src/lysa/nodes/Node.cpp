@@ -133,9 +133,18 @@ namespace lysa {
         updateGlobalTransform();
     }
 
+    void Node::setVisible(const bool visible) {
+        lockViewportUpdates();
+        this->visible = visible;
+        for (const auto &child : children) {
+            child->setVisible(visible);
+        }
+        setUpdated();
+        unlockViewportUpdates();
+    }
+
     bool Node::addChild(const std::shared_ptr<Node> child, const bool async) {
         if (haveChild(child, false)) { return false; }
-        // assert([&]{return child->parent == nullptr; }, "Remove child from parent first");
         if (child->parent) {
             child->parent->removeChild(child, async);
         }
@@ -146,10 +155,9 @@ namespace lysa {
             viewport->addNode(child, async);
             child->ready(viewport);
         }
-        // child->visible = visible && child->visible;
+        child->visible = visible && child->visible;
         // child->castShadows = castShadows;
         // child->dontDrawEdges = dontDrawEdges;
-        // if (addedToScene) { app()._addNode(child, async); }
         return true;
     }
 
@@ -326,9 +334,9 @@ namespace lysa {
                 setProcessMode(ProcessMode::DISABLED);
             }
         } else if (property == "visible") {
-            // setVisible(value == "true");
+            setVisible(value == "true");
         } else if (property == "name") {
-            // setName(value);
+            setName(std::to_wstring(value));
         } else  if (property == "cast_shadows") {
             // setCastShadows(value == "true");
         }
@@ -357,6 +365,14 @@ namespace lysa {
         for (auto &child : children) {
             child->printTree(tab + 1);
         }
+    }
+
+    void Node::lockViewportUpdates() {
+        if (viewport) viewport->lockDeferredUpdate();
+    }
+
+    void Node::unlockViewportUpdates() {
+        if (viewport) viewport->unlockDeferredUpdate();
     }
 
 }

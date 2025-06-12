@@ -22,7 +22,7 @@ namespace lysa {
             .transform = globalTransform,
             .aabbMin = worldAABB.min,
             .aabbMax = worldAABB.max,
-            .visible = 1,
+            .visible = isVisible() ? 1u : 0u,
         };
     }
 

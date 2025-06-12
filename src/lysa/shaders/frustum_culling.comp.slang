@@ -48,6 +48,9 @@ void main(uint3 id : SV_DispatchThreadID) {
     DrawCommand command = input[id.x];
     Instance instance = instances[command.instanceIndex];
     MeshInstance meshInstance = meshInstances[instance.meshInstanceIndex];
+    if (meshInstance.visible == 0) {
+        return;
+    }
 
     [unroll]
     for (int i = 0; i < 6; ++i) {

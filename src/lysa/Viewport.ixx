@@ -79,6 +79,14 @@ export namespace lysa {
             return *window;
         }
 
+        void lockDeferredUpdate() {
+            lockDeferredUpdates = true;
+        }
+
+        void unlockDeferredUpdate() {
+            lockDeferredUpdates = false;
+        }
+
         virtual ~Viewport();
         Viewport(Viewport&) = delete;
         Viewport& operator=(Viewport&) = delete;
@@ -105,7 +113,7 @@ export namespace lysa {
         ViewportConfiguration& config;
         vireo::Viewport        viewport{};
         vireo::Rect            scissors{};
-        Window*               window{nullptr};
+        Window*                window{nullptr};
         // Node tree
         std::shared_ptr<Node> rootNode;
         std::mutex            rootNodeMutex;
