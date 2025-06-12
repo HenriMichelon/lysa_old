@@ -96,7 +96,6 @@ export namespace lysa {
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             std::shared_ptr<vireo::CommandList> commandListUpdate;
             std::shared_ptr<vireo::CommandList> commandList;
-            std::shared_ptr<vireo::Semaphore> semaphore;
         };
 
         WindowConfiguration&  config;

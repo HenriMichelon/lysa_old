@@ -33,7 +33,6 @@ namespace lysa {
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.commandList = frame.commandAllocator->createCommandList();
             frame.commandListUpdate = frame.commandAllocator->createCommandList();
-            frame.semaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
         }
         renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer");
         renderer->resize(swapChain->getExtent());
@@ -110,11 +109,6 @@ namespace lysa {
             renderer->update(frame.commandListUpdate, scene);
         }
         frame.commandListUpdate->end();
-        Application::getGraphicQueue()->submit(
-            vireo::WaitStage::COMPUTE_SHADER,
-            frame.semaphore,
-            {frame.commandListUpdate});
-        // std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         auto& commandList = frame.commandList;
         commandList->begin();
@@ -140,11 +134,9 @@ namespace lysa {
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
         Application::getGraphicQueue()->submit(
-            frame.semaphore,
-            vireo::WaitStage::PIPELINE_TOP,
             frame.inFlightFence,
             swapChain,
-            {commandList});
+            {frame.commandListUpdate, commandList});
         swapChain->present();
         swapChain->nextFrameIndex();
     }
