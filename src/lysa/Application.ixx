@@ -4,10 +4,6 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-module;
-#include <Jolt/Jolt.h>
-#include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Core/JobSystemThreadPool.h>
 export module lysa.application;
 
 import std;
@@ -15,9 +11,9 @@ import vireo;
 import lysa.configuration;
 import lysa.global;
 import lysa.log;
-import lysa.physics;
 import lysa.resources;
 import lysa.window;
+import lysa.physics.engine;
 
 export namespace lysa {
 
@@ -69,6 +65,17 @@ export namespace lysa {
             return instance->config;
         }
 
+        /**
+        * Add a lambda expression in the deferred calls queue.<br>
+        * They will be called before the next frame, after the scene pre-drawing updates
+        * where nodes are added/removed from the drawing lists (for all the frames in flight).
+        */
+        template<typename Lambda>
+        static auto callDeferred(Lambda lambda) {
+            auto lock = std::lock_guard(instance->deferredCallsMutex);
+            instance->deferredCalls.push_back(lambda);
+        }
+
         virtual ~Application();
 
     private:
@@ -81,22 +88,14 @@ export namespace lysa {
         std::list<std::shared_ptr<Window>> windows;
         bool quit{false};
         std::shared_ptr<Log> log;
+        std::list<std::function<void()>> deferredCalls;
+        std::mutex deferredCallsMutex;
+        std::unique_ptr<PhysicsEngine> physicsEngine;
 
         // Fixed delta time for the physics
         static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
         double currentTime{0.0};
         double accumulator{0.0};
-
-        /*
-        * Jolt Physic system members
-        */
-        JPH::PhysicsSystem                   physicsSystem;
-        ContactListener                      contactListener;
-        BPLayerInterfaceImpl                 broadphaseLayerInterface;
-        ObjectVsBroadPhaseLayerFilterImpl    objectVsBroadphaseLayerFilter;
-        ObjectLayerPairFilterImpl            objectVsObjectLayerFilter;
-        std::unique_ptr<JPH::TempAllocatorImpl>   tempAllocator;
-        std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
 
         void drawFrame();
 

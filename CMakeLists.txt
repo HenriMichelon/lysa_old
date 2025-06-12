@@ -17,7 +17,7 @@ if (NOT DEFINED VIREO_PROJECT_DIR)
 endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
-#set(DIRECTX_BACKEND ON)
+set(PHYSIC_ENGINE_JOLT ON)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
@@ -33,6 +33,9 @@ endif()
 if(WIN32)
     add_compile_definitions(WIN32_LEAN_AND_MEAN UNICODE _UNICODE)
 endif ()
+if(PHYSIC_ENGINE_JOLT)
+    add_compile_definitions(PHYSIC_ENGINE_JOLT)
+endif()
 
 
 #######################################################
@@ -97,6 +100,9 @@ target_sources(${HLSLPP_TARGET}
 compile_options(${HLSLPP_TARGET})
 target_include_directories(${HLSLPP_TARGET} PUBLIC ${HLSLPP_SRC_DIR}/include)
 target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
+target_precompile_headers(${HLSLPP_TARGET} PRIVATE
+        <intrin.h>
+)
 
 #######################################################
 if(WIN32)
@@ -108,7 +114,14 @@ if(WIN32)
     set(WIN32_MODULES ""
     )
 endif ()
-
+if(PHYSIC_ENGINE_JOLT)
+    set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
+    )
+    set(PHYSICS_MODULES
+            ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.ixx
+    )
+endif ()
 add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
@@ -137,6 +150,8 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.cpp
 
+        ${ENGINE_SRC_DIR}/physics/PhysicsEngine.cpp
+
         ${ENGINE_SRC_DIR}/resources/Animation.cpp
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp
@@ -153,6 +168,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
 
         ${WIN32_SRC}
+        ${PHYSICS_SRC}
         ${SRC_DIR}/stb/stb.cpp
 )
 target_sources(${LYSA_TARGET}
@@ -173,7 +189,6 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Memory.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
-        ${ENGINE_SRC_DIR}/Physics.ixx
         ${ENGINE_SRC_DIR}/Resources.ixx
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Samplers.ixx
@@ -185,6 +200,7 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.ixx
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
+        ${ENGINE_SRC_DIR}/nodes/CollisionObject.ixx
         ${ENGINE_SRC_DIR}/nodes/DirectionalLight.ixx
         ${ENGINE_SRC_DIR}/nodes/Environment.ixx
         ${ENGINE_SRC_DIR}/nodes/Light.ixx
@@ -193,12 +209,16 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.ixx
 
+        ${ENGINE_SRC_DIR}/physics/Configuration.ixx
+        ${ENGINE_SRC_DIR}/physics/PhysicsEngine.ixx
+
         ${ENGINE_SRC_DIR}/resources/Animation.ixx
         ${ENGINE_SRC_DIR}/resources/AnimationLibrary.ixx
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx
         ${ENGINE_SRC_DIR}/resources/Mesh.ixx
         ${ENGINE_SRC_DIR}/resources/Resource.ixx
+        ${ENGINE_SRC_DIR}/resources/Shape.ixx
         ${ENGINE_SRC_DIR}/resources/Texture.ixx
 
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
@@ -208,15 +228,18 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
+
         ${WIN32_MODULES}
+        ${PHYSICS_MODULES}
 )
 
 compile_options(${LYSA_TARGET})
 target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${JoltPhysics_SOURCE_DIR}/..)
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash Jolt)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
-#target_precompile_headers(${LYSA_TARGET} PRIVATE
-#)
+target_precompile_headers(${LYSA_TARGET} PRIVATE
+        <intrin.h>
+)
 if(WIN32)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)

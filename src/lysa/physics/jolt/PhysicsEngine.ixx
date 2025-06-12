@@ -6,25 +6,27 @@
 */
 module;
 #include <Jolt/Jolt.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/ObjectLayerPairFilterTable.h>
-/*
-#include <Jolt/Physics/Collision/ContactListener.h>*/
-export module lysa.physics;
+export module lysa.physics.jolt.engine;
 
-import lysa.types;
+import lysa.math;
 import lysa.signal;
+import lysa.types;
+import lysa.physics.configuration;
+import lysa.physics.engine;
 
 export namespace lysa {
 
     // Class that determines if two nodes can collide
     class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilterTable {
     public:
-        explicit ObjectLayerPairFilterImpl(uint32 inNumObjectLayers): ObjectLayerPairFilterTable(inNumObjectLayers) {}
+        explicit ObjectLayerPairFilterImpl(const uint32 inNumObjectLayers): ObjectLayerPairFilterTable(inNumObjectLayers) {}
         [[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
     };
 
-    // This defines a mapping between object and broadphase layers.
+    // This defines a mapping between objects and broadphase layers.
     class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface {
     public:
         [[nodiscard]] uint32_t GetNumBroadPhaseLayers() const override { return 1;}
@@ -61,6 +63,27 @@ export namespace lysa {
                   const JPH::Body &body1, 
                   const JPH::Body &body2, 
                   const JPH::ContactManifold &inManifold) const;
+    };
+
+    class JoltPhysicsEngine : public PhysicsEngine {
+    public:
+        JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
+
+        void update(float deltaTime) override;
+
+        /**
+        * Returns the physics system gravity
+        */
+        float3 getGravity() const override;
+
+    private:
+        JPH::PhysicsSystem physicsSystem;
+        ContactListener contactListener;
+        BPLayerInterfaceImpl broadphaseLayerInterface;
+        ObjectVsBroadPhaseLayerFilterImpl objectVsBroadphaseLayerFilter;
+        ObjectLayerPairFilterImpl objectVsObjectLayerFilter;
+        std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
+        std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
     };
 
 }

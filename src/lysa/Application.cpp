@@ -20,7 +20,8 @@ namespace lysa {
         vireo{vireo::Vireo::create(config.backend)},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
         computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
-        resources{*vireo, config.resourcesConfig, *graphicQueue} {
+        resources{*vireo, config.resourcesConfig, *graphicQueue},
+        physicsEngine{PhysicsEngine::create(config.physicsConfig)} {
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
         if constexpr (isLoggingEnabled()) {
@@ -75,6 +76,15 @@ namespace lysa {
             window->update();
         }
 
+        // Physics events & others deferred calls
+        if (!deferredCalls.empty()) {
+            std::ranges::for_each(deferredCalls, [](const std::function<void()>& call) {
+                call();
+            });
+            auto lock = std::lock_guard(deferredCallsMutex);
+            deferredCalls.clear();
+        }
+
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(
             std::chrono::steady_clock::now().time_since_epoch())
             .count();
@@ -88,7 +98,7 @@ namespace lysa {
         accumulator += frameTime;
         {
             while (accumulator >= FIXED_DELTA_TIME) {
-                // Update physics here
+                physicsEngine->update(FIXED_DELTA_TIME);
                 for (const auto& window : windows) {
                     window->physicsProcess(FIXED_DELTA_TIME);
                 }

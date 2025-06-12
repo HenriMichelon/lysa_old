@@ -8,6 +8,7 @@ export module lysa.configuration;
 
 import vireo;
 import lysa.global;
+import lysa.physics.configuration;
 
 export namespace lysa {
 
@@ -23,6 +24,7 @@ export namespace lysa {
         std::filesystem::path  appDir{L"."};
         //! Directory to search for compiled shaders inside app://
         std::wstring           shaderDir{L"shaders"};
+        PhysicsConfiguration   physicsConfig{};
         //! Where to log a message using Logger
         int                    loggingMode{LOGGING_MODE_NONE};
         //! Minimum level for the log messages
