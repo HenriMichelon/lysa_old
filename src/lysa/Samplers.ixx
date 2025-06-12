@@ -14,7 +14,7 @@ export namespace lysa {
     class Samplers {
     public:
         static constexpr auto MAX_SAMPLERS{20};
-        static constexpr uint32_t SET_SAMPLERS{1};
+        static constexpr uint32 SET_SAMPLERS{1};
 
         struct SamplerInfo {
             vireo::Filter minFilter;

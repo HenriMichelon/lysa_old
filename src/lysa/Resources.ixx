@@ -20,7 +20,7 @@ export namespace lysa {
     public:
         static constexpr auto MAX_TEXTURES{500};
 
-        static constexpr uint32_t SET_RESOURCES{0};
+        static constexpr uint32 SET_RESOURCES{0};
         static constexpr vireo::DescriptorIndex BINDING_MATERIAL{0};
         static constexpr vireo::DescriptorIndex BINDING_SURFACES{1};
         static constexpr vireo::DescriptorIndex BINDING_TEXTURE{2};

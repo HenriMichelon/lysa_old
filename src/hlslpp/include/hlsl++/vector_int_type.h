@@ -13,14 +13,14 @@ hlslpp_module_export namespace lysa
 	
 		// Cast
 	
-		hlslpp_inline operator int32_t() const { return i32[X]; }
+		hlslpp_inline operator int32() const { return i32[X]; }
 
 		// Return the address of this int32 in the same way we return the value
-		hlslpp_inline int32_t* operator&() { return &i32[X]; }
+		hlslpp_inline int32* operator&() { return &i32[X]; }
 	
 		#define hlslpp_iswizzle1_swizzle(E, A, v) (_hlslpp_perm_epi32(v, A == 0 ? E : 0, A == 1 ? E : 1, A == 2 ? E : 2, A == 3 ? E : 3))
 
-		hlslpp_inline iswizzle1& operator = (int32_t i);
+		hlslpp_inline iswizzle1& operator = (int32 i);
 
 		template<int A>
 		hlslpp_inline iswizzle1& operator = (const iswizzle1<A>& s);
@@ -32,7 +32,7 @@ hlslpp_module_export namespace lysa
 		union
 		{
 			n128i vec;
-			int32_t i32[4];
+			int32 i32[4];
 		};
 	};
 

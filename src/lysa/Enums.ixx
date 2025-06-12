@@ -576,7 +576,7 @@ export namespace lysa {
     /**
     * Animation type for a animation track
     */
-    enum class AnimationType : uint8_t {
+    enum class AnimationType : uint8 {
         /**
          * The values are the translation along the X, Y, and Z axes.
          */
@@ -595,7 +595,7 @@ export namespace lysa {
     /**
      * Interpolation type to apply when caculating animation values
      */
-    enum class AnimationInterpolation : uint8_t {
+    enum class AnimationInterpolation : uint8 {
         /**
          * The animated values are linearly interpolated between keyframes..
          */
@@ -614,7 +614,7 @@ export namespace lysa {
     /**
      * Animation loop mode
      */
-    enum class AnimationLoopMode : uint8_t {
+    enum class AnimationLoopMode : uint8 {
         //! No loop (default)
         NONE    = 0,
         //! Restart from start of the track

@@ -131,7 +131,7 @@ export namespace lysa {
 
     private:
         float x, y;
-        uint32_t buttonsState;
+        uint32 buttonsState;
         int modifiers;
     };
 
@@ -141,7 +141,7 @@ export namespace lysa {
     */
     class InputEventMouseMotion: public InputEventMouse {
     public:
-        InputEventMouseMotion(const uint32_t buttonsState, const int modifiers, const float posX, const float posY, const float rX, const float rY):
+        InputEventMouseMotion(const uint32 buttonsState, const int modifiers, const float posX, const float posY, const float rX, const float rY):
             InputEventMouse{InputEventType::MOUSE_MOTION, buttonsState, modifiers, posX, posY},
             relativeX{rX},
             relativeY{rY} {}
@@ -165,7 +165,7 @@ export namespace lysa {
     */
     class InputEventMouseButton: public InputEventMouse {
     public:
-        InputEventMouseButton(const MouseButton button, const bool pressed,const  int modifiers, const uint32_t buttonsState, const float posX, const float posY):
+        InputEventMouseButton(const MouseButton button, const bool pressed,const  int modifiers, const uint32 buttonsState, const float posX, const float posY):
             InputEventMouse{InputEventType::MOUSE_BUTTON, buttonsState, modifiers, posX, posY},
             button{button},
             pressed{pressed} {}

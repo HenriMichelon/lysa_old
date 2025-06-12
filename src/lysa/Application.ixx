@@ -4,6 +4,10 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+module;
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
 export module lysa.application;
 
 import std;
@@ -11,6 +15,7 @@ import vireo;
 import lysa.configuration;
 import lysa.global;
 import lysa.log;
+import lysa.physics;
 import lysa.resources;
 import lysa.window;
 
@@ -81,6 +86,17 @@ export namespace lysa {
         static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
         double currentTime{0.0};
         double accumulator{0.0};
+
+        /*
+        * Jolt Physic system members
+        */
+        JPH::PhysicsSystem                   physicsSystem;
+        ContactListener                      contactListener;
+        BPLayerInterfaceImpl                 broadphaseLayerInterface;
+        ObjectVsBroadPhaseLayerFilterImpl    objectVsBroadphaseLayerFilter;
+        ObjectLayerPairFilterImpl            objectVsObjectLayerFilter;
+        std::unique_ptr<JPH::TempAllocatorImpl>   tempAllocator;
+        std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
 
         void drawFrame();
 

@@ -135,11 +135,11 @@ namespace lysa {
 
     std::string to_hexstring(const void* ptr) {
         std::stringstream ss;
-        ss << "0x" << std::hex << reinterpret_cast<uint64_t>(ptr);
+        ss << "0x" << std::hex << reinterpret_cast<uint64>(ptr);
         return ss.str();
     }
 
-    std::string to_hexstring(const uint32_t ptr) {
+    std::string to_hexstring(const uint32 ptr) {
         std::stringstream ss;
         ss << "0x" << std::hex << ptr;
         return ss.str();

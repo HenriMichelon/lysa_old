@@ -64,7 +64,6 @@ export namespace lysa {
             .size = sizeof(InstanceIndexConstant),
         };
 
-
         Scene(
             const SceneConfiguration& config,
             uint32 framesInFlight,
@@ -166,7 +165,7 @@ export namespace lysa {
 
         void updatePipelineData(
             vireo::CommandList& commandList,
-            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
+            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
 
         void compute(
             vireo::CommandList& commandList,

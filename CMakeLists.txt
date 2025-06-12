@@ -173,6 +173,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Memory.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
+        ${ENGINE_SRC_DIR}/Physics.ixx
         ${ENGINE_SRC_DIR}/Resources.ixx
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Samplers.ixx
@@ -211,12 +212,11 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR})
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${JoltPhysics_SOURCE_DIR}/..)
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash Jolt)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
-target_precompile_headers(${LYSA_TARGET} PRIVATE
-        "<cstdint>"
-)
+#target_precompile_headers(${LYSA_TARGET} PRIVATE
+#)
 if(WIN32)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)

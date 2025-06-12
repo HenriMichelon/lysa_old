@@ -43,7 +43,7 @@ export namespace lysa {
      * Helper to log a memory address in hexadecimal
      */
     std::string to_hexstring(const void* ptr);
-    std::string to_hexstring(uint32_t ptr);
+    std::string to_hexstring(uint32 ptr);
 
     std::string to_string(const wchar_t* wstr);
 

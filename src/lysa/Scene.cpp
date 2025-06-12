@@ -84,7 +84,7 @@ namespace lysa {
 
     void Scene::updatePipelineData(
         vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             if (pipelineData->instancesUpdated) {
                 pipelineData->instancesArray.flush(commandList);
@@ -172,9 +172,10 @@ namespace lysa {
             auto lightIndex = 0;
             auto lightsArray = std::vector<LightData>(lightsBufferCount);
             for (const auto& light : lights) {
-                // if (!light->isVisible()) { continue; }
-                lightsArray[lightIndex] = light->getLightData();
-                lightIndex++;
+                if (light->isVisible()) {
+                    lightsArray[lightIndex] = light->getLightData();
+                    lightIndex++;
+                }
             }
             lightsBuffer->write(lightsArray.data(), lightsArray.size() * sizeof(LightData));
         }
@@ -438,6 +439,5 @@ namespace lysa {
                 meshInstancesDataMemoryBlocks.at(instance));
         }
     }
-
 
 }
