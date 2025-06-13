@@ -117,6 +117,7 @@ endif ()
 if(PHYSIC_ENGINE_JOLT)
     set(PHYSICS_SRC
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
     )
     set(PHYSICS_MODULES
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.ixx
@@ -157,6 +158,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/resources/Material.cpp
         ${ENGINE_SRC_DIR}/resources/Mesh.cpp
         ${ENGINE_SRC_DIR}/resources/Resource.cpp
+        ${ENGINE_SRC_DIR}/resources/Shape.cpp
         ${ENGINE_SRC_DIR}/resources/Texture.cpp
 
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp

@@ -13,17 +13,19 @@ import lysa.resources.resource;
 
 export namespace lysa {
 
+    using shape_handle = void*;
+
     /**
      * Base class for all collision shapes
      */
     class Shape : public Resource {
+    public:
+        auto getShapeHandle() const { return shapeHandle; }
+
     protected:
-        //JPH::ShapeSettings* shapeSettings{nullptr}; // https://jrouwe.github.io/JoltPhysics/index.html#memory-management
+        shape_handle shapeHandle{nullptr};
 
         explicit Shape(const std::wstring &resName);
-
-    public:
-        //inline auto _getShapeSettings() const { return shapeSettings; }
     };
 
     /**
