@@ -303,6 +303,14 @@ namespace lysa {
         return quaternion{float3x3{globalTransform}};
     }
 
+    float3 Node::toGlobal(const float3& local) const {
+        return mul(globalTransform, float4{local, 1.0f}).xyz;
+    }
+
+    float3 Node::toLocal(const float3& global) const {
+        return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
+    }
+
     std::wstring Node::getPath() const {
         if (parent) {
             return parent->getPath() + L"/" + getName();

@@ -80,6 +80,9 @@ export namespace lysa {
 
         auto& getPhysicsSystem() { return physicsSystem; }
 
+        auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
+
+
     private:
         JPH::PhysicsSystem physicsSystem;
         ContactListener contactListener;

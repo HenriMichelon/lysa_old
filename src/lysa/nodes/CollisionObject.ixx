@@ -21,7 +21,7 @@ export namespace lysa {
     /**
      * Base class for 3D physics objects.
      */
-    class CollisionObject : public Node {
+    class CollisionObject : public Node, public std::enable_shared_from_this<CollisionObject> {
     public:
 
         /**
@@ -66,6 +66,8 @@ export namespace lysa {
         void setProperty(const std::string &property, const std::string &value) override;
 
         void setVisible(bool visible = true) override;
+
+        auto sharedPtr() { return shared_from_this(); }
 
         CollisionObject(const CollisionObject&);
 

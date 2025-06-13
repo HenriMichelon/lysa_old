@@ -516,6 +516,16 @@ export namespace lysa {
         std::shared_ptr<Node> duplicate() const;
 
         /**
+         * Transforms a local vector from this node's local space to world space.
+         */
+        float3 toGlobal(const float3& local) const;
+
+        /**
+         * Transforms a world space vector to this node's local space.
+         */
+        float3 toLocal(const float3& global) const;
+
+        /**
          * Returns the normalized right vector
          */
         float3 getRightVector() const {  return normalize(globalTransform[0].xyz); }
