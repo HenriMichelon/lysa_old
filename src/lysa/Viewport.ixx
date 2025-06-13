@@ -129,8 +129,9 @@ export namespace lysa {
 
         bool input(InputEvent &inputEvent) { return input(rootNode, inputEvent); }
 
-        // Recursively call onInput() on a tree node
         bool input(const std::shared_ptr<Node> &node, InputEvent &inputEvent);
+
+        void pause(const std::shared_ptr<Node> &node);
 
         void attachToWindow(Window& window);
 

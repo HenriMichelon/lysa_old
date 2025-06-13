@@ -580,13 +580,14 @@ export namespace lysa {
 
         virtual void exitScene() { onExitScene(); }
 
+        friend class Window;
+        friend class Viewport;
+
         virtual void pause() { }
 
         virtual void resume() { }
 
     private:
-        friend class Window;
-        friend class Viewport;
 
         static unique_id currentId;
         unique_id        id;

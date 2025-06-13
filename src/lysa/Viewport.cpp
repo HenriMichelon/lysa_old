@@ -191,14 +191,27 @@ namespace lysa {
         }
     }
 
-    void Viewport::setPaused(const bool pause) {
-        paused = pause;
-        // pause(rootNode);
+    void Viewport::setPaused(const bool isPaused) {
+        paused = isPaused;
+        pause(rootNode);
+    }
+
+    void Viewport::pause(const std::shared_ptr<Node>& node) {
+        assert([&]{ return node != nullptr; }, "Invalid node");
+        if (paused && (!node->isProcessed())) {
+            node->pause();
+        }
+        if ((!paused && (node->isProcessed()))) {
+            node->resume();
+        }
+        for (auto &child : node->getChildren()) {
+            pause(child);
+        }
     }
 
     bool Viewport::input(const std::shared_ptr<Node> &node, InputEvent &inputEvent) {
-        assert([&]{ return node != nullptr; }, "Invalide node");
-        for (auto &child : node->children) {
+        assert([&]{ return node != nullptr; }, "Invalid node");
+        for (auto &child : node->getChildren()) {
             if (input(child, inputEvent))
                 return true;
         }
