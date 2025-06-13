@@ -93,7 +93,7 @@ export namespace lysa {
         /**
          * Moves the virtualCharacter using this velocity
          */
-        void setVelocity(const float3& velocity);
+        void setVelocity(const float3& velocity) const;
 
         /**
          * Set the maximum angle of slope that character can still walk on (degrres)

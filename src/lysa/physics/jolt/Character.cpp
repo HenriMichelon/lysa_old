@@ -78,12 +78,12 @@ namespace lysa {
         return contacts;
     }
 
-    void Character::setVelocity(const float3& velocity) {
+    void Character::setVelocity(const float3& velocity) const {
         if (all(velocity == FLOAT3ZERO)) {
             virtualCharacter->SetLinearVelocity(JPH::Vec3::sZero());
         } else {
             // current orientation * velocity
-            const auto vel = mul(getRotationGlobal(), velocity);
+            const auto vel = mul(velocity, getRotationGlobal());
             virtualCharacter->SetLinearVelocity(JPH::Vec3{vel.x, vel.y, vel.z});
         }
     }
@@ -127,7 +127,7 @@ namespace lysa {
         const auto rotation = virtualCharacter->GetRotation();
         const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
         if (any(rot != getRotationGlobal())) {
-            setRotation(rot);
+            // setRotation(rot);
         }
         updating = false;
     }

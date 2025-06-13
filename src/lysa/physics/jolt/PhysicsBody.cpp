@@ -61,7 +61,7 @@ namespace lysa {
             bodyInterface.SetLinearVelocity(bodyId, JPH::Vec3::sZero());
         } else {
             // current orientation * velocity
-            const auto vel = mul(getRotationGlobal(), velocity);
+            const auto vel = mul(velocity, getRotationGlobal());
             bodyInterface.SetLinearVelocity(bodyId, JPH::Vec3{vel.x, vel.y, vel.z});
         }
     }

@@ -620,6 +620,7 @@ export namespace lysa {
 
         void unlockViewportUpdates();
 
+        float4x4 rotate(const float4x4& m, float angle, const float3& axis);
     };
 
 }

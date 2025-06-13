@@ -44,7 +44,7 @@ namespace lysa {
         points.clear();
         const auto &transform = meshInstance->getTransform();
         for (const auto &vertex : meshInstance->getMesh()->getVertices()) {
-            auto point = mul(transform, float4{vertex.position, 1.0f});
+            auto point = mul(float4{vertex.position, 1.0f}, transform);
             points.push_back(point.xyz);
         }
         createShape();

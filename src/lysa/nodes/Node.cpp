@@ -113,21 +113,6 @@ namespace lysa {
         translate(float3{x, y, z});
     }
 
-    void Node::rotateX(const float angle) {
-        localTransform = mul(float4x4::rotation_x(angle), localTransform);
-        updateGlobalTransform();
-    }
-
-    void Node::rotateY(const float angle) {
-        localTransform = mul(float4x4::rotation_y(angle), localTransform);
-        updateGlobalTransform();
-    }
-
-    void Node::rotateZ(const float angle) {
-        localTransform = mul(float4x4::rotation_z(angle), localTransform);
-        updateGlobalTransform();
-    }
-
     void Node::scale(const float scale) {
         localTransform = mul(float4x4::scale(scale), localTransform);
         updateGlobalTransform();
@@ -156,8 +141,6 @@ namespace lysa {
             child->ready(viewport);
         }
         child->visible = visible && child->visible;
-        // child->castShadows = castShadows;
-        // child->dontDrawEdges = dontDrawEdges;
         return true;
     }
 
@@ -215,13 +198,6 @@ namespace lysa {
     }
 
     /*
-    float3 Node::toGlobal(const float3& local) const {
-        return mul(globalTransform, float4{local, 1.0f}).xyz;
-    }
-
-    float3 Node::toLocal(const float3& global) const {
-        return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
-    }
 
     void Node::setScale(const float3& scale) {
         if (any(scale != getScale())) {
@@ -242,19 +218,7 @@ namespace lysa {
     void Node::rotateTowards(const quaternion& targetRotation, const float maxAngle) {
         updateGlobalTransform();
     }
-    
-    void Node::rotate(const quaternion& quaternion) {
-        updateGlobalTransform();
-    }
-    
-    void Node::rotateX(const float angle) {
-        updateGlobalTransform();
-    }
 
-    void Node::rotateZ(const float angle) {
-        updateGlobalTransform();
-    }
-    
     float3 Node::getScaleGlobal() const {
         float3 scale;
         scale.x = length(globalTransform[0].xyz);
@@ -280,28 +244,37 @@ namespace lysa {
     }
 
     void Node::setRotationX(const float angle) {
-        const auto rm = float4x4::rotation_x(angle);
-        localTransform = mul(localTransform, rm);
-        updateGlobalTransform();
+        rotateX(angle - getRotationX());
     }
 
     void Node::setRotationY(const float angle) {
-        const auto rm = float4x4::rotation_y(angle);
-        localTransform = mul(localTransform, rm);
-        updateGlobalTransform();
+        rotateY(angle - getRotationY());
     }
 
     void Node::setRotationZ(const float angle) {
-        const auto rm = float4x4::rotation_z(angle);
-        localTransform = mul(localTransform, rm);
-        updateGlobalTransform();
+        rotateZ(angle - getRotationZ());
     }
 
     void Node::setRotation(const quaternion& quat) {
-        auto tm = float4x4::translation(getPosition());
-        auto rm = float4x4{quat};
-        auto sm = float4x4::scale(getScale());
+        const auto tm = float4x4::translation(getPosition());
+        const auto rm = float4x4{quat};
+        const auto sm = float4x4::scale(getScale());
         localTransform = mul(tm, mul(rm, sm));
+        updateGlobalTransform();
+    }
+
+    void Node::rotateX(const float angle) {
+        localTransform = mul(float4x4::rotation_x(angle), localTransform);
+        updateGlobalTransform();
+    }
+
+    void Node::rotateY(const float angle) {
+        localTransform = mul(float4x4::rotation_y(angle), localTransform);
+        updateGlobalTransform();
+    }
+
+    void Node::rotateZ(const float angle) {
+        localTransform = mul(float4x4::rotation_z(angle), localTransform);
         updateGlobalTransform();
     }
 
@@ -328,11 +301,11 @@ namespace lysa {
     }
 
     float3 Node::toGlobal(const float3& local) const {
-        return mul(globalTransform, float4{local, 1.0f}).xyz;
+        return mul(float4(local, 1.0f), globalTransform).xyz;
     }
 
     float3 Node::toLocal(const float3& global) const {
-        return mul(mul(inverse(globalTransform), localTransform), float4{global, 1.0f}).xyz;
+        return mul(float4(global, 1.0f), mul(localTransform, inverse(globalTransform))).xyz;
     }
 
     std::wstring Node::getPath() const {
@@ -346,7 +319,7 @@ namespace lysa {
         if (property == "position") {
             setPosition(to_float3(value));
         } else if (property == "rotation") {
-            // setRotation(to_float3(value));
+            setRotation(quaternion{to_float3(value)});
         } else if (property == "scale") {
             // setScale(to_float3(value));
         } else if (property == "groups") {
@@ -408,11 +381,15 @@ namespace lysa {
     }
 
     void Node::lockViewportUpdates() {
-        if (viewport) viewport->lockDeferredUpdate();
+        if (viewport) {
+            viewport->lockDeferredUpdate();
+        }
     }
 
     void Node::unlockViewportUpdates() {
-        if (viewport) viewport->unlockDeferredUpdate();
+        if (viewport) {
+            viewport->unlockDeferredUpdate();
+        }
     }
 
 }
