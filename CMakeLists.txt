@@ -119,6 +119,7 @@ if(PHYSIC_ENGINE_JOLT)
             ${ENGINE_SRC_DIR}/physics/jolt/ConvexHullShape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/StaticCompoundShape.cpp
     )
     set(PHYSICS_MODULES
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.ixx
@@ -224,6 +225,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/resources/Mesh.ixx
         ${ENGINE_SRC_DIR}/resources/Resource.ixx
         ${ENGINE_SRC_DIR}/resources/Shape.ixx
+        ${ENGINE_SRC_DIR}/resources/StaticCompoundShape.ixx
         ${ENGINE_SRC_DIR}/resources/Texture.ixx
 
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
