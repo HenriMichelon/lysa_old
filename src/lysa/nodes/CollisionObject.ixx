@@ -77,11 +77,11 @@ export namespace lysa {
         std::shared_ptr<Shape> shape{nullptr};
 
         CollisionObject(const std::shared_ptr<Shape>&shape,
-                        uint32 layer,
+                        collision_layer layer,
                         const std::wstring&  name = TypeNames[COLLISION_OBJECT],
                         Type type = COLLISION_OBJECT);
 
-        CollisionObject(uint32 layer,
+        CollisionObject(collision_layer layer,
                         const std::wstring &name = TypeNames[COLLISION_OBJECT],
                         Type type = COLLISION_OBJECT);
 

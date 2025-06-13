@@ -24,7 +24,7 @@ export namespace lysa {
          * @param name The node name
          */
         CollisionArea(const std::shared_ptr<Shape>& shape,
-                      uint32 layer,
+                      collision_layer layer,
                       const std::wstring& name = TypeNames[COLLISION_AREA]);
 
         /**

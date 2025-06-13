@@ -188,9 +188,10 @@ namespace lysa {
 
     bool Node::isProcessed() const {
         const auto paused = viewport == nullptr || viewport->isPaused();
-        auto       mode   = processMode;
-        if ((parent == nullptr) && (mode == ProcessMode::INHERIT))
+        auto mode = processMode;
+        if ((parent == nullptr) && (mode == ProcessMode::INHERIT)) {
             mode = ProcessMode::PAUSABLE;
+        }
         return ((mode == ProcessMode::INHERIT) && (parent->isProcessed())) ||
                 (!paused && (mode == ProcessMode::PAUSABLE)) ||
                 (paused && (mode == ProcessMode::WHEN_PAUSED)) ||
