@@ -116,6 +116,7 @@ if(WIN32)
 endif ()
 if(PHYSIC_ENGINE_JOLT)
     set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/jolt/ConvexHullShape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
     )
@@ -154,6 +155,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/physics/PhysicsEngine.cpp
 
         ${ENGINE_SRC_DIR}/resources/Animation.cpp
+        ${ENGINE_SRC_DIR}/resources/ConvexHullShape.cpp
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp
         ${ENGINE_SRC_DIR}/resources/Mesh.cpp
@@ -216,6 +218,7 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/resources/Animation.ixx
         ${ENGINE_SRC_DIR}/resources/AnimationLibrary.ixx
+        ${ENGINE_SRC_DIR}/resources/ConvexHullShape.ixx
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx
         ${ENGINE_SRC_DIR}/resources/Mesh.ixx

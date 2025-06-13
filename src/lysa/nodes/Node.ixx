@@ -120,7 +120,12 @@ export namespace lysa {
          * Returns the world space transformation matrix
          */
         const float4x4& getTransformGlobal() const { return globalTransform; }
-    
+
+        /**
+         * Returns the local space transformation matrix
+         */
+        const float4x4& getTransform() const { return localTransform; }
+
         /**
          * Transforms a local vector from this node's local space to world space.
          */
