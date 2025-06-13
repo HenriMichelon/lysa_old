@@ -104,6 +104,7 @@ export namespace lysa {
         void resume() override;
 
 #ifdef PHYSIC_ENGINE_JOLT
+        friend class Character;
         JPH::BodyID bodyId{0};
         JPH::EActivation activationMode{JPH::EActivation::Activate};
         JPH::BodyInterface &bodyInterface;

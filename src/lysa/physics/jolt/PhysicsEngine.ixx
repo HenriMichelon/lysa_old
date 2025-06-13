@@ -82,6 +82,7 @@ export namespace lysa {
 
         auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
 
+        auto& getTempAllocator() { return tempAllocator; }
 
     private:
         JPH::PhysicsSystem physicsSystem;

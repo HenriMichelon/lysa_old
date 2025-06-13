@@ -116,6 +116,7 @@ if(WIN32)
 endif ()
 if(PHYSIC_ENGINE_JOLT)
     set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/jolt/Character.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/CollisionArea.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/CollisionObject.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/ConvexHullShape.cpp
@@ -153,6 +154,7 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.cpp
         ${ENGINE_SRC_DIR}/nodes/Camera.cpp
+        ${ENGINE_SRC_DIR}/nodes/Character.cpp
         ${ENGINE_SRC_DIR}/nodes/CollisionArea.cpp
         ${ENGINE_SRC_DIR}/nodes/CollisionObject.cpp
         ${ENGINE_SRC_DIR}/nodes/DirectionalLight.cpp
@@ -221,6 +223,7 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.ixx
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
+        ${ENGINE_SRC_DIR}/nodes/Character.ixx
         ${ENGINE_SRC_DIR}/nodes/CollisionArea.ixx
         ${ENGINE_SRC_DIR}/nodes/CollisionObject.ixx
         ${ENGINE_SRC_DIR}/nodes/DirectionalLight.ixx
