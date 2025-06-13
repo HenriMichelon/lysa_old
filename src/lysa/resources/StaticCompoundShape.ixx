@@ -28,7 +28,7 @@ export namespace lysa {
         /**
          * Local space rotation
          */
-        float3 rotation{0.0f};
+        quaternion rotation{quaternion::identity()};
     };
 
     /**

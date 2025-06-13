@@ -116,8 +116,10 @@ if(WIN32)
 endif ()
 if(PHYSIC_ENGINE_JOLT)
     set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/jolt/CollisionArea.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/CollisionObject.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/ConvexHullShape.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/MeshShape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/StaticCompoundShape.cpp
@@ -146,6 +148,7 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.cpp
         ${ENGINE_SRC_DIR}/nodes/Camera.cpp
+        ${ENGINE_SRC_DIR}/nodes/CollisionArea.cpp
         ${ENGINE_SRC_DIR}/nodes/CollisionObject.cpp
         ${ENGINE_SRC_DIR}/nodes/DirectionalLight.cpp
         ${ENGINE_SRC_DIR}/nodes/Environment.cpp
@@ -162,6 +165,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp
         ${ENGINE_SRC_DIR}/resources/Mesh.cpp
+        ${ENGINE_SRC_DIR}/resources/MeshShape.ixx
         ${ENGINE_SRC_DIR}/resources/Resource.cpp
         ${ENGINE_SRC_DIR}/resources/Shape.cpp
         ${ENGINE_SRC_DIR}/resources/Texture.cpp
@@ -207,6 +211,7 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/nodes/AnimationPlayer.ixx
         ${ENGINE_SRC_DIR}/nodes/Camera.ixx
+        ${ENGINE_SRC_DIR}/nodes/CollisionArea.ixx
         ${ENGINE_SRC_DIR}/nodes/CollisionObject.ixx
         ${ENGINE_SRC_DIR}/nodes/DirectionalLight.ixx
         ${ENGINE_SRC_DIR}/nodes/Environment.ixx
@@ -225,6 +230,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx
         ${ENGINE_SRC_DIR}/resources/Mesh.ixx
+        ${ENGINE_SRC_DIR}/resources/MeshShape.ixx
         ${ENGINE_SRC_DIR}/resources/Resource.ixx
         ${ENGINE_SRC_DIR}/resources/Shape.ixx
         ${ENGINE_SRC_DIR}/resources/StaticCompoundShape.ixx

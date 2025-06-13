@@ -6,7 +6,6 @@
 */
 module;
 #include <Jolt/Jolt.h>
-#include <Jolt/Physics/EActivation.h>
 #include <Jolt/Physics/Body/Body.h>
 module lysa.nodes.collision_object;
 
@@ -15,7 +14,6 @@ import lysa.application;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
-
 
     CollisionObject::CollisionObject(
         const std::shared_ptr<Shape>& shape,
