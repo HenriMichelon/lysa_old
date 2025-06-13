@@ -21,7 +21,7 @@ namespace lysa {
         if (meshInstance != nullptr) {
             createShape(meshInstance);
         } else {
-            throw Exception("MeshShape : Node ", node.getName(), "does not have a MeshInstance child");
+            throw Exception("MeshShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
         }
     }
 

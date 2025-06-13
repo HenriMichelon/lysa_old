@@ -255,15 +255,6 @@ namespace lysa {
         updateGlobalTransform();
     }
     
-    void Node::setRotationX(const float angle) {
-    }
-    
-    void Node::setRotationY(const float angle) {
-    }
-    
-    void Node::setRotationZ(const float angle) {
-    }
-
     float3 Node::getScaleGlobal() const {
         float3 scale;
         scale.x = length(globalTransform[0].xyz);
@@ -272,6 +263,39 @@ namespace lysa {
         return scale;
     }
 */
+
+    float Node::getRotationX() const {
+        const auto angles = eulerAngles(getRotation());
+        return angles.x;
+    }
+
+    float Node::getRotationY() const {
+        const auto angles = eulerAngles(getRotation());
+        return angles.y;
+    }
+
+    float Node::getRotationZ() const {
+        const auto angles = eulerAngles(getRotation());
+        return angles.z;
+    }
+
+    void Node::setRotationX(const float angle) {
+        const auto rm = float4x4::rotation_x(angle);
+        localTransform = mul(localTransform, rm);
+        updateGlobalTransform();
+    }
+
+    void Node::setRotationY(const float angle) {
+        const auto rm = float4x4::rotation_y(angle);
+        localTransform = mul(localTransform, rm);
+        updateGlobalTransform();
+    }
+
+    void Node::setRotationZ(const float angle) {
+        const auto rm = float4x4::rotation_z(angle);
+        localTransform = mul(localTransform, rm);
+        updateGlobalTransform();
+    }
 
     void Node::setRotation(const quaternion& quat) {
         auto tm = float4x4::translation(getPosition());

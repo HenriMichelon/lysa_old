@@ -127,6 +127,7 @@ if(PHYSIC_ENGINE_JOLT)
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsBody.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/RayCast.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/RigidBody.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/StaticBody.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/StaticCompoundShape.cpp
     )
@@ -177,7 +178,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp
         ${ENGINE_SRC_DIR}/resources/Mesh.cpp
-        ${ENGINE_SRC_DIR}/resources/MeshShape.ixx
+        ${ENGINE_SRC_DIR}/resources/MeshShape.cpp
         ${ENGINE_SRC_DIR}/resources/Resource.cpp
         ${ENGINE_SRC_DIR}/resources/Shape.cpp
         ${ENGINE_SRC_DIR}/resources/Texture.cpp
@@ -217,6 +218,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Samplers.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
+        ${ENGINE_SRC_DIR}/Tween.ixx
         ${ENGINE_SRC_DIR}/Viewport.ixx
         ${ENGINE_SRC_DIR}/VirtualFS.ixx
         ${ENGINE_SRC_DIR}/Window.ixx

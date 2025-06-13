@@ -38,7 +38,6 @@ export namespace lysa {
 
     float3 eulerAngles(quaternion q);
 
-
     /**
      * Helper to log a memory address in hexadecimal
      */

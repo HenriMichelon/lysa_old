@@ -127,16 +127,6 @@ export namespace lysa {
         const float4x4& getTransform() const { return localTransform; }
 
         /**
-         * Transforms a local vector from this node's local space to world space.
-         */
-        // float3 toGlobal(const float3& local) const;
-    
-        /**
-         * Transforms a world space vector to this node's local space.
-         */
-        // float3 toLocal(const float3& global) const;
-    
-        /**
         * Sets the local space position (relative to parent)
         */
         virtual void setPosition(const float3& position);
@@ -249,32 +239,32 @@ export namespace lysa {
         /**
          * Sets the X axis rotation of the local transformation by angle in radians.
          */
-        // void setRotationX(float angle);
+        void setRotationX(float angle);
     
         /**
          * Sets the Y axis rotation of the local transformation by angle in radians.
          */
-        // void setRotationY(float angle);
+        void setRotationY(float angle);
     
         /**
          * Sets the Z axis rotation of the local transformation by angle in radians.
          */
-        // void setRotationZ(float angle);
+        void setRotationZ(float angle);
 
         /**
          * Returns the X axis rotation of the local transformation
          */
-        // float getRotationX() const { return getRotation().x; }
+        float getRotationX() const;
     
         /**
          * Returns the Y axis rotation of the local transformation
          */
-        // float getRotationY() const { return getRotation().y; }
+        float getRotationY() const;
     
         /**
          * Returns the Z axis rotation of the local transformation
          */
-        // float getRotationZ() const { return getRotation().z; }
+        float getRotationZ() const;
     
         /**
          * Scales part of the local transformation.

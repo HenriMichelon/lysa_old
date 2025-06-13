@@ -620,4 +620,12 @@ export namespace lysa {
         //! Restart from start of the track
         LINEAR  = 1,
     };
+
+    /**
+     * A Tween transition type
+     */
+    enum class TransitionType : uint8 {
+        /** The animation is interpolated linearly */
+        LINEAR = 0,
+    };
 }
