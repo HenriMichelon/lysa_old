@@ -122,7 +122,8 @@ if(PHYSIC_ENGINE_JOLT)
             ${ENGINE_SRC_DIR}/physics/jolt/MeshShape.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsBody.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.cpp
-            ${ENGINE_SRC_DIR}/physics/jolt/Shape.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/PhysicsBody.cpp
+            ${ENGINE_SRC_DIR}/physics/jolt/RigidBody.cpp
             ${ENGINE_SRC_DIR}/physics/jolt/StaticCompoundShape.cpp
     )
     set(PHYSICS_MODULES
@@ -157,6 +158,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
         ${ENGINE_SRC_DIR}/nodes/PhysicsBody.cpp
+        ${ENGINE_SRC_DIR}/nodes/RigidBody.cpp
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.cpp
 
@@ -221,6 +223,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
         ${ENGINE_SRC_DIR}/nodes/PhysicsBody.ixx
+        ${ENGINE_SRC_DIR}/nodes/RigidBody.ixx
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.ixx
 
