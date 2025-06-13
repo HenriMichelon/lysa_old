@@ -4,6 +4,11 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef PHYSIC_ENGINE_JOLT
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#endif
 export module lysa.nodes.collision_object;
 
 import lysa.math;
@@ -71,12 +76,7 @@ export namespace lysa {
         collision_layer collisionLayer;
         std::shared_ptr<Shape> shape{nullptr};
 
-/*
-        JPH::EActivation    activationMode;
-        JPH::BodyInterface &bodyInterface;
-        JPH::BodyID bodyId{JPH::BodyID::cInvalidBodyID};*/
-
-        CollisionObject(const std::shared_ptr<Shape>&_shape,
+        CollisionObject(const std::shared_ptr<Shape>&shape,
                         uint32 layer,
                         const std::wstring&  name = TypeNames[COLLISION_OBJECT],
                         Type type = COLLISION_OBJECT);
@@ -87,33 +87,28 @@ export namespace lysa {
 
         virtual void setPositionAndRotation();
 
-        //void setBodyId(JPH::BodyID id);
+        void updateGlobalTransform() override;
 
-        //static CollisionObject *_getByBodyId(JPH::BodyID id);
+        void releaseResources();
 
-        // void _updateTransform() override;
+        void process(float alpha) override;
 
-        // void _updateTransform(const mat4 &parentMatrix) override;
+        void enterScene() override;
 
-        //void releaseBodyId();
+        void exitScene() override;
 
+        void pause() override;
 
-    private:
-        //bool savedState{false};
+        void resume() override;
 
-    public:
-        //void _update(float alpha) override;
-
-        //void _onEnterScene() override;
-
-        //void _onExitScene() override;
-
-        //void _onPause() override;
-
-        //void _onResume() override;
-
-        //[[nodiscard]] inline auto _getBodyId() const { return bodyId; }
-
+#ifdef PHYSIC_ENGINE_JOLT
+        JPH::BodyID bodyId{0};
+        JPH::EActivation activationMode{JPH::EActivation::Activate};
+        JPH::BodyInterface &bodyInterface;
+        auto getBodyId() const { return bodyId; }
+        static CollisionObject *getByBodyId(JPH::BodyID id);
+        void setBodyId(JPH::BodyID id);
+#endif
     };
 
 

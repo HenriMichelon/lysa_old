@@ -65,6 +65,11 @@ export namespace lysa {
             return instance->config;
         }
 
+        static auto& getPhysicsEngine() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return *instance->physicsEngine;
+        }
+
         /**
         * Add a lambda expression in the deferred calls queue.<br>
         * They will be called before the next frame, after the scene pre-drawing updates

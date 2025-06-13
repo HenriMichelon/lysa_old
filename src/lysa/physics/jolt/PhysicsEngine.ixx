@@ -76,6 +76,10 @@ export namespace lysa {
         */
         float3 getGravity() const override;
 
+        auto& getBodyInterface() { return physicsSystem.GetBodyInterface(); }
+
+        auto& getPhysicsSystem() { return physicsSystem; }
+
     private:
         JPH::PhysicsSystem physicsSystem;
         ContactListener contactListener;
