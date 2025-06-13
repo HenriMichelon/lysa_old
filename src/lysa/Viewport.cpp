@@ -72,6 +72,15 @@ namespace lysa {
         }
     }
 
+    void Viewport::activateCamera(const std::shared_ptr<Camera> &camera) {
+        lockDeferredUpdates = true;
+        for (auto& frame : framesData) {
+            frame.activeCamera = camera;
+            frame.cameraChanged = true;
+        }
+        lockDeferredUpdates = false;
+    }
+
     void Viewport::addNode(const std::shared_ptr<Node> &node, const bool async) {
         assert([&]{return node != nullptr;}, "Node can't be null");
         lockDeferredUpdates = true;

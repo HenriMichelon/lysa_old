@@ -46,6 +46,12 @@ export namespace lysa {
          */
         void setPaused(bool pause);
 
+        /**
+         * Changes the current camera
+         * @param camera the camera to activate, must be in a scene
+         */
+        void activateCamera(const std::shared_ptr<Camera> &camera);
+
         // Add a node to the current scene
         void addNode(const std::shared_ptr<Node> &node, bool async);
 
@@ -118,8 +124,8 @@ export namespace lysa {
         std::shared_ptr<Node> rootNode;
         std::mutex            rootNodeMutex;
         // Per frame data
-        std::vector<FrameData>              framesData;
-        std::mutex                          frameDataMutex;
+        std::vector<FrameData> framesData;
+        std::mutex             frameDataMutex;
         // State of the current scene
         bool                  paused{false};
         //

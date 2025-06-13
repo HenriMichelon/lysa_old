@@ -18,7 +18,7 @@ namespace lysa {
     CollisionArea::CollisionArea(const std::shared_ptr<Shape>& shape,
                                  const uint32 layer,
                                  const std::wstring& name):
-        CollisionObject{shape, layer, name, COLLISION_AREA} {
+        CollisionObject{nullptr, layer, name, COLLISION_AREA} {
         setShape(shape);
     }
 

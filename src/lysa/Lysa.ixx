@@ -45,6 +45,9 @@ export import lysa.nodes.ray_cast;
 export import lysa.nodes.rigid_body;
 export import lysa.nodes.static_body;
 
+export import lysa.physics.configuration;
+export import lysa.physics.engine;
+
 export import lysa.resources.animation;
 export import lysa.resources.animation_library;
 export import lysa.resources.convex_hull_shape;

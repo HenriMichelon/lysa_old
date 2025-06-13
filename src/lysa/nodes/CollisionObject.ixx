@@ -105,7 +105,7 @@ export namespace lysa {
 
 #ifdef PHYSIC_ENGINE_JOLT
         friend class Character;
-        JPH::BodyID bodyId{0};
+        JPH::BodyID bodyId{JPH::BodyID::cInvalidBodyID};
         JPH::EActivation activationMode{JPH::EActivation::Activate};
         JPH::BodyInterface &bodyInterface;
         auto getBodyId() const { return bodyId; }

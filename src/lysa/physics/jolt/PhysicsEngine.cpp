@@ -31,24 +31,27 @@ namespace lysa {
             JPH::ValidateResult::RejectAllContactsForThisBodyPair;
     }
 
-    void ContactListener::OnContactAdded(const JPH::Body &inBody1,
-                                         const JPH::Body &inBody2,
-                                         const JPH::ContactManifold &inManifold,
-                                         JPH::ContactSettings &ioSettings) {
+    void ContactListener::OnContactAdded(
+        const JPH::Body &inBody1,
+        const JPH::Body &inBody2,
+        const JPH::ContactManifold &inManifold,
+        JPH::ContactSettings &ioSettings) {
         emit(CollisionObject::on_collision_starts, inBody1, inBody2, inManifold);
     }
 
-    void ContactListener::OnContactPersisted(const JPH::Body &inBody1,
-                        const JPH::Body &inBody2,
-                        const JPH::ContactManifold &inManifold,
-                        JPH::ContactSettings &ioSettings) {
+    void ContactListener::OnContactPersisted(
+        const JPH::Body &inBody1,
+        const JPH::Body &inBody2,
+        const JPH::ContactManifold &inManifold,
+        JPH::ContactSettings &ioSettings) {
         emit(CollisionObject::on_collision_persists, inBody1, inBody2, inManifold);
     }
 
-    void ContactListener::emit(const Signal::signal &signal,
-                               const JPH::Body &body1,
-                               const JPH::Body &body2,
-                               const JPH::ContactManifold &inManifold) const {
+    void ContactListener::emit(
+        const Signal::signal &signal,
+        const JPH::Body &body1,
+        const JPH::Body &body2,
+        const JPH::ContactManifold &inManifold) const {
         const auto node1 = reinterpret_cast<CollisionObject*>(body1.GetUserData());
         const auto node2 = reinterpret_cast<CollisionObject*>(body2.GetUserData());
         assert([&]{ return node1 && node2; }, "physics body not associated with a node");
@@ -116,6 +119,5 @@ namespace lysa {
         const auto gravity = physicsSystem.GetGravity();
         return float3{gravity.GetX(), gravity.GetY(), gravity.GetZ()};
     }
-
 
 }

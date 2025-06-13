@@ -23,7 +23,7 @@ namespace lysa {
                              const JPH::EMotionType motionType,
                              const std::wstring& name,
                              const Type type):
-        CollisionObject{shape, layer, name, type},
+        CollisionObject{nullptr, layer, name, type},
         motionType{motionType} {
         this->activationMode = activationMode;
         setShape(shape);

@@ -9,6 +9,7 @@ export module lysa.nodes.node;
 import std;
 import lysa.global;
 import lysa.input_event;
+import lysa.tween;
 
 export namespace lysa {
 
@@ -134,12 +135,12 @@ export namespace lysa {
         /**
         * Sets the local space position (relative to parent)
         */
-        virtual void setPosition(const float x, const float y, const float z) { setPosition(float3{x, y, z}); }
+        // virtual void setPosition(const float x, const float y, const float z) { setPosition(float3{x, y, z}); }
 
         /**
         * Returns the local space position (relative to parent)
         */
-        float3 getPosition() const { return localTransform[3].xyz; }
+        const float3 getPosition() const { return localTransform[3].xyz; }
     
         /**
          * Changes the node's position by the given offset vector in local space.
@@ -159,7 +160,9 @@ export namespace lysa {
         /**
          * Sets the world space position
          */
-        virtual void setPositionGlobal(const float x, const float y, const float z) { setPositionGlobal(float3{x, y, z}); }
+        virtual void setPositionGlobal(const float x, const float y, const float z) {
+            setPositionGlobal(float3{x, y, z});
+        }
 
         /**
          * Returns the world space position
@@ -550,6 +553,28 @@ export namespace lysa {
          */
         void setName(const std::wstring &nodeName) { name = nodeName; }
 
+        /**
+         * Creates a Tween to tweens a property of the node between an `initial` value
+         * and `final` value in a span of time equal to `duration`, in seconds.
+         */
+        template <typename T>
+        std::shared_ptr<Tween> createPropertyTween(
+                typename PropertyTween<T>::Setter set,
+                const T initial,
+                const T final,
+                float duration,
+                const TransitionType ttype = TransitionType::LINEAR,
+                const Tween::Callback& callback = nullptr) {
+            auto tween = make_shared<PropertyTween<T>>(this, set, initial, final, duration, ttype, callback);
+            tweens.push_back(tween);
+            return tween;
+        }
+
+        /**
+         * Removes the `tween` from the processing list
+         */
+        void killTween(const std::shared_ptr<Tween> &tween);
+
         ~Node() override = default;
     
     protected:
@@ -578,7 +603,6 @@ export namespace lysa {
         virtual void resume() { }
 
     private:
-
         static unique_id currentId;
         unique_id        id;
         Type             type;
@@ -588,8 +612,9 @@ export namespace lysa {
         bool             visible{true};
         ProcessMode      processMode{ProcessMode::INHERIT};
 
-        std::list<std::wstring>          groups;
-        std::list<std::shared_ptr<Node>> children;
+        std::list<std::shared_ptr<Tween>> tweens;
+        std::list<std::wstring>           groups;
+        std::list<std::shared_ptr<Node>>  children;
 
         void lockViewportUpdates();
 

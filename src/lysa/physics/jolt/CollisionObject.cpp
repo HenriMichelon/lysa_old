@@ -72,7 +72,7 @@ namespace lysa {
             return;
         }
         const auto& position = getPositionGlobal();
-        const auto& quat = getRotationGlobal();
+        const auto& quat = normalize(getRotationGlobal());
         bodyInterface.SetPositionAndRotation(
                 bodyId,
                 JPH::RVec3(position.x, position.y, position.z),

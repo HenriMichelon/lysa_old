@@ -35,6 +35,7 @@ if(WIN32)
 endif ()
 if(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(PHYSIC_ENGINE_JOLT)
+    add_compile_definitions(JPH_DISABLE_CUSTOM_ALLOCATOR)
 endif()
 
 

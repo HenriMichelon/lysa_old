@@ -48,9 +48,9 @@ export namespace lysa {
     class PropertyTween: public Tween {
     public:
         /**
-         * A Setter method will be called by the Tween each update
+         * A Setter method called by the Tween each update
          */
-        typedef void (Object::*Setter)(T);
+        typedef void (Object::*Setter)(const T&);
 
         /**
          * Create a Tween to tweens a property of an Object.

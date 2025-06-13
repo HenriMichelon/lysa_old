@@ -400,6 +400,13 @@ namespace lysa {
         }
     }
 
+    void Node::killTween(const std::shared_ptr<Tween> &tween) {
+        if (tween != nullptr) {
+            tween->kill();
+            tweens.remove(tween);
+        }
+    }
+
     void Node::lockViewportUpdates() {
         if (viewport) viewport->lockDeferredUpdate();
     }

@@ -22,17 +22,17 @@ export namespace lysa {
     // Class that determines if two nodes can collide
     class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilterTable {
     public:
-        explicit ObjectLayerPairFilterImpl(const uint32 inNumObjectLayers): ObjectLayerPairFilterTable(inNumObjectLayers) {}
-        [[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
+        ObjectLayerPairFilterImpl(const uint32 inNumObjectLayers): ObjectLayerPairFilterTable(inNumObjectLayers) {}
+        bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
     };
 
     // This defines a mapping between objects and broadphase layers.
     class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface {
     public:
-        [[nodiscard]] uint32_t GetNumBroadPhaseLayers() const override { return 1;}
-        [[nodiscard]] JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override { return static_cast<JPH::BroadPhaseLayer>(0); }
+        uint32_t GetNumBroadPhaseLayers() const override { return 1;}
+        JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override { return static_cast<JPH::BroadPhaseLayer>(0); }
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-        [[nodiscard]] const char * GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override { return "?";}
+        const char * GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override { return "?";}
 #endif
 
     };
@@ -40,7 +40,7 @@ export namespace lysa {
     // Class that determines if an object layer can collide with a broadphase layer
     class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter {
     public:
-        [[nodiscard]] bool ShouldCollide(JPH::ObjectLayer layers, JPH::BroadPhaseLayer masks) const override { return true; }
+        bool ShouldCollide(JPH::ObjectLayer layers, JPH::BroadPhaseLayer masks) const override { return true; }
     };
 
     class ContactListener : public JPH::ContactListener {
