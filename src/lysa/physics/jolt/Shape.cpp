@@ -48,8 +48,4 @@ namespace lysa {
         shapeHandle = new JPH::SphereShapeSettings(radius);
     }
 
-    CylinderShape::CylinderShape(const float radius, const float height, const std::wstring &resName):
-        Shape{resName} {
-        shapeHandle = new JPH::CylinderShapeSettings(height / 2.0f, radius);
-    }
 }

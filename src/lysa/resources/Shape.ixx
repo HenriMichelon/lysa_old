@@ -59,20 +59,6 @@ export namespace lysa {
     };
 
     /**
-     * Cylinder-shaped collision Shape
-     */
-    class CylinderShape : public Shape {
-    public:
-        /**
-         * Creates a CylinderShape with the given radius
-         */
-        explicit CylinderShape(float radius, float height, const std::wstring &resName = L"CylinderShape");
-
-    private:
-        explicit CylinderShape(const std::wstring &resName) : Shape(resName) {}
-    };
-
-    /**
      * AABB-based collision Shape
      */
     class AABBShape : public Shape {

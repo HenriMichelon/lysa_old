@@ -19,7 +19,7 @@ endif()
 set(LYSA_TARGET ${PROJECT_NAME})
 set(DIRECTX_BACKEND OFF)
 set(PHYSIC_ENGINE_JOLT OFF)
-set(PHYSIC_ENGINE_PHYSIX ON)
+set(PHYSIC_ENGINE_PHYSX ON)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
@@ -37,14 +37,14 @@ if(WIN32)
 endif ()
 
 #######################################################
-if(NOT PHYSIC_ENGINE_JOLT AND NOT PHYSIC_ENGINE_PHYSIX)
-    message(FATAL_ERROR "Please activate a physic library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSIX")
+if(NOT PHYSIC_ENGINE_JOLT AND NOT PHYSIC_ENGINE_PHYSX)
+    message(FATAL_ERROR "Please activate a physic library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSX")
 endif()
 if(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(JPH_DISABLE_CUSTOM_ALLOCATOR)
 endif()
-if (PHYSIC_ENGINE_PHYSIX)
+if (PHYSIC_ENGINE_PHYSX)
     if (NOT DEFINED PHYSX_ROOT)
         message(FATAL_ERROR "Please set PHYSX_ROOT in the .env.cmake file")
     endif()
@@ -122,12 +122,12 @@ target_precompile_headers(${HLSLPP_TARGET} PRIVATE
 
 #######################################################
 if(WIN32)
-    set(WIN32_SRC
+    set(OS_SRC
             ${ENGINE_SRC_DIR}/os/win32/Application.cpp
             ${ENGINE_SRC_DIR}/os/win32/Input.cpp
             ${ENGINE_SRC_DIR}/os/win32/Window.cpp
     )
-    set(WIN32_MODULES ""
+    set(OS_MODULES ""
     )
 endif ()
 if(PHYSIC_ENGINE_JOLT)
@@ -149,6 +149,14 @@ if(PHYSIC_ENGINE_JOLT)
     )
     set(PHYSICS_MODULES
             ${ENGINE_SRC_DIR}/physics/jolt/PhysicsEngine.ixx
+    )
+endif ()
+if(PHYSIC_ENGINE_PHYSX)
+    set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/physx/PhysicsEngine.cpp
+    )
+    set(PHYSICS_MODULES
+            ${ENGINE_SRC_DIR}/physics/physx/PhysicsEngine.ixx
     )
 endif ()
 add_library(${LYSA_TARGET} STATIC
@@ -207,7 +215,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
 
-        ${WIN32_SRC}
+        ${OS_SRC}
         ${PHYSICS_SRC}
         ${SRC_DIR}/stb/stb.cpp
 )
@@ -280,7 +288,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
 
-        ${WIN32_MODULES}
+        ${OS_MODULES}
         ${PHYSICS_MODULES}
 )
 
@@ -307,7 +315,7 @@ if(PHYSIC_ENGINE_JOLT)
     target_include_directories(${LYSA_TARGET} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
     target_link_libraries(${LYSA_TARGET} Jolt)
 endif()
-if (PHYSIC_ENGINE_PHYSIX)
+if (PHYSIC_ENGINE_PHYSX)
     target_include_directories(${LYSA_TARGET} PUBLIC
             ${PHYSX_ROOT}/include
     )
