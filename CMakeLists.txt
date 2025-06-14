@@ -17,25 +17,40 @@ if (NOT DEFINED VIREO_PROJECT_DIR)
 endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
-set(PHYSIC_ENGINE_JOLT ON)
+set(DIRECTX_BACKEND OFF)
+set(PHYSIC_ENGINE_JOLT OFF)
+set(PHYSIC_ENGINE_PHYSIX ON)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(MSVC)
-    set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
-endif()
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 if(WIN32)
+    if(MSVC)
+        set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
+    endif()
     add_compile_definitions(WIN32_LEAN_AND_MEAN UNICODE _UNICODE)
 endif ()
+
+#######################################################
+if(NOT PHYSIC_ENGINE_JOLT AND NOT PHYSIC_ENGINE_PHYSIX)
+    message(FATAL_ERROR "Please activate a physic library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSIX")
+endif()
 if(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(JPH_DISABLE_CUSTOM_ALLOCATOR)
+endif()
+if (PHYSIC_ENGINE_PHYSIX)
+    if (NOT DEFINED PHYSX_ROOT)
+        message(FATAL_ERROR "Please set PHYSX_ROOT in the .env.cmake file")
+    endif()
+    if (NOT DEFINED PHYSX_LIBRARIES)
+        message(FATAL_ERROR "Please set PHYSX_LIBRARIES in the .env.cmake file")
+    endif()
 endif()
 
 
@@ -270,12 +285,13 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${JoltPhysics_SOURCE_DIR}/..)
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash Jolt)
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR})
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
-        <intrin.h>
+    "<intrin.h>"
 )
+
 if(WIN32)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)
@@ -285,4 +301,21 @@ if(WIN32)
     endif()
     set_target_properties(${LYSA_TARGET} PROPERTIES
             WIN32_EXECUTABLE TRUE)
+endif()
+
+if(PHYSIC_ENGINE_JOLT)
+    target_include_directories(${LYSA_TARGET} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
+    target_link_libraries(${LYSA_TARGET} Jolt)
+endif()
+if (PHYSIC_ENGINE_PHYSIX)
+    target_include_directories(${LYSA_TARGET} PUBLIC
+            ${PHYSX_ROOT}/include
+    )
+    target_link_directories(${LYSA_TARGET} PUBLIC ${PHYSX_LIBRARIES})
+    target_link_libraries(${LYSA_TARGET}
+            PhysX_static_64
+            PhysXCommon_static_64
+            PhysXFoundation_static_64
+            PhysXExtensions_static_64
+    )
 endif()

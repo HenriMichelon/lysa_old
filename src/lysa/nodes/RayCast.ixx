@@ -21,7 +21,11 @@ export namespace lysa {
     /**
      * %A ray in 3D space, used to find the first CollisionObject it intersects.
      */
-    class RayCast : public Node, public JPH::BodyFilter {
+    class RayCast : public Node
+#ifdef PHYSIC_ENGINE_JOLT
+        , public JPH::BodyFilter
+#endif
+    {
     public:
         /**
          * Creates a RayCast
@@ -80,11 +84,11 @@ export namespace lysa {
         float3 hitPoint{};
         collision_layer collisionLayer{};
         bool excludeParent{true};
+        std::shared_ptr<CollisionObject> collider{nullptr};
 
         void physicsProcess(float delta) override;
 
 #ifdef PHYSIC_ENGINE_JOLT
-        std::shared_ptr<CollisionObject> collider{nullptr};
         JPH::BroadPhaseLayerFilter broadPhaseLayerFilter{};
         std::unique_ptr<JPH::ObjectLayerFilter> objectLayerFilter;
         bool ShouldCollideLocked(const JPH::Body &inBody) const override;
