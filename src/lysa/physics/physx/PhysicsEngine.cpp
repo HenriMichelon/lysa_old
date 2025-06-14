@@ -32,11 +32,31 @@ namespace lysa {
         foundation->release();
     }
 
-
-    void PhysXPhysicsEngine::update(const float deltaTime) {
+    std::unique_ptr<PhysicsScene> PhysXPhysicsEngine::createScene() {
+        return std::make_unique<PhysXPhysicsScene>(physics);
     }
 
-    float3 PhysXPhysicsEngine::getGravity() const {
+    PhysXPhysicsScene::PhysXPhysicsScene(physx::PxPhysics* physics) {
+        physx::PxSceneDesc sceneDesc(physics->getTolerancesScale());
+        sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+        physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+        sceneDesc.cpuDispatcher = dispatcher;
+        sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+        scene = physics->createScene(sceneDesc);
+    }
+
+    PhysXPhysicsScene::~PhysXPhysicsScene() {
+        scene->release();
+    }
+
+    void PhysXPhysicsScene::update(const float deltaTime) {
+        scene->simulate(deltaTime);
+        scene->fetchResults(true);
+    }
+
+    float3 PhysXPhysicsScene::getGravity() const {
+        const auto gravity = scene->getGravity();
+        return float3{gravity.x, gravity.y, gravity.z};
     }
 
 }

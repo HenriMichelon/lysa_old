@@ -79,9 +79,6 @@ export namespace lysa {
 
         void update(float deltaTime) override;
 
-        /**
-        * Returns the physics system gravity
-        */
         float3 getGravity() const override;
 
         auto& getBodyInterface() { return physicsSystem.GetBodyInterface(); }

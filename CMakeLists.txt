@@ -18,8 +18,8 @@ endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
 set(DIRECTX_BACKEND ON)
-set(PHYSIC_ENGINE_JOLT ON)
-set(PHYSIC_ENGINE_PHYSX OFF)
+set(PHYSIC_ENGINE_JOLT OFF)
+set(PHYSIC_ENGINE_PHYSX ON)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
@@ -156,7 +156,20 @@ if(PHYSIC_ENGINE_JOLT)
 endif ()
 if(PHYSIC_ENGINE_PHYSX)
     set(PHYSICS_SRC
+            ${ENGINE_SRC_DIR}/physics/physx/Character.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/CollisionArea.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/CollisionObject.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/ConvexHullShape.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/KinematicBody.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/MeshShape.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/PhysicsBody.cpp
             ${ENGINE_SRC_DIR}/physics/physx/PhysicsEngine.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/PhysicsBody.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/RayCast.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/RigidBody.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/Shape.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/StaticBody.cpp
+            ${ENGINE_SRC_DIR}/physics/physx/StaticCompoundShape.cpp
     )
     set(PHYSICS_MODULES
             ${ENGINE_SRC_DIR}/physics/physx/PhysicsEngine.ixx

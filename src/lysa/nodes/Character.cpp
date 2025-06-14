@@ -16,8 +16,7 @@ namespace lysa {
                         name,
                         CHARACTER),
         height{height},
-        radius{radius},
-        yDelta{height / 2} {
+        radius{radius} {
     }
 
     void Character::attachToViewport(Viewport* viewport) {

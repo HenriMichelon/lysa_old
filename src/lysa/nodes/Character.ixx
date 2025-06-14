@@ -146,7 +146,7 @@ export namespace lysa {
         void resume() override;
 
 #ifdef PHYSIC_ENGINE_JOLT
-        float yDelta; // https://jrouwe.github.io/JoltPhysics/class_character_base_settings.html#aee9be06866efe751ab7e2df57edee6b1
+        float yDelta{0}; // https://jrouwe.github.io/JoltPhysics/class_character_base_settings.html#aee9be06866efe751ab7e2df57edee6b1
         std::unique_ptr<JPH::CharacterVirtual> virtualCharacter;
         std::unique_ptr<JPH::ObjectLayerFilter> objectLayerFilter;
         void OnContactAdded(const JPH::CharacterVirtual *  inCharacter,
