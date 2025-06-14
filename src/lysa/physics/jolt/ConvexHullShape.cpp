@@ -19,9 +19,7 @@ namespace lysa {
             jphPoints.push_back(JPH::Vec3{vertex.x, vertex.y, vertex.z});
         }
         shapeSettings = new JPH::ConvexHullShapeSettings(
-            jphPoints,
-            JPH::cDefaultConvexRadius,
-            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(material).get());
+            jphPoints);
     }
 
 }

@@ -19,16 +19,16 @@ import lysa.physics.engine;
 
 namespace lysa {
 
-    Shape::Shape(const std::shared_ptr<PhysicsMaterial>& material, const std::wstring &resName):
-        Resource{resName}, material{material} {
+    Shape::Shape(PhysicsMaterial* material, const std::wstring &resName):
+        Resource{resName}{
         this->material = material ?
-            material:
+            material->duplicate():
             Application::getPhysicsEngine().createMaterial();
     }
 
     AABBShape::AABBShape(
         const Node &node,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName ):
         Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
@@ -38,7 +38,7 @@ namespace lysa {
             shapeSettings = new JPH::BoxShapeSettings(
                 JPH::Vec3(extends.x, extends.y, extends.z),
                 JPH::cDefaultConvexRadius,
-                std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
+                reinterpret_cast<JPH::PhysicsMaterial*>(this->material));
         } else {
             throw Exception("AABBShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
         }
@@ -46,7 +46,7 @@ namespace lysa {
 
     BoxShape::BoxShape(
         const float3& extends,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName}, extends
         {extends} {
@@ -56,7 +56,7 @@ namespace lysa {
         shapeSettings = new JPH::BoxShapeSettings(
             JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2),
             JPH::cDefaultConvexRadius,
-            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
+            reinterpret_cast<JPH::PhysicsMaterial*>(this->material));
     }
 
     std::shared_ptr<Resource> BoxShape::duplicate() const {
@@ -64,18 +64,18 @@ namespace lysa {
         dup->shapeSettings = new JPH::BoxShapeSettings(
             JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2),
             JPH::cDefaultConvexRadius,
-            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
+            reinterpret_cast<JPH::PhysicsMaterial*>(this->material));
         return dup;
     }
 
     SphereShape::SphereShape(
         const float radius,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
         shapeSettings = new JPH::SphereShapeSettings(
             radius,
-            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
+            reinterpret_cast<JPH::PhysicsMaterial*>(this->material));
     }
 
 }

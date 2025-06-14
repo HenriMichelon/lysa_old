@@ -8,7 +8,7 @@ export module lysa.resources.mesh_shape;
 
 import lysa.nodes.node;
 import lysa.nodes.mesh_instance;
-import lysa.physics.engine;
+import lysa.physics.physics_material;
 import lysa.resources.shape;
 
 export namespace lysa {
@@ -23,7 +23,7 @@ export namespace lysa {
          */
         MeshShape(
             const std::shared_ptr<Node> &node,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"MeshShape");
 
         /**
@@ -31,15 +31,12 @@ export namespace lysa {
          */
         MeshShape(
             const Node &node,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"MeshShape");
-
-    protected:
-        std::list<std::shared_ptr<PhysicsMaterial>> materials;
 
     private:
         void tryCreateShape(
-            const std::shared_ptr<Node>& nodel);
+            const std::shared_ptr<Node>& node);
 
         void createShape(
             const std::shared_ptr<MeshInstance>& meshInstance);

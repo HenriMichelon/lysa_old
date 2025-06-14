@@ -23,16 +23,15 @@ namespace lysa {
         }
         const auto & indices = meshInstance->getMesh()->getIndices();
         JPH::IndexedTriangleList triangles;
-        JPH::PhysicsMaterialList materials;
+        // JPH::PhysicsMaterialList materials;
         triangles.reserve(indices.size()/3);
         for (int i = 0; i < indices.size(); i += 3) {
             triangles.push_back({indices[i + 0], indices[i + 1], indices[i + 2]});
-            auto m = material->duplicate();
-            this->materials.push_back(m);
-            materials.push_back(std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(m).get());
+            // auto m = material->duplicate();
+            // materials.push_back(m);
         }
 
-        shapeSettings = new JPH::MeshShapeSettings(vertexList, triangles, materials);
+        shapeSettings = new JPH::MeshShapeSettings(vertexList, triangles);
     }
 
 }

@@ -12,7 +12,7 @@ namespace lysa {
 
     ConvexHullShape::ConvexHullShape(
         const std::shared_ptr<Node> &node,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
         tryCreateShape(node);
@@ -20,7 +20,7 @@ namespace lysa {
 
     ConvexHullShape::ConvexHullShape(
         const std::shared_ptr<Mesh> &mesh,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
         createShape(mesh);
@@ -40,7 +40,7 @@ namespace lysa {
 
     ConvexHullShape::ConvexHullShape(
         const std::vector<float3>& points,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName}, points{points} {
         createShape();

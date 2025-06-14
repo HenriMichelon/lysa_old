@@ -283,6 +283,7 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/physics/Configuration.ixx
         ${ENGINE_SRC_DIR}/physics/PhysicsEngine.ixx
+        ${ENGINE_SRC_DIR}/physics/PhysicsMaterial.ixx
 
         ${ENGINE_SRC_DIR}/resources/Animation.ixx
         ${ENGINE_SRC_DIR}/resources/AnimationLibrary.ixx

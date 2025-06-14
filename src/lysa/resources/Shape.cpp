@@ -10,7 +10,7 @@ namespace lysa {
 
     AABBShape::AABBShape(
         const std::shared_ptr<Node> &node,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName) : AABBShape{*node, material, resName} {}
 
 }

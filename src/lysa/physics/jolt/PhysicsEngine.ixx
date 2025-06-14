@@ -17,6 +17,7 @@ import lysa.signal;
 import lysa.types;
 import lysa.physics.configuration;
 import lysa.physics.engine;
+import lysa.physics.physics_material;
 
 export namespace lysa {
 
@@ -67,21 +68,6 @@ export namespace lysa {
                   JPH::ContactSettings &ioSettings) const;
     };
 
-
-    class JoltPhysicsMaterial : public PhysicsMaterial, public JPH::PhysicsMaterial {
-    public:
-        JoltPhysicsMaterial(
-            float staticFriction = 0.5f,
-            float dynamicFriction = 0.5f,
-            float restitution = 0.0f);
-
-        float staticFriction;
-        float dynamicFriction;
-        float restitution;
-
-        std::shared_ptr<lysa::PhysicsMaterial> duplicate() override;
-    };
-
     class JoltPhysicsScene : public PhysicsScene {
     public:
         JoltPhysicsScene(
@@ -115,7 +101,7 @@ export namespace lysa {
 
         std::unique_ptr<PhysicsScene> createScene() override;
 
-        std::shared_ptr<PhysicsMaterial> createMaterial(
+        PhysicsMaterial* createMaterial(
             float staticFriction = 0.5f,
             float dynamicFriction = 0.5f,
             float restitution = 0.0f) override;
@@ -129,7 +115,7 @@ export namespace lysa {
         ObjectLayerPairFilterImpl objectVsObjectLayerFilter;
         std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
         std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
-        std::shared_ptr<PhysicsMaterial> defaultMaterial;
+        PhysicsMaterial* defaultMaterial;
     };
 
 }

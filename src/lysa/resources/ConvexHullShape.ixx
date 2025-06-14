@@ -10,7 +10,7 @@ import std;
 import lysa.math;
 import lysa.nodes.node;
 import lysa.nodes.mesh_instance;
-import lysa.physics.engine;
+import lysa.physics.physics_material;
 import lysa.resources.shape;
 import lysa.resources.mesh;
 
@@ -27,7 +27,7 @@ export namespace lysa {
          */
         ConvexHullShape(
             const std::shared_ptr<Node> &node,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"ConvexHullShape");
 
         /**
@@ -35,7 +35,7 @@ export namespace lysa {
          */
         ConvexHullShape(
             const std::shared_ptr<Mesh> &mesh,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"ConvexHullShape");
 
         /**
@@ -43,7 +43,7 @@ export namespace lysa {
          */
         ConvexHullShape(
             const std::vector<float3>& points,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"ConvexHullShape");
 
         std::shared_ptr<Resource> duplicate()  const override;

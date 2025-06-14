@@ -14,7 +14,7 @@ export module lysa.resources.shape;
 import std;
 import lysa.math;
 import lysa.nodes.node;
-import lysa.physics.engine;
+import lysa.physics.physics_material;
 import lysa.resources.resource;
 
 export namespace lysa {
@@ -24,10 +24,10 @@ export namespace lysa {
      */
     class Shape : public Resource {
     public:
-        Shape(const std::shared_ptr<PhysicsMaterial>& material, const std::wstring &resName);
+        Shape(PhysicsMaterial* material, const std::wstring &resName);
 
     protected:
-        std::shared_ptr<PhysicsMaterial> material;
+        PhysicsMaterial* material;
 
 #ifdef PHYSIC_ENGINE_JOLT
     public:
@@ -48,7 +48,7 @@ export namespace lysa {
          */
         explicit BoxShape(
             const float3& extends,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"BoxShape");
 
         std::shared_ptr<Resource> duplicate() const override;
@@ -67,11 +67,11 @@ export namespace lysa {
          */
         SphereShape(
             float radius,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"SphereShape");
 
     private:
-        SphereShape(const std::wstring &resName, const std::shared_ptr<PhysicsMaterial>& material) : Shape(material, resName) {}
+        SphereShape(const std::wstring &resName, PhysicsMaterial* material) : Shape(material, resName) {}
     };
 
     /**
@@ -84,7 +84,7 @@ export namespace lysa {
          */
         AABBShape(
             const std::shared_ptr<Node> &node,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"AABBShape");
 
         /**
@@ -92,14 +92,14 @@ export namespace lysa {
          */
         AABBShape(
             const Node &node,
-            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"AABBShape");
 
     private:
-        explicit AABBShape(
-            const std::shared_ptr<PhysicsMaterial>& material,
+        AABBShape(
+            PhysicsMaterial* material,
             const std::wstring &resName) :
-            Shape(material, resName) {}
+            Shape{material, resName} {}
     };
 
 }

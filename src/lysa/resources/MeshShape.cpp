@@ -12,7 +12,7 @@ namespace lysa {
 
     MeshShape::MeshShape(
         const std::shared_ptr<Node> &node,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName ):
         Shape{material, resName} {
         tryCreateShape(node);
@@ -20,7 +20,7 @@ namespace lysa {
 
     MeshShape::MeshShape(
         const Node &node,
-        const std::shared_ptr<PhysicsMaterial>& material,
+        PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();

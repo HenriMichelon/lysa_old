@@ -9,15 +9,9 @@ export module lysa.physics.engine;
 import std;
 import lysa.math;
 import lysa.physics.configuration;
+import lysa.physics.physics_material;
 
 export namespace lysa {
-
-    class PhysicsMaterial {
-    public:
-        virtual std::shared_ptr<PhysicsMaterial> duplicate() = 0;
-
-        virtual ~PhysicsMaterial() = default;
-    };
 
     class PhysicsScene {
     public:
@@ -37,7 +31,7 @@ export namespace lysa {
 
         virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
 
-        virtual std::shared_ptr<PhysicsMaterial> createMaterial(
+        virtual PhysicsMaterial* createMaterial(
             float staticFriction = 0.5f,
             float dynamicFriction = 0.5f,
             float restitution = 0.0f) = 0;

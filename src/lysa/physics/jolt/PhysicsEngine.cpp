@@ -15,6 +15,7 @@ import lysa.application;
 import lysa.global;
 import lysa.nodes.collision_object;
 import lysa.nodes.node;
+import lysa.physics.physics_material;
 
 namespace lysa {
 
@@ -57,9 +58,9 @@ namespace lysa {
         const auto node2 = reinterpret_cast<CollisionObject*>(body2.GetUserData());
         assert([&]{ return node1 && node2; }, "physics body not associated with a node");
 
-        const auto mat1 = reinterpret_cast<const JoltPhysicsMaterial *>(
+        const auto mat1 = reinterpret_cast<const PhysicsMaterial *>(
             body1.GetShape()->GetMaterial(inManifold.mSubShapeID1));
-        const auto mat2 = reinterpret_cast<const JoltPhysicsMaterial *>(
+        const auto mat2 = reinterpret_cast<const PhysicsMaterial *>(
             body2.GetShape()->GetMaterial(inManifold.mSubShapeID2));
         if (mat1 && mat2) {
             ioSettings.mCombinedFriction = 0.5f * (
@@ -99,7 +100,7 @@ namespace lysa {
         return ObjectLayerPairFilterTable::ShouldCollide(inObject1, inObject2);
     }
 
-    JoltPhysicsMaterial::JoltPhysicsMaterial(
+    PhysicsMaterial::PhysicsMaterial(
         const float staticFriction,
         const float dynamicFriction,
         const float restitution):
@@ -123,7 +124,7 @@ namespace lysa {
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
         jobSystem = std::make_unique<JPH::JobSystemThreadPool>(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers);
         defaultMaterial = JoltPhysicsEngine::createMaterial();
-        JPH::PhysicsMaterial::sDefault = std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(defaultMaterial).get();
+        JPH::PhysicsMaterial::sDefault = reinterpret_cast<JPH::PhysicsMaterial*>(defaultMaterial);
     }
 
     std::unique_ptr<PhysicsScene> JoltPhysicsEngine::createScene() {
@@ -136,15 +137,15 @@ namespace lysa {
             objectVsObjectLayerFilter);
     }
 
-    std::shared_ptr<PhysicsMaterial> JoltPhysicsEngine::createMaterial(
+    PhysicsMaterial* JoltPhysicsEngine::createMaterial(
         const float staticFriction,
         const float dynamicFriction,
         const float restitution) {
-        return std::make_shared<JoltPhysicsMaterial>(staticFriction, dynamicFriction, restitution);
+        return new PhysicsMaterial(staticFriction, dynamicFriction, restitution);
     }
 
-    std::shared_ptr<PhysicsMaterial> JoltPhysicsMaterial::duplicate() {
-        return std::make_shared<JoltPhysicsMaterial>(staticFriction, dynamicFriction, restitution);
+    PhysicsMaterial* PhysicsMaterial::duplicate() const {
+        return new PhysicsMaterial(staticFriction, dynamicFriction, restitution);
     }
 
     JoltPhysicsScene::JoltPhysicsScene(
