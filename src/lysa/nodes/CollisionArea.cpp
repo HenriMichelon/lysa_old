@@ -43,10 +43,10 @@ namespace lysa {
             if (parts.size() > 0) {
                 if (parts.at(0) == "BoxShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for", lysa::to_string(getName())); }
-                    setShape(make_shared<BoxShape>(to_float3(parts[1].data()), getName()));
+                    setShape(make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "SphereShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for", lysa::to_string(getName())); }
-                    setShape(make_shared<SphereShape>(std::stof(parts[1].data()), getName()));
+                    setShape(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
                     setShape(std::make_shared<MeshShape>(*this));
                 } else if (parts.at(0) == "AABBShape") {

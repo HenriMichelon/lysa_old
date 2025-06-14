@@ -9,6 +9,8 @@ module;
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 module lysa.resources.convex_hull_shape;
 
+import lysa.application;
+
 namespace lysa {
 
     void ConvexHullShape::createShape() {
@@ -16,7 +18,10 @@ namespace lysa {
         for (const auto &vertex : points) {
             jphPoints.push_back(JPH::Vec3{vertex.x, vertex.y, vertex.z});
         }
-        shapeHandle = new JPH::ConvexHullShapeSettings(jphPoints);
+        shapeSettings = new JPH::ConvexHullShapeSettings(
+            jphPoints,
+            JPH::cDefaultConvexRadius,
+            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(material).get());
     }
 
 }

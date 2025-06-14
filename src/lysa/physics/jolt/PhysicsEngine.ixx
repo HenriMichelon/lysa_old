@@ -63,7 +63,23 @@ export namespace lysa {
         void emit(const Signal::signal &signal,
                   const JPH::Body &body1, 
                   const JPH::Body &body2, 
-                  const JPH::ContactManifold &inManifold) const;
+                  const JPH::ContactManifold &inManifold,
+                  JPH::ContactSettings &ioSettings) const;
+    };
+
+
+    class JoltPhysicsMaterial : public PhysicsMaterial, public JPH::PhysicsMaterial {
+    public:
+        JoltPhysicsMaterial(
+            float staticFriction = 0.5f,
+            float dynamicFriction = 0.5f,
+            float restitution = 0.0f);
+
+        float staticFriction;
+        float dynamicFriction;
+        float restitution;
+
+        std::shared_ptr<lysa::PhysicsMaterial> duplicate() override;
     };
 
     class JoltPhysicsScene : public PhysicsScene {
@@ -72,9 +88,9 @@ export namespace lysa {
             JPH::TempAllocatorImpl& tempAllocator,
             JPH::JobSystemThreadPool& jobSystem,
             ContactListener& contactListener,
-            BPLayerInterfaceImpl& broadphaseLayerInterface,
-            ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
-            ObjectLayerPairFilterImpl& objectVsObjectLayerFilter
+            const BPLayerInterfaceImpl& broadphaseLayerInterface,
+            const ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
+            const ObjectLayerPairFilterImpl& objectVsObjectLayerFilter
         );
 
         void update(float deltaTime) override;
@@ -99,6 +115,11 @@ export namespace lysa {
 
         std::unique_ptr<PhysicsScene> createScene() override;
 
+        std::shared_ptr<PhysicsMaterial> createMaterial(
+            float staticFriction = 0.5f,
+            float dynamicFriction = 0.5f,
+            float restitution = 0.0f) override;
+
         auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
 
     private:
@@ -108,6 +129,7 @@ export namespace lysa {
         ObjectLayerPairFilterImpl objectVsObjectLayerFilter;
         std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
         std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
+        std::shared_ptr<PhysicsMaterial> defaultMaterial;
     };
 
 }

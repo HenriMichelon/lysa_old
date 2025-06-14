@@ -25,7 +25,7 @@ namespace lysa {
         // }
     }
 
-    void CollisionObject::setCollisionLayer(const uint32_t layer) {
+    void CollisionObject::setCollisionLayer(const collision_layer layer) {
         collisionLayer = layer;
         // if (!bodyId.IsInvalid() && bodyInterface) {
         //     bodyInterface->SetObjectLayer(bodyId, collisionLayer);

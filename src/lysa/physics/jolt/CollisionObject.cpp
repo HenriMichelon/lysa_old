@@ -15,30 +15,6 @@ import lysa.physics.jolt.engine;
 
 namespace lysa {
 
-    CollisionObject::CollisionObject(
-        const std::shared_ptr<Shape>& shape,
-        const uint32 layer,
-        const std::wstring& name,
-        const Type type):
-        Node{name, type},
-        collisionLayer{layer},
-        shape{shape} {
-    }
-
-    CollisionObject::CollisionObject(
-        const uint32 layer,
-        const std::wstring& name,
-        const Type type):
-        Node{name, type},
-        collisionLayer{layer} {
-    }
-
-    CollisionObject::CollisionObject(const CollisionObject& other):
-        Node{other.getName(), other.getType()},
-        collisionLayer{other.collisionLayer},
-        shape{other.shape} {
-    }
-
     JPH::BodyInterface* CollisionObject::getBodyInterface() const {
         if (getViewport()) {
             return &dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene()).getBodyInterface();
@@ -58,7 +34,7 @@ namespace lysa {
         }
     }
 
-    void CollisionObject::setCollisionLayer(const uint32_t layer) {
+    void CollisionObject::setCollisionLayer(const collision_layer layer) {
         collisionLayer = layer;
         if (!bodyId.IsInvalid() && bodyInterface) {
             bodyInterface->SetObjectLayer(bodyId, collisionLayer);

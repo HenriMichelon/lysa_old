@@ -18,8 +18,8 @@ endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
 set(DIRECTX_BACKEND ON)
-set(PHYSIC_ENGINE_JOLT OFF)
-set(PHYSIC_ENGINE_PHYSX ON)
+set(PHYSIC_ENGINE_JOLT ON)
+set(PHYSIC_ENGINE_PHYSX OFF)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)

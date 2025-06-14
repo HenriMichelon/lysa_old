@@ -4,28 +4,38 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef PHYSIC_ENGINE_JOLT
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+#endif
 export module lysa.resources.shape;
 
 import std;
 import lysa.math;
 import lysa.nodes.node;
+import lysa.physics.engine;
 import lysa.resources.resource;
 
 export namespace lysa {
-
-    using shape_handle = void*;
 
     /**
      * Base class for all collision shapes
      */
     class Shape : public Resource {
     public:
-        auto getShapeHandle() const { return shapeHandle; }
+        Shape(const std::shared_ptr<PhysicsMaterial>& material, const std::wstring &resName);
 
     protected:
-        shape_handle shapeHandle{nullptr};
+        std::shared_ptr<PhysicsMaterial> material;
 
-        explicit Shape(const std::wstring &resName);
+#ifdef PHYSIC_ENGINE_JOLT
+    public:
+        auto getShapeSettings() const { return shapeSettings; }
+
+    protected:
+        JPH::ShapeSettings* shapeSettings{nullptr};
+#endif
     };
 
     /**
@@ -36,7 +46,10 @@ export namespace lysa {
         /**
          * Creates a BoxShape with the given extents
          */
-        explicit BoxShape(const float3& extends, const std::wstring &resName = L"BoxShape");
+        explicit BoxShape(
+            const float3& extends,
+            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            const std::wstring &resName = L"BoxShape");
 
         std::shared_ptr<Resource> duplicate() const override;
 
@@ -52,10 +65,13 @@ export namespace lysa {
         /**
          * Creates a SphereShape with the given radius
          */
-        explicit SphereShape(float radius, const std::wstring &resName = L"SphereShape");
+        SphereShape(
+            float radius,
+            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            const std::wstring &resName = L"SphereShape");
 
     private:
-        explicit SphereShape(const std::wstring &resName) : Shape(resName) {}
+        SphereShape(const std::wstring &resName, const std::shared_ptr<PhysicsMaterial>& material) : Shape(material, resName) {}
     };
 
     /**
@@ -66,15 +82,24 @@ export namespace lysa {
         /**
          * Creates an AABBShape for a given node
          */
-        explicit AABBShape(const std::shared_ptr<Node> &node, const std::wstring &resName = L"AABBShape");
+        AABBShape(
+            const std::shared_ptr<Node> &node,
+            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            const std::wstring &resName = L"AABBShape");
 
         /**
          * Creates an AABBShape for a given node
          */
-        explicit AABBShape(const Node &node, const std::wstring &resName = L"AABBShape");
+        AABBShape(
+            const Node &node,
+            const std::shared_ptr<PhysicsMaterial>& material = nullptr,
+            const std::wstring &resName = L"AABBShape");
 
     private:
-        explicit AABBShape(const std::wstring &resName) : Shape(resName) {}
+        explicit AABBShape(
+            const std::shared_ptr<PhysicsMaterial>& material,
+            const std::wstring &resName) :
+            Shape(material, resName) {}
     };
 
 }

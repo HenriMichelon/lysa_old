@@ -45,13 +45,13 @@ namespace lysa {
                     const auto mesh = getChild(to_wstring(parts[1].data()));
                     if (mesh == nullptr) { throw Exception("Child with path", parts[1].data(), "not found in", lysa::to_string(getName())); }
                     if (mesh->getType() != MESH_INSTANCE) { throw Exception("Child with path", parts[1].data(), "not a MeshInstance in", lysa::to_string(getName())); }
-                    setShape(make_shared<ConvexHullShape>(mesh, getName()));
+                    setShape(make_shared<ConvexHullShape>(mesh, nullptr, getName()));
                 } else if (parts.at(0) == "BoxShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for", lysa::to_string(getName())); }
-                    setShape(make_shared<BoxShape>(to_float3(parts[1].data()), getName()));
+                    setShape(make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "SphereShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for", lysa::to_string(getName())); }
-                    setShape(make_shared<SphereShape>(std::stof(parts[1].data()), getName()));
+                    setShape(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
                     setShape(std::make_shared<MeshShape>(*this));
                 } else if (parts.at(0) == "AABBShape") {

@@ -43,6 +43,7 @@ namespace lysa {
     }
 
     Window::~Window() {
+        stopped = true;
         swapChain->waitIdle();
         framesData.clear();
         renderer.reset();

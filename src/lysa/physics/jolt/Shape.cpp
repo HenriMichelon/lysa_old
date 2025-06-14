@@ -12,40 +12,70 @@ module;
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 module lysa.resources.shape;
 
+import lysa.application;
 import lysa.global;
 import lysa.nodes.mesh_instance;
+import lysa.physics.engine;
 
 namespace lysa {
 
-    AABBShape::AABBShape(const Node &node, const std::wstring &resName ): Shape{resName} {
+    Shape::Shape(const std::shared_ptr<PhysicsMaterial>& material, const std::wstring &resName):
+        Resource{resName}, material{material} {
+        this->material = material ?
+            material:
+            Application::getPhysicsEngine().createMaterial();
+    }
+
+    AABBShape::AABBShape(
+        const Node &node,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName ):
+        Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
         if (meshInstance) {
             const auto& aabb = meshInstance->getMesh()->getAABB();
             const auto& extends = (aabb.max - aabb.min) * 0.5f;
-            shapeHandle = new JPH::BoxShapeSettings(JPH::Vec3(extends.x, extends.y, extends.z));
+            shapeSettings = new JPH::BoxShapeSettings(
+                JPH::Vec3(extends.x, extends.y, extends.z),
+                JPH::cDefaultConvexRadius,
+                std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
         } else {
             throw Exception("AABBShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
         }
     }
 
-    BoxShape::BoxShape(const float3& extends, const std::wstring &resName):
-        Shape{resName}, extends
+    BoxShape::BoxShape(
+        const float3& extends,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName}, extends
         {extends} {
         if (extends.x <= 0.2 || extends.y <= 0.2 || extends.z <= 0.2) {
             throw Exception("Invalid extends for BoxShape", lysa::to_string(resName), " : extends must be greater than 0.2");
         }
-        shapeHandle = new JPH::BoxShapeSettings(JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2));
+        shapeSettings = new JPH::BoxShapeSettings(
+            JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2),
+            JPH::cDefaultConvexRadius,
+            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
     }
 
     std::shared_ptr<Resource> BoxShape::duplicate() const {
-        auto dup = std::make_shared<BoxShape>(extends, getName());
-        dup->shapeHandle = new JPH::BoxShapeSettings(JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2));
+        auto dup = std::make_shared<BoxShape>(extends, material, getName());
+        dup->shapeSettings = new JPH::BoxShapeSettings(
+            JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2),
+            JPH::cDefaultConvexRadius,
+            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
         return dup;
     }
 
-    SphereShape::SphereShape(const float radius, const std::wstring &resName):
-        Shape{resName} {
-        shapeHandle = new JPH::SphereShapeSettings(radius);
+    SphereShape::SphereShape(
+        const float radius,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName} {
+        shapeSettings = new JPH::SphereShapeSettings(
+            radius,
+            std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(this->material).get());
     }
 
 }

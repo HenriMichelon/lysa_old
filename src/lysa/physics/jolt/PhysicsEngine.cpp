@@ -36,7 +36,7 @@ namespace lysa {
         const JPH::Body &inBody2,
         const JPH::ContactManifold &inManifold,
         JPH::ContactSettings &ioSettings) {
-        emit(CollisionObject::on_collision_starts, inBody1, inBody2, inManifold);
+        emit(CollisionObject::on_collision_starts, inBody1, inBody2, inManifold, ioSettings);
     }
 
     void ContactListener::OnContactPersisted(
@@ -44,17 +44,30 @@ namespace lysa {
         const JPH::Body &inBody2,
         const JPH::ContactManifold &inManifold,
         JPH::ContactSettings &ioSettings) {
-        emit(CollisionObject::on_collision_persists, inBody1, inBody2, inManifold);
+        emit(CollisionObject::on_collision_persists, inBody1, inBody2, inManifold, ioSettings);
     }
 
     void ContactListener::emit(
         const Signal::signal &signal,
         const JPH::Body &body1,
         const JPH::Body &body2,
-        const JPH::ContactManifold &inManifold) const {
+        const JPH::ContactManifold &inManifold,
+        JPH::ContactSettings &ioSettings) const {
         const auto node1 = reinterpret_cast<CollisionObject*>(body1.GetUserData());
         const auto node2 = reinterpret_cast<CollisionObject*>(body2.GetUserData());
         assert([&]{ return node1 && node2; }, "physics body not associated with a node");
+
+        const auto mat1 = reinterpret_cast<const JoltPhysicsMaterial *>(
+            body1.GetShape()->GetMaterial(inManifold.mSubShapeID1));
+        const auto mat2 = reinterpret_cast<const JoltPhysicsMaterial *>(
+            body2.GetShape()->GetMaterial(inManifold.mSubShapeID2));
+        if (mat1 && mat2) {
+            ioSettings.mCombinedFriction = 0.5f * (
+                body1.IsStatic() ? mat1->staticFriction : mat1->dynamicFriction +
+                body2.IsStatic() ? mat2->staticFriction : mat2->dynamicFriction);
+            ioSettings.mCombinedRestitution = std::max(mat1->restitution, mat2->restitution);
+        }
+
         const auto normal = float3{
             inManifold.mWorldSpaceNormal.GetX(),
             inManifold.mWorldSpaceNormal.GetY(),
@@ -86,6 +99,15 @@ namespace lysa {
         return ObjectLayerPairFilterTable::ShouldCollide(inObject1, inObject2);
     }
 
+    JoltPhysicsMaterial::JoltPhysicsMaterial(
+        const float staticFriction,
+        const float dynamicFriction,
+        const float restitution):
+        staticFriction(staticFriction),
+        dynamicFriction(dynamicFriction),
+        restitution(restitution) {
+    }
+
     JoltPhysicsEngine::JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable):
         objectVsObjectLayerFilter{layerCollisionTable.layersCount} {
         // The layer vs layer collision table initialization
@@ -94,13 +116,14 @@ namespace lysa {
                 objectVsObjectLayerFilter.EnableCollision(layerCollide.layer, layer);
             }
         }
-
         // Initialize the Jolt Physics system
         JPH::RegisterDefaultAllocator();
         JPH::Factory::sInstance = new JPH::Factory();
         JPH::RegisterTypes();
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
         jobSystem = std::make_unique<JPH::JobSystemThreadPool>(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers);
+        defaultMaterial = JoltPhysicsEngine::createMaterial();
+        JPH::PhysicsMaterial::sDefault = std::reinterpret_pointer_cast<JPH::PhysicsMaterial>(defaultMaterial).get();
     }
 
     std::unique_ptr<PhysicsScene> JoltPhysicsEngine::createScene() {
@@ -113,13 +136,24 @@ namespace lysa {
             objectVsObjectLayerFilter);
     }
 
+    std::shared_ptr<PhysicsMaterial> JoltPhysicsEngine::createMaterial(
+        const float staticFriction,
+        const float dynamicFriction,
+        const float restitution) {
+        return std::make_shared<JoltPhysicsMaterial>(staticFriction, dynamicFriction, restitution);
+    }
+
+    std::shared_ptr<PhysicsMaterial> JoltPhysicsMaterial::duplicate() {
+        return std::make_shared<JoltPhysicsMaterial>(staticFriction, dynamicFriction, restitution);
+    }
+
     JoltPhysicsScene::JoltPhysicsScene(
         JPH::TempAllocatorImpl& tempAllocator,
         JPH::JobSystemThreadPool& jobSystem,
         ContactListener& contactListener,
-        BPLayerInterfaceImpl& broadphaseLayerInterface,
-        ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
-        ObjectLayerPairFilterImpl& objectVsObjectLayerFilter) :
+        const BPLayerInterfaceImpl& broadphaseLayerInterface,
+        const ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
+        const ObjectLayerPairFilterImpl& objectVsObjectLayerFilter) :
         tempAllocator {tempAllocator},
         jobSystem {jobSystem} {
         physicsSystem.Init(1024,

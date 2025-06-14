@@ -22,7 +22,7 @@ namespace lysa {
         const auto position = getPositionGlobal();
         const auto quat = getRotationGlobal();
         JPH::BodyCreationSettings settings{
-                reinterpret_cast<JPH::ShapeSettings*>(shape->getShapeHandle()),
+                shape->getShapeSettings(),
                 JPH::RVec3{position.x, position.y, position.z},
                 JPH::Quat{quat.x, quat.y, quat.z, quat.w},
                 JPH::EMotionType::Dynamic,

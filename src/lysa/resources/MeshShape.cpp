@@ -10,13 +10,19 @@ import lysa.global;
 
 namespace lysa {
 
-    MeshShape::MeshShape(const std::shared_ptr<Node> &node, const std::wstring &resName ):
-        Shape{resName} {
+    MeshShape::MeshShape(
+        const std::shared_ptr<Node> &node,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName ):
+        Shape{material, resName} {
         tryCreateShape(node);
     }
 
-    MeshShape::MeshShape(const Node &node, const std::wstring &resName):
-        Shape{resName} {
+    MeshShape::MeshShape(
+        const Node &node,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
         if (meshInstance != nullptr) {
             createShape(meshInstance);
@@ -25,7 +31,8 @@ namespace lysa {
         }
     }
 
-    void MeshShape::tryCreateShape(const std::shared_ptr<Node>& node) {
+    void MeshShape::tryCreateShape(
+        const std::shared_ptr<Node>& node) {
         auto meshInstance = std::dynamic_pointer_cast<MeshInstance>(node);
         if (meshInstance == nullptr) {
             meshInstance = node->findFirstChild<MeshInstance>();

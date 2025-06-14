@@ -12,6 +12,13 @@ import lysa.physics.configuration;
 
 export namespace lysa {
 
+    class PhysicsMaterial {
+    public:
+        virtual std::shared_ptr<PhysicsMaterial> duplicate() = 0;
+
+        virtual ~PhysicsMaterial() = default;
+    };
+
     class PhysicsScene {
     public:
         virtual void update(float deltaTime) = 0;
@@ -29,6 +36,11 @@ export namespace lysa {
         static std::unique_ptr<PhysicsEngine> create(const PhysicsConfiguration& config);
 
         virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
+
+        virtual std::shared_ptr<PhysicsMaterial> createMaterial(
+            float staticFriction = 0.5f,
+            float dynamicFriction = 0.5f,
+            float restitution = 0.0f) = 0;
 
         virtual ~PhysicsEngine() = default;
     };

@@ -44,7 +44,7 @@ namespace lysa {
         const auto &quat = normalize(getRotationGlobal());
         this->shape = shape;
         const JPH::BodyCreationSettings settings{
-                reinterpret_cast<JPH::ShapeSettings*>(shape->getShapeHandle()),
+                shape->getShapeSettings(),
                 JPH::RVec3{position.x, position.y, position.z},
                 JPH::Quat{quat.x, quat.y, quat.z, quat.w},
                 motionType,

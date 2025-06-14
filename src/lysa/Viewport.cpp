@@ -20,6 +20,7 @@ namespace lysa {
     }
 
     Viewport::~Viewport() {
+        lockDeferredUpdates = true;
         framesData.clear();
         rootNode.reset();
     }

@@ -10,17 +10,24 @@ import lysa.resources.resource;
 
 namespace lysa {
 
-    ConvexHullShape::ConvexHullShape(const std::shared_ptr<Node> &node, const std::wstring &resName):
-        Shape{resName} {
+    ConvexHullShape::ConvexHullShape(
+        const std::shared_ptr<Node> &node,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName} {
         tryCreateShape(node);
     }
 
-    ConvexHullShape::ConvexHullShape(const std::shared_ptr<Mesh> &mesh, const std::wstring &resName):
-        Shape{resName} {
+    ConvexHullShape::ConvexHullShape(
+        const std::shared_ptr<Mesh> &mesh,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName} {
         createShape(mesh);
     }
 
-    void ConvexHullShape::tryCreateShape(const std::shared_ptr<Node> &node) {
+    void ConvexHullShape::tryCreateShape(
+        const std::shared_ptr<Node> &node) {
         auto meshInstance = std::dynamic_pointer_cast<MeshInstance>(node);
         if (meshInstance == nullptr) {
             const auto& meshNode = node->findFirstChild<MeshInstance>();
@@ -31,16 +38,20 @@ namespace lysa {
         }
     }
 
-    ConvexHullShape::ConvexHullShape(const std::vector<float3>& points, const std::wstring &resName):
-    Shape{resName}, points{points} {
+    ConvexHullShape::ConvexHullShape(
+        const std::vector<float3>& points,
+        const std::shared_ptr<PhysicsMaterial>& material,
+        const std::wstring &resName):
+        Shape{material, resName}, points{points} {
         createShape();
     }
 
     std::shared_ptr<Resource> ConvexHullShape::duplicate() const {
-        return std::make_shared<ConvexHullShape>(points, getName());
+        return std::make_shared<ConvexHullShape>(points, material, getName());
     }
 
-    void ConvexHullShape::createShape(const std::shared_ptr<MeshInstance>& meshInstance) {
+    void ConvexHullShape::createShape(
+        const std::shared_ptr<MeshInstance>& meshInstance) {
         points.clear();
         const auto &transform = meshInstance->getTransform();
         for (const auto &vertex : meshInstance->getMesh()->getVertices()) {
@@ -50,7 +61,8 @@ namespace lysa {
         createShape();
     }
 
-    void ConvexHullShape::createShape(const std::shared_ptr<Mesh> &mesh) {
+    void ConvexHullShape::createShape(
+        const std::shared_ptr<Mesh> &mesh) {
         points.clear();
         for (const auto &vertex : mesh->getVertices()) {
             points.push_back(vertex.position);
