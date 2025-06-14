@@ -13,6 +13,7 @@ import lysa.input_event;
 import lysa.scene;
 import lysa.nodes.camera;
 import lysa.nodes.node;
+import lysa.physics.engine;
 
 export namespace lysa {
 
@@ -93,6 +94,10 @@ export namespace lysa {
             lockDeferredUpdates = false;
         }
 
+        auto& getPhysicsScene() const {
+            return *physicsScene;
+        }
+
         virtual ~Viewport();
         Viewport(Viewport&) = delete;
         Viewport& operator=(Viewport&) = delete;
@@ -130,6 +135,8 @@ export namespace lysa {
         bool                  paused{false};
         //
         bool                  lockDeferredUpdates{false};
+
+        std::unique_ptr<PhysicsScene> physicsScene;
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }
 

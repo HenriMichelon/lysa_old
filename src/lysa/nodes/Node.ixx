@@ -585,18 +585,22 @@ export namespace lysa {
 
         virtual void updateGlobalTransform();
 
-        virtual void ready(Viewport* viewport);
+        virtual void ready();
 
         virtual void physicsProcess(float delta);
 
         virtual void process(float alpha);
 
-        virtual void enterScene() { onEnterScene(); }
+        virtual void enterScene();
 
-        virtual void exitScene() { onExitScene(); }
+        virtual void exitScene();
 
         friend class Window;
         friend class Viewport;
+
+        virtual void attachToViewport(Viewport* viewport);
+
+        virtual void detachFromViewport();
 
         virtual void pause() { }
 

@@ -18,12 +18,16 @@ namespace lysa {
     CollisionArea::CollisionArea(const std::shared_ptr<Shape>& shape,
                                  const uint32 layer,
                                  const std::wstring& name):
-        CollisionObject{nullptr, layer, name, COLLISION_AREA} {
-        setShape(shape);
+        CollisionObject{shape, layer, name, COLLISION_AREA} {
     }
 
     CollisionArea::CollisionArea(const std::wstring &name):
         CollisionObject{ 0, name, COLLISION_AREA} {
+    }
+
+    void CollisionArea::attachToViewport(Viewport* viewport) {
+        CollisionObject::attachToViewport(viewport);
+        setShape(shape);
     }
 
     std::shared_ptr<Node> CollisionArea::duplicateInstance() const {
@@ -43,9 +47,6 @@ namespace lysa {
                 } else if (parts.at(0) == "SphereShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for", lysa::to_string(getName())); }
                     setShape(make_shared<SphereShape>(std::stof(parts[1].data()), getName()));
-                } else if (parts.at(0) == "CylinderShape") {
-                    if (parts.size() < 3) { throw Exception("Missing parameter for CylinderShape for", lysa::to_string(getName())); }
-                    setShape(make_shared<CylinderShape>(std::stof(parts[1].data()), std::stof(parts[2].data()), getName()));
                 } else if (parts.at(0) == "MeshShape") {
                     setShape(std::make_shared<MeshShape>(*this));
                 } else if (parts.at(0) == "AABBShape") {

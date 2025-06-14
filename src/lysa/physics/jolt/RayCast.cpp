@@ -12,6 +12,7 @@ module;
 module lysa.nodes.ray_cast;
 
 import lysa.application;
+import lysa.viewport;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
@@ -25,15 +26,15 @@ namespace lysa {
             JPH::Vec3{worldDirection.x, worldDirection.y, worldDirection.z}
         };
         JPH::RayCastResult result;
-        auto& engine = dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine());
-        if (engine.getPhysicsSystem().GetNarrowPhaseQuery().CastRay(
+        auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
+        if (physicsScene.getPhysicsSystem().GetNarrowPhaseQuery().CastRay(
                 ray,
                 result,
                 broadPhaseLayerFilter,
                 *objectLayerFilter,
                 *this)) {
             const auto obj = reinterpret_cast<CollisionObject *>(
-                   engine.getBodyInterface().GetUserData(result.mBodyID));
+                   physicsScene.getBodyInterface().GetUserData(result.mBodyID));
             collider = obj->sharedPtr();
             const auto posInRay = ray.GetPointOnRay(result.mFraction);
             hitPoint = float3{posInRay.GetX(), posInRay.GetY(), posInRay.GetZ()};

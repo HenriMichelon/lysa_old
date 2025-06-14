@@ -101,6 +101,27 @@ namespace lysa {
         JPH::RegisterTypes();
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
         jobSystem = std::make_unique<JPH::JobSystemThreadPool>(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers);
+    }
+
+    std::unique_ptr<PhysicsScene> JoltPhysicsEngine::createScene() {
+        return std::make_unique<JoltPhysicsScene>(
+            *tempAllocator,
+            *jobSystem,
+            contactListener,
+            broadphaseLayerInterface,
+            objectVsBroadphaseLayerFilter,
+            objectVsObjectLayerFilter);
+    }
+
+    JoltPhysicsScene::JoltPhysicsScene(
+        JPH::TempAllocatorImpl& tempAllocator,
+        JPH::JobSystemThreadPool& jobSystem,
+        ContactListener& contactListener,
+        BPLayerInterfaceImpl& broadphaseLayerInterface,
+        ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
+        ObjectLayerPairFilterImpl& objectVsObjectLayerFilter) :
+        tempAllocator {tempAllocator},
+        jobSystem {jobSystem} {
         physicsSystem.Init(1024,
                            0,
                            2048,
@@ -111,11 +132,11 @@ namespace lysa {
         physicsSystem.SetContactListener(&contactListener);
     }
 
-    void JoltPhysicsEngine::update(const float deltaTime) {
-        physicsSystem.Update(deltaTime, 1, tempAllocator.get(), jobSystem.get());
+    void JoltPhysicsScene::update(const float deltaTime) {
+        physicsSystem.Update(deltaTime, 1, &tempAllocator, &jobSystem);
     }
 
-    float3 JoltPhysicsEngine::getGravity() const {
+    float3 JoltPhysicsScene::getGravity() const {
         const auto gravity = physicsSystem.GetGravity();
         return float3{gravity.GetX(), gravity.GetY(), gravity.GetZ()};
     }

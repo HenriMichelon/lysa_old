@@ -14,16 +14,24 @@ namespace lysa {
                          const std::wstring& name):
         CollisionObject(layer,
                         name,
-                        CHARACTER) {
+                        CHARACTER),
+        height{height},
+        radius{radius},
+        yDelta{height / 2} {
+    }
+
+    void Character::attachToViewport(Viewport* viewport) {
+        CollisionObject::attachToViewport(viewport);
         setShape(height, radius);
     }
 
     void Character::enterScene() {
+        CollisionObject::enterScene();
         setPositionAndRotation();
-        Node::enterScene();
     }
 
     void Character::resume() {
+        CollisionObject::resume();
         setPositionAndRotation();
     }
 

@@ -12,6 +12,7 @@ module;
 #endif
 export module lysa.nodes.physics_body;
 
+import lysa.viewport;
 import lysa.nodes.collision_object;
 import lysa.resources.shape;
 
@@ -38,12 +39,12 @@ export namespace lysa {
         * Sets the coefficient of restitution
         * (the ratio of the relative velocity of separation after collision to the relative velocity of approach before collision)
         */
-        void setBounce(float value) const;
+        void setBounce(float value);
 
         /**
          * Sets the body's mass.
          */
-        void setMass(float value) const;
+        void setMass(float value);
 
         /**
          * Returns the linear velocity
@@ -67,10 +68,18 @@ export namespace lysa {
         ~PhysicsBody() override = default;
 
     protected:
+        float gravityFactor{1.0f};
+        float mass{-1.0f};
+        float bounce{-1.0f};
+
         /**
          * Sets a new collision shape, recreates the body in the physic system
          */
         void setShape(const std::shared_ptr<Shape> &shape);
+
+        void attachToViewport(Viewport* viewport) override;
+
+        void enterScene();
 
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::EMotionType motionType;

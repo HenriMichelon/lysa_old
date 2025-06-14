@@ -6,6 +6,7 @@
 */
 module lysa.viewport;
 
+import lysa.application;
 import lysa.window;
 import lysa.nodes.node;
 
@@ -14,7 +15,8 @@ namespace lysa {
     Viewport::Viewport(ViewportConfiguration& config) :
         config{config},
         viewport{config.viewport},
-        scissors{config.scissors} {
+        scissors{config.scissors},
+        physicsScene{Application::getPhysicsEngine().createScene()}{
     }
 
     Viewport::~Viewport() {
@@ -62,6 +64,7 @@ namespace lysa {
 
     void Viewport::physicsProcess(const float delta) const {
         if (rootNode) {
+            physicsScene->update(delta);
             rootNode->physicsProcess(delta);
         }
     }
@@ -94,11 +97,11 @@ namespace lysa {
                 }
             }
         }
+        node->attachToViewport(this);
         node->enterScene();
         for (const auto &child : node->getChildren()) {
             addNode(child, async);
         }
-        // node->_setAddedToScene(true);
         lockDeferredUpdates = false;
     }
 
@@ -119,7 +122,7 @@ namespace lysa {
                 }
             }
         }
-        // node->_setAddedToScene(false);
+        node->detachFromViewport();
         node->exitScene();
         lockDeferredUpdates = false;
     }
@@ -196,7 +199,7 @@ namespace lysa {
         if (rootNode) {
             assert([&]{ return node->getParent() == nullptr && node->getViewport() == nullptr;}, "Node can't be a root node");
             addNode(rootNode, false);
-            rootNode->ready(this);
+            rootNode->ready();
         }
     }
 

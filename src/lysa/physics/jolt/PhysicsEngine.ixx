@@ -11,6 +11,7 @@ module;
 #include <Jolt/Physics/Collision/ObjectLayerPairFilterTable.h>
 export module lysa.physics.jolt.engine;
 
+import std;
 import lysa.math;
 import lysa.signal;
 import lysa.types;
@@ -65,9 +66,16 @@ export namespace lysa {
                   const JPH::ContactManifold &inManifold) const;
     };
 
-    class JoltPhysicsEngine : public PhysicsEngine {
+    class JoltPhysicsScene : public PhysicsScene {
     public:
-        JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
+        JoltPhysicsScene(
+            JPH::TempAllocatorImpl& tempAllocator,
+            JPH::JobSystemThreadPool& jobSystem,
+            ContactListener& contactListener,
+            BPLayerInterfaceImpl& broadphaseLayerInterface,
+            ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
+            ObjectLayerPairFilterImpl& objectVsObjectLayerFilter
+        );
 
         void update(float deltaTime) override;
 
@@ -80,12 +88,23 @@ export namespace lysa {
 
         auto& getPhysicsSystem() { return physicsSystem; }
 
-        auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
-
         auto& getTempAllocator() { return tempAllocator; }
 
     private:
         JPH::PhysicsSystem physicsSystem;
+        JPH::TempAllocatorImpl& tempAllocator;
+        JPH::JobSystemThreadPool& jobSystem;
+    };
+
+    class JoltPhysicsEngine : public PhysicsEngine {
+    public:
+        JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
+
+        std::unique_ptr<PhysicsScene> createScene() override;
+
+        auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
+
+    private:
         ContactListener contactListener;
         BPLayerInterfaceImpl broadphaseLayerInterface;
         ObjectVsBroadPhaseLayerFilterImpl objectVsBroadphaseLayerFilter;

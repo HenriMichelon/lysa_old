@@ -98,7 +98,6 @@ namespace lysa {
         accumulator += frameTime;
         {
             while (accumulator >= FIXED_DELTA_TIME) {
-                physicsEngine->update(FIXED_DELTA_TIME);
                 for (const auto& window : windows) {
                     window->physicsProcess(FIXED_DELTA_TIME);
                 }

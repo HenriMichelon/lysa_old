@@ -34,7 +34,7 @@ namespace lysa {
         settings.mMassPropertiesOverride       = JPH::MassProperties{.mMass = 1.0f,.mInertia = JPH::Mat44::sIdentity()};
         // settings.mCollideKinematicVsNonDynamic = true;
         settings.mGravityFactor                = 0.0f;
-        const auto body = bodyInterface.CreateBody(settings);
+        const auto body = bodyInterface->CreateBody(settings);
         setBodyId(body->GetID());
     }
 

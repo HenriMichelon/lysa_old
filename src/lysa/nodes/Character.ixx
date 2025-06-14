@@ -13,6 +13,7 @@ export module lysa.nodes.character;
 
 import lysa.constants;
 import lysa.signal;
+import lysa.viewport;
 import lysa.nodes.collision_object;
 import lysa.resources.shape;
 
@@ -137,6 +138,8 @@ export namespace lysa {
         void physicsProcess(float delta) override;
 
         void process(float alpha) override;
+
+        void attachToViewport(Viewport* viewport) override;
 
         void enterScene() override;
 

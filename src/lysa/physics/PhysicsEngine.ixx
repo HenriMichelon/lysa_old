@@ -8,22 +8,27 @@ export module lysa.physics.engine;
 
 import std;
 import lysa.math;
-import lysa.signal;
-import lysa.types;
 import lysa.physics.configuration;
 
 export namespace lysa {
 
-    class PhysicsEngine {
+    class PhysicsScene {
     public:
-        static std::unique_ptr<PhysicsEngine> create(const PhysicsConfiguration& config);
-
         virtual void update(float deltaTime) = 0;
 
         /**
         * Returns the physics system gravity
         */
         virtual float3 getGravity() const = 0;
+
+        virtual ~PhysicsScene() = default;
+    };
+
+    class PhysicsEngine {
+    public:
+        static std::unique_ptr<PhysicsEngine> create(const PhysicsConfiguration& config);
+
+        virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
 
         virtual ~PhysicsEngine() = default;
     };

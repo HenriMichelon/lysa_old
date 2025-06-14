@@ -6,6 +6,7 @@
 */
 export module lysa.nodes.collision_area;
 
+import lysa.viewport;
 import lysa.nodes.collision_object;
 import lysa.resources.shape;
 
@@ -43,6 +44,8 @@ export namespace lysa {
 
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
+
+        void attachToViewport(Viewport* viewport) override;
     };
 
 }

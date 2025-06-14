@@ -11,8 +11,8 @@ module;
 #include <Jolt/Physics/EActivation.h>
 module lysa.nodes.physics_body;
 
-import lysa.application;
 import lysa.global;
+import lysa.viewport;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
@@ -23,10 +23,9 @@ namespace lysa {
                              const JPH::EMotionType motionType,
                              const std::wstring& name,
                              const Type type):
-        CollisionObject{nullptr, layer, name, type},
+        CollisionObject{shape, layer, name, type},
         motionType{motionType} {
         this->activationMode = activationMode;
-        setShape(shape);
     }
 
     PhysicsBody::PhysicsBody(const collision_layer layer,
@@ -51,50 +50,53 @@ namespace lysa {
                 motionType,
                 collisionLayer,
         };
-        const auto body = bodyInterface.CreateBody(settings);
+        const auto body = bodyInterface->CreateBody(settings);
         setBodyId(body->GetID());
     }
 
     void PhysicsBody::setVelocity(const float3& velocity) {
-        if (bodyId.IsInvalid()) { return; }
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
         if (all(velocity == FLOAT3ZERO)) {
-            bodyInterface.SetLinearVelocity(bodyId, JPH::Vec3::sZero());
+            bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3::sZero());
         } else {
             // current orientation * velocity
             const auto vel = mul(velocity, getRotationGlobal());
-            bodyInterface.SetLinearVelocity(bodyId, JPH::Vec3{vel.x, vel.y, vel.z});
+            bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3{vel.x, vel.y, vel.z});
         }
     }
 
     void PhysicsBody::setGravityFactor(const float factor) {
-        if (bodyId.IsInvalid()) { return; }
-        bodyInterface.SetGravityFactor(bodyId, factor);
+        gravityFactor = factor;
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->SetGravityFactor(bodyId, factor);
     }
 
     float3 PhysicsBody::getVelocity() const {
-        if (bodyId.IsInvalid()) { return FLOAT3ZERO; }
-        const auto velocity = bodyInterface.GetLinearVelocity(bodyId);
+        if (bodyId.IsInvalid() || !bodyInterface) { return FLOAT3ZERO; }
+        const auto velocity = bodyInterface->GetLinearVelocity(bodyId);
         return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
     }
 
     void PhysicsBody::applyForce(const float3& force) const {
-        if (bodyId.IsInvalid()) { return; }
-        bodyInterface.AddForce(
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->AddForce(
                 bodyId,
                 JPH::Vec3{force.x, force.y, force.z});
     }
 
     void PhysicsBody::applyForce(const float3& force, const float3& position) const {
-        if (bodyId.IsInvalid()) { return; }
-        bodyInterface.AddForce(
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->AddForce(
                 bodyId,
                 JPH::Vec3{force.x, force.y, force.z},
                 JPH::Vec3{position.x, position.y, position.z});
     }
 
-    void PhysicsBody::setMass(const float value) const {
-        assert([&] { return !getBodyId().IsInvalid();}, "Invalid body id");
-        const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine())
+    void PhysicsBody::setMass(const float value) {
+        if (getType() == STATIC_BODY) { return; }
+        mass = value;
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
             .getPhysicsSystem()
             .GetBodyLockInterface(),
             getBodyId());
@@ -108,9 +110,10 @@ namespace lysa {
         }
     }
 
-    void PhysicsBody::setBounce(const float value) const {
-        assert([&] { return !getBodyId().IsInvalid();}, "Invalid body id");
-        bodyInterface.SetRestitution(getBodyId(), value);
+    void PhysicsBody::setBounce(const float value) {
+        bounce = value;
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->SetRestitution(getBodyId(), value);
     }
 
 }

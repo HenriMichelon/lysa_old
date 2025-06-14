@@ -17,9 +17,9 @@ if (NOT DEFINED VIREO_PROJECT_DIR)
 endif()
 
 set(LYSA_TARGET ${PROJECT_NAME})
-set(DIRECTX_BACKEND OFF)
-set(PHYSIC_ENGINE_JOLT OFF)
-set(PHYSIC_ENGINE_PHYSX ON)
+set(DIRECTX_BACKEND ON)
+set(PHYSIC_ENGINE_JOLT ON)
+set(PHYSIC_ENGINE_PHYSX OFF)
 
 #######################################################
 set(CMAKE_CXX_STANDARD 23)
@@ -39,6 +39,9 @@ endif ()
 #######################################################
 if(NOT PHYSIC_ENGINE_JOLT AND NOT PHYSIC_ENGINE_PHYSX)
     message(FATAL_ERROR "Please activate a physic library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSX")
+endif()
+if(PHYSIC_ENGINE_JOLT AND PHYSIC_ENGINE_PHYSX)
+    message(FATAL_ERROR "Please deactivate a physic library")
 endif()
 if(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(PHYSIC_ENGINE_JOLT)

@@ -13,6 +13,7 @@ export module lysa.nodes.collision_object;
 
 import lysa.math;
 import lysa.signal;
+import lysa.viewport;
 import lysa.nodes.node;
 import lysa.resources.shape;
 
@@ -95,6 +96,8 @@ export namespace lysa {
 
         void process(float alpha) override;
 
+        void attachToViewport(Viewport* viewport) override;
+
         void enterScene() override;
 
         void exitScene() override;
@@ -107,9 +110,10 @@ export namespace lysa {
         friend class Character;
         JPH::BodyID bodyId{JPH::BodyID::cInvalidBodyID};
         JPH::EActivation activationMode{JPH::EActivation::Activate};
-        JPH::BodyInterface &bodyInterface;
+        JPH::BodyInterface* bodyInterface{nullptr};
+        JPH::BodyInterface* CollisionObject::getBodyInterface() const;
         auto getBodyId() const { return bodyId; }
-        static CollisionObject *getByBodyId(JPH::BodyID id);
+        // static CollisionObject *getByBodyId(JPH::BodyID id);
         void setBodyId(JPH::BodyID id);
 #endif
     };

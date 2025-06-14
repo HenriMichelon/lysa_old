@@ -10,7 +10,7 @@ module;
 module lysa.nodes.collision_object;
 
 import lysa.global;
-import lysa.application;
+import lysa.viewport;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
@@ -22,8 +22,7 @@ namespace lysa {
         const Type type):
         Node{name, type},
         collisionLayer{layer},
-        shape{shape},
-        bodyInterface{dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine()).getBodyInterface()} {
+        shape{shape} {
     }
 
     CollisionObject::CollisionObject(
@@ -31,49 +30,55 @@ namespace lysa {
         const std::wstring& name,
         const Type type):
         Node{name, type},
-        collisionLayer{layer},
-        bodyInterface{dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine()).getBodyInterface()} {
+        collisionLayer{layer} {
     }
 
     CollisionObject::CollisionObject(const CollisionObject& other):
         Node{other.getName(), other.getType()},
         collisionLayer{other.collisionLayer},
-        shape{other.shape},
-        bodyInterface{dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine()).getBodyInterface()} {
+        shape{other.shape} {
+    }
+
+    JPH::BodyInterface* CollisionObject::getBodyInterface() const {
+        if (getViewport()) {
+            return &dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene()).getBodyInterface();
+        }
+        return nullptr;
     }
 
 
     void CollisionObject::releaseResources() {
-        if (!bodyId.IsInvalid()) {
-            if (bodyInterface.IsAdded(bodyId)) {
-                bodyInterface.RemoveBody(bodyId);
+        if (!bodyId.IsInvalid() && bodyInterface) {
+            if (bodyInterface->IsAdded(bodyId)) {
+                bodyInterface->RemoveBody(bodyId);
             }
-            bodyInterface.DestroyBody(bodyId);
+            bodyInterface->DestroyBody(bodyId);
+            bodyInterface = nullptr;
             bodyId = JPH::BodyID{JPH::BodyID::cInvalidBodyID};
         }
     }
 
     void CollisionObject::setCollisionLayer(const uint32_t layer) {
         collisionLayer = layer;
-        if (!bodyId.IsInvalid()) {
-            bodyInterface.SetObjectLayer(bodyId, collisionLayer);
+        if (!bodyId.IsInvalid() && bodyInterface) {
+            bodyInterface->SetObjectLayer(bodyId, collisionLayer);
         }
     }
 
     bool CollisionObject::wereInContact(const CollisionObject *obj) const {
-        if (bodyId.IsInvalid()) { return false; }
-        return dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine())
+        if (bodyId.IsInvalid() || !bodyInterface) { return false; }
+        return dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
             .getPhysicsSystem()
             .WereBodiesInContact(bodyId, obj->bodyId);
     }
 
     void CollisionObject::setPositionAndRotation() {
-        if (updating || bodyId.IsInvalid()|| !bodyInterface.IsAdded(bodyId)) {
+        if (updating || bodyId.IsInvalid()|| !bodyInterface || !bodyInterface->IsAdded(bodyId)) {
             return;
         }
         const auto& position = getPositionGlobal();
         const auto& quat = normalize(getRotationGlobal());
-        bodyInterface.SetPositionAndRotation(
+        bodyInterface->SetPositionAndRotation(
                 bodyId,
                 JPH::RVec3(position.x, position.y, position.z),
                 JPH::Quat(quat.x, quat.y, quat.z, quat.w),
@@ -82,23 +87,23 @@ namespace lysa {
 
     void CollisionObject::setBodyId(const JPH::BodyID id) {
         bodyId = id;
-        bodyInterface.SetUserData(bodyId, reinterpret_cast<uint64>(this));
+        bodyInterface->SetUserData(bodyId, reinterpret_cast<uint64>(this));
         //log(toString(), " body id ", to_string(id.GetIndexAndSequenceNumber()), getName());
     }
 
-    CollisionObject *CollisionObject::getByBodyId(const JPH::BodyID id) {
-        return reinterpret_cast<CollisionObject *>(dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine())
-            .getBodyInterface()
-            .GetUserData(id));
-    }
+    // CollisionObject *CollisionObject::getByBodyId(const JPH::BodyID id) {
+        // return reinterpret_cast<CollisionObject *>(dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine())
+            // .getBodyInterface()
+            // .GetUserData(id));
+    // }
 
     void CollisionObject::process(const float alpha) {
         Node::process(alpha);
-        if (bodyId.IsInvalid() || !bodyInterface.IsAdded(bodyId)) { return; }
+        if (bodyId.IsInvalid() || !bodyInterface || !bodyInterface->IsAdded(bodyId)) { return; }
         updating = true;
         JPH::Vec3 position;
         JPH::Quat rotation;
-        bodyInterface.GetPositionAndRotation(bodyId, position, rotation);
+        bodyInterface->GetPositionAndRotation(bodyId, position, rotation);
         const auto pos = float3{position.GetX(), position.GetY(), position.GetZ()};
         setPositionGlobal(pos);
         const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
@@ -106,38 +111,41 @@ namespace lysa {
         updating = false;
     }
 
+    void CollisionObject::attachToViewport(Viewport* viewport) {
+        Node::attachToViewport(viewport);
+        bodyInterface = getBodyInterface();
+    }
+
     void CollisionObject::enterScene() {
-        if (isProcessed() && !bodyId.IsInvalid() && isVisible()) {
-            if (!bodyInterface.IsAdded(bodyId)) {
-                bodyInterface.AddBody(bodyId, activationMode);
-            }
-            bodyInterface.SetObjectLayer(bodyId, collisionLayer);
+        bodyInterface->SetObjectLayer(bodyId, collisionLayer);
+        if (isProcessed() && isVisible()) {
+            bodyInterface->AddBody(bodyId, activationMode);
             setPositionAndRotation();
         }
         Node::enterScene();
     }
 
     void CollisionObject::exitScene() {
-        if (!bodyId.IsInvalid() && bodyInterface.IsAdded(bodyId)) {
-            bodyInterface.RemoveBody(bodyId);
+        if (!bodyId.IsInvalid() && bodyInterface) {
+            releaseResources();
         }
         Node::exitScene();
     }
 
     void CollisionObject::pause() {
-        if (!bodyId.IsInvalid() && bodyInterface.IsAdded(bodyId)) {
-            bodyInterface.RemoveBody(bodyId);
+        if (!bodyId.IsInvalid() && bodyInterface && bodyInterface->IsAdded(bodyId)) {
+            bodyInterface->RemoveBody(bodyId);
         }
         Node::pause();
     }
 
     void CollisionObject::resume() {
         if (isProcessed() && !bodyId.IsInvalid()) {
-            if (isVisible() && (getViewport() != nullptr)) {
-                if (!bodyInterface.IsAdded(bodyId)) {
-                    bodyInterface.AddBody(bodyId, activationMode);
+            if (isVisible() && bodyInterface) {
+                if (!bodyInterface->IsAdded(bodyId)) {
+                    bodyInterface->AddBody(bodyId, activationMode);
                 }
-                bodyInterface.SetObjectLayer(bodyId, collisionLayer);
+                bodyInterface->SetObjectLayer(bodyId, collisionLayer);
                 setPositionAndRotation();
             }
         }
@@ -145,16 +153,16 @@ namespace lysa {
     }
 
     void CollisionObject::setVisible(const bool visible) {
-        if (!bodyId.IsInvalid() && visible != this->isVisible()) {
-            if (isVisible() && (getViewport() != nullptr)) {
-                if (!bodyInterface.IsAdded(bodyId)) {
-                    bodyInterface.AddBody(bodyId, activationMode);
+        if (!bodyId.IsInvalid() && visible != this->isVisible() && bodyInterface) {
+            if (isVisible()) {
+                if (!bodyInterface->IsAdded(bodyId)) {
+                    bodyInterface->AddBody(bodyId, activationMode);
                 }
-                bodyInterface.SetObjectLayer(bodyId, collisionLayer);
+                bodyInterface->SetObjectLayer(bodyId, collisionLayer);
                 setPositionAndRotation();
             } else {
-                if (bodyInterface.IsAdded(bodyId)) {
-                    bodyInterface.RemoveBody(bodyId);
+                if (bodyInterface->IsAdded(bodyId)) {
+                    bodyInterface->RemoveBody(bodyId);
                 }
             }
         }

@@ -12,10 +12,12 @@ module lysa.nodes.character;
 
 import lysa.application;
 import lysa.global;
+import lysa.viewport;
 import lysa.nodes.node;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
+
     void Character::setShape(const float height, const float radius) {
         assert([&]{ return height/2 > radius; }, "Invalid capsule shape: height/2 < radius");
         yDelta = height/2;
@@ -23,7 +25,7 @@ namespace lysa {
         const auto quat = normalize(getRotationGlobal());
         const auto pos = JPH::RVec3(position.x, position.y + yDelta, position.z);
         const auto rot = JPH::Quat(quat.x, quat.y, quat.z, quat.w);
-        auto& engine = dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine());
+        auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
 
         JPH::CharacterVirtualSettings settingsVirtual;
         settingsVirtual.mShape          = new JPH::CapsuleShape(height/2 - radius, radius);
@@ -35,7 +37,7 @@ namespace lysa {
                                                        pos,
                                                        rot,
                                                        reinterpret_cast<uint64>(this),
-                                                       &engine.getPhysicsSystem());
+                                                       &physicsScene.getPhysicsSystem());
         setCollisionLayer(collisionLayer);
         virtualCharacter->SetListener(this);
     }
@@ -65,7 +67,7 @@ namespace lysa {
     std::list<CollisionObject::Collision> Character::getCollisions() const {
         std::list<Collision> contacts;
         for (const auto &contact : virtualCharacter->GetActiveContacts()) {
-            auto *node = reinterpret_cast<CollisionObject *>(bodyInterface.GetUserData(contact.mBodyB));
+            auto *node = reinterpret_cast<CollisionObject *>(bodyInterface->GetUserData(contact.mBodyB));
             assert([&] { return node; }, "physics body not associated with a node");
             contacts.push_back({
                 .position = float3{contact.mPosition.GetX(), contact.mPosition.GetY(), contact.mPosition.GetZ()},
@@ -93,7 +95,7 @@ namespace lysa {
     }
 
     void Character::setPositionAndRotation() {
-        if (updating) {
+        if (updating || !bodyInterface) {
             return;
         }
         const auto position = getPositionGlobal();
@@ -106,14 +108,14 @@ namespace lysa {
 
     void Character::physicsProcess(const float delta) {
         Node::physicsProcess(delta);
-        auto& engine = dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine());
+        auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
         virtualCharacter->Update(delta,
-              virtualCharacter->GetUp() * engine.getPhysicsSystem().GetGravity().Length(),
+              virtualCharacter->GetUp() * physicsScene.getPhysicsSystem().GetGravity().Length(),
               *this,
               *objectLayerFilter,
               *this,
               {},
-              *engine.getTempAllocator().get());
+              physicsScene.getTempAllocator());
     }
 
     void Character::process(const float alpha) {
@@ -138,7 +140,7 @@ namespace lysa {
                                    JPH::RVec3Arg                  inContactPosition,
                                    JPH::Vec3Arg                   inContactNormal,
                                    JPH::CharacterContactSettings &ioSettings) {
-        auto *node   = reinterpret_cast<CollisionObject *>(bodyInterface.GetUserData(inBodyID2));
+        auto *node = reinterpret_cast<CollisionObject *>(bodyInterface->GetUserData(inBodyID2));
         assert([&] { return node; }, "physics body not associated with a node");
         auto event = Collision{
             .position = float3{inContactPosition.GetX(), inContactPosition.GetY(), inContactPosition.GetZ()},
@@ -154,13 +156,13 @@ namespace lysa {
     bool Character::OnContactValidate(const JPH::CharacterVirtual *  inCharacter,
                                     const JPH::BodyID &            inBodyID2,
                                     const JPH::SubShapeID &        inSubShapeID2) {
-        const auto *node = reinterpret_cast<CollisionObject *>(bodyInterface.GetUserData(inBodyID2));
+        const auto *node = reinterpret_cast<CollisionObject *>(bodyInterface->GetUserData(inBodyID2));
         return isProcessed() && node->isProcessed();
     }
 
     bool Character::ShouldCollide(const JPH::BodyID &inBodyID) const {
         if (!isProcessed()) { return false; }
-        const auto node1 = reinterpret_cast<CollisionObject *>(bodyInterface.GetUserData(inBodyID));
+        const auto node1 = reinterpret_cast<CollisionObject *>(bodyInterface->GetUserData(inBodyID));
         return objectLayerFilter->ShouldCollide(node1->getCollisionLayer());
     }
 

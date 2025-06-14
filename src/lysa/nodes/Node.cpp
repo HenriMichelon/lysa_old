@@ -31,11 +31,10 @@ namespace lysa {
         Node::updateGlobalTransform();
     }
 
-    void Node::ready(Viewport* viewport) {
+    void Node::ready() {
         assert([&]{return viewport != nullptr; }, "Invalid viewport");
-        this->viewport = viewport;
         for (const auto& child : children) {
-            child->ready(viewport);
+            child->ready();
         }
         if (isProcessed()) {
             onReady();
@@ -72,6 +71,36 @@ namespace lysa {
         for (const auto& child : children) {
             child->updateGlobalTransform();
         }
+    }
+
+    void Node::exitScene() {
+        onExitScene();
+        viewport = nullptr;
+        for (const auto& child : children) {
+            child->exitScene();
+        }
+    }
+
+    void Node::attachToViewport(Viewport* viewport) {
+        this->viewport = viewport;
+        for (const auto& child : children) {
+            child->attachToViewport(viewport);
+        }
+    }
+
+    void Node::detachFromViewport() {
+        this->viewport = nullptr;
+        for (const auto& child : children) {
+            child->detachFromViewport();
+        }
+    }
+
+    void Node::enterScene() {
+        this->viewport = viewport;
+        for (const auto& child : children) {
+            child->enterScene();
+        }
+        onEnterScene();
     }
 
     std::shared_ptr<Node> Node::duplicateInstance() const {
@@ -138,7 +167,7 @@ namespace lysa {
         child->updateGlobalTransform();
         if (viewport) {
             viewport->addNode(child, async);
-            child->ready(viewport);
+            child->ready();
         }
         child->visible = visible && child->visible;
         return true;
