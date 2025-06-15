@@ -42,6 +42,12 @@ export namespace lysa {
         StaticCompoundShape(
             const std::vector<SubShape> &subshapes,
             const std::wstring &resName = L"StaticCompoundShape");
+
+#ifdef PHYSIC_ENGINE_PHYSX
+        auto getSubShapes() const { return subShapes; }
+    private:
+        std::list<SubShape> subShapes;
+#endif
     };
 
 }

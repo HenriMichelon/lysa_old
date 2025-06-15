@@ -15,43 +15,49 @@ import lysa.physics.physx.engine;
 
 namespace lysa {
 
-    AABBShape::AABBShape(const Node &node, const std::wstring &resName ): Shape{resName} {
+    AABBShape::AABBShape(
+        const Node &node,
+        const PhysicsMaterial* material,
+        const std::wstring &resName ):
+        Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
         if (meshInstance) {
             const auto& aabb = meshInstance->getMesh()->getAABB();
             const auto& extends = (aabb.max - aabb.min) * 0.5f;
-            const auto physx = dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
-            shapeHandle = physx->createShape(
+            shape = getPhysx()->createShape(
                 physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-                *physx->createMaterial(0.5f, 0.5f, 0.0f));
+                *material);
         } else {
             throw Exception("AABBShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
         }
     }
 
-    BoxShape::BoxShape(const float3& extends, const std::wstring &resName):
-        Shape{resName}, extends{extends} {
-        const auto physx = dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
-        shapeHandle = physx->createShape(
+    BoxShape::BoxShape(
+        const float3& extends,
+        PhysicsMaterial* material,
+        const std::wstring &resName):
+        Shape{material, resName}, extends{extends} {
+        shape = getPhysx()->createShape(
             physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-            *physx->createMaterial(0.5f, 0.5f, 0.0f));
+            *material);
     }
 
     std::shared_ptr<Resource> BoxShape::duplicate() const {
-        auto dup = std::make_shared<BoxShape>(extends, getName());
-        const auto physx = dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
-        dup->shapeHandle = physx->createShape(
+        auto dup = std::make_shared<BoxShape>(extends, material, getName());
+        dup->shape = getPhysx()->createShape(
             physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-            *physx->createMaterial(0.5f, 0.5f, 0.0f));
+            *material);
         return dup;
     }
 
-    SphereShape::SphereShape(const float radius, const std::wstring &resName):
-        Shape{resName} {
-        const auto physx = dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
-        shapeHandle = physx->createShape(
+    SphereShape::SphereShape(
+        const float radius,
+        const PhysicsMaterial* material,
+        const std::wstring &resName):
+        Shape{material, resName} {
+        shape = getPhysx()->createShape(
             physx::PxSphereGeometry (radius),
-            *physx->createMaterial(0.5f, 0.5f, 0.0f));
+            *material);
     }
 
 }

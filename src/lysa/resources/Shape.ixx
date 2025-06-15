@@ -9,6 +9,9 @@ module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.resources.shape;
 
 import std;
@@ -16,6 +19,10 @@ import lysa.math;
 import lysa.nodes.node;
 import lysa.physics.physics_material;
 import lysa.resources.resource;
+#ifdef PHYSIC_ENGINE_PHYSX
+import lysa.application;
+import lysa.physics.physx.engine;
+#endif
 
 export namespace lysa {
 
@@ -24,7 +31,7 @@ export namespace lysa {
      */
     class Shape : public Resource {
     public:
-        Shape(PhysicsMaterial* material, const std::wstring &resName);
+        Shape(const PhysicsMaterial* material, const std::wstring &resName);
 
     protected:
         PhysicsMaterial* material;
@@ -32,9 +39,17 @@ export namespace lysa {
 #ifdef PHYSIC_ENGINE_JOLT
     public:
         auto getShapeSettings() const { return shapeSettings; }
-
     protected:
         JPH::ShapeSettings* shapeSettings{nullptr};
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+    public:
+        auto getShape() const { return shape; }
+    protected:
+        physx::PxShape* shape{nullptr};
+        static auto getPhysx() {
+            return dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
+        }
 #endif
     };
 
@@ -67,7 +82,7 @@ export namespace lysa {
          */
         SphereShape(
             float radius,
-            PhysicsMaterial* material = nullptr,
+            const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"SphereShape");
 
     private:
@@ -84,7 +99,7 @@ export namespace lysa {
          */
         AABBShape(
             const std::shared_ptr<Node> &node,
-            PhysicsMaterial* material = nullptr,
+            const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"AABBShape");
 
         /**
@@ -92,7 +107,7 @@ export namespace lysa {
          */
         AABBShape(
             const Node &node,
-            PhysicsMaterial* material = nullptr,
+            const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"AABBShape");
 
     private:

@@ -8,9 +8,16 @@ module lysa.resources.shape;
 
 namespace lysa {
 
+    Shape::Shape(const PhysicsMaterial* material, const std::wstring &resName):
+        Resource{resName}{
+        this->material = material ?
+            Application::getPhysicsEngine().duplicateMaterial((material)):
+            Application::getPhysicsEngine().createMaterial();
+    }
+
     AABBShape::AABBShape(
         const std::shared_ptr<Node> &node,
-        PhysicsMaterial* material,
+        const PhysicsMaterial* material,
         const std::wstring &resName) : AABBShape{*node, material, resName} {}
 
 }

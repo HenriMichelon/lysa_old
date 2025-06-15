@@ -12,6 +12,7 @@ import lysa.application;
 import lysa.global;
 import lysa.nodes.collision_object;
 import lysa.nodes.node;
+import lysa.physics.physics_material;
 
 namespace lysa {
 
@@ -24,7 +25,6 @@ namespace lysa {
         if (!foundation) {
             throw Exception("Failed to create PhysX physics");
         }
-
     }
 
     PhysXPhysicsEngine::~PhysXPhysicsEngine() {
@@ -34,6 +34,20 @@ namespace lysa {
 
     std::unique_ptr<PhysicsScene> PhysXPhysicsEngine::createScene() {
         return std::make_unique<PhysXPhysicsScene>(physics);
+    }
+
+    PhysicsMaterial* PhysXPhysicsEngine::createMaterial(
+       const float staticFriction,
+       const float dynamicFriction,
+       const float restitution) const {
+        return physics->createMaterial(staticFriction, dynamicFriction, restitution);
+    }
+
+    PhysicsMaterial* PhysXPhysicsEngine::duplicateMaterial(const PhysicsMaterial* orig) const {
+        return physics->createMaterial(
+            orig->getStaticFriction(),
+            orig->getDynamicFriction(),
+            orig->getRestitution());
     }
 
     PhysXPhysicsScene::PhysXPhysicsScene(physx::PxPhysics* physics) {

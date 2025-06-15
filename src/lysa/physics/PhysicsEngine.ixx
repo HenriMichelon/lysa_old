@@ -34,7 +34,9 @@ export namespace lysa {
         virtual PhysicsMaterial* createMaterial(
             float staticFriction = 0.5f,
             float dynamicFriction = 0.5f,
-            float restitution = 0.0f) = 0;
+            float restitution = 0.0f) const = 0;
+
+        virtual PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const = 0;
 
         virtual ~PhysicsEngine() = default;
     };

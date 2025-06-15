@@ -16,12 +16,11 @@ if (NOT DEFINED VIREO_PROJECT_DIR)
     message(FATAL_ERROR "Please set VIREO_PROJECT_DIR in the .env.cmake file")
 endif()
 
+#######################################################
 set(LYSA_TARGET ${PROJECT_NAME})
 set(DIRECTX_BACKEND ON)
-set(PHYSIC_ENGINE_JOLT ON)
-set(PHYSIC_ENGINE_PHYSX OFF)
-
-#######################################################
+set(PHYSIC_ENGINE_JOLT OFF)
+set(PHYSIC_ENGINE_PHYSX ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
@@ -29,6 +28,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
+
+#######################################################
 if(WIN32)
     if(MSVC)
         set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
@@ -38,10 +39,10 @@ endif ()
 
 #######################################################
 if(NOT PHYSIC_ENGINE_JOLT AND NOT PHYSIC_ENGINE_PHYSX)
-    message(FATAL_ERROR "Please activate a physic library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSX")
+    message(FATAL_ERROR "Please activate a physics library with PHYSIC_ENGINE_JOLT ou PHYSIC_ENGINE_PHYSX")
 endif()
 if(PHYSIC_ENGINE_JOLT AND PHYSIC_ENGINE_PHYSX)
-    message(FATAL_ERROR "Please deactivate a physic library")
+    message(FATAL_ERROR "Please deactivate a physics library")
 endif()
 if(PHYSIC_ENGINE_JOLT)
     add_compile_definitions(PHYSIC_ENGINE_JOLT)
@@ -54,8 +55,8 @@ if (PHYSIC_ENGINE_PHYSX)
     if (NOT DEFINED PHYSX_LIBRARIES)
         message(FATAL_ERROR "Please set PHYSX_LIBRARIES in the .env.cmake file")
     endif()
+    add_compile_definitions(PHYSIC_ENGINE_PHYSX)
 endif()
-
 
 #######################################################
 include(FetchContent)
@@ -102,10 +103,10 @@ add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} $
 add_library(xxhash STATIC
         ${xxhash_SOURCE_DIR}/xxhash.c
 )
-
 target_include_directories(xxhash PUBLIC
         ${xxhash_SOURCE_DIR}
 )
+compile_options(xxhash)
 
 #######################################################
 # HLSL++ math library
@@ -120,7 +121,7 @@ compile_options(${HLSLPP_TARGET})
 target_include_directories(${HLSLPP_TARGET} PUBLIC ${HLSLPP_SRC_DIR}/include)
 target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
 target_precompile_headers(${HLSLPP_TARGET} PRIVATE
-        <intrin.h>
+    <intrin.h>
 )
 
 #######################################################
@@ -133,6 +134,8 @@ if(WIN32)
     set(OS_MODULES ""
     )
 endif ()
+
+#######################################################
 if(PHYSIC_ENGINE_JOLT)
     set(PHYSICS_SRC
             ${ENGINE_SRC_DIR}/physics/jolt/Character.cpp
@@ -175,6 +178,8 @@ if(PHYSIC_ENGINE_PHYSX)
             ${ENGINE_SRC_DIR}/physics/physx/PhysicsEngine.ixx
     )
 endif ()
+
+#######################################################
 add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
@@ -317,6 +322,7 @@ target_precompile_headers(${LYSA_TARGET} PRIVATE
     "<intrin.h>"
 )
 
+#######################################################
 if(WIN32)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)
@@ -328,19 +334,21 @@ if(WIN32)
             WIN32_EXECUTABLE TRUE)
 endif()
 
+#######################################################
 if(PHYSIC_ENGINE_JOLT)
     target_include_directories(${LYSA_TARGET} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
     target_link_libraries(${LYSA_TARGET} Jolt)
 endif()
 if (PHYSIC_ENGINE_PHYSX)
     target_include_directories(${LYSA_TARGET} PUBLIC
-            ${PHYSX_ROOT}/include
+        ${PHYSX_ROOT}/include
     )
     target_link_directories(${LYSA_TARGET} PUBLIC ${PHYSX_LIBRARIES})
     target_link_libraries(${LYSA_TARGET}
-            PhysX_static_64
-            PhysXCommon_static_64
-            PhysXFoundation_static_64
-            PhysXExtensions_static_64
+        PhysX_static_64
+        PhysXCooking_static_64
+        PhysXCommon_static_64
+        PhysXFoundation_static_64
+        PhysXExtensions_static_64
     )
 endif()

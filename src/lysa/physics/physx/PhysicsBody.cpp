@@ -108,10 +108,4 @@ namespace lysa {
         // }
     }
 
-    void PhysicsBody::setBounce(const float value) {
-        bounce = value;
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // bodyInterface->SetRestitution(getBodyId(), value);
-    }
-
 }

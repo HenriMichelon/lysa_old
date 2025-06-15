@@ -19,16 +19,9 @@ import lysa.physics.engine;
 
 namespace lysa {
 
-    Shape::Shape(PhysicsMaterial* material, const std::wstring &resName):
-        Resource{resName}{
-        this->material = material ?
-            material->duplicate():
-            Application::getPhysicsEngine().createMaterial();
-    }
-
     AABBShape::AABBShape(
         const Node &node,
-        PhysicsMaterial* material,
+        const PhysicsMaterial* material,
         const std::wstring &resName ):
         Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
@@ -70,7 +63,7 @@ namespace lysa {
 
     SphereShape::SphereShape(
         const float radius,
-        PhysicsMaterial* material,
+        const PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
         shapeSettings = new JPH::SphereShapeSettings(

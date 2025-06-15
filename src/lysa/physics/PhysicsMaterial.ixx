@@ -9,21 +9,19 @@ module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.physics.physics_material;
 
 import std;
 
 export namespace lysa {
 
-    class PhysicsMaterial
 #ifdef PHYSIC_ENGINE_JOLT
-        : JPH::PhysicsMaterial
-#endif
+    class PhysicsMaterial : JPH::PhysicsMaterial
     {
     public:
-        PhysicsMaterial* duplicate() const;
-
-#ifdef PHYSIC_ENGINE_JOLT
         PhysicsMaterial(
             float staticFriction = 0.5f,
             float dynamicFriction = 0.5f,
@@ -32,7 +30,10 @@ export namespace lysa {
         float staticFriction;
         float dynamicFriction;
         float restitution;
-#endif
     };
+#endif
 
+#ifdef PHYSIC_ENGINE_PHYSX
+    using PhysicsMaterial = physx::PxMaterial;
+#endif
 }
