@@ -22,7 +22,6 @@ namespace lysa {
         return nullptr;
     }
 
-
     void CollisionObject::releaseResources() {
         if (!bodyId.IsInvalid() && bodyInterface) {
             if (bodyInterface->IsAdded(bodyId)) {
@@ -66,12 +65,6 @@ namespace lysa {
         bodyInterface->SetUserData(bodyId, reinterpret_cast<uint64>(this));
         //log(toString(), " body id ", to_string(id.GetIndexAndSequenceNumber()), getName());
     }
-
-    // CollisionObject *CollisionObject::getByBodyId(const JPH::BodyID id) {
-        // return reinterpret_cast<CollisionObject *>(dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine())
-            // .getBodyInterface()
-            // .GetUserData(id));
-    // }
 
     void CollisionObject::process(const float alpha) {
         Node::process(alpha);

@@ -25,7 +25,6 @@ namespace lysa {
         CollisionObject::enterScene();
         setGravityFactor(gravityFactor);
         if (mass > 0) { setMass(mass); }
-        if (bounce > 0) { setBounce(bounce); }
     }
 
     void PhysicsBody::recreateBody() {
@@ -72,8 +71,6 @@ namespace lysa {
             }
         } else if (property == "mass") {
             setMass(stof(value));
-        } else if (property == "bounce") {
-            setBounce(stof(value));
         }
     }
 

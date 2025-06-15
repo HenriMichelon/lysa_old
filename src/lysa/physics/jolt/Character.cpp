@@ -12,6 +12,7 @@ module lysa.nodes.character;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.physics.jolt.engine;
@@ -147,7 +148,6 @@ namespace lysa {
             .normal = float3{inContactNormal.GetX(), inContactNormal.GetY(), inContactNormal.GetZ()},
             .object = node
         };
-        // log("Character::OnContactAdded", on_collision, node->getName());
         Application::callDeferred([this, event]{
             this->emit(on_collision, (void*)&event);
         });

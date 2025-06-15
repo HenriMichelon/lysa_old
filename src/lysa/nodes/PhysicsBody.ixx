@@ -36,12 +36,6 @@ export namespace lysa {
         virtual void setGravityFactor(float factor);
 
         /**
-        * Sets the coefficient of restitution
-        * (the ratio of the relative velocity of separation after collision to the relative velocity of approach before collision)
-        */
-        void setBounce(float value);
-
-        /**
          * Sets the body's mass.
          */
         void setMass(float value);
@@ -70,7 +64,6 @@ export namespace lysa {
     protected:
         float gravityFactor{1.0f};
         float mass{-1.0f};
-        float bounce{-1.0f};
 
         /**
          * Sets a new collision shape, recreates the body in the physic system

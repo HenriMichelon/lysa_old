@@ -113,7 +113,6 @@ export namespace lysa {
         JPH::BodyInterface* bodyInterface{nullptr};
         JPH::BodyInterface* CollisionObject::getBodyInterface() const;
         auto getBodyId() const { return bodyId; }
-        // static CollisionObject *getByBodyId(JPH::BodyID id);
         void setBodyId(JPH::BodyID id);
 #endif
     };

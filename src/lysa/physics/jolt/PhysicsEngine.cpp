@@ -84,6 +84,8 @@ namespace lysa {
             Application::callDeferred([this, signal, node1, event1]{
                node1->emit(signal, (void*)&event1);
             });
+        } else {
+            GAME1("Character collision");
         }
         const auto pos2 = inManifold.GetWorldSpaceContactPointOn1(0);
         auto event2 = CollisionObject::Collision {
