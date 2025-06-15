@@ -33,6 +33,8 @@ export namespace lysa {
     public:
         Shape(const PhysicsMaterial* material, const std::wstring &resName);
 
+        auto& getMaterial() const { return *material; }
+
     protected:
         PhysicsMaterial* material;
 
@@ -44,9 +46,9 @@ export namespace lysa {
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
     public:
-        auto getShape() const { return shape; }
+        auto& getGeometry() const { return *geometry; }
     protected:
-        physx::PxShape* shape{nullptr};
+        std::unique_ptr<physx::PxGeometry> geometry;
         static auto getPhysx() {
             return dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
         }

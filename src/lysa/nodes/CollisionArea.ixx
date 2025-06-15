@@ -29,7 +29,7 @@ export namespace lysa {
                       const std::wstring& name = TypeNames[COLLISION_AREA]);
 
         /**
-         * Creates a CollisionArea without collision shape
+         * Creates a CollisionArea without a collision shape
          */
         explicit CollisionArea(const std::wstring& name = TypeNames[COLLISION_AREA]);
 

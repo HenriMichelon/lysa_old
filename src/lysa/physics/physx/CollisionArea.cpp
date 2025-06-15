@@ -18,23 +18,22 @@ namespace lysa {
             releaseResources();
         }
         this->shape = shape;
+        const auto& physx = getPhysx();
+
         const auto position = getPositionGlobal();
         const auto quat = getRotationGlobal();
-        // JPH::BodyCreationSettings settings{
-        //         reinterpret_cast<JPH::ShapeSettings*>(shape->getShapeHandle()),
-        //         JPH::RVec3{position.x, position.y, position.z},
-        //         JPH::Quat{quat.x, quat.y, quat.z, quat.w},
-        //         JPH::EMotionType::Dynamic,
-        //         collisionLayer,
-        // };
-        // settings.mIsSensor                     = true;
-        // settings.mUseManifoldReduction         = true;
-        // settings.mOverrideMassProperties       = JPH::EOverrideMassProperties::MassAndInertiaProvided;
-        // settings.mMassPropertiesOverride       = JPH::MassProperties{.mMass = 1.0f,.mInertia = JPH::Mat44::sIdentity()};
-        // // settings.mCollideKinematicVsNonDynamic = true;
-        // settings.mGravityFactor                = 0.0f;
-        // const auto body = bodyInterface->CreateBody(settings);
-        // setBodyId(body->GetID());
+        const physx::PxTransform transform{
+            physx::PxVec3(position.x, position.y, position.z),
+            physx::PxQuat(quat.x, quat.y, quat.z, quat.w)};
+        const auto actor = physx->createRigidStatic(transform);
+
+        const physx::PxShapeFlags shapeFlags =
+            physx::PxShapeFlag::eSCENE_QUERY_SHAPE |
+            physx::PxShapeFlag::eTRIGGER_SHAPE;
+        const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true, shapeFlags);
+        shapes.push_back(pxShape);
+        actor->attachShape(*pxShape);
+        setActor(actor);
     }
 
 }

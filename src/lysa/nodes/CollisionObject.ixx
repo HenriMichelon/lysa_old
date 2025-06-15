@@ -9,6 +9,9 @@ module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.nodes.collision_object;
 
 import lysa.math;
@@ -16,6 +19,10 @@ import lysa.signal;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.resources.shape;
+#ifdef PHYSIC_ENGINE_PHYSX
+import lysa.application;
+import lysa.physics.physx.engine;
+#endif
 
 export namespace lysa {
 
@@ -107,13 +114,28 @@ export namespace lysa {
         void resume() override;
 
 #ifdef PHYSIC_ENGINE_JOLT
-        friend class Character;
-        JPH::BodyID bodyId{JPH::BodyID::cInvalidBodyID};
-        JPH::EActivation activationMode{JPH::EActivation::Activate};
         JPH::BodyInterface* bodyInterface{nullptr};
-        JPH::BodyInterface* CollisionObject::getBodyInterface() const;
+        JPH::EActivation activationMode{JPH::EActivation::Activate};
+
         auto getBodyId() const { return bodyId; }
         void setBodyId(JPH::BodyID id);
+
+        friend class Character;
+        JPH::BodyID bodyId{JPH::BodyID::cInvalidBodyID};
+        JPH::BodyInterface* getBodyInterface() const;
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        physx::PxRigidActor *actor{nullptr};
+        physx::PxScene* scene{nullptr};
+        std::list<physx::PxShape*> shapes{nullptr};
+
+        auto getActor() const { return actor; }
+        void setActor(physx::PxRigidActor *actor);
+
+        physx::PxScene* getPxScene() const;
+        static auto getPhysx() {
+            return dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
+        }
 #endif
     };
 

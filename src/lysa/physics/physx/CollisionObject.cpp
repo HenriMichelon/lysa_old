@@ -14,114 +14,99 @@ import lysa.physics.physx.engine;
 
 namespace lysa {
 
+    physx::PxScene* CollisionObject::getPxScene() const {
+        if (getViewport()) {
+            return dynamic_cast<PhysXPhysicsScene&>(getViewport()->getPhysicsScene()).getScene();
+        }
+        return nullptr;
+    }
+
     void CollisionObject::releaseResources() {
-        // if (!bodyId.IsInvalid() && bodyInterface) {
-        //     if (bodyInterface->IsAdded(bodyId)) {
-        //         bodyInterface->RemoveBody(bodyId);
-        //     }
-        //     bodyInterface->DestroyBody(bodyId);
-        //     bodyInterface = nullptr;
-        //     bodyId = JPH::BodyID{JPH::BodyID::cInvalidBodyID};
-        // }
+        if (actor && scene) {
+            scene->removeActor(*actor);
+            actor->release();
+            actor = nullptr;
+        }
     }
 
     void CollisionObject::setCollisionLayer(const collision_layer layer) {
         collisionLayer = layer;
-        // if (!bodyId.IsInvalid() && bodyInterface) {
-        //     bodyInterface->SetObjectLayer(bodyId, collisionLayer);
-        // }
+    }
+
+    void CollisionObject::setActor(physx::PxRigidActor *actor) {
+        this->actor = actor;
+        this->actor->userData = reinterpret_cast<void *>(this);
     }
 
     bool CollisionObject::wereInContact(const CollisionObject *obj) const {
-        // if (bodyId.IsInvalid() || !bodyInterface) { return false; }
-        // return dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
-        //     .getPhysicsSystem()
-        //     .WereBodiesInContact(bodyId, obj->bodyId);
-        return false;
+        if (!actor || !scene) { return false; }
+        throw Exception("Not implemented");
     }
 
     void CollisionObject::setPositionAndRotation() {
-        // if (updating || bodyId.IsInvalid()|| !bodyInterface || !bodyInterface->IsAdded(bodyId)) {
-        //     return;
-        // }
-        // const auto& position = getPositionGlobal();
-        // const auto& quat = normalize(getRotationGlobal());
-        // bodyInterface->SetPositionAndRotation(
-        //         bodyId,
-        //         JPH::RVec3(position.x, position.y, position.z),
-        //         JPH::Quat(quat.x, quat.y, quat.z, quat.w),
-        //         activationMode);
+        if (!actor || !scene) { return; }
+        const auto pos = getPositionGlobal();
+        const auto quat = normalize(getRotationGlobal());
+        physx::PxTransform t(physx::PxVec3(pos.x, pos.y, pos.z), physx::PxQuat(quat.x, quat.y, quat.z, quat.w));
+        actor->setGlobalPose(t);
     }
 
     void CollisionObject::process(const float alpha) {
         Node::process(alpha);
-        // if (bodyId.IsInvalid() || !bodyInterface || !bodyInterface->IsAdded(bodyId)) { return; }
+        if (!actor || !scene) { return; }
         updating = true;
-        // JPH::Vec3 position;
-        // JPH::Quat rotation;
-        // bodyInterface->GetPositionAndRotation(bodyId, position, rotation);
-        // const auto pos = float3{position.GetX(), position.GetY(), position.GetZ()};
-        // setPositionGlobal(pos);
-        // const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
-        // setRotationGlobal(rot);
+        const physx::PxTransform &pose = actor->getGlobalPose();
+        setPositionGlobal(float3(pose.p.x, pose.p.y, pose.p.z));
+        setRotationGlobal(quaternion(pose.q.x, pose.q.y, pose.q.z, pose.q.w));
         updating = false;
     }
 
     void CollisionObject::attachToViewport(Viewport* viewport) {
         Node::attachToViewport(viewport);
-        // bodyInterface = getBodyInterface();
+        scene = getPxScene();
     }
 
     void CollisionObject::enterScene() {
-        // bodyInterface->SetObjectLayer(bodyId, collisionLayer);
-        // if (isProcessed() && isVisible()) {
-        //     bodyInterface->AddBody(bodyId, activationMode);
-        //     setPositionAndRotation();
-        // }
+        if (isProcessed() && actor && scene && isVisible()) {
+            scene->addActor(*actor);
+            setPositionAndRotation();
+        }
         Node::enterScene();
     }
 
     void CollisionObject::exitScene() {
-        // if (!bodyId.IsInvalid() && bodyInterface) {
-        //     releaseResources();
-        // }
+        if (actor && scene) {
+            scene->removeActor(*actor);
+        }
         Node::exitScene();
     }
 
     void CollisionObject::pause() {
-        // if (!bodyId.IsInvalid() && bodyInterface && bodyInterface->IsAdded(bodyId)) {
-        //     bodyInterface->RemoveBody(bodyId);
-        // }
+        if (actor && scene) {
+            scene->removeActor(*actor);
+        }
         Node::pause();
     }
 
     void CollisionObject::resume() {
-        // if (isProcessed() && !bodyId.IsInvalid()) {
-        //     if (isVisible() && bodyInterface) {
-        //         if (!bodyInterface->IsAdded(bodyId)) {
-        //             bodyInterface->AddBody(bodyId, activationMode);
-        //         }
-        //         bodyInterface->SetObjectLayer(bodyId, collisionLayer);
-        //         setPositionAndRotation();
-        //     }
-        // }
+        if (isProcessed() && actor) {
+            if (isVisible() && scene) {
+                scene->addActor(*actor);
+                setPositionAndRotation();
+            }
+        }
         Node::resume();
     }
 
     void CollisionObject::setVisible(const bool visible) {
-        // if (!bodyId.IsInvalid() && visible != this->isVisible() && bodyInterface) {
-        //     if (isVisible()) {
-        //         if (!bodyInterface->IsAdded(bodyId)) {
-        //             bodyInterface->AddBody(bodyId, activationMode);
-        //         }
-        //         bodyInterface->SetObjectLayer(bodyId, collisionLayer);
-        //         setPositionAndRotation();
-        //     } else {
-        //         if (bodyInterface->IsAdded(bodyId)) {
-        //             bodyInterface->RemoveBody(bodyId);
-        //         }
-        //     }
-        // }
+        if (actor && scene && visible != this->isVisible()) {
+            if (isVisible()) {
+                scene->addActor(*actor);
+                setPositionAndRotation();
+            } else {
+                scene->removeActor(*actor);
+            }
+        }
         Node::setVisible(visible);
     }
 

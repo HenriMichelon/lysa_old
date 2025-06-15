@@ -12,23 +12,21 @@ import lysa.resources.shape;
 
 namespace lysa {
 
-    // KinematicBody::KinematicBody(const std::shared_ptr<Shape>& shape,
-    //                              const collision_layer  layer,
-    //                              const std::wstring& name):
-    //     PhysicsBody(shape,
-    //                 layer,
-    //                 JPH::EActivation::Activate,
-    //                 JPH::EMotionType::Kinematic,
-    //                 name,
-    //                 KINEMATIC_BODY) {
-    // }
-    //
-    // KinematicBody::KinematicBody(const std::wstring& name):
-    //    PhysicsBody(0,
-    //                JPH::EActivation::Activate,
-    //                JPH::EMotionType::Kinematic,
-    //                name,
-    //                KINEMATIC_BODY) {
-    // }
+    KinematicBody::KinematicBody(const std::shared_ptr<Shape>& shape,
+                                 const collision_layer  layer,
+                                 const std::wstring& name):
+        PhysicsBody(shape,
+                    layer,
+                    physx::PxActorType::eRIGID_DYNAMIC,
+                    name,
+                    KINEMATIC_BODY) {
+    }
+
+    KinematicBody::KinematicBody(const std::wstring& name):
+       PhysicsBody(0,
+                   physx::PxActorType::eRIGID_DYNAMIC,
+                   name,
+                   KINEMATIC_BODY) {
+    }
 
 }

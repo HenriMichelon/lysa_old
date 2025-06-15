@@ -29,11 +29,8 @@ namespace lysa {
         if (!PxCookConvexMesh(params, convexDesc, blob, &result)) {
             throw Exception("ConvexHullShape cooking failed");
         }
-
         physx::PxDefaultMemoryInputData input(blob.getData(), blob.getSize());
-        physx::PxConvexMesh* mesh = getPhysx()->createConvexMesh(input);
-        shape = getPhysx()->createShape(physx::PxConvexMeshGeometry(mesh), *material);
-        mesh->release();
+        geometry = std::make_unique<physx::PxConvexMeshGeometry>(getPhysx()->createConvexMesh(input));
     }
 
 }

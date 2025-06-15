@@ -10,6 +10,9 @@ module;
 #include <Jolt/Physics/Body/BodyFilter.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.nodes.ray_cast;
 
 import lysa.math;
@@ -21,9 +24,12 @@ export namespace lysa {
     /**
      * %A ray in 3D space, used to find the first CollisionObject it intersects.
      */
-    class RayCast : public Node
+    class RayCast : public Node, public
 #ifdef PHYSIC_ENGINE_JOLT
-        , public JPH::BodyFilter
+        JPH::BodyFilter
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        physx::PxQueryFilterCallback
 #endif
     {
     public:
@@ -92,6 +98,18 @@ export namespace lysa {
         JPH::BroadPhaseLayerFilter broadPhaseLayerFilter{};
         std::unique_ptr<JPH::ObjectLayerFilter> objectLayerFilter;
         bool ShouldCollideLocked(const JPH::Body &inBody) const override;
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        physx::PxQueryHitType::Enum preFilter(
+            const physx::PxFilterData& filterData,
+            const physx::PxShape* shape,
+            const physx::PxRigidActor* actor,
+            physx::PxHitFlags& queryFlags) override;
+        physx::PxQueryHitType::Enum postFilter(
+            const physx::PxFilterData& filterData,
+            const physx::PxQueryHit& hit,
+            const physx::PxShape* shape,
+            const physx::PxRigidActor* actor) override;
 #endif
     };
 

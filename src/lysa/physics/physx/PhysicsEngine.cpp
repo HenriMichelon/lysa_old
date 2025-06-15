@@ -16,7 +16,7 @@ import lysa.physics.physics_material;
 
 namespace lysa {
 
-    PhysXPhysicsEngine::PhysXPhysicsEngine(const LayerCollisionTable& layerCollisionTable) {
+    PhysXPhysicsEngine::PhysXPhysicsEngine() {
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
         if (!foundation) {
             throw Exception("Failed to create PhysX foundation");

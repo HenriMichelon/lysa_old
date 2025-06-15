@@ -55,7 +55,7 @@ if (PHYSIC_ENGINE_PHYSX)
     if (NOT DEFINED PHYSX_LIBRARIES)
         message(FATAL_ERROR "Please set PHYSX_LIBRARIES in the .env.cmake file")
     endif()
-    add_compile_definitions(PHYSIC_ENGINE_PHYSX)
+    add_compile_definitions(PHYSIC_ENGINE_PHYSX PX_PHYSX_STATIC_LIB PX_FOUNDATION_STATIC_LIB PX_PHYSX_COMMON_STATIC_LIB)
 endif()
 
 #######################################################
@@ -346,9 +346,10 @@ if (PHYSIC_ENGINE_PHYSX)
     target_link_directories(${LYSA_TARGET} PUBLIC ${PHYSX_LIBRARIES})
     target_link_libraries(${LYSA_TARGET}
         PhysX_static_64
-        PhysXCooking_static_64
         PhysXCommon_static_64
-        PhysXFoundation_static_64
+        PhysXCooking_static_64
         PhysXExtensions_static_64
+        PhysXFoundation_static_64
+        PhysXPvdSDK_static_64
     )
 endif()

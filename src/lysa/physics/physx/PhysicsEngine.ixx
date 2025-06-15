@@ -24,6 +24,8 @@ export namespace lysa {
 
         float3 getGravity() const override;
 
+        auto getScene() const { return scene; }
+
         ~PhysXPhysicsScene() override;
     private:
         physx::PxScene* scene;
@@ -32,7 +34,7 @@ export namespace lysa {
 
     class PhysXPhysicsEngine : public PhysicsEngine {
     public:
-        PhysXPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
+        PhysXPhysicsEngine();
 
         std::unique_ptr<PhysicsScene> createScene() override;
 

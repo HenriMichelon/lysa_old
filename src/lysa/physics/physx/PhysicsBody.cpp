@@ -10,102 +10,106 @@ module lysa.nodes.physics_body;
 
 import lysa.global;
 import lysa.viewport;
+import lysa.resources.static_compound_shape;
 import lysa.physics.physx.engine;
 
 namespace lysa {
 
-    // PhysicsBody::PhysicsBody(const std::shared_ptr<Shape>& shape,
-    //                          const collision_layer layer,
-    //                          const JPH::EActivation activationMode,
-    //                          const JPH::EMotionType motionType,
-    //                          const std::wstring& name,
-    //                          const Type type):
-    //     CollisionObject{shape, layer, name, type},
-    //     motionType{motionType} {
-    //     this->activationMode = activationMode;
-    // }
-    //
-    // PhysicsBody::PhysicsBody(const collision_layer layer,
-    //                          const JPH::EActivation activationMode,
-    //                          const JPH::EMotionType motionType,
-    //                          const std::wstring& name,
-    //                          const Type type):
-    //     CollisionObject{layer, name, type},
-    //     motionType{motionType} {
-    //     this->activationMode = activationMode;
-    // }
+    PhysicsBody::PhysicsBody(
+        const std::shared_ptr<Shape>& shape,
+        const collision_layer layer,
+        const physx::PxActorType::Enum actorType,
+        const std::wstring& name,
+        const Type type):
+        CollisionObject{shape, layer, name, type},
+        actorType{actorType} {
+    }
+
+    PhysicsBody::PhysicsBody(
+        const collision_layer layer,
+        const physx::PxActorType::Enum actorType,
+        const std::wstring& name,
+        const Type type):
+        CollisionObject{layer, name, type},
+        actorType{actorType} {
+    }
 
     void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
-        releaseResources();
+        if (this->shape) {
+            releaseResources();
+        }
+        this->shape = shape;
+        const auto& physx = getPhysx();
+
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
-        this->shape = shape;
-        // const JPH::BodyCreationSettings settings{
-        //         reinterpret_cast<JPH::ShapeSettings*>(shape->getShapeHandle()),
-        //         JPH::RVec3{position.x, position.y, position.z},
-        //         JPH::Quat{quat.x, quat.y, quat.z, quat.w},
-        //         motionType,
-        //         collisionLayer,
-        // };
-        // const auto body = bodyInterface->CreateBody(settings);
-        // setBodyId(body->GetID());
+        const physx::PxTransform transform{
+            physx::PxVec3(position.x, position.y, position.z),
+            physx::PxQuat(quat.x, quat.y, quat.z, quat.w)};
+        if (actorType == physx::PxActorType::eRIGID_DYNAMIC) {
+            physx::PxRigidDynamic* body = physx->createRigidDynamic(transform);
+            if (mass > 0.0f) {
+                body->setMass(mass);
+            }
+            body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
+            body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
+            setActor(body);
+        } else {
+            setActor(physx->createRigidStatic(transform));
+        }
+
+        if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
+            for (const auto& subshape : compound->getSubShapes()) {
+                auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
+                shapes.push_back(pxShape);
+                actor->attachShape(*pxShape);
+            }
+        } else {
+            const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
+            shapes.push_back(pxShape);
+            actor->attachShape(*pxShape);
+        }
     }
 
     void PhysicsBody::setVelocity(const float3& velocity) {
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // if (all(velocity == FLOAT3ZERO)) {
-        //     bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3::sZero());
-        // } else {
-        //     // current orientation * velocity
-        //     const auto vel = mul(velocity, getRotationGlobal());
-        //     bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3{vel.x, vel.y, vel.z});
-        // }
+        if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
+        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+        if (all(velocity == FLOAT3ZERO)) {
+            body->setLinearVelocity(physx::PxVec3(0, 0, 0));
+        } else {
+            const float3 v = mul(velocity, getRotationGlobal());
+            body->setLinearVelocity(physx::PxVec3(v.x, v.y, v.z));
+        }
+    }
+
+    float3 PhysicsBody::getVelocity() const {
+        if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return FLOAT3ZERO;
+        const auto v = static_cast<physx::PxRigidDynamic*>(actor)->getLinearVelocity();
+        return float3{v.x, v.y, v.z};
     }
 
     void PhysicsBody::setGravityFactor(const float factor) {
         gravityFactor = factor;
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // bodyInterface->SetGravityFactor(bodyId, factor);
+        if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
+        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+        body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
+        // what a shame, no gravity factor?
     }
 
-    float3 PhysicsBody::getVelocity() const {
-        // if (bodyId.IsInvalid() || !bodyInterface) { return FLOAT3ZERO; }
-        // const auto velocity = bodyInterface->GetLinearVelocity(bodyId);
-        // return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
-        return FLOAT3ZERO;
-    }
 
     void PhysicsBody::applyForce(const float3& force) const {
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // bodyInterface->AddForce(
-        //         bodyId,
-        //         JPH::Vec3{force.x, force.y, force.z});
+        if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
+        static_cast<physx::PxRigidDynamic*>(actor)->addForce(physx::PxVec3(force.x, force.y, force.z));
     }
 
-    void PhysicsBody::applyForce(const float3& force, const float3& position) const {
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // bodyInterface->AddForce(
-        //         bodyId,
-        //         JPH::Vec3{force.x, force.y, force.z},
-        //         JPH::Vec3{position.x, position.y, position.z});
+    void PhysicsBody::applyForce(const float3& force, const float3&) const {
+        applyForce(force); // what a shame NVidia
     }
 
     void PhysicsBody::setMass(const float value) {
-        if (getType() == STATIC_BODY) { return; }
         mass = value;
-        // if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        // const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
-        //     .getPhysicsSystem()
-        //     .GetBodyLockInterface(),
-        //     getBodyId());
-        // if (lock.Succeeded()) {
-        //     JPH::MotionProperties *mp = lock.GetBody().GetMotionProperties();
-        //     if (value != 0.0f) {
-        //         mp->SetInverseMass(1.0f/value);
-        //     } else {
-        //         mp->SetInverseMass(0.0f);
-        //     }
-        // }
+        if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
+        static_cast<physx::PxRigidDynamic*>(actor)->setMass(mass);
     }
 
 }

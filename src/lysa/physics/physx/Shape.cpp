@@ -24,9 +24,7 @@ namespace lysa {
         if (meshInstance) {
             const auto& aabb = meshInstance->getMesh()->getAABB();
             const auto& extends = (aabb.max - aabb.min) * 0.5f;
-            shape = getPhysx()->createShape(
-                physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-                *material);
+            geometry = std::make_unique<physx::PxBoxGeometry>(extends.x / 2, extends.y / 2, extends.z / 2);
         } else {
             throw Exception("AABBShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
         }
@@ -37,16 +35,12 @@ namespace lysa {
         PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName}, extends{extends} {
-        shape = getPhysx()->createShape(
-            physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-            *material);
+        geometry = std::make_unique<physx::PxBoxGeometry>(extends.x / 2, extends.y / 2, extends.z / 2);
     }
 
     std::shared_ptr<Resource> BoxShape::duplicate() const {
         auto dup = std::make_shared<BoxShape>(extends, material, getName());
-        dup->shape = getPhysx()->createShape(
-            physx::PxBoxGeometry(extends.x / 2, extends.y / 2, extends.z / 2),
-            *material);
+        dup->geometry = std::make_unique<physx::PxBoxGeometry>(extends.x / 2, extends.y / 2, extends.z / 2);
         return dup;
     }
 
@@ -55,9 +49,7 @@ namespace lysa {
         const PhysicsMaterial* material,
         const std::wstring &resName):
         Shape{material, resName} {
-        shape = getPhysx()->createShape(
-            physx::PxSphereGeometry (radius),
-            *material);
+        geometry = std::make_unique<physx::PxSphereGeometry>(radius);
     }
 
 }
