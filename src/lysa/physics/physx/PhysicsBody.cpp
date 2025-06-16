@@ -57,6 +57,7 @@ namespace lysa {
             body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
             // body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
             // body->setMaxDepenetrationVelocity(2.0f);
+            // body->setLinearDamping(0.1f);
             setActor(body);
         } else {
             setActor(physx->createRigidStatic(transform));

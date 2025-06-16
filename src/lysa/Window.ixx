@@ -83,6 +83,8 @@ export namespace lysa {
          */
         void setMousePosition(const float2& position) const;
 
+        const auto& getConfiguration() const { return config; }
+
         virtual ~Window();
         Window(Window&) = delete;
         Window& operator=(Window&) = delete;

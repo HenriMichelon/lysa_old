@@ -12,20 +12,21 @@ import lysa.virtual_fs;
 namespace lysa {
 
     DebugRenderer::DebugRenderer(
-        const uint32 framesInFlight,
+        const RenderingConfiguration& config,
         const std::wstring& name) :
         name{name} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(L"Debug");
         descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
         descriptorLayout->build();
-        framesData.resize(framesInFlight);
+        framesData.resize(config.framesInFlight);
         for (auto& frameData : framesData) {
             frameData.globalUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform), 1, L"Debug global uniform");
             frameData.globalUniform->map();
             frameData.descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Debug");
             frameData.descriptorSet->update(0, frameData.globalUniform);
         }
+        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();

@@ -38,7 +38,7 @@ namespace lysa {
                 scissors);
         }
         resize(window.getExtent());
-        debugRenderer = std::make_unique<DebugRenderer>(framesInFlight, L"Debug Renderer");
+        debugRenderer = std::make_unique<DebugRenderer>(window.getConfiguration().renderingConfig, L"Debug Renderer");
     }
 
     void Viewport::resize(const vireo::Extent &extent) {

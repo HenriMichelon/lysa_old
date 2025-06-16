@@ -19,7 +19,7 @@ export namespace lysa {
     class DebugRenderer {
     public:
         DebugRenderer(
-            uint32 framesInFlight,
+            const RenderingConfiguration& config,
             const std::wstring& name);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
@@ -67,7 +67,6 @@ export namespace lysa {
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorRenderFormats = {vireo::ImageFormat::R8G8B8A8_UNORM}, // Read config
             .colorBlendDesc = {{ .blendEnable = false }},
             .cullMode = vireo::CullMode::NONE,
             .polygonMode = vireo::PolygonMode::WIREFRAME,
