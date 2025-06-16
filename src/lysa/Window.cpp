@@ -34,7 +34,7 @@ namespace lysa {
             frame.commandList = frame.commandAllocator->createCommandList();
             frame.commandListUpdate = frame.commandAllocator->createCommandList();
         }
-        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Main Renderer");
+        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
         renderer->resize(swapChain->getExtent());
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
@@ -108,6 +108,7 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             renderer->update(frame.commandListUpdate, scene);
+            viewport->getDebugRenderer().update(*frame.commandListUpdate, frameIndex);
         }
         frame.commandListUpdate->end();
 
@@ -119,7 +120,13 @@ namespace lysa {
                 commandList,
                 scene,
                 viewport == mainViewport,
-                swapChain->getCurrentFrameIndex());
+                frameIndex);
+            viewport->getDebugRenderer().render(
+                *commandList,
+                scene,
+                renderer->getColorRenderTarget(frameIndex),
+                renderer->getDepthRenderTarget(frameIndex),
+                frameIndex);
         }
         renderer->postprocess(
             *commandList,
@@ -127,7 +134,7 @@ namespace lysa {
             mainViewport->getScissors(),
             swapChain->getCurrentFrameIndex());
 
-        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
+        const auto colorAttachment = renderer->getColorImage(frameIndex);
         commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
         commandList->copy(colorAttachment, swapChain);

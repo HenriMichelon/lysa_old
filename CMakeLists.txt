@@ -84,6 +84,7 @@ file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 #        "${SHADERS_SRC_DIR}/*.slang"
 #)
 set(SHADERS_SOURCE_FILES
+        "${SHADERS_SRC_DIR}/debug.slang"
         "${SHADERS_SRC_DIR}/default.vert.slang"
         "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
         "${SHADERS_SRC_DIR}/forward.frag.slang"
@@ -228,6 +229,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/resources/Shape.cpp
         ${ENGINE_SRC_DIR}/resources/Texture.cpp
 
+        ${ENGINE_SRC_DIR}/renderers/DebugRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
 
@@ -302,6 +304,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/resources/StaticCompoundShape.ixx
         ${ENGINE_SRC_DIR}/resources/Texture.ixx
 
+        ${ENGINE_SRC_DIR}/renderers/DebugRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
 

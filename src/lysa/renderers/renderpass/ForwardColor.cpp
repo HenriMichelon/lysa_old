@@ -78,19 +78,6 @@ namespace lysa {
         scene.drawOpaquesModels(
           commandList,
           pipelines);
-        // commandList.endRendering();
-        // commandList.barrier(
-        //    colorAttachment,
-        //    vireo::ResourceState::RENDER_TARGET_COLOR,
-        //    vireo::ResourceState::UNDEFINED);
-        // commandList.barrier(
-        //     colorAttachment,
-        //     vireo::ResourceState::UNDEFINED,
-        //     vireo::ResourceState::RENDER_TARGET_COLOR);
-        // renderingConfig.colorRenderTargets[0].clear = false;
-        // renderingConfig.clearDepthStencil = false;
-        // renderingConfig.discardDepthStencilAfterRender = true;
-        // commandList.beginRendering(renderingConfig);
         scene.drawTransparentModels(
           commandList,
           pipelines);

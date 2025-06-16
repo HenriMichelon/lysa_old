@@ -38,6 +38,7 @@ namespace lysa {
                 scissors);
         }
         resize(window.getExtent());
+        debugRenderer = std::make_unique<DebugRenderer>(framesInFlight, L"Debug Renderer");
     }
 
     void Viewport::resize(const vireo::Extent &extent) {
@@ -78,9 +79,9 @@ namespace lysa {
 
     void Viewport::activateCamera(const std::shared_ptr<Camera> &camera) {
         lockDeferredUpdates = true;
-        for (auto& frame : framesData) {
-            frame.activeCamera = camera;
-            frame.cameraChanged = true;
+        for (int i = 0; i < framesData.size(); i++) {
+            framesData[i].activeCamera = camera;
+            framesData[i].cameraChanged = true;
         }
         lockDeferredUpdates = false;
     }
@@ -171,9 +172,6 @@ namespace lysa {
             // Change the current camera if needed
             if (data.cameraChanged) {
                 data.scene->activateCamera(data.activeCamera);
-                // if (applicationConfig.debug) {
-                    // debugRenderer->activateCamera(data.activeCamera, currentFrame);
-                // }
                 data.activeCamera.reset();
                 data.cameraChanged = false;
             }
@@ -182,9 +180,6 @@ namespace lysa {
                 const auto &camera = rootNode->findFirstChild<Camera>(true);
                 if (camera && camera->isProcessed()) {
                     data.scene->activateCamera(camera);
-                    // if (applicationConfig.debug) {
-                        // debugRenderer->activateCamera(camera, currentFrame);
-                    // }
                 }
             }
         }

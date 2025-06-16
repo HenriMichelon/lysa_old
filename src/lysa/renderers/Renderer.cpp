@@ -68,10 +68,6 @@ namespace lysa {
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
                 vireo::ResourceState::UNDEFINED);
         }
-        // commandList.barrier(
-            // frame.colorAttachment,
-            // vireo::ResourceState::RENDER_TARGET_COLOR,
-            // vireo::ResourceState::UNDEFINED);
     }
 
     void Renderer::postprocess(
@@ -106,7 +102,7 @@ namespace lysa {
         }
     }
 
-    std::shared_ptr<vireo::Image> Renderer::getColorAttachment(const uint32 frameIndex) const {
+    std::shared_ptr<vireo::Image> Renderer::getColorImage(const uint32 frameIndex) const {
         if (postProcessingPasses.empty()) {
             return framesData[frameIndex].colorAttachment->getImage();
         }

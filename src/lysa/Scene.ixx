@@ -42,13 +42,13 @@ export namespace lysa {
 
     class Scene {
     public:
-        static constexpr uint32_t SET_SCENE{2};
+        static constexpr uint32 SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
         static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
-        static constexpr uint32_t SET_PIPELINE{3};
+        static constexpr uint32 SET_PIPELINE{3};
         static constexpr vireo::DescriptorIndex BINDING_INSTANCES{0};
         inline static std::shared_ptr<vireo::DescriptorLayout> pipelineDescriptorLayout{nullptr};
 

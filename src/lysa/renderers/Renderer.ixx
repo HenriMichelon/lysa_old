@@ -32,7 +32,15 @@ export namespace lysa {
         virtual void updatePipelines(
             const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) = 0;
 
-        std::shared_ptr<vireo::Image> getColorAttachment(uint32 frameIndex) const;
+        std::shared_ptr<vireo::Image> getColorImage(uint32 frameIndex) const;
+
+        auto getColorRenderTarget(const uint32 frameIndex) const {
+            return framesData[frameIndex].colorAttachment;
+        }
+
+        auto getDepthRenderTarget(const uint32 frameIndex) const {
+            return framesData[frameIndex].depthAttachment;
+        }
 
         void update(
             const std::shared_ptr<vireo::CommandList>& commandList,
