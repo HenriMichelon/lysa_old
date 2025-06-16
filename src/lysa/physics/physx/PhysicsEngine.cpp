@@ -10,6 +10,7 @@ module lysa.physics.physx.engine;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.nodes.collision_object;
 import lysa.nodes.node;
 import lysa.physics.physics_material;
@@ -57,6 +58,8 @@ namespace lysa {
         sceneDesc.cpuDispatcher = dispatcher;
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
         scene = physics->createScene(sceneDesc);
+        scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
+        scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES, 2.0f);
     }
 
     PhysXPhysicsScene::~PhysXPhysicsScene() {
@@ -66,6 +69,20 @@ namespace lysa {
     void PhysXPhysicsScene::update(const float deltaTime) {
         scene->simulate(deltaTime);
         scene->fetchResults(true);
+        // const physx::PxRenderBuffer& rb = scene->getRenderBuffer();
+        // for(physx::PxU32 i=0; i < rb.getNbPoints(); i++)
+        // {
+        //     const physx::PxDebugPoint& point = rb.getPoints()[i];
+        //     // render the point
+        // }
+        //
+        // for(physx::PxU32 i=0; i < rb.getNbLines(); i++)
+        // {
+        //     const physx::PxDebugLine& line = rb.getLines()[i];
+        //     INFO(line.pos0.x, ",", line.pos0.y, ",", line.pos0.z,
+        //         " / ", line.pos1.x, ",", line.pos1.y, ",", line.pos1.z);
+        //     // render the line
+        // }
     }
 
     float3 PhysXPhysicsScene::getGravity() const {

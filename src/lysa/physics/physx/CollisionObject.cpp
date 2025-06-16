@@ -47,7 +47,9 @@ namespace lysa {
         if (!actor || !scene) { return; }
         const auto pos = getPositionGlobal();
         const auto quat = normalize(getRotationGlobal());
-        physx::PxTransform t(physx::PxVec3(pos.x, pos.y, pos.z), physx::PxQuat(quat.x, quat.y, quat.z, quat.w));
+        physx::PxTransform t(
+            physx::PxVec3(pos.x, pos.y, pos.z),
+            physx::PxQuat(quat.x, quat.y, quat.z, quat.w));
         actor->setGlobalPose(t);
     }
 

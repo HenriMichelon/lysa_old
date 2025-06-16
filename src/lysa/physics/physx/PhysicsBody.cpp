@@ -57,15 +57,19 @@ namespace lysa {
         } else {
             setActor(physx->createRigidStatic(transform));
         }
+        actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
+
 
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
                 auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
+                pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
                 shapes.push_back(pxShape);
                 actor->attachShape(*pxShape);
             }
         } else {
             const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
+            pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
             shapes.push_back(pxShape);
             actor->attachShape(*pxShape);
         }
@@ -93,7 +97,6 @@ namespace lysa {
         if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
         const auto body = static_cast<physx::PxRigidDynamic*>(actor);
         body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
-        // what a shame, no gravity factor?
     }
 
 
@@ -103,7 +106,7 @@ namespace lysa {
     }
 
     void PhysicsBody::applyForce(const float3& force, const float3&) const {
-        applyForce(force); // what a shame NVidia
+        applyForce(force);
     }
 
     void PhysicsBody::setMass(const float value) {
