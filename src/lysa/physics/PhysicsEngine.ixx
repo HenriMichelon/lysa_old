@@ -7,6 +7,7 @@
 export module lysa.physics.engine;
 
 import std;
+import lysa.configuration;
 import lysa.enums;
 import lysa.math;
 import lysa.physics.configuration;
@@ -33,7 +34,7 @@ export namespace lysa {
     public:
         static std::unique_ptr<PhysicsEngine> create(const PhysicsConfiguration& config);
 
-        virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
+        virtual std::unique_ptr<PhysicsScene> createScene(const DebugConfig& debugConfig)  = 0;
 
         virtual PhysicsMaterial* createMaterial(
             float friction = 0.5f,

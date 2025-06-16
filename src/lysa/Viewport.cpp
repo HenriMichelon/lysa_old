@@ -16,7 +16,7 @@ namespace lysa {
         config{config},
         viewport{config.viewport},
         scissors{config.scissors},
-        physicsScene{Application::getPhysicsEngine().createScene()}{
+        physicsScene{Application::getPhysicsEngine().createScene(config.debugConfig)} {
     }
 
     Viewport::~Viewport() {
@@ -38,7 +38,13 @@ namespace lysa {
                 scissors);
         }
         resize(window.getExtent());
-        debugRenderer = std::make_unique<DebugRenderer>(window.getConfiguration().renderingConfig, L"Debug Renderer");
+        if (config.debugConfig.enabled) {
+            debugRenderer = std::make_unique<DebugRenderer>(
+                config.debugConfig,
+                window.getConfiguration().renderingConfig,
+                L"Debug Renderer");
+            displayDebug = config.debugConfig.displayAtStartup;
+        }
     }
 
     void Viewport::resize(const vireo::Extent &extent) {
@@ -130,57 +136,55 @@ namespace lysa {
     }
 
     void Viewport::processDeferredUpdates(const uint32 frameIndex) {
-        {
-            auto lock = std::lock_guard(frameDataMutex);
-            auto &data = framesData[frameIndex];
-            // Remove from the renderer the nodes previously removed from the scene tree
-            // Immediate removes
-            if (!data.removedNodes.empty()) {
-                for (const auto &node : data.removedNodes) {
-                    data.scene->removeNode(node);
-                }
-                data.removedNodes.clear();
+        auto lock = std::lock_guard(frameDataMutex);
+        auto &data = framesData[frameIndex];
+        // Remove from the renderer the nodes previously removed from the scene tree
+        // Immediate removes
+        if (!data.removedNodes.empty()) {
+            for (const auto &node : data.removedNodes) {
+                data.scene->removeNode(node);
             }
-            // Async removes
-            if (!data.removedNodesAsync.empty()) {
-                auto count = 0;
-                for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
-                    data.scene->removeNode(*it);
-                    it = data.removedNodesAsync.erase(it);
-                    count += 1;
-                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
-                }
+            data.removedNodes.clear();
+        }
+        // Async removes
+        if (!data.removedNodesAsync.empty()) {
+            auto count = 0;
+            for (auto it = data.removedNodesAsync.begin(); it != data.removedNodesAsync.end();) {
+                data.scene->removeNode(*it);
+                it = data.removedNodesAsync.erase(it);
+                count += 1;
+                if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
             }
-            // Add to the renderer the nodes previously added to the scene tree
-            // Immediate additions
-            if (!data.addedNodes.empty()) {
-                for (const auto &node : data.addedNodes) {
-                    data.scene->addNode(node);
-                }
-                data.addedNodes.clear();
+        }
+        // Add to the renderer the nodes previously added to the scene tree
+        // Immediate additions
+        if (!data.addedNodes.empty()) {
+            for (const auto &node : data.addedNodes) {
+                data.scene->addNode(node);
             }
-            // Async additions
-            if (!data.addedNodesAsync.empty()) {
-                auto count = 0;
-                for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
-                    data.scene->addNode(*it);
-                    it = data.addedNodesAsync.erase(it);
-                    count += 1;
-                    if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
-                }
+            data.addedNodes.clear();
+        }
+        // Async additions
+        if (!data.addedNodesAsync.empty()) {
+            auto count = 0;
+            for (auto it = data.addedNodesAsync.begin(); it != data.addedNodesAsync.end();) {
+                data.scene->addNode(*it);
+                it = data.addedNodesAsync.erase(it);
+                count += 1;
+                if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
             }
-            // Change the current camera if needed
-            if (data.cameraChanged) {
-                data.scene->activateCamera(data.activeCamera);
-                data.activeCamera.reset();
-                data.cameraChanged = false;
-            }
-            // Search for a camera in the scene tree if there is no current camera
-            if (data.scene->getCurrentCamera() == nullptr) {
-                const auto &camera = rootNode->findFirstChild<Camera>(true);
-                if (camera && camera->isProcessed()) {
-                    data.scene->activateCamera(camera);
-                }
+        }
+        // Change the current camera if needed
+        if (data.cameraChanged) {
+            data.scene->activateCamera(data.activeCamera);
+            data.activeCamera.reset();
+            data.cameraChanged = false;
+        }
+        // Search for a camera in the scene tree if there is no current camera
+        if (data.scene->getCurrentCamera() == nullptr) {
+            const auto &camera = rootNode->findFirstChild<Camera>(true);
+            if (camera && camera->isProcessed()) {
+                data.scene->activateCamera(camera);
             }
         }
     }

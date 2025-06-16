@@ -9,6 +9,7 @@ module;
 export module lysa.physics.physx.engine;
 
 import std;
+import lysa.configuration;
 import lysa.math;
 import lysa.physics.configuration;
 import lysa.physics.engine;
@@ -19,7 +20,7 @@ export namespace lysa {
 
     class PhysXPhysicsScene : public PhysicsScene {
     public:
-        PhysXPhysicsScene(physx::PxPhysics*);
+        PhysXPhysicsScene(physx::PxPhysics*, const DebugConfig& debugConfig);
 
         void update(float deltaTime) override;
 
@@ -41,7 +42,7 @@ export namespace lysa {
     public:
         PhysXPhysicsEngine();
 
-        std::unique_ptr<PhysicsScene> createScene() override;
+        std::unique_ptr<PhysicsScene> createScene(const DebugConfig& debugConfig) override;
 
         PhysicsMaterial* createMaterial(
             float friction = 0.5f,

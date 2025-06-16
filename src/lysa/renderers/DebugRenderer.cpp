@@ -12,21 +12,27 @@ import lysa.virtual_fs;
 namespace lysa {
 
     DebugRenderer::DebugRenderer(
-        const RenderingConfiguration& config,
+        const DebugConfig& config,
+        const RenderingConfiguration& renderingConfiguration,
         const std::wstring& name) :
+        config{config},
         name{name} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(L"Debug");
         descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
         descriptorLayout->build();
-        framesData.resize(config.framesInFlight);
+        framesData.resize(renderingConfiguration.framesInFlight);
         for (auto& frameData : framesData) {
             frameData.globalUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform), 1, L"Debug global uniform");
             frameData.globalUniform->map();
             frameData.descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Debug");
             frameData.descriptorSet->update(0, frameData.globalUniform);
         }
-        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
+        renderingConfig.depthTestEnable = config.useDepthTesting;
+        pipelineConfig.depthTestEnable = config.useDepthTesting;
+        pipelineConfig.depthWriteEnable = config.useDepthTesting;
+        pipelineConfig.polygonMode = config.shapeWireframe ? vireo::PolygonMode::WIREFRAME : vireo::PolygonMode::FILL;
+        pipelineConfig.colorRenderFormats.push_back(renderingConfiguration.renderingFormat);
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
@@ -35,7 +41,7 @@ namespace lysa {
         VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/debug.frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
-            { descriptorLayout },
+           { descriptorLayout },
            {},
            L"Debug");
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::LINE_LIST;
@@ -110,10 +116,6 @@ namespace lysa {
         };
         frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
 
-        // commandList.barrier(
-                // colorAttachment,
-                // vireo::ResourceState::UNDEFINED,
-                // vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.barrier(
                 depthAttachment,
                 vireo::ResourceState::UNDEFINED,

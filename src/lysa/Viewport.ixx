@@ -103,6 +103,14 @@ export namespace lysa {
             return *debugRenderer;
         }
 
+        const auto& getConfiguration() const {
+            return config;
+        }
+
+        auto getDisplayDebug() const { return displayDebug;}
+
+        void setDisplayDebug(const bool displayDebug) { this->displayDebug = displayDebug; }
+
         virtual ~Viewport();
         Viewport(Viewport&) = delete;
         Viewport& operator=(Viewport&) = delete;
@@ -143,6 +151,7 @@ export namespace lysa {
 
         std::unique_ptr<PhysicsScene> physicsScene;
         std::unique_ptr<DebugRenderer> debugRenderer;
+        bool displayDebug{false};
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }
 

@@ -12,6 +12,52 @@ import lysa.physics.configuration;
 
 export namespace lysa {
 
+    //! Coloring scheme of collision shapes (only supported by Jolt)
+    enum class DebugShapeColor {
+        //! Random color per instance
+        InstanceColor,
+        //! Convex = green, scaled = yellow, compound = orange, mesh = red
+        ShapeTypeColor,
+        //! Static = grey, keyframed = green, dynamic = random color per instance
+        MotionTypeColor,
+        //! Static = grey, keyframed = green, dynamic = yellow, sleeping = red
+        SleepColor,
+    };
+
+    /**
+     * Configuration of the in-game debug
+     */
+    struct DebugConfig {
+        //! Enable the debug visualization
+        bool                enabled{false};
+        //! If the debug renderer is enabled, display the debug at startup
+        bool                displayAtStartup{true};
+        //! Draw with depth-testing
+        bool                useDepthTesting{true};
+        //! Draw coordinate system (x = red, y = green, z = blue)
+        bool                drawCoordinateSystem{false};
+        //! Coordinate system draw scale
+        float               coordinateSystemScale{1.0f};
+        //! Draw all the rays of the RayCast objects
+        bool                drawRayCast{false};
+        //! Color for the non-colliding rays
+        float4              rayCastColor{1.0f, 0.5f, 0.0f, 1.0f};
+        //! Color for the colliding rays
+        float4              rayCastCollidingColor{0.95f, 0.275f, 0.76f, 1.0f};
+        //! Draw the collision shapes of all collision objects
+		bool			    drawShape{true};
+        //! The collision shapes will be drawn in wireframe instead of solid
+        bool                shapeWireframe{true};
+        //! Coloring scheme to use for collision shapes
+		DebugShapeColor	    shapeColor{DebugShapeColor::ShapeTypeColor};
+        //! Draw a bounding box per collision object
+		bool				drawBoundingBox{false};
+        //! Draw the velocity vectors
+		bool				drawVelocity{false};
+        //! Draw the center of mass for each collision object
+        bool                drawCenterOfMass{false};
+	};
+
     struct ResourcesConfiguration {
         uint32 maxVertexInstances{5000000};
         uint32 maxMaterialInstances{1000};
@@ -31,6 +77,7 @@ export namespace lysa {
         LogLevel               logLevelMin{LogLevel::INFO};
         //! Graphic API
         vireo::Backend         backend{vireo::Backend::VULKAN};
+        //! Global resources configuration
         ResourcesConfiguration resourcesConfig;
     };
 
@@ -54,6 +101,7 @@ export namespace lysa {
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
+        //! Enable the forward depth pre pass
         bool               forwardDepthPrepass{false};
     };
 
@@ -61,9 +109,12 @@ export namespace lysa {
      */
     struct ViewportConfiguration {
         friend class Node;
-        vireo::Viewport        viewport{};
-        vireo::Rect            scissors{};
-        SceneConfiguration     sceneConfig{};
+        vireo::Viewport    viewport{};
+        vireo::Rect        scissors{};
+        //! Scene resources configuration
+        SceneConfiguration sceneConfig{};
+        //! Debug configuration for this viewport
+        DebugConfig        debugConfig{};
     };
 
     /**
@@ -74,9 +125,9 @@ export namespace lysa {
         std::wstring            title{};
         //! State of the display Window
         WindowMode              mode{WindowMode::WINDOWED};
-        //! Startup X position (top-left corner)
+        //! Start up X position (top-left corner)
         int32                   x{-1};
-        //! Startup Y position (top-left corner)
+        //! Start up Y position (top-left corner)
         int32                   y{-1};
         //! Width in pixels of the display Window
         uint32                  width{1280};
@@ -84,8 +135,9 @@ export namespace lysa {
         uint32                  height{720};
         //! Monitor index to display the Window
         int32                   monitor{0};
-
+        //! Configuration of the main viewport
         ViewportConfiguration   mainViewportConfig{};
+        //! Configuration of the various renderers
         RenderingConfiguration  renderingConfig{};
     };
 

@@ -74,8 +74,8 @@ namespace lysa {
         foundation->release();
     }
 
-    std::unique_ptr<PhysicsScene> PhysXPhysicsEngine::createScene() {
-        return std::make_unique<PhysXPhysicsScene>(physics);
+    std::unique_ptr<PhysicsScene> PhysXPhysicsEngine::createScene(const DebugConfig& debugConfig) {
+        return std::make_unique<PhysXPhysicsScene>(physics, debugConfig);
     }
 
     PhysicsMaterial* PhysXPhysicsEngine::createMaterial(
@@ -116,7 +116,9 @@ namespace lysa {
             orig->getRestitution());
     }
 
-    PhysXPhysicsScene::PhysXPhysicsScene(physx::PxPhysics* physics) {
+    PhysXPhysicsScene::PhysXPhysicsScene(
+        physx::PxPhysics* physics,
+        const DebugConfig& debugConfig) {
         physx::PxSceneDesc sceneDesc(physics->getTolerancesScale());
         sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
         physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
@@ -125,10 +127,21 @@ namespace lysa {
         // sceneDesc.filterShader = myFilterShader;
         // sceneDesc.contactModifyCallback = new MyContactModifyCallback();
         scene = physics->createScene(sceneDesc);
-        scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
-        scene->setVisualizationParameter(physx::PxVisualizationParameter::eWORLD_AXES, 2.0f);
-        scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES, 1.0f);
-        scene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+        if (debugConfig.enabled) {
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eWORLD_AXES,
+                debugConfig.drawCoordinateSystem ? debugConfig.coordinateSystemScale : 0.0f);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES,
+                debugConfig.drawCenterOfMass);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES,
+                debugConfig.drawShape);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_AABBS,
+                debugConfig.drawBoundingBox);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eBODY_LIN_VELOCITY,
+                debugConfig.drawVelocity);
+            scene->setVisualizationParameter(physx::PxVisualizationParameter::eBODY_ANG_VELOCITY,
+               debugConfig.drawVelocity);
+        }
     }
 
     PhysXPhysicsScene::~PhysXPhysicsScene() {

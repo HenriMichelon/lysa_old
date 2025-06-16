@@ -19,7 +19,8 @@ export namespace lysa {
     class DebugRenderer {
     public:
         DebugRenderer(
-            const RenderingConfiguration& config,
+            const DebugConfig& config,
+            const RenderingConfiguration& renderingConfiguration,
             const std::wstring& name);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
@@ -39,11 +40,14 @@ export namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             uint32 frameIndex);
 
+        const auto& getConfiguration() const { return config; }
+
         virtual ~DebugRenderer() = default;
         DebugRenderer(DebugRenderer&) = delete;
         DebugRenderer& operator=(DebugRenderer&) = delete;
 
     private:
+        const DebugConfig& config;
         const std::wstring name;
 
         struct GlobalUniform {
@@ -69,14 +73,10 @@ export namespace lysa {
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = {{ .blendEnable = false }},
             .cullMode = vireo::CullMode::NONE,
-            .polygonMode = vireo::PolygonMode::WIREFRAME,
-            .depthTestEnable = true,
-            .depthWriteEnable = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {
             .colorRenderTargets = {{ }},
-            .depthTestEnable = pipelineConfig.depthTestEnable,
         };
 
         vireo::Extent currentExtent{};
