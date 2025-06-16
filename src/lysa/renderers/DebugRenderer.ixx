@@ -68,6 +68,7 @@ export namespace lysa {
             .colorRenderFormats = {vireo::ImageFormat::R8G8B8A8_UNORM}, // Read config
             .colorBlendDesc = {{ .blendEnable = true }},
             .cullMode = vireo::CullMode::NONE,
+            .polygonMode = vireo::PolygonMode::WIREFRAME,
             .depthTestEnable = true,
             .depthWriteEnable = true,
         };
