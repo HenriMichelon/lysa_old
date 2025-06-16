@@ -137,8 +137,9 @@ namespace lysa {
         JPH::PhysicsMaterial::sDefault = reinterpret_cast<JPH::PhysicsMaterial*>(defaultMaterial);
     }
 
-    std::unique_ptr<PhysicsScene> JoltPhysicsEngine::createScene() {
+    std::unique_ptr<PhysicsScene> JoltPhysicsEngine::createScene(const DebugConfig& debugConfig) {
         return std::make_unique<JoltPhysicsScene>(
+            debugConfig,
             *tempAllocator,
             *jobSystem,
             contactListener,
@@ -164,12 +165,14 @@ namespace lysa {
     }
 
     JoltPhysicsScene::JoltPhysicsScene(
+        const DebugConfig& debugConfig,
         JPH::TempAllocatorImpl& tempAllocator,
         JPH::JobSystemThreadPool& jobSystem,
         ContactListener& contactListener,
         const BPLayerInterfaceImpl& broadphaseLayerInterface,
         const ObjectVsBroadPhaseLayerFilterImpl& objectVsBroadphaseLayerFilter,
         const ObjectLayerPairFilterImpl& objectVsObjectLayerFilter) :
+        debugConfig{debugConfig},
         tempAllocator {tempAllocator},
         jobSystem {jobSystem} {
         physicsSystem.Init(1024,
@@ -180,6 +183,14 @@ namespace lysa {
                            objectVsBroadphaseLayerFilter,
                            objectVsObjectLayerFilter);
         physicsSystem.SetContactListener(&contactListener);
+        bodyDrawSettings = JPH::BodyManager::DrawSettings{
+            .mDrawShape = debugConfig.drawShape,
+            .mDrawShapeWireframe = debugConfig.shapeWireframe,
+            .mDrawShapeColor = static_cast<JPH::BodyManager::EShapeColor>(debugConfig.shapeColor),
+            .mDrawBoundingBox = debugConfig.drawBoundingBox,
+            .mDrawCenterOfMassTransform = debugConfig.drawCenterOfMass,
+            .mDrawVelocity = debugConfig.drawVelocity,
+        };
     }
 
     void JoltPhysicsScene::update(const float deltaTime) {
@@ -187,6 +198,14 @@ namespace lysa {
     }
 
     void JoltPhysicsScene::debug(DebugRenderer& debugRenderer) {
+        if (debugConfig.enabled) {
+            if (debugConfig.drawCoordinateSystem) {
+                debugRenderer.DrawCoordinateSystem(JPH::RMat44::sTranslation(
+                    JPH::Vec3::sZero()) *
+                    JPH::Mat44::sScale(debugConfig.coordinateSystemScale));
+            }
+            physicsSystem.DrawBodies(bodyDrawSettings, &debugRenderer, nullptr);
+        }
 
     }
 

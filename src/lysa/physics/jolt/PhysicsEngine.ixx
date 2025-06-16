@@ -12,6 +12,7 @@ module;
 export module lysa.physics.jolt.engine;
 
 import std;
+import lysa.configuration;
 import lysa.math;
 import lysa.signal;
 import lysa.types;
@@ -72,6 +73,7 @@ export namespace lysa {
     class JoltPhysicsScene : public PhysicsScene {
     public:
         JoltPhysicsScene(
+            const DebugConfig& debugConfig,
             JPH::TempAllocatorImpl& tempAllocator,
             JPH::JobSystemThreadPool& jobSystem,
             ContactListener& contactListener,
@@ -93,16 +95,19 @@ export namespace lysa {
         auto& getTempAllocator() const { return tempAllocator; }
 
     private:
+        const DebugConfig& debugConfig;
         JPH::PhysicsSystem physicsSystem;
         JPH::TempAllocatorImpl& tempAllocator;
         JPH::JobSystemThreadPool& jobSystem;
+        // Debug view config
+        JPH::BodyManager::DrawSettings bodyDrawSettings{};
     };
 
     class JoltPhysicsEngine : public PhysicsEngine {
     public:
         JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
 
-        std::unique_ptr<PhysicsScene> createScene() override;
+        std::unique_ptr<PhysicsScene> createScene(const DebugConfig& debugConfig) override;
 
         PhysicsMaterial* createMaterial(
             float friction = 0.5f,
