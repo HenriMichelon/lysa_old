@@ -69,20 +69,25 @@ namespace lysa {
     void PhysXPhysicsScene::update(const float deltaTime) {
         scene->simulate(deltaTime);
         scene->fetchResults(true);
-        // const physx::PxRenderBuffer& rb = scene->getRenderBuffer();
-        // for(physx::PxU32 i=0; i < rb.getNbPoints(); i++)
-        // {
-        //     const physx::PxDebugPoint& point = rb.getPoints()[i];
-        //     // render the point
-        // }
-        //
-        // for(physx::PxU32 i=0; i < rb.getNbLines(); i++)
-        // {
-        //     const physx::PxDebugLine& line = rb.getLines()[i];
-        //     INFO(line.pos0.x, ",", line.pos0.y, ",", line.pos0.z,
-        //         " / ", line.pos1.x, ",", line.pos1.y, ",", line.pos1.z);
-        //     // render the line
-        // }
+    }
+
+    void PhysXPhysicsScene::debug(DebugRenderer& debugRenderer) {
+        const physx::PxRenderBuffer& rb = scene->getRenderBuffer();
+        for(int i=0; i < rb.getNbLines(); i++) {
+            const auto& line = rb.getLines()[i];
+            debugRenderer.drawLine(
+                float3{line.pos0.x, line.pos0.y, line.pos0.z},
+                float3{line.pos1.x, line.pos1.y, line.pos1.z},
+                float4{line.color0, line.color0, line.color0, 1.0f});
+        }
+        for(int i=0; i < rb.getNbTriangles(); i++) {
+            const auto& triangle = rb.getTriangles()[i];
+            debugRenderer.drawTriangle(
+                float3{triangle.pos0.x, triangle.pos0.y, triangle.pos0.z},
+                float3{triangle.pos1.x, triangle.pos1.y, triangle.pos1.z},
+                float3{triangle.pos2.x, triangle.pos2.y, triangle.pos2.z},
+                float4{triangle.color0, triangle.color0, triangle.color0, 1.0f});
+        }
     }
 
     float3 PhysXPhysicsScene::getGravity() const {

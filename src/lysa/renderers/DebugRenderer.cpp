@@ -56,6 +56,11 @@ namespace lysa {
         vertexBufferDirty = true;
     }
 
+    void DebugRenderer::restart() {
+        linesVertices.clear();
+        triangleVertices.clear();
+    }
+
     void DebugRenderer::update(
         const vireo::CommandList& commandList,
         const uint32) {

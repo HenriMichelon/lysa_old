@@ -26,6 +26,8 @@ export namespace lysa {
 
         void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
 
+        void restart();
+
         void update(
             const vireo::CommandList& commandList,
             uint32 frameIndex);
@@ -68,14 +70,14 @@ export namespace lysa {
             .colorRenderFormats = {vireo::ImageFormat::R8G8B8A8_UNORM}, // Read config
             .colorBlendDesc = {{ .blendEnable = true }},
             .cullMode = vireo::CullMode::NONE,
-            .polygonMode = vireo::PolygonMode::WIREFRAME,
-            .depthTestEnable = true,
-            .depthWriteEnable = true,
+            .polygonMode = vireo::PolygonMode::FILL,
+            .depthTestEnable = false,
+            .depthWriteEnable = false,
         };
 
         vireo::RenderingConfiguration renderingConfig {
             .colorRenderTargets = {{ }},
-            .depthTestEnable = true,
+            .depthTestEnable = pipelineConfig.depthTestEnable,
         };
 
         vireo::Extent currentExtent{};

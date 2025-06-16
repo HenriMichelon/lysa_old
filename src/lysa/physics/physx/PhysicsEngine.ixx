@@ -13,6 +13,7 @@ import lysa.math;
 import lysa.physics.configuration;
 import lysa.physics.engine;
 import lysa.physics.physics_material;
+import lysa.renderers.debug;
 
 export namespace lysa {
 
@@ -21,6 +22,8 @@ export namespace lysa {
         PhysXPhysicsScene(physx::PxPhysics*);
 
         void update(float deltaTime) override;
+
+        void debug(DebugRenderer& debugRenderer);
 
         float3 getGravity() const override;
 

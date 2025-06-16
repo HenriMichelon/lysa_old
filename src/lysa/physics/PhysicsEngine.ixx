@@ -10,12 +10,15 @@ import std;
 import lysa.math;
 import lysa.physics.configuration;
 import lysa.physics.physics_material;
+import lysa.renderers.debug;
 
 export namespace lysa {
 
     class PhysicsScene {
     public:
         virtual void update(float deltaTime) = 0;
+
+        virtual void debug(DebugRenderer& debugRenderer) = 0;
 
         /**
         * Returns the physics system gravity
