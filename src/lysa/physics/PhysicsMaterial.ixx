@@ -29,7 +29,7 @@ export namespace lysa {
 
         float friction;
         float restitution;
-        CombineMode restitutionCombineMode{CombineMode::AVERAGE};
+        CombineMode restitutionCombineMode{CombineMode::MAX};
     };
 #endif
 

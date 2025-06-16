@@ -82,12 +82,13 @@ namespace lysa {
         const float friction,
         const float restitution) const {
         const auto material = physics->createMaterial(friction, friction, restitution);
-        material->setFrictionCombineMode(physx::PxCombineMode::eMAX);
+        material->setFrictionCombineMode(physx::PxCombineMode::eAVERAGE);
+        material->setRestitutionCombineMode(physx::PxCombineMode::eMAX);
         return material;
     }
 
     void PhysXPhysicsEngine::setRestitutionCombineMode(PhysicsMaterial* physicsMaterial,
-                                                       CombineMode combineMode) const {
+                                                       const CombineMode combineMode) const {
         physx::PxCombineMode::Enum pxCombineMode;
         switch (combineMode) {
         case CombineMode::AVERAGE:

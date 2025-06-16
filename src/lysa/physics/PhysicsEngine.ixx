@@ -36,7 +36,7 @@ export namespace lysa {
         virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
 
         virtual PhysicsMaterial* createMaterial(
-            float friction = 0.0f,
+            float friction = 0.5f,
             float restitution = 0.0f) const = 0;
 
         virtual void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const = 0;

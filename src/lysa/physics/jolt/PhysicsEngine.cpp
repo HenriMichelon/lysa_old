@@ -64,7 +64,7 @@ namespace lysa {
         const auto mat2 = reinterpret_cast<const PhysicsMaterial *>(
             body2.GetShape()->GetMaterial(inManifold.mSubShapeID2));
         if (mat1 && mat2) {
-            ioSettings.mCombinedFriction = std::sqrt(mat1->friction * mat2->friction);
+            ioSettings.mCombinedFriction = (mat1->friction + mat2->friction)  / 2.f;
             switch (mat2->restitutionCombineMode) {
             case CombineMode::AVERAGE:
                 ioSettings.mCombinedRestitution =  0.5f * (mat1->restitution + mat2->restitution);

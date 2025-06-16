@@ -44,7 +44,7 @@ namespace lysa {
     }
 
     void CollisionObject::setPositionAndRotation() {
-        if (!actor || !scene) { return; }
+        if (updating || !actor || !scene) { return; }
         const auto pos = getPositionGlobal();
         const auto quat = normalize(getRotationGlobal());
         physx::PxTransform t(
