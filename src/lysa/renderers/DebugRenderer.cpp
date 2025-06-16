@@ -84,6 +84,7 @@ namespace lysa {
                     stagingBuffer->write(triangleVertices.data(), triangleVertices.size() * sizeof(Vertex), linesVertices.size() * sizeof(Vertex));
                 }
                 commandList.copy(stagingBuffer, vertexBuffer);
+                commandList.barrier(*vertexBuffer, vireo::ResourceState::COPY_DST, vireo::ResourceState::VERTEX_INPUT);
                 vertexBufferDirty = false;
             }
         }
@@ -103,10 +104,10 @@ namespace lysa {
         };
         frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
 
-        commandList.barrier(
-                colorAttachment,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::RENDER_TARGET_COLOR);
+        // commandList.barrier(
+                // colorAttachment,
+                // vireo::ResourceState::UNDEFINED,
+                // vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.barrier(
                 depthAttachment,
                 vireo::ResourceState::UNDEFINED,
