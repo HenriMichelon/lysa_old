@@ -30,9 +30,12 @@ export namespace lysa {
 
         auto getScene() const { return scene; }
 
+        auto getControllerManager() const { return controllerManager; }
+
         ~PhysXPhysicsScene() override;
     private:
         physx::PxScene* scene;
+        physx::PxControllerManager* controllerManager;
 
         static float4 colorU32ToFloat4(physx::PxU32 color);
     };
@@ -57,10 +60,10 @@ export namespace lysa {
         ~PhysXPhysicsEngine() override;
 
     private:
-        physx::PxDefaultAllocator      gAllocator;
-        physx::PxDefaultErrorCallback  gErrorCallback;
-        physx::PxFoundation*           foundation;
-        physx::PxPhysics*              physics;
+        physx::PxDefaultAllocator     gAllocator;
+        physx::PxDefaultErrorCallback gErrorCallback;
+        physx::PxFoundation*          foundation;
+        physx::PxPhysics*             physics;
     };
 
 }

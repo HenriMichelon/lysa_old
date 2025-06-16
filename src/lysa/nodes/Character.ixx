@@ -9,6 +9,9 @@ module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.nodes.character;
 
 import lysa.constants;
@@ -94,12 +97,12 @@ export namespace lysa {
         /**
          * Moves the virtualCharacter using this velocity
          */
-        void setVelocity(const float3& velocity) const;
+        void setVelocity(const float3& velocity);
 
         /**
          * Set the maximum angle of slope that character can still walk on (degrres)
          */
-        void setMaxSlopeAngle(float angle) const;
+        void setMaxSlopeAngle(float angle);
 
         /**
          * Returns the height of the capsule collision shape
@@ -161,6 +164,12 @@ export namespace lysa {
         bool ShouldCollide(const JPH::BroadPhaseLayer inLayer) const override { return true; }
         bool ShouldCollide(const JPH::BodyID &inBodyID) const override;
         bool ShouldCollideLocked(const JPH::Body &inBody) const override;
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        float3 velocity{0.0f};
+        float maxSlopeAngle{45.0f};
+        physx::PxController* controller{nullptr};
+        physx::PxCapsuleController* capsuleController{nullptr};
 #endif
     };
 

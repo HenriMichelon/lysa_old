@@ -127,6 +127,7 @@ namespace lysa {
         // sceneDesc.filterShader = myFilterShader;
         // sceneDesc.contactModifyCallback = new MyContactModifyCallback();
         scene = physics->createScene(sceneDesc);
+        controllerManager = PxCreateControllerManager(*scene);
         if (debugConfig.enabled) {
             scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
             scene->setVisualizationParameter(physx::PxVisualizationParameter::eWORLD_AXES,
@@ -145,6 +146,7 @@ namespace lysa {
     }
 
     PhysXPhysicsScene::~PhysXPhysicsScene() {
+        controllerManager->release();
         scene->release();
     }
 

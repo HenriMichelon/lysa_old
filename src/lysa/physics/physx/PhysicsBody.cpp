@@ -40,7 +40,7 @@ namespace lysa {
         }
         this->shape = shape;
         const auto& physx = getPhysx();
-
+        const auto debug = getViewport()->getConfiguration().debugConfig.enabled;
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
         const physx::PxTransform transform{
@@ -62,12 +62,16 @@ namespace lysa {
         } else {
             setActor(physx->createRigidStatic(transform));
         }
-        actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
+        if (debug) {
+            actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
+        }
 
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
                 auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
-                pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
+                if (debug) {
+                    pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
+                }
                 const auto &localPos = subshape.position;
                 const auto &localQuat = normalize(subshape.rotation);
                 const physx::PxTransform localPose{
@@ -81,7 +85,11 @@ namespace lysa {
             }
         } else {
             const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
-            pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
+            pxShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, 1.0f);
+            pxShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, 1.0f);
+            if (debug) {
+                pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
+            }
             shapes.push_back(pxShape);
             // pxShape->setContactOffset(0.001f);
             // pxShape->setRestOffset(0.0f);

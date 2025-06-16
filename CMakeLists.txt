@@ -354,5 +354,6 @@ if (PHYSIC_ENGINE_PHYSX)
         PhysXExtensions_static_64
         PhysXFoundation_static_64
         PhysXPvdSDK_static_64
+        PhysXCharacterKinematic_static_64
     )
 endif()

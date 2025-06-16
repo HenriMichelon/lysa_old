@@ -20,10 +20,20 @@ namespace lysa {
         assert([&]{ return height/2 > radius; }, "Invalid capsule shape: height/2 < radius");
         const auto position= getPositionGlobal();
         const auto quat = normalize(getRotationGlobal());
-        // const auto pos = JPH::RVec3(position.x, position.y + yDelta, position.z);
-        // const auto rot = JPH::Quat(quat.x, quat.y, quat.z, quat.w);
-        // auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
-
+        physx::PxCapsuleControllerDesc desc;
+        desc.height = height - 2.0f * radius;
+        desc.radius = radius;
+        desc.position = physx::PxExtendedVec3(position.x, position.y, position.z);
+        desc.upDirection = physx::PxVec3(upVector.x, upVector.y, upVector.z);
+        desc.slopeLimit = physx::PxCos(radians(maxSlopeAngle));
+        desc.stepOffset = 0.3f;
+        desc.contactOffset = 0.1f;
+        desc.material = getPhysx()->createMaterial(0.5f, 0.5f, 0.0f);
+        desc.reportCallback = nullptr; // XXX
+        desc.behaviorCallback = nullptr;
+        capsuleController = static_cast<physx::PxCapsuleController*>(
+            dynamic_cast<PhysXPhysicsScene&>(getViewport()->getPhysicsScene()).getControllerManager()->createController(desc));
+        controller = capsuleController;
         setCollisionLayer(collisionLayer);
     }
 
@@ -50,7 +60,9 @@ namespace lysa {
 
     void Character::setUp(const float3& vector) {
         upVector = vector;
-        // virtualCharacter->SetUp(JPH::Vec3{upVector.x, upVector.y, upVector.z});
+        if (controller) {
+            controller->setUpDirection(physx::PxVec3(upVector.x, upVector.y, upVector.z));
+        }
     }
 
     std::list<CollisionObject::Collision> Character::getCollisions() const {
@@ -69,73 +81,55 @@ namespace lysa {
         return contacts;
     }
 
-    void Character::setVelocity(const float3& velocity) const {
-        if (all(velocity == FLOAT3ZERO)) {
-            // virtualCharacter->SetLinearVelocity(JPH::Vec3::sZero());
-        } else {
-            // current orientation * velocity
-            // const auto vel = mul(velocity, getRotationGlobal());
-            // virtualCharacter->SetLinearVelocity(JPH::Vec3{vel.x, vel.y, vel.z});
-        }
+    void Character::setVelocity(const float3& velocity) {
+        this->velocity = velocity;
     }
 
-    void Character::setMaxSlopeAngle(const float angle) const {
-        // virtualCharacter->SetMaxSlopeAngle(radians(angle));
+    void Character::setMaxSlopeAngle(const float angle) {
+        maxSlopeAngle = angle;
     }
 
     void Character::setPositionAndRotation() {
-        // if (updating || !bodyInterface) {
-        //     return;
-        // }
-        // const auto position = getPositionGlobal();
-        // const auto quat = normalize(getRotationGlobal());
-        // const auto pos = JPH::RVec3(position.x, position.y + yDelta, position.z);
-        // const auto rot = JPH::Quat(quat.x, quat.y, quat.z, quat.w);
-        // virtualCharacter->SetPosition(pos);
-        // virtualCharacter->SetRotation(rot);
+        if (updating || !controller) {
+            return;
+        }
+        const float3 pos = getPositionGlobal();
+        controller->setPosition(physx::PxExtendedVec3(pos.x, pos.y, pos.z));
     }
 
     void Character::physicsProcess(const float delta) {
         Node::physicsProcess(delta);
-        // auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
-        // virtualCharacter->Update(delta,
-        //       virtualCharacter->GetUp() * physicsScene.getPhysicsSystem().GetGravity().Length(),
-        //       *this,
-        //       *objectLayerFilter,
-        //       *this,
-        //       {},
-        //       physicsScene.getTempAllocator());
+        if (!controller) return;
+        auto disp = velocity * delta;
+        physx::PxFilterData filterData;
+        filterData.word0 = collisionLayer;
+        physx::PxControllerFilters filters;
+        filters.mFilterData = &filterData;
+        controller->move(physx::PxVec3(disp.x, disp.y, disp.z), 0.001f, delta, filters);
     }
 
     void Character::process(const float alpha) {
         Node::process(alpha);
+        if (!controller) { return; }
         updating = true;
-        // const auto position = virtualCharacter->GetPosition();
-        // const auto pos = float3{position.GetX(), position.GetY() - yDelta, position.GetZ()};
-        // if (any(pos != getPositionGlobal())) {
-        //     setPositionGlobal(pos);
-        // }
-        // const auto rotation = virtualCharacter->GetRotation();
-        // const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
-        // if (any(rot != getRotationGlobal())) {
-        //     // setRotation(rot);
-        // }
+        const physx::PxExtendedVec3 position = controller->getPosition();
+        const auto pos = float3{
+            static_cast<float>(position.x),
+            static_cast<float>(position.y),
+            static_cast<float>(position.z)
+        };
+        if (any(pos != getPositionGlobal())) {
+            setPositionGlobal(pos);
+        }
         updating = false;
     }
 
     float3 Character::getVelocity() const {
-        // if (getBodyId().IsInvalid()) { return FLOAT3ZERO; }
-        // const auto velocity = virtualCharacter->GetLinearVelocity();
-        // return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
-        return FLOAT3ZERO;
+        return velocity;
     }
 
     void Character::setCollisionLayer(const uint32_t layer) {
         collisionLayer = layer;
-        // auto& engine = dynamic_cast<JoltPhysicsEngine&>(Application::getPhysicsEngine());
-        // objectLayerFilter = std::make_unique<JPH::DefaultObjectLayerFilter>(
-        //     engine.getObjectLayerPairFilter(),
-        //     collisionLayer);
     }
 
 }
