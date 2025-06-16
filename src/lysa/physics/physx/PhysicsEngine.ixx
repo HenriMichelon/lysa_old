@@ -23,7 +23,7 @@ export namespace lysa {
 
         void update(float deltaTime) override;
 
-        void debug(DebugRenderer& debugRenderer);
+        void debug(DebugRenderer& debugRenderer) override;
 
         float3 getGravity() const override;
 
@@ -32,6 +32,8 @@ export namespace lysa {
         ~PhysXPhysicsScene() override;
     private:
         physx::PxScene* scene;
+
+        static float4 colorU32ToFloat4(physx::PxU32 color);
     };
 
 
@@ -47,6 +49,8 @@ export namespace lysa {
             float restitution = 0.0f) const override;
 
         PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const override;
+
+        void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const override;
 
         auto getPhysics() const { return physics; }
 

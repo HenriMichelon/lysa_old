@@ -628,4 +628,11 @@ export namespace lysa {
         /** The animation is interpolated linearly */
         LINEAR = 0,
     };
+
+    enum class CombineMode : uint8 {
+        AVERAGE = 0,
+        MIN     = 1,
+        MAX     = 2,
+        MULTIPLY= 3,
+    };
 }

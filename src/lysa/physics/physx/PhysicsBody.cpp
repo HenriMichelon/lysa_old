@@ -59,11 +59,16 @@ namespace lysa {
         }
         actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
 
-
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
                 auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
                 pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
+                const auto &localPos = subshape.position;
+                const auto &localQuat = normalize(subshape.rotation);
+                const physx::PxTransform localPose{
+                    physx::PxVec3(localPos.x, localPos.y, localPos.z),
+                    physx::PxQuat(localQuat.x, localQuat.y, localQuat.z, localQuat.w)};
+                pxShape->setLocalPose(localPose);
                 shapes.push_back(pxShape);
                 actor->attachShape(*pxShape);
             }

@@ -18,6 +18,7 @@ import lysa.types;
 import lysa.physics.configuration;
 import lysa.physics.engine;
 import lysa.physics.physics_material;
+import lysa.renderers.debug;
 
 export namespace lysa {
 
@@ -81,13 +82,15 @@ export namespace lysa {
 
         void update(float deltaTime) override;
 
+        void debug(DebugRenderer& debugRenderer) override;
+
         float3 getGravity() const override;
 
         auto& getBodyInterface() { return physicsSystem.GetBodyInterface(); }
 
         auto& getPhysicsSystem() { return physicsSystem; }
 
-        auto& getTempAllocator() { return tempAllocator; }
+        auto& getTempAllocator() const { return tempAllocator; }
 
     private:
         JPH::PhysicsSystem physicsSystem;
@@ -107,6 +110,8 @@ export namespace lysa {
             float restitution = 0.0f) const override;
 
         PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const override;
+
+        void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const override;
 
         auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
 

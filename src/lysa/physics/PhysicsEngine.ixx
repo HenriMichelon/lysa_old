@@ -7,6 +7,7 @@
 export module lysa.physics.engine;
 
 import std;
+import lysa.enums;
 import lysa.math;
 import lysa.physics.configuration;
 import lysa.physics.physics_material;
@@ -35,9 +36,11 @@ export namespace lysa {
         virtual std::unique_ptr<PhysicsScene> createScene()  = 0;
 
         virtual PhysicsMaterial* createMaterial(
-            float staticFriction = 0.5f,
-            float dynamicFriction = 0.5f,
+            float staticFriction = 0.f,
+            float dynamicFriction = 0.f,
             float restitution = 0.0f) const = 0;
+
+        virtual void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const = 0;
 
         virtual PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const = 0;
 

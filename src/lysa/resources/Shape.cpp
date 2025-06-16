@@ -6,6 +6,8 @@
 */
 module lysa.resources.shape;
 
+import lysa.application;
+
 namespace lysa {
 
     Shape::Shape(const PhysicsMaterial* material, const std::wstring &resName):

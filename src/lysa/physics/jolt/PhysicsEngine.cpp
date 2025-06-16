@@ -67,7 +67,20 @@ namespace lysa {
             ioSettings.mCombinedFriction = 0.5f * (
                 body1.IsStatic() ? mat1->staticFriction : mat1->dynamicFriction +
                 body2.IsStatic() ? mat2->staticFriction : mat2->dynamicFriction);
-            ioSettings.mCombinedRestitution = std::max(mat1->restitution, mat2->restitution);
+            switch (mat2->restitutionCombineMode) {
+            case CombineMode::AVERAGE:
+                ioSettings.mCombinedRestitution =  0.5f * (mat1->restitution + mat2->restitution);
+                break;
+            case CombineMode::MIN:
+                ioSettings.mCombinedRestitution = std::min(mat1->restitution, mat2->restitution);
+                break;
+            case CombineMode::MAX:
+                ioSettings.mCombinedRestitution = std::max(mat1->restitution, mat2->restitution);
+                break;
+            case CombineMode::MULTIPLY:
+                ioSettings.mCombinedRestitution = mat1->restitution * mat2->restitution;
+                break;
+            }
         }
 
         const auto normal = float3{
@@ -146,7 +159,13 @@ namespace lysa {
     }
 
     PhysicsMaterial* JoltPhysicsEngine::duplicateMaterial(const PhysicsMaterial* orig) const {
-        return new PhysicsMaterial(orig->staticFriction, orig->dynamicFriction, orig->restitution);
+        const auto mat = new PhysicsMaterial(orig->staticFriction, orig->dynamicFriction, orig->restitution);
+        mat->restitutionCombineMode = orig->restitutionCombineMode;
+        return mat;
+    }
+
+    void JoltPhysicsEngine::setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const {
+        physicsMaterial->restitutionCombineMode = combineMode;
     }
 
     JoltPhysicsScene::JoltPhysicsScene(
@@ -170,6 +189,10 @@ namespace lysa {
 
     void JoltPhysicsScene::update(const float deltaTime) {
         physicsSystem.Update(deltaTime, 1, &tempAllocator, &jobSystem);
+    }
+
+    void JoltPhysicsScene::debug(DebugRenderer& debugRenderer) {
+
     }
 
     float3 JoltPhysicsScene::getGravity() const {

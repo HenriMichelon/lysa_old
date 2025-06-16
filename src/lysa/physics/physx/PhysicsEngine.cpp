@@ -44,6 +44,27 @@ namespace lysa {
         return physics->createMaterial(staticFriction, dynamicFriction, restitution);
     }
 
+    void PhysXPhysicsEngine::setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const {
+        physx::PxCombineMode::Enum pxCombineMode;
+        switch (combineMode) {
+        case CombineMode::AVERAGE:
+            pxCombineMode = physx::PxCombineMode::eAVERAGE;
+            break;
+        case CombineMode::MIN:
+            pxCombineMode = physx::PxCombineMode::eMIN;
+            break;
+        case CombineMode::MAX:
+            pxCombineMode = physx::PxCombineMode::eMAX;
+            break;
+        case CombineMode::MULTIPLY:
+            pxCombineMode = physx::PxCombineMode::eMULTIPLY;
+            break;
+        default:
+            return;
+        }
+        physicsMaterial->setRestitutionCombineMode(pxCombineMode);
+    }
+
     PhysicsMaterial* PhysXPhysicsEngine::duplicateMaterial(const PhysicsMaterial* orig) const {
         return physics->createMaterial(
             orig->getStaticFriction(),
@@ -59,7 +80,9 @@ namespace lysa {
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
         scene = physics->createScene(sceneDesc);
         scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
-        scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES, 2.0f);
+        scene->setVisualizationParameter(physx::PxVisualizationParameter::eWORLD_AXES, 2.0f);
+        scene->setVisualizationParameter(physx::PxVisualizationParameter::eACTOR_AXES, 1.0f);
+        scene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
     }
 
     PhysXPhysicsScene::~PhysXPhysicsScene() {
@@ -78,7 +101,7 @@ namespace lysa {
             debugRenderer.drawLine(
                 float3{line.pos0.x, line.pos0.y, line.pos0.z},
                 float3{line.pos1.x, line.pos1.y, line.pos1.z},
-                float4{line.color0, line.color0, line.color0, 1.0f});
+                colorU32ToFloat4(line.color0));
         }
         for(int i=0; i < rb.getNbTriangles(); i++) {
             const auto& triangle = rb.getTriangles()[i];
@@ -86,8 +109,16 @@ namespace lysa {
                 float3{triangle.pos0.x, triangle.pos0.y, triangle.pos0.z},
                 float3{triangle.pos1.x, triangle.pos1.y, triangle.pos1.z},
                 float3{triangle.pos2.x, triangle.pos2.y, triangle.pos2.z},
-                float4{triangle.color0, triangle.color0, triangle.color0, 1.0f});
+                colorU32ToFloat4(triangle.color0));
         }
+    }
+
+    float4 PhysXPhysicsScene::colorU32ToFloat4(physx::PxU32 color) {
+        const float a = static_cast<float>((color >> 24) & 0xFF) / 255.0f;
+        const float r = static_cast<float>((color >> 16) & 0xFF) / 255.0f;
+        const float g = static_cast<float>((color >> 8) & 0xFF) / 255.0f;
+        const float b = static_cast<float>((color >> 0) & 0xFF) / 255.0f;
+        return float4{ r, g, b, a };
     }
 
     float3 PhysXPhysicsScene::getGravity() const {

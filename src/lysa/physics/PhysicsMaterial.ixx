@@ -15,6 +15,7 @@ module;
 export module lysa.physics.physics_material;
 
 import std;
+import lysa.enums;
 
 export namespace lysa {
 
@@ -30,6 +31,7 @@ export namespace lysa {
         float staticFriction;
         float dynamicFriction;
         float restitution;
+        CombineMode restitutionCombineMode{CombineMode::AVERAGE};
     };
 #endif
 

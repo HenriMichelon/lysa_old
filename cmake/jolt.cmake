@@ -33,6 +33,9 @@ set(USE_LZCNT ON)
 set(USE_TZCNT ON)
 set(USE_F16C ON)
 set(USE_FMADD ON)
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"

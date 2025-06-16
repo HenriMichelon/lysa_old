@@ -68,11 +68,11 @@ export namespace lysa {
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorRenderFormats = {vireo::ImageFormat::R8G8B8A8_UNORM}, // Read config
-            .colorBlendDesc = {{ .blendEnable = true }},
+            .colorBlendDesc = {{ .blendEnable = false }},
             .cullMode = vireo::CullMode::NONE,
-            .polygonMode = vireo::PolygonMode::FILL,
-            .depthTestEnable = false,
-            .depthWriteEnable = false,
+            .polygonMode = vireo::PolygonMode::WIREFRAME,
+            .depthTestEnable = true,
+            .depthWriteEnable = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {
