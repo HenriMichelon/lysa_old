@@ -64,9 +64,7 @@ namespace lysa {
         const auto mat2 = reinterpret_cast<const PhysicsMaterial *>(
             body2.GetShape()->GetMaterial(inManifold.mSubShapeID2));
         if (mat1 && mat2) {
-            ioSettings.mCombinedFriction = 0.5f * (
-                body1.IsStatic() ? mat1->staticFriction : mat1->dynamicFriction +
-                body2.IsStatic() ? mat2->staticFriction : mat2->dynamicFriction);
+            ioSettings.mCombinedFriction = std::sqrt(mat1->friction * mat2->friction);
             switch (mat2->restitutionCombineMode) {
             case CombineMode::AVERAGE:
                 ioSettings.mCombinedRestitution =  0.5f * (mat1->restitution + mat2->restitution);
@@ -115,11 +113,9 @@ namespace lysa {
     }
 
     PhysicsMaterial::PhysicsMaterial(
-        const float staticFriction,
-        const float dynamicFriction,
+        const float friction,
         const float restitution):
-        staticFriction(staticFriction),
-        dynamicFriction(dynamicFriction),
+        friction(friction),
         restitution(restitution) {
     }
 
@@ -152,14 +148,13 @@ namespace lysa {
     }
 
     PhysicsMaterial* JoltPhysicsEngine::createMaterial(
-        const float staticFriction,
-        const float dynamicFriction,
+        const float friction,
         const float restitution) const {
-        return new PhysicsMaterial(staticFriction, dynamicFriction, restitution);
+        return new PhysicsMaterial(friction, restitution);
     }
 
     PhysicsMaterial* JoltPhysicsEngine::duplicateMaterial(const PhysicsMaterial* orig) const {
-        const auto mat = new PhysicsMaterial(orig->staticFriction, orig->dynamicFriction, orig->restitution);
+        const auto mat = new PhysicsMaterial(orig->friction, orig->restitution);
         mat->restitutionCombineMode = orig->restitutionCombineMode;
         return mat;
     }

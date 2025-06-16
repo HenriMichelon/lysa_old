@@ -50,9 +50,13 @@ namespace lysa {
             physx::PxRigidDynamic* body = physx->createRigidDynamic(transform);
             if (mass > 0.0f) {
                 body->setMass(mass);
+            } else {
+                physx::PxRigidBodyExt::updateMassAndInertia(*body, /*density=*/1000.0f);
             }
             body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
             body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
+            // body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+            // body->setMaxDepenetrationVelocity(2.0f);
             setActor(body);
         } else {
             setActor(physx->createRigidStatic(transform));
@@ -69,6 +73,8 @@ namespace lysa {
                     physx::PxVec3(localPos.x, localPos.y, localPos.z),
                     physx::PxQuat(localQuat.x, localQuat.y, localQuat.z, localQuat.w)};
                 pxShape->setLocalPose(localPose);
+                // pxShape->setContactOffset(0.001f);
+                // pxShape->setRestOffset(0.0f);
                 shapes.push_back(pxShape);
                 actor->attachShape(*pxShape);
             }
@@ -76,6 +82,8 @@ namespace lysa {
             const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
             pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
             shapes.push_back(pxShape);
+            // pxShape->setContactOffset(0.001f);
+            // pxShape->setRestOffset(0.0f);
             actor->attachShape(*pxShape);
         }
     }
@@ -111,13 +119,18 @@ namespace lysa {
     }
 
     void PhysicsBody::applyForce(const float3& force, const float3&) const {
-        applyForce(force);
+        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+        physx::PxRigidBodyExt::addForceAtPos(
+            *body,
+            physx::PxVec3(force.x, force.y, force.z),
+            physx::PxVec3(0, 0, 0));
     }
 
     void PhysicsBody::setMass(const float value) {
         mass = value;
         if (!actor || !scene || actorType != physx::PxActorType::eRIGID_DYNAMIC) return;
-        static_cast<physx::PxRigidDynamic*>(actor)->setMass(mass);
+        auto* body = static_cast<physx::PxRigidDynamic*>(actor);
+        body->setMass(mass);
     }
 
 }

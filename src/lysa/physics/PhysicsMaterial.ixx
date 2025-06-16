@@ -24,12 +24,10 @@ export namespace lysa {
     {
     public:
         PhysicsMaterial(
-            float staticFriction = 0.5f,
-            float dynamicFriction = 0.5f,
-            float restitution = 0.0f);
+            float friction,
+            float restitution);
 
-        float staticFriction;
-        float dynamicFriction;
+        float friction;
         float restitution;
         CombineMode restitutionCombineMode{CombineMode::AVERAGE};
     };

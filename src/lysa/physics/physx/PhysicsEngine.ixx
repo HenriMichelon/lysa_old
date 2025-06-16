@@ -44,8 +44,7 @@ export namespace lysa {
         std::unique_ptr<PhysicsScene> createScene() override;
 
         PhysicsMaterial* createMaterial(
-            float staticFriction = 0.5f,
-            float dynamicFriction = 0.5f,
+            float friction = 0.0f,
             float restitution = 0.0f) const override;
 
         PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const override;

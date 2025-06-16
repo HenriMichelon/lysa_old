@@ -16,6 +16,47 @@ import lysa.nodes.node;
 import lysa.physics.physics_material;
 
 namespace lysa {
+    physx::PxFilterFlags myFilterShader(
+        physx::PxFilterObjectAttributes attributes0,
+        physx::PxFilterData filterData0,
+        physx::PxFilterObjectAttributes attributes1,
+        physx::PxFilterData filterData1,
+        physx::PxPairFlags& pairFlags,
+        const void* constantBlock,
+        physx::PxU32 constantBlockSize) {
+        pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+        pairFlags |= physx::PxPairFlag::eMODIFY_CONTACTS;
+        return physx::PxFilterFlag::eDEFAULT;
+    }
+
+
+    class MyContactModifyCallback : public physx::PxContactModifyCallback {
+    public:
+        void onContactModify(physx::PxContactModifyPair* const pairs, physx::PxU32 count) override {
+            for (int i = 0; i < count; ++i) {
+                physx::PxContactModifyPair& pair = pairs[i];
+                const physx::PxRigidDynamic* dynA =
+                    pair.actor[0] ? pair.actor[0]->is<physx::PxRigidDynamic>() : nullptr;
+                const physx::PxRigidDynamic* dynB =
+                    pair.actor[1] ? pair.actor[1]->is<physx::PxRigidDynamic>() : nullptr;
+
+                physx::PxVec3 vA = dynA ? dynA->getLinearVelocity() : physx::PxVec3(0.0f);
+                physx::PxVec3 vB = dynB ? dynB->getLinearVelocity() : physx::PxVec3(0.0f);
+                physx::PxVec3 relativeVelocity = vA - vB;
+
+                for (physx::PxU32 contactIndex = 0; contactIndex < pair.contacts.size(); ++contactIndex) {
+                    physx::PxVec3 normal = pair.contacts.getNormal(contactIndex);
+
+                    float normalSpeed = relativeVelocity.dot(normal);
+                    // if (physx::PxAbs(normalSpeed) < 5.0f) {
+                        // pair.contacts.setRestitution(contactIndex, 0.0f);
+                        // pair.contacts.setStaticFriction(contactIndex, 0.5f);
+                        // pair.contacts.setDynamicFriction(contactIndex, 0.0f);
+                    // }
+                }
+            }
+        }
+    };
 
     PhysXPhysicsEngine::PhysXPhysicsEngine() {
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -38,13 +79,15 @@ namespace lysa {
     }
 
     PhysicsMaterial* PhysXPhysicsEngine::createMaterial(
-       const float staticFriction,
-       const float dynamicFriction,
-       const float restitution) const {
-        return physics->createMaterial(staticFriction, dynamicFriction, restitution);
+        const float friction,
+        const float restitution) const {
+        const auto material = physics->createMaterial(friction, friction, restitution);
+        material->setFrictionCombineMode(physx::PxCombineMode::eMAX);
+        return material;
     }
 
-    void PhysXPhysicsEngine::setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const {
+    void PhysXPhysicsEngine::setRestitutionCombineMode(PhysicsMaterial* physicsMaterial,
+                                                       CombineMode combineMode) const {
         physx::PxCombineMode::Enum pxCombineMode;
         switch (combineMode) {
         case CombineMode::AVERAGE:
@@ -78,6 +121,8 @@ namespace lysa {
         physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
         sceneDesc.cpuDispatcher = dispatcher;
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+        // sceneDesc.filterShader = myFilterShader;
+        // sceneDesc.contactModifyCallback = new MyContactModifyCallback();
         scene = physics->createScene(sceneDesc);
         scene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
         scene->setVisualizationParameter(physx::PxVisualizationParameter::eWORLD_AXES, 2.0f);
@@ -96,14 +141,14 @@ namespace lysa {
 
     void PhysXPhysicsScene::debug(DebugRenderer& debugRenderer) {
         const physx::PxRenderBuffer& rb = scene->getRenderBuffer();
-        for(int i=0; i < rb.getNbLines(); i++) {
+        for (int i = 0; i < rb.getNbLines(); i++) {
             const auto& line = rb.getLines()[i];
             debugRenderer.drawLine(
                 float3{line.pos0.x, line.pos0.y, line.pos0.z},
                 float3{line.pos1.x, line.pos1.y, line.pos1.z},
                 colorU32ToFloat4(line.color0));
         }
-        for(int i=0; i < rb.getNbTriangles(); i++) {
+        for (int i = 0; i < rb.getNbTriangles(); i++) {
             const auto& triangle = rb.getTriangles()[i];
             debugRenderer.drawTriangle(
                 float3{triangle.pos0.x, triangle.pos0.y, triangle.pos0.z},
@@ -118,12 +163,11 @@ namespace lysa {
         const float r = static_cast<float>((color >> 16) & 0xFF) / 255.0f;
         const float g = static_cast<float>((color >> 8) & 0xFF) / 255.0f;
         const float b = static_cast<float>((color >> 0) & 0xFF) / 255.0f;
-        return float4{ r, g, b, a };
+        return float4{r, g, b, a};
     }
 
     float3 PhysXPhysicsScene::getGravity() const {
         const auto gravity = scene->getGravity();
         return float3{gravity.x, gravity.y, gravity.z};
     }
-
 }
