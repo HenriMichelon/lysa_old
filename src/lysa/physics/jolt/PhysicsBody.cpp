@@ -9,6 +9,7 @@ module;
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyLock.h>
 #include <Jolt/Physics/EActivation.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 module lysa.nodes.physics_body;
 
 import lysa.global;
@@ -38,7 +39,7 @@ namespace lysa {
         this->activationMode = activationMode;
     }
 
-    void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
+    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
         releaseResources();
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
@@ -52,6 +53,16 @@ namespace lysa {
         };
         const auto body = bodyInterface->CreateBody(settings);
         setBodyId(body->GetID());
+        const auto scale = getScale();
+        if (any(scale != float3{1.0f, 1.0f, 1.0f})) {
+            bodyInterface->SetShape(
+                bodyId,
+                new JPH::ScaledShape(
+                    bodyInterface->GetShape(bodyId),
+                    JPH::Vec3{scale.x, scale.y, scale.z}),
+                true,
+                activationMode);
+        }
     }
 
     void PhysicsBody::setVelocity(const float3& velocity) {

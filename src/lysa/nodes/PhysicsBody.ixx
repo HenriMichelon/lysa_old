@@ -68,10 +68,7 @@ export namespace lysa {
         float gravityFactor{1.0f};
         float mass{-1.0f};
 
-        /**
-         * Sets a new collision shape, recreates the body in the physic system
-         */
-        void setShape(const std::shared_ptr<Shape> &shape);
+        void createBody(const std::shared_ptr<Shape> &shape);
 
         void attachToViewport(Viewport* viewport) override;
 

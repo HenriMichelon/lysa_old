@@ -312,12 +312,9 @@ namespace lysa {
             setRotation(quat);
             return;
         }
-        auto quatParent = quaternion{float3x3{parent->globalTransform}};
-        auto quatLocal = mul(quaternion(-quatParent.xyz, quatParent.w), quat);
-        auto tm = float4x4::translation(getPosition());
-        auto rm = float4x4{quatLocal};
-        auto sm = float4x4::scale(getScale());
-        localTransform = mul(tm, mul(rm, sm));
+        const auto rm = mul(float4x4::scale(getScale()), float4x4{quat});
+        localTransform = mul(inverse(parent->globalTransform), rm);
+        localTransform[3] = float4(getPositionGlobal(), 1.0f);
         updateGlobalTransform();
     }
 

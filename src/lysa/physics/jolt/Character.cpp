@@ -21,15 +21,16 @@ namespace lysa {
 
     void Character::setShape(const float height, const float radius) {
         assert([&]{ return height/2 > radius; }, "Invalid capsule shape: height/2 < radius");
-        yDelta = height/2;
+        auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
+
+        JPH::CharacterVirtualSettings settingsVirtual;
+        const auto h = height - 2.0f * radius;
+        yDelta = h/2.0f + radius/2.0f;
         const auto position= getPositionGlobal();
         const auto quat = normalize(getRotationGlobal());
         const auto pos = JPH::RVec3(position.x, position.y + yDelta, position.z);
         const auto rot = JPH::Quat(quat.x, quat.y, quat.z, quat.w);
-        auto& physicsScene = dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene());
-
-        JPH::CharacterVirtualSettings settingsVirtual;
-        settingsVirtual.mShape          = new JPH::CapsuleShape(height/2 - radius, radius);
+        settingsVirtual.mShape          = new JPH::CapsuleShape(h/2, radius);
         settingsVirtual.mInnerBodyLayer = collisionLayer;
         settingsVirtual.mInnerBodyShape = settingsVirtual.mShape;
         settingsVirtual.mEnhancedInternalEdgeRemoval = true;
@@ -127,11 +128,11 @@ namespace lysa {
         if (any(pos != getPositionGlobal())) {
             setPositionGlobal(pos);
         }
-        const auto rotation = virtualCharacter->GetRotation();
-        const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
-        if (any(rot != getRotationGlobal())) {
+        // const auto rotation = virtualCharacter->GetRotation();
+        // const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
+        // if (any(rot != getRotationGlobal())) {
             // setRotation(rot);
-        }
+        // }
         updating = false;
     }
 

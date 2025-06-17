@@ -116,6 +116,8 @@ export namespace lysa {
 
         void resume() override;
 
+        void scale(float scale) override;
+
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::BodyInterface* bodyInterface{nullptr};
         JPH::EActivation activationMode{JPH::EActivation::Activate};

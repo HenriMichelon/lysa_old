@@ -7,6 +7,7 @@
 module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/Body.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 module lysa.nodes.collision_object;
 
 import lysa.application;
@@ -85,6 +86,22 @@ namespace lysa {
                 activationMode);
     }
 
+    void CollisionObject::scale(const float scale) {
+        Node::scale(scale);
+        if (bodyId.IsInvalid()|| !bodyInterface || !bodyInterface->IsAdded(bodyId)) {
+            return;
+        }
+        if (scale != 1.0f) {
+            bodyInterface->SetShape(
+                bodyId,
+                new JPH::ScaledShape(
+                    bodyInterface->GetShape(bodyId),
+                    JPH::Vec3{scale, scale, scale}),
+                false,
+                activationMode);
+        }
+    }
+
     void CollisionObject::setBodyId(const JPH::BodyID id) {
         bodyId = id;
         bodyInterface->SetUserData(bodyId, reinterpret_cast<uint64>(this));
@@ -99,9 +116,13 @@ namespace lysa {
         JPH::Quat rotation;
         bodyInterface->GetPositionAndRotation(bodyId, position, rotation);
         const auto pos = float3{position.GetX(), position.GetY(), position.GetZ()};
-        setPositionGlobal(pos);
+        if (any(pos != getPositionGlobal())) {
+            setPositionGlobal(pos);
+        }
         const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
-        setRotationGlobal(rot);
+        if (any(rot != getRotationGlobal())) {
+            setRotationGlobal(rot);
+        }
         updating = false;
     }
 

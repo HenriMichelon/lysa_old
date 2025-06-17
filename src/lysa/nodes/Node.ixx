@@ -135,12 +135,12 @@ export namespace lysa {
         /**
         * Sets the local space position (relative to parent)
         */
-        // virtual void setPosition(const float x, const float y, const float z) { setPosition(float3{x, y, z}); }
+        virtual void setPosition(const float x, const float y, const float z) { setPosition(float3{x, y, z}); }
 
         /**
         * Returns the local space position (relative to parent)
         */
-        const float3 getPosition() const { return localTransform[3].xyz; }
+        float3 getPosition() const { return localTransform[3].xyz; }
     
         /**
          * Changes the node's position by the given offset vector in local space.
@@ -222,7 +222,7 @@ export namespace lysa {
         /**
          * Scale the local transformation
          */
-        void scale(float scale);
+        virtual void scale(float scale);
 
         /**
          * Sets the local transformation
@@ -268,17 +268,7 @@ export namespace lysa {
          * Returns the Z axis rotation of the local transformation
          */
         float getRotationZ() const;
-    
-        /**
-         * Scales part of the local transformation.
-         */
-        // virtual void setScale(const float3& scale);
-    
-        /**
-         * Scales part of the local transformation with the same value on each axis
-         */
-        // void setScale(float scale);
-    
+
         /**
          * Returns the scale part of the local transformation.
          */

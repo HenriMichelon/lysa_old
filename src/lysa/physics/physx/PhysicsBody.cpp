@@ -34,7 +34,7 @@ namespace lysa {
         actorType{actorType} {
     }
 
-    void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
+    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
         if (this->shape) {
             releaseResources();
         }
@@ -55,9 +55,6 @@ namespace lysa {
             }
             body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
             body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
-            // body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
-            // body->setMaxDepenetrationVelocity(2.0f);
-            // body->setLinearDamping(0.1f);
             setActor(body);
         } else {
             setActor(physx->createRigidStatic(transform));
