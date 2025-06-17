@@ -28,13 +28,18 @@ namespace lysa {
         desc.upDirection = physx::PxVec3(upVector.x, upVector.y, upVector.z);
         desc.slopeLimit = physx::PxCos(radians(maxSlopeAngle));
         desc.stepOffset = 0.3f;
-        desc.contactOffset = 0.1f;
+        desc.contactOffset = 0.05f;
+        desc.density = 10.0f;
         desc.material = physX.createMaterial(0.5f, 0.0f);
         desc.reportCallback = this;
         desc.behaviorCallback = nullptr;
         capsuleController = static_cast<physx::PxCapsuleController*>(
             dynamic_cast<PhysXPhysicsScene&>(getViewport()->getPhysicsScene()).getControllerManager()->createController(desc));
         setCollisionLayer(collisionLayer);
+        constexpr float scale = 1.2f;
+        capsule = physx::PxCapsuleGeometry{
+            capsuleController->getRadius() * scale,
+            (capsuleController->getHeight() * 0.5f) * scale};
     }
 
     float3 Character::getGroundVelocity() const {
@@ -95,7 +100,29 @@ namespace lysa {
     void Character::physicsProcess(const float delta) {
         Node::physicsProcess(delta);
         if (!capsuleController) return;
-        currentContacts.clear();
+
+        const auto pos = capsuleController->getPosition();
+        const auto origin = physx::PxVec3 {
+            static_cast<float>(pos.x),
+            static_cast<float>(pos.y),
+            static_cast<float>(pos.z)
+        };
+        physx::PxOverlapHit hitBuffer[16];
+        physx::PxOverlapBuffer buffer(hitBuffer, 16);
+        auto filterData = physx::PxQueryFilterData {};
+        filterData.flags = physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eSTATIC;
+        std::unordered_set<CollisionObject*> contacts;
+        if (scene->overlap(capsule, physx::PxTransform {origin}, buffer, filterData)) {
+            for (int i = 0; i < buffer.nbTouches; i++) {
+                const auto actor = buffer.getTouch(i).actor;
+                if (actor && actor->userData) {
+                    contacts.insert(static_cast<CollisionObject*>(actor->userData));
+                }
+            }
+        }
+        currentContacts.remove_if([&](const auto& contact) {
+            return !contacts.contains(contact.object);
+        });
 
         const auto disp = velocity * delta;
         float3 globalDir = mul(disp, float3x3{globalTransform});
@@ -153,7 +180,6 @@ namespace lysa {
         const physx::PxQueryHit &hit,
         const physx::PxShape *shape,
         const physx::PxRigidActor *actor) {
-        const auto shapeData = shape->getQueryFilterData();
         return physx::PxQueryHitType::eBLOCK;
     }
 

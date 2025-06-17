@@ -173,10 +173,11 @@ export namespace lysa {
 #ifdef PHYSIC_ENGINE_PHYSX
         bool onGround{false};
         CollisionObject* ground{nullptr};
-        std::vector<Collision> currentContacts;
+        std::list<Collision> currentContacts;
         float3 velocity{0.0f};
         float maxSlopeAngle{45.0f};
         physx::PxCapsuleController* capsuleController{nullptr};
+        physx::PxCapsuleGeometry capsule;
         void onShapeHit(const physx::PxControllerShapeHit &hit) override;
         void onControllerHit(const physx::PxControllersHit &hit) override;
         void onObstacleHit(const physx::PxControllerObstacleHit &hit) override;

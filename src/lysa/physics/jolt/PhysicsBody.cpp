@@ -7,7 +7,6 @@
 module;
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyLock.h>
 #include <Jolt/Physics/EActivation.h>
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 module lysa.nodes.physics_body;
@@ -62,62 +61,6 @@ namespace lysa {
                     JPH::Vec3{scale.x, scale.y, scale.z}),
                 true,
                 activationMode);
-        }
-    }
-
-    void PhysicsBody::setVelocity(const float3& velocity) {
-        if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        if (all(velocity == FLOAT3ZERO)) {
-            bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3::sZero());
-        } else {
-            // current orientation * velocity
-            const auto vel = mul(velocity, getRotationGlobal());
-            bodyInterface->SetLinearVelocity(bodyId, JPH::Vec3{vel.x, vel.y, vel.z});
-        }
-    }
-
-    void PhysicsBody::setGravityFactor(const float factor) {
-        gravityFactor = factor;
-        if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        bodyInterface->SetGravityFactor(bodyId, factor);
-    }
-
-    float3 PhysicsBody::getVelocity() const {
-        if (bodyId.IsInvalid() || !bodyInterface) { return FLOAT3ZERO; }
-        const auto velocity = bodyInterface->GetLinearVelocity(bodyId);
-        return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
-    }
-
-    void PhysicsBody::applyForce(const float3& force) const {
-        if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        bodyInterface->AddForce(
-                bodyId,
-                JPH::Vec3{force.x, force.y, force.z});
-    }
-
-    void PhysicsBody::applyForce(const float3& force, const float3& position) const {
-        if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        bodyInterface->AddForce(
-                bodyId,
-                JPH::Vec3{force.x, force.y, force.z},
-                JPH::Vec3{position.x, position.y, position.z});
-    }
-
-    void PhysicsBody::setMass(const float value) {
-        if (getType() == STATIC_BODY) { return; }
-        mass = value;
-        if (bodyId.IsInvalid() || !bodyInterface) { return; }
-        const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
-            .getPhysicsSystem()
-            .GetBodyLockInterface(),
-            getBodyId());
-        if (lock.Succeeded()) {
-            JPH::MotionProperties *mp = lock.GetBody().GetMotionProperties();
-            if (value != 0.0f) {
-                mp->SetInverseMass(1.0f/value);
-            } else {
-                mp->SetInverseMass(0.0f);
-            }
         }
     }
 

@@ -27,40 +27,9 @@ export namespace lysa {
     class PhysicsBody : public CollisionObject {
     public:
 
-        /**
-         * Sets the linear velocity
-         */
-        virtual void setVelocity(const float3& velocity);
-
-        /**
-         *
-         * Sets the gravity multiplier (set to 0.0f to disable gravity).
-         */
-        virtual void setGravityFactor(float factor);
-
-        /**
-         * Sets the body's mass.
-         */
-        void setMass(float value);
-
-        /**
-         * Returns the linear velocity
-         */
-        virtual float3 getVelocity() const;
-
-        /**
-         * Add force (unit: N) at the center of mass for the next time step, will be reset after the next physics update
-         */
-        void applyForce(const float3& force) const;
-
-        /**
-         * Add force (unit: N) at `position` for the next time step, will be reset after the next physics update
-         */
-        void applyForce(const float3& force, const float3& position) const;
+        void recreateBody();
 
         void setProperty(const std::string &property, const std::string &value) override;
-
-        void recreateBody();
 
         ~PhysicsBody() override = default;
 
@@ -68,11 +37,9 @@ export namespace lysa {
         float gravityFactor{1.0f};
         float mass{-1.0f};
 
-        void createBody(const std::shared_ptr<Shape> &shape);
+        virtual void createBody(const std::shared_ptr<Shape> &shape);
 
         void attachToViewport(Viewport* viewport) override;
-
-        void enterScene();
 
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::EMotionType motionType;

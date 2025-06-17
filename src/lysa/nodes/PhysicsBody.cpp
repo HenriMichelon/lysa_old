@@ -21,12 +21,6 @@ namespace lysa {
         createBody(shape);
     }
 
-    void PhysicsBody::enterScene() {
-        CollisionObject::enterScene();
-        setGravityFactor(gravityFactor);
-        if (mass > 0) { setMass(mass); }
-    }
-
     void PhysicsBody::recreateBody() {
         createBody(dynamic_pointer_cast<Shape>(shape->duplicate()));
     }
@@ -69,8 +63,6 @@ namespace lysa {
                     throw Exception("PhysicsBody : missing or invalid shape for ", lysa::to_string(getName()));
                 }
             }
-        } else if (property == "mass") {
-            setMass(stof(value));
         }
     }
 
