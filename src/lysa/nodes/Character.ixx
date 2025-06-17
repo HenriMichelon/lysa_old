@@ -32,6 +32,11 @@ export namespace lysa {
                     public JPH::BodyFilter,
                     public JPH::CharacterContactListener
 #endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        ,
+        public physx::PxUserControllerHitReport,
+        public physx::PxQueryFilterCallback
+#endif
     {
     public:
         /**
@@ -135,6 +140,7 @@ export namespace lysa {
         float height;
         float radius;
         float3 upVector{AXIS_UP};
+        float yDelta{0};
 
         void setPositionAndRotation() override;
 
@@ -149,7 +155,6 @@ export namespace lysa {
         void resume() override;
 
 #ifdef PHYSIC_ENGINE_JOLT
-        float yDelta{0}; // https://jrouwe.github.io/JoltPhysics/class_character_base_settings.html#aee9be06866efe751ab7e2df57edee6b1
         std::unique_ptr<JPH::CharacterVirtual> virtualCharacter;
         std::unique_ptr<JPH::ObjectLayerFilter> objectLayerFilter;
         void OnContactAdded(const JPH::CharacterVirtual *  inCharacter,
@@ -166,10 +171,26 @@ export namespace lysa {
         bool ShouldCollideLocked(const JPH::Body &inBody) const override;
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
+        bool onGround{false};
+        CollisionObject* ground{nullptr};
         float3 velocity{0.0f};
         float maxSlopeAngle{45.0f};
-        physx::PxController* controller{nullptr};
         physx::PxCapsuleController* capsuleController{nullptr};
+        void onShapeHit(const physx::PxControllerShapeHit &hit) override;
+        void onControllerHit(const physx::PxControllersHit &hit) override;
+        void onObstacleHit(const physx::PxControllerObstacleHit &hit) override;
+        physx::PxQueryHitType::Enum preFilter(
+            const physx::PxFilterData &filterData,
+            const physx::PxShape *shape,
+            const physx::PxRigidActor *actor,
+            physx::PxHitFlags &queryFlags
+        ) override;
+        physx::PxQueryHitType::Enum postFilter(
+        const physx::PxFilterData &filterData,
+        const physx::PxQueryHit &hit,
+        const physx::PxShape *shape,
+        const physx::PxRigidActor *actor
+        ) override;
 #endif
     };
 

@@ -66,33 +66,36 @@ namespace lysa {
             actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
         }
 
+        physx::PxFilterData filterData;
+        filterData.word0 = 1;
+        filterData.word1 = 1;
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
                 auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
                 if (debug) {
                     pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
                 }
+                pxShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+                pxShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
                 const auto &localPos = subshape.position;
                 const auto &localQuat = normalize(subshape.rotation);
                 const physx::PxTransform localPose{
                     physx::PxVec3(localPos.x, localPos.y, localPos.z),
                     physx::PxQuat(localQuat.x, localQuat.y, localQuat.z, localQuat.w)};
                 pxShape->setLocalPose(localPose);
-                // pxShape->setContactOffset(0.001f);
-                // pxShape->setRestOffset(0.0f);
+                pxShape->setQueryFilterData(filterData);
                 shapes.push_back(pxShape);
                 actor->attachShape(*pxShape);
             }
         } else {
             const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
-            pxShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, 1.0f);
-            pxShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, 1.0f);
             if (debug) {
                 pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
             }
+            pxShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+            pxShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
+            pxShape->setQueryFilterData(filterData);
             shapes.push_back(pxShape);
-            // pxShape->setContactOffset(0.001f);
-            // pxShape->setRestOffset(0.0f);
             actor->attachShape(*pxShape);
         }
     }

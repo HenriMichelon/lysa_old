@@ -10,6 +10,7 @@ module lysa.nodes.character;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.physics.physx.engine;
@@ -23,17 +24,17 @@ namespace lysa {
         physx::PxCapsuleControllerDesc desc;
         desc.height = height - 2.0f * radius;
         desc.radius = radius;
-        desc.position = physx::PxExtendedVec3(position.x, position.y, position.z);
+        yDelta = height * 0.5f;
+        desc.position = physx::PxExtendedVec3(position.x, position.y + yDelta, position.z);
         desc.upDirection = physx::PxVec3(upVector.x, upVector.y, upVector.z);
         desc.slopeLimit = physx::PxCos(radians(maxSlopeAngle));
         desc.stepOffset = 0.3f;
         desc.contactOffset = 0.1f;
         desc.material = getPhysx()->createMaterial(0.5f, 0.5f, 0.0f);
-        desc.reportCallback = nullptr; // XXX
+        desc.reportCallback = this;
         desc.behaviorCallback = nullptr;
         capsuleController = static_cast<physx::PxCapsuleController*>(
             dynamic_cast<PhysXPhysicsScene&>(getViewport()->getPhysicsScene()).getControllerManager()->createController(desc));
-        controller = capsuleController;
         setCollisionLayer(collisionLayer);
     }
 
@@ -44,24 +45,23 @@ namespace lysa {
     }
 
     Node* Character::getGround() const {
-        // return reinterpret_cast<Node*>(virtualCharacter->GetGroundUserData());
-        return nullptr;
+        return ground;
     }
 
     bool Character::isOnGround() const {
-        return false;
-        // return virtualCharacter->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround;
+        physx::PxControllerState state;
+        capsuleController->getState(state);
+        return onGround && !state.isMovingUp;
     }
 
     bool Character::isGround(const CollisionObject &object) const {
-        return false;
-        // return object.getBodyId() == virtualCharacter->GetGroundBodyID();
+        return &object == ground;
     }
 
     void Character::setUp(const float3& vector) {
         upVector = vector;
-        if (controller) {
-            controller->setUpDirection(physx::PxVec3(upVector.x, upVector.y, upVector.z));
+        if (capsuleController) {
+            capsuleController->setUpDirection(physx::PxVec3(upVector.x, upVector.y, upVector.z));
         }
     }
 
@@ -90,32 +90,39 @@ namespace lysa {
     }
 
     void Character::setPositionAndRotation() {
-        if (updating || !controller) {
+        if (updating || !capsuleController) {
             return;
         }
         const float3 pos = getPositionGlobal();
-        controller->setPosition(physx::PxExtendedVec3(pos.x, pos.y, pos.z));
+        capsuleController->setPosition(physx::PxExtendedVec3(pos.x, pos.y + yDelta, pos.z));
     }
 
     void Character::physicsProcess(const float delta) {
         Node::physicsProcess(delta);
-        if (!controller) return;
-        auto disp = velocity * delta;
-        physx::PxFilterData filterData;
-        filterData.word0 = collisionLayer;
+        if (!capsuleController) return;
+        const auto disp = velocity * delta;
+        float3 globalDir = mul(disp, float3x3{globalTransform});
+
         physx::PxControllerFilters filters;
-        filters.mFilterData = &filterData;
-        controller->move(physx::PxVec3(disp.x, disp.y, disp.z), 0.001f, delta, filters);
+        filters.mFilterData = nullptr;
+        filters.mFilterCallback = this;
+        const auto flag =
+            capsuleController->move(
+                physx::PxVec3(globalDir.x, globalDir.y, globalDir.z),
+                0.001f,
+                delta,
+                filters);
+        onGround = flag.isSet(physx::PxControllerCollisionFlag::eCOLLISION_DOWN) && ground;
     }
 
     void Character::process(const float alpha) {
         Node::process(alpha);
-        if (!controller) { return; }
+        if (!capsuleController) { return; }
         updating = true;
-        const physx::PxExtendedVec3 position = controller->getPosition();
+        const physx::PxExtendedVec3 position = capsuleController->getPosition();
         const auto pos = float3{
             static_cast<float>(position.x),
-            static_cast<float>(position.y),
+            static_cast<float>(position.y) - yDelta,
             static_cast<float>(position.z)
         };
         if (any(pos != getPositionGlobal())) {
@@ -132,4 +139,38 @@ namespace lysa {
         collisionLayer = layer;
     }
 
+    physx::PxQueryHitType::Enum Character::preFilter(
+            const physx::PxFilterData &filterData,
+            const physx::PxShape *shape,
+            const physx::PxRigidActor *actor,
+            physx::PxHitFlags &queryFlags
+        ) {
+        return physx::PxQueryHitType::eBLOCK;
+    }
+
+    physx::PxQueryHitType::Enum Character::postFilter(
+        const physx::PxFilterData &filterData,
+        const physx::PxQueryHit &hit,
+        const physx::PxShape *shape,
+        const physx::PxRigidActor *actor
+        ) {
+        return physx::PxQueryHitType::eBLOCK;
+    }
+
+    void Character::onShapeHit(const physx::PxControllerShapeHit &hit) {
+        const auto node = static_cast<CollisionObject*>(hit.actor->userData);
+        if (node) {
+            const auto normal = float3{hit.worldNormal.x, hit.worldNormal.y, hit.worldNormal.z};
+            if (normal.y > 0.0f) {
+                ground = node;
+                // INFO("onShapeHit", lysa::to_string(node->getName()), " ", to_string(normal));
+            }
+        }
+    }
+
+    void Character::onControllerHit(const physx::PxControllersHit &hit) {
+    }
+
+    void Character::onObstacleHit(const physx::PxControllerObstacleHit &hit) {
+    }
 }

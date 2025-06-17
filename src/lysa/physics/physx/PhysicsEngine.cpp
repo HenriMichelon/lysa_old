@@ -26,6 +26,7 @@ namespace lysa {
         physx::PxU32 constantBlockSize) {
         pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
         pairFlags |= physx::PxPairFlag::eMODIFY_CONTACTS;
+
         return physx::PxFilterFlag::eDEFAULT;
     }
 
