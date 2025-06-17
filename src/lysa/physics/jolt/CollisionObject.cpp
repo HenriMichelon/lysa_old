@@ -9,11 +9,36 @@ module;
 #include <Jolt/Physics/Body/Body.h>
 module lysa.nodes.collision_object;
 
+import lysa.application;
 import lysa.global;
 import lysa.viewport;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
+
+    CollisionObject::CollisionObject(
+        const std::shared_ptr<Shape>& shape,
+        const uint32 layer,
+        const std::wstring& name,
+        const Type type):
+        Node{name, type},
+        collisionLayer{layer},
+        shape{shape} {
+    }
+
+    CollisionObject::CollisionObject(
+        const uint32 layer,
+        const std::wstring& name,
+        const Type type):
+        Node{name, type},
+        collisionLayer{layer} {
+    }
+
+    CollisionObject::CollisionObject(const CollisionObject& other):
+        Node{other.getName(), other.getType()},
+        collisionLayer{other.collisionLayer},
+        shape{other.shape} {
+    }
 
     JPH::BodyInterface* CollisionObject::getBodyInterface() const {
         if (getViewport()) {

@@ -81,7 +81,7 @@ namespace lysa {
         return contacts;
     }
 
-    void Character::setVelocity(const float3& velocity) const {
+    void Character::setVelocity(const float3& velocity) {
         if (all(velocity == FLOAT3ZERO)) {
             virtualCharacter->SetLinearVelocity(JPH::Vec3::sZero());
         } else {
@@ -91,7 +91,7 @@ namespace lysa {
         }
     }
 
-    void Character::setMaxSlopeAngle(const float angle) const {
+    void Character::setMaxSlopeAngle(const float angle) {
         virtualCharacter->SetMaxSlopeAngle(radians(angle));
     }
 

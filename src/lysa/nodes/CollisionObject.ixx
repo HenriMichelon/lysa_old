@@ -14,13 +14,16 @@ module;
 #endif
 export module lysa.nodes.collision_object;
 
+import lysa.application;
 import lysa.math;
 import lysa.signal;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.resources.shape;
+#ifdef PHYSIC_ENGINE_JOLT
+import lysa.physics.jolt.engine;
+#endif
 #ifdef PHYSIC_ENGINE_PHYSX
-import lysa.application;
 import lysa.physics.physx.engine;
 #endif
 
