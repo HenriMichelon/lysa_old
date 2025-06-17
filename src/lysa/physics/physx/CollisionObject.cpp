@@ -88,6 +88,11 @@ namespace lysa {
         actor->setGlobalPose(t);
     }
 
+    void CollisionObject::scale(const float scale) {
+        Node::scale(scale);
+        if (!actor || !scene) { return; }
+    }
+
     void CollisionObject::process(const float alpha) {
         Node::process(alpha);
         if (!actor || !scene) { return; }
