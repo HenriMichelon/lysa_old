@@ -125,17 +125,16 @@ export namespace lysa {
         JPH::BodyInterface* getBodyInterface() const;
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
+        PhysXPhysicsEngine& physX;
         physx::PxRigidActor *actor{nullptr};
         physx::PxScene* scene{nullptr};
         std::list<physx::PxShape*> shapes{nullptr};
 
-        auto getActor() const { return actor; }
         void setActor(physx::PxRigidActor *actor);
 
         physx::PxScene* getPxScene() const;
-        static auto getPhysx() {
-            return dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
-        }
+    public:
+        auto getActor() const { return actor; }
 #endif
     };
 

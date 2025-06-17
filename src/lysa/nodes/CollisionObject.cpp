@@ -15,7 +15,8 @@ namespace lysa {
         const Type type):
         Node{name, type},
         collisionLayer{layer},
-        shape{shape} {
+        shape{shape},
+        physX{dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine())} {
     }
 
     CollisionObject::CollisionObject(
@@ -23,13 +24,15 @@ namespace lysa {
         const std::wstring& name,
         const Type type):
         Node{name, type},
-        collisionLayer{layer} {
+        collisionLayer{layer},
+        physX{dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine())} {
     }
 
     CollisionObject::CollisionObject(const CollisionObject& other):
         Node{other.getName(), other.getType()},
         collisionLayer{other.collisionLayer},
-        shape{other.shape} {
+        shape{other.shape},
+        physX{dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine())} {
     }
 
     CollisionObject::~CollisionObject() {

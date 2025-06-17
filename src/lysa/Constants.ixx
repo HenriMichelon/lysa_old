@@ -95,5 +95,7 @@ export namespace lysa {
 
     constexpr pipeline_id DEFAULT_PIPELINE_ID{0};
 
+    constexpr uint32 MAX_COLLISIONS_LAYERS{100};
+
 
 }

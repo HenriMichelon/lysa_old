@@ -16,50 +16,27 @@ import lysa.nodes.node;
 import lysa.physics.physics_material;
 
 namespace lysa {
-    physx::PxFilterFlags myFilterShader(
-        physx::PxFilterObjectAttributes attributes0,
-        physx::PxFilterData filterData0,
-        physx::PxFilterObjectAttributes attributes1,
-        physx::PxFilterData filterData1,
-        physx::PxPairFlags& pairFlags,
-        const void* constantBlock,
-        physx::PxU32 constantBlockSize) {
-        pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
-        pairFlags |= physx::PxPairFlag::eMODIFY_CONTACTS;
 
+    bool PhysXPhysicsEngine::collisionMatrix[MAX_COLLISIONS_LAYERS][MAX_COLLISIONS_LAYERS]{};
+
+    physx::PxFilterFlags myFilterShader(
+        const physx::PxFilterObjectAttributes,
+        const physx::PxFilterData filterData0,
+        const physx::PxFilterObjectAttributes,
+        const physx::PxFilterData filterData1,
+        physx::PxPairFlags& pairFlags,
+        const void*, physx::PxU32) {
+        if (!PhysXPhysicsEngine::collisionMatrix[filterData0.word0][filterData0.word0]) {
+            return physx::PxFilterFlag::eKILL;
+        }
+        pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+        // pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
+        // pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_LOST;
         return physx::PxFilterFlag::eDEFAULT;
     }
 
 
-    class MyContactModifyCallback : public physx::PxContactModifyCallback {
-    public:
-        void onContactModify(physx::PxContactModifyPair* const pairs, physx::PxU32 count) override {
-            for (int i = 0; i < count; ++i) {
-                physx::PxContactModifyPair& pair = pairs[i];
-                const physx::PxRigidDynamic* dynA =
-                    pair.actor[0] ? pair.actor[0]->is<physx::PxRigidDynamic>() : nullptr;
-                const physx::PxRigidDynamic* dynB =
-                    pair.actor[1] ? pair.actor[1]->is<physx::PxRigidDynamic>() : nullptr;
-
-                physx::PxVec3 vA = dynA ? dynA->getLinearVelocity() : physx::PxVec3(0.0f);
-                physx::PxVec3 vB = dynB ? dynB->getLinearVelocity() : physx::PxVec3(0.0f);
-                physx::PxVec3 relativeVelocity = vA - vB;
-
-                for (physx::PxU32 contactIndex = 0; contactIndex < pair.contacts.size(); ++contactIndex) {
-                    physx::PxVec3 normal = pair.contacts.getNormal(contactIndex);
-
-                    float normalSpeed = relativeVelocity.dot(normal);
-                    // if (physx::PxAbs(normalSpeed) < 5.0f) {
-                        // pair.contacts.setRestitution(contactIndex, 0.0f);
-                        // pair.contacts.setStaticFriction(contactIndex, 0.5f);
-                        // pair.contacts.setDynamicFriction(contactIndex, 0.0f);
-                    // }
-                }
-            }
-        }
-    };
-
-    PhysXPhysicsEngine::PhysXPhysicsEngine() {
+    PhysXPhysicsEngine::PhysXPhysicsEngine(const LayerCollisionTable& layerCollisionTable) {
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
         if (!foundation) {
             throw Exception("Failed to create PhysX foundation");
@@ -67,6 +44,19 @@ namespace lysa {
         physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, physx::PxTolerancesScale());
         if (!foundation) {
             throw Exception("Failed to create PhysX physics");
+        }
+
+        // Build collision matrix
+        for (uint32_t i = 0; i < MAX_COLLISIONS_LAYERS; ++i) {
+            for (uint32_t j = 0; j < MAX_COLLISIONS_LAYERS; ++j) {
+                collisionMatrix[i][j] = false;
+            }
+        }
+        for (const auto& entry : layerCollisionTable.layersCollideWith) {
+            const uint32_t from = entry.layer;
+            for (const uint32_t to : entry.collideWith) {
+                collisionMatrix[from][to] = true;
+            }
         }
     }
 
@@ -122,11 +112,8 @@ namespace lysa {
         const DebugConfig& debugConfig) {
         physx::PxSceneDesc sceneDesc(physics->getTolerancesScale());
         sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-        physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
-        sceneDesc.cpuDispatcher = dispatcher;
-        sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
-        // sceneDesc.filterShader = myFilterShader;
-        // sceneDesc.contactModifyCallback = new MyContactModifyCallback();
+        sceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+        sceneDesc.filterShader = myFilterShader;
         scene = physics->createScene(sceneDesc);
         controllerManager = PxCreateControllerManager(*scene);
         if (debugConfig.enabled) {

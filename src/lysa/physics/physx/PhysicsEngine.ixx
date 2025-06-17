@@ -10,6 +10,7 @@ export module lysa.physics.physx.engine;
 
 import std;
 import lysa.configuration;
+import lysa.constants;
 import lysa.math;
 import lysa.physics.configuration;
 import lysa.physics.engine;
@@ -43,7 +44,7 @@ export namespace lysa {
 
     class PhysXPhysicsEngine : public PhysicsEngine {
     public:
-        PhysXPhysicsEngine();
+        PhysXPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
 
         std::unique_ptr<PhysicsScene> createScene(const DebugConfig& debugConfig) override;
 
@@ -55,9 +56,15 @@ export namespace lysa {
 
         void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const override;
 
+        inline bool shouldCollide(const uint32_t layer1, const uint32_t layer2) const {
+            return collisionMatrix[layer1][layer2];
+        }
+
         auto getPhysics() const { return physics; }
 
         ~PhysXPhysicsEngine() override;
+
+        static bool collisionMatrix[MAX_COLLISIONS_LAYERS][MAX_COLLISIONS_LAYERS];
 
     private:
         physx::PxDefaultAllocator     gAllocator;

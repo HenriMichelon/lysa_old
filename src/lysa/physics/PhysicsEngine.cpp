@@ -21,7 +21,7 @@ namespace lysa {
         return std::make_unique<JoltPhysicsEngine>(config.layerCollisionTable);
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
-        return std::make_unique<PhysXPhysicsEngine>();
+        return std::make_unique<PhysXPhysicsEngine>(config.layerCollisionTable);
 #endif
         throw Exception("Not implemented");
     }

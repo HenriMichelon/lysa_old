@@ -39,7 +39,7 @@ namespace lysa {
             releaseResources();
         }
         this->shape = shape;
-        const auto& physx = getPhysx();
+        const auto& physx = physX.getPhysics();
         const auto debug = getViewport()->getConfiguration().debugConfig.enabled;
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
@@ -67,8 +67,7 @@ namespace lysa {
         }
 
         physx::PxFilterData filterData;
-        filterData.word0 = 1;
-        filterData.word1 = 1;
+        filterData.word0 = collisionLayer;
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
                 auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
@@ -84,6 +83,7 @@ namespace lysa {
                     physx::PxQuat(localQuat.x, localQuat.y, localQuat.z, localQuat.w)};
                 pxShape->setLocalPose(localPose);
                 pxShape->setQueryFilterData(filterData);
+                pxShape->setSimulationFilterData(filterData);
                 shapes.push_back(pxShape);
                 actor->attachShape(*pxShape);
             }
@@ -95,6 +95,7 @@ namespace lysa {
             pxShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
             pxShape->setFlag(physx::PxShapeFlag::eSCENE_QUERY_SHAPE, true);
             pxShape->setQueryFilterData(filterData);
+            pxShape->setSimulationFilterData(filterData);
             shapes.push_back(pxShape);
             actor->attachShape(*pxShape);
         }

@@ -20,7 +20,6 @@ namespace lysa {
     void Character::setShape(const float height, const float radius) {
         assert([&]{ return height/2 > radius; }, "Invalid capsule shape: height/2 < radius");
         const auto position= getPositionGlobal();
-        const auto quat = normalize(getRotationGlobal());
         physx::PxCapsuleControllerDesc desc;
         desc.height = height - 2.0f * radius;
         desc.radius = radius;
@@ -30,7 +29,7 @@ namespace lysa {
         desc.slopeLimit = physx::PxCos(radians(maxSlopeAngle));
         desc.stepOffset = 0.3f;
         desc.contactOffset = 0.1f;
-        desc.material = getPhysx()->createMaterial(0.5f, 0.5f, 0.0f);
+        desc.material = physX.createMaterial(0.5f, 0.0f);
         desc.reportCallback = this;
         desc.behaviorCallback = nullptr;
         capsuleController = static_cast<physx::PxCapsuleController*>(
@@ -39,8 +38,16 @@ namespace lysa {
     }
 
     float3 Character::getGroundVelocity() const {
-        // const auto velocity = virtualCharacter->GetGroundVelocity();
-        // return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
+        if (ground) {
+            auto* actor = ground->getActor();
+            if (actor) {
+                const auto* rigid = actor->is<physx::PxRigidDynamic>();
+                if (rigid) {
+                    const auto& v = rigid->getLinearVelocity();
+                    return float3{v.x, v.y, v.z};
+                }
+            }
+        }
         return FLOAT3ZERO;
     }
 
@@ -66,19 +73,7 @@ namespace lysa {
     }
 
     std::list<CollisionObject::Collision> Character::getCollisions() const {
-        std::list<Collision> contacts;
-        // for (const auto &contact : virtualCharacter->GetActiveContacts()) {
-        //     auto *node = reinterpret_cast<CollisionObject *>(bodyInterface->GetUserData(contact.mBodyB));
-        //     assert([&] { return node; }, "physics body not associated with a node");
-        //     contacts.push_back({
-        //         .position = float3{contact.mPosition.GetX(), contact.mPosition.GetY(), contact.mPosition.GetZ()},
-        //         .normal = float3{contact.mSurfaceNormal.GetX(),
-        //                        contact.mSurfaceNormal.GetY(),
-        //                        contact.mSurfaceNormal.GetZ()},
-        //         .object = node
-        //     });
-        // }
-        return contacts;
+        return {currentContacts.begin(), currentContacts.end()};
     }
 
     void Character::setVelocity(const float3& velocity) {
@@ -100,6 +95,8 @@ namespace lysa {
     void Character::physicsProcess(const float delta) {
         Node::physicsProcess(delta);
         if (!capsuleController) return;
+        currentContacts.clear();
+
         const auto disp = velocity * delta;
         float3 globalDir = mul(disp, float3x3{globalTransform});
 
@@ -140,20 +137,23 @@ namespace lysa {
     }
 
     physx::PxQueryHitType::Enum Character::preFilter(
-            const physx::PxFilterData &filterData,
-            const physx::PxShape *shape,
-            const physx::PxRigidActor *actor,
-            physx::PxHitFlags &queryFlags
-        ) {
-        return physx::PxQueryHitType::eBLOCK;
+        const physx::PxFilterData &filterData,
+        const physx::PxShape *shape,
+        const physx::PxRigidActor *actor,
+        physx::PxHitFlags &queryFlags) {
+        const auto shapeData = shape->getQueryFilterData();
+        if (physX.shouldCollide(collisionLayer, shapeData.word0)) {
+            return physx::PxQueryHitType::eBLOCK;
+        }
+        return physx::PxQueryHitType::eNONE;
     }
 
     physx::PxQueryHitType::Enum Character::postFilter(
         const physx::PxFilterData &filterData,
         const physx::PxQueryHit &hit,
         const physx::PxShape *shape,
-        const physx::PxRigidActor *actor
-        ) {
+        const physx::PxRigidActor *actor) {
+        const auto shapeData = shape->getQueryFilterData();
         return physx::PxQueryHitType::eBLOCK;
     }
 
@@ -161,9 +161,14 @@ namespace lysa {
         const auto node = static_cast<CollisionObject*>(hit.actor->userData);
         if (node) {
             const auto normal = float3{hit.worldNormal.x, hit.worldNormal.y, hit.worldNormal.z};
+            const auto position = float3{hit.worldPos.x, hit.worldPos.y, hit.worldPos.z};
+            currentContacts.push_back(Collision{
+                .position = position,
+                .normal = normal,
+                .object = node
+            });
             if (normal.y > 0.0f) {
                 ground = node;
-                // INFO("onShapeHit", lysa::to_string(node->getName()), " ", to_string(normal));
             }
         }
     }

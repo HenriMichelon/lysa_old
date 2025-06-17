@@ -173,6 +173,7 @@ export namespace lysa {
 #ifdef PHYSIC_ENGINE_PHYSX
         bool onGround{false};
         CollisionObject* ground{nullptr};
+        std::vector<Collision> currentContacts;
         float3 velocity{0.0f};
         float maxSlopeAngle{45.0f};
         physx::PxCapsuleController* capsuleController{nullptr};

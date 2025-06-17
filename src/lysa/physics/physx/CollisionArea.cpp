@@ -18,7 +18,7 @@ namespace lysa {
             releaseResources();
         }
         this->shape = shape;
-        const auto& physx = getPhysx();
+        const auto& physx = physX.getPhysics();
 
         const auto position = getPositionGlobal();
         const auto quat = getRotationGlobal();

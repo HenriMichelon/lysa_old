@@ -31,6 +31,14 @@ namespace lysa {
 
     void CollisionObject::setCollisionLayer(const collision_layer layer) {
         collisionLayer = layer;
+        if (actor) {
+            physx::PxFilterData filterData;
+            filterData.word0 = collisionLayer;
+            for (const auto& pxShape : shapes) {
+                pxShape->setQueryFilterData(filterData);
+                pxShape->setSimulationFilterData(filterData);
+            }
+        }
     }
 
     void CollisionObject::setActor(physx::PxRigidActor *actor) {
