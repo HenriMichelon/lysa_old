@@ -34,9 +34,6 @@ export namespace lysa {
         ~PhysicsBody() override = default;
 
     protected:
-        float gravityFactor{1.0f};
-        float mass{-1.0f};
-
         virtual void createBody(const std::shared_ptr<Shape> &shape);
 
         void attachToViewport(Viewport* viewport) override;

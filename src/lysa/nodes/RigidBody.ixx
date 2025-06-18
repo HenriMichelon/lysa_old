@@ -55,34 +55,54 @@ export namespace lysa {
         void setMass(float value);
 
         /**
+         * Returns the body's mass.
+         */
+        float getMass() const;
+
+        /**
          * Returns the linear velocity
          */
         virtual float3 getVelocity() const;
 
         /**
-         * Add force (unit: N) at the center of mass for the next time step, will be reset after the next physics update
+         * Adds force at the center of mass for the next time step, will be reset after the next physics update
          */
-        void applyForce(const float3& force) const;
+        void addForce(const float3& force);
 
         /**
-         * Add force (unit: N) at `position` for the next time step, will be reset after the next physics update
+         * Adds force at `position` for the next time step, will be reset after the next physics update
          */
-        void applyForce(const float3& force, const float3& position) const;
+        void addForce(const float3& force, const float3& position);
+
+        /**
+         * Adds an impulse at the center of mass
+         */
+        void addImpulse(const float3& force);
+
+        /**
+         * Adds an impulse at `position`
+         */
+        void addImpulse(const float3& force, const float3& position);
 
         void setProperty(const std::string &property, const std::string &value) override;
 
         ~RigidBody() override = default;
 
     protected:
-        float density{1000.0f};
+        float gravityFactor{1.0f};
+        float density{100.0f};
+        float mass{-1.0f};
 
         std::shared_ptr<Node> duplicateInstance() const override;
 
-#ifdef PHYSIC_ENGINE_PHYSX
         void createBody(const std::shared_ptr<Shape> &shape) override;
-#endif
 
         void enterScene() override;
+
+#ifdef PHYSIC_ENGINE_PHYSX
+        bool forceApplied{false};
+        void process(float delta) override;
+#endif
 
     };
 }

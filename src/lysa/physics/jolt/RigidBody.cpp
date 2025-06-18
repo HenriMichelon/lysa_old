@@ -12,6 +12,7 @@ module;
 module lysa.nodes.rigid_body;
 
 import lysa.constants;
+import lysa.log;
 import lysa.physics.jolt.engine;
 
 namespace lysa {
@@ -33,6 +34,11 @@ namespace lysa {
                     JPH::EMotionType::Dynamic,
                     name,
                     RIGID_BODY) {
+    }
+
+    void RigidBody::createBody(const std::shared_ptr<Shape> &shape) {
+        PhysicsBody::createBody(shape);
+        setMass(mass);
     }
 
     void RigidBody::setVelocity(const float3& velocity) {
@@ -58,14 +64,14 @@ namespace lysa {
         return float3{velocity.GetX(), velocity.GetY(), velocity.GetZ()};
     }
 
-    void RigidBody::applyForce(const float3& force) const {
+    void RigidBody::addForce(const float3& force) {
         if (bodyId.IsInvalid() || !bodyInterface) { return; }
         bodyInterface->AddForce(
                 bodyId,
                 JPH::Vec3{force.x, force.y, force.z});
     }
 
-    void RigidBody::applyForce(const float3& force, const float3& position) const {
+    void RigidBody::addForce(const float3& force, const float3& position) {
         if (bodyId.IsInvalid() || !bodyInterface) { return; }
         bodyInterface->AddForce(
                 bodyId,
@@ -73,20 +79,64 @@ namespace lysa {
                 JPH::Vec3{position.x, position.y, position.z});
     }
 
+    void RigidBody::addImpulse(const float3& force) {
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->AddImpulse(
+                bodyId,
+                JPH::Vec3{force.x, force.y, force.z});
+    }
+
+    void RigidBody::addImpulse(const float3& force, const float3& position) {
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        bodyInterface->AddImpulse(
+                bodyId,
+                JPH::Vec3{force.x, force.y, force.z},
+                JPH::Vec3{position.x, position.y, position.z});
+    }
+
+    void RigidBody::setDensity(const float density) {
+        this->density = density;
+        if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        const auto joltShape = bodyInterface->GetShape(bodyId);
+        if (joltShape) {
+            setMass(joltShape->GetVolume() * density);
+        }
+    }
+
     void RigidBody::setMass(const float value) {
         mass = value;
         if (bodyId.IsInvalid() || !bodyInterface) { return; }
+        if (mass > 0.0f) {
+            const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
+                .getPhysicsSystem()
+                .GetBodyLockInterface(),
+                getBodyId());
+            if (lock.Succeeded()) {
+                JPH::MotionProperties *mp = lock.GetBody().GetMotionProperties();
+                if (mass != 0.0f) {
+                    mp->SetInverseMass(1.0f/mass);
+                } else {
+                    mp->SetInverseMass(0.0f);
+                }
+            }
+        } else {
+            const auto joltShape = bodyInterface->GetShape(bodyId);
+            if (joltShape) {
+                setMass(joltShape->GetVolume() * density);
+            }
+        }
+    }
+
+    float RigidBody::getMass() const {
+        if (bodyId.IsInvalid() || !bodyInterface) { return mass; }
         const JPH::BodyLockWrite lock(dynamic_cast<JoltPhysicsScene&>(getViewport()->getPhysicsScene())
             .getPhysicsSystem()
             .GetBodyLockInterface(),
             getBodyId());
         if (lock.Succeeded()) {
-            JPH::MotionProperties *mp = lock.GetBody().GetMotionProperties();
-            if (value != 0.0f) {
-                mp->SetInverseMass(1.0f/value);
-            } else {
-                mp->SetInverseMass(0.0f);
-            }
+            const JPH::MotionProperties *mp = lock.GetBody().GetMotionProperties();
+            return 1.0f/mp->GetInverseMass();
         }
+        return mass;
     }
 }

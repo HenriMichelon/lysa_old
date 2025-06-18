@@ -48,10 +48,7 @@ namespace lysa {
             physx::PxVec3(position.x, position.y, position.z),
             physx::PxQuat(quat.x, quat.y, quat.z, quat.w)};
         if (actorType == physx::PxActorType::eRIGID_DYNAMIC) {
-            physx::PxRigidDynamic* body = physx->createRigidDynamic(transform);
-            body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
-            body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
-            setActor(body);
+            setActor(physx->createRigidDynamic(transform));
         } else {
             setActor(physx->createRigidStatic(transform));
         }

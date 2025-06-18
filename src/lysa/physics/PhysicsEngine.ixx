@@ -16,6 +16,11 @@ import lysa.renderers.debug;
 
 export namespace lysa {
 
+    enum class PhysicsEngineType {
+        JOLT,
+        PHYSX
+    };
+
     class PhysicsScene {
     public:
         virtual void update(float deltaTime) = 0;
@@ -43,6 +48,8 @@ export namespace lysa {
         virtual void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const = 0;
 
         virtual PhysicsMaterial* duplicateMaterial(const PhysicsMaterial* orig) const = 0;
+
+        static PhysicsEngineType getEngineType();
 
         virtual ~PhysicsEngine() = default;
     };

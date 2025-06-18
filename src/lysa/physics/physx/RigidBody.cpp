@@ -31,15 +31,18 @@ namespace lysa {
 
     void RigidBody::createBody(const std::shared_ptr<Shape> &shape) {
         PhysicsBody::createBody(shape);
+        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+        body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
+        body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
         setMass(mass);
     }
 
     void RigidBody::setDensity(const float density) {
+        this->density = density;
         if (!actor || !scene) return;
         const auto body = static_cast<physx::PxRigidDynamic*>(actor);
         physx::PxRigidBodyExt::updateMassAndInertia(*body, density);
     }
-
 
     void RigidBody::setVelocity(const float3& velocity) {
         if (!actor || !scene) return;
@@ -65,19 +68,50 @@ namespace lysa {
         body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
     }
 
-
-    void RigidBody::applyForce(const float3& force) const {
+    void RigidBody::addForce(const float3& force) {
         if (!actor || !scene) return;
-        static_cast<physx::PxRigidDynamic*>(actor)->addForce(physx::PxVec3(force.x, force.y, force.z));
+        static_cast<physx::PxRigidDynamic*>(actor)->addForce(
+            physx::PxVec3(force.x, force.y, force.z),
+            physx::PxForceMode::eFORCE);
+        forceApplied = true;
     }
 
-    void RigidBody::applyForce(const float3& force, const float3&position) const {
+    void RigidBody::addForce(const float3& force, const float3&position) {
         if (!actor || !scene) return;
         const auto body = static_cast<physx::PxRigidDynamic*>(actor);
         physx::PxRigidBodyExt::addForceAtPos(
             *body,
             physx::PxVec3(force.x, force.y, force.z),
-            physx::PxVec3(position.x, position.y, position.z));
+            physx::PxVec3(position.x, position.y, position.z),
+            physx::PxForceMode::eFORCE);
+        forceApplied = true;
+    }
+
+    void RigidBody::addImpulse(const float3& force) {
+        if (!actor || !scene) return;
+        static_cast<physx::PxRigidDynamic*>(actor)->addForce(
+            physx::PxVec3(force.x, force.y, force.z),
+            physx::PxForceMode::eIMPULSE);
+    }
+
+    void RigidBody::addImpulse(const float3& force, const float3&position) {
+        if (!actor || !scene) return;
+        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+        physx::PxRigidBodyExt::addForceAtPos(
+            *body,
+            physx::PxVec3(force.x, force.y, force.z),
+            physx::PxVec3(position.x, position.y, position.z),
+            physx::PxForceMode::eIMPULSE);
+    }
+
+    void RigidBody::process(const float delta) {
+        PhysicsBody::process(delta);
+        if (forceApplied) {
+            if (!actor || !scene) return;
+            const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+            body->clearForce();
+            forceApplied = false;
+        }
     }
 
     void RigidBody::setMass(const float value) {
@@ -89,6 +123,12 @@ namespace lysa {
         } else {
             physx::PxRigidBodyExt::updateMassAndInertia(*body, density);
         }
+    }
+
+    float RigidBody::getMass() const {
+        if (!actor || !scene) return mass;
+        const auto* body = static_cast<physx::PxRigidDynamic*>(actor);
+        return body->getMass();
     }
 
 }
