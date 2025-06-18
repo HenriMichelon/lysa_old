@@ -30,16 +30,9 @@ namespace lysa {
         if (excludeParent && node == getParent()) {
             return physx::PxQueryHitType::eNONE;
         }
-
-        const auto& config = Application::getConfiguration().physicsConfig;
-        const auto targetLayer = node->getCollisionLayer();
-        for (const auto& entry : config.layerCollisionTable.layersCollideWith) {
-            if (entry.layer == collisionLayer) {
-                if (std::ranges::find(entry.collideWith, targetLayer) != entry.collideWith.end()) {
-                    return physx::PxQueryHitType::eBLOCK;
-                }
-                return physx::PxQueryHitType::eNONE;
-            }
+        const auto shapeData = shape->getQueryFilterData();
+        if (PhysXPhysicsEngine::collisionMatrix[collisionLayer][shapeData.word0]) {
+            return physx::PxQueryHitType::eBLOCK;
         }
         return physx::PxQueryHitType::eNONE;
     }
@@ -61,8 +54,13 @@ namespace lysa {
 
         physx::PxRaycastBuffer hit;
         physx::PxQueryFilterData filterData;
-        filterData.flags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC;
+        filterData.flags =
+            physx::PxQueryFlag::eSTATIC |
+            physx::PxQueryFlag::eDYNAMIC |
+            physx::PxQueryFlag::eANY_HIT |
+            physx::PxQueryFlag::ePREFILTER;
 
+        collider = nullptr;
         const auto scene = dynamic_cast<PhysXPhysicsScene&>(getViewport()->getPhysicsScene()).getScene();
         bool status = scene->raycast(
             physx::PxVec3(origin.x, origin.y, origin.z),
@@ -70,23 +68,15 @@ namespace lysa {
             maxDist,
             hit,
             physx::PxHitFlag::eDEFAULT,
-            filterData);
-
+            filterData,
+            this);
         if (status && hit.hasBlock) {
-            physx::PxRigidActor* actor = hit.block.actor;
-            if (actor) {
-                void* userData = actor->userData;
-                auto* obj = reinterpret_cast<CollisionObject*>(userData);
-                if (obj && (!excludeParent || obj != getParent()) && isProcessed() && obj->isProcessed()) {
-                    collider = obj->sharedPtr();
-                    const auto& p = hit.block.position;
-                    hitPoint = float3{p.x, p.y, p.z};
-                    return;
-                }
-            }
+            auto* obj = reinterpret_cast<CollisionObject*>(hit.block.actor->userData);
+            collider = obj->sharedPtr();
+            const auto& p = hit.block.position;
+            hitPoint = float3{p.x, p.y, p.z};
         }
 
-        collider = nullptr;
     }
 
     void RayCast::setCollisionLayer(const collision_layer layer) {
