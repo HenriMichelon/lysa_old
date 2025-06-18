@@ -33,7 +33,7 @@ export namespace lysa {
         //! If the debug renderer is enabled, display the debug at startup
         bool                displayAtStartup{true};
         //! Draw with depth-testing
-        bool                useDepthTesting{true};
+        bool                depthTestEnable{true};
         //! Draw coordinate system (x = red, y = green, z = blue)
         bool                drawCoordinateSystem{false};
         //! Coordinate system draw scale
@@ -46,8 +46,6 @@ export namespace lysa {
         float4              rayCastCollidingColor{0.95f, 0.275f, 0.76f, 1.0f};
         //! Draw the collision shapes of all collision objects
 		bool			    drawShape{true};
-        //! The collision shapes will be drawn in wireframe instead of solid
-        bool                shapeWireframe{true};
         //! Coloring scheme to use for collision shapes
 		DebugShapeColor	    shapeColor{DebugShapeColor::ShapeTypeColor};
         //! Draw a bounding box per collision object

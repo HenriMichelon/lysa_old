@@ -29,12 +29,13 @@ import lysa.global;
 import lysa.configuration;
 import lysa.scene;
 import lysa.nodes.node;
+import lysa.renderers.vector;
 
 export namespace lysa {
 
-    class DebugRenderer
+    class DebugRenderer : public VectorRenderer
 #ifdef PHYSIC_ENGINE_JOLT
-        : public JPH::DebugRendererSimple
+        , public JPH::DebugRendererSimple
 #endif
     {
     public:
@@ -43,24 +44,7 @@ export namespace lysa {
             const RenderingConfiguration& renderingConfiguration,
             const std::wstring& name);
 
-        void drawLine(const float3& from, const float3& to, const float4& color);
-
-        void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
-
         void drawRayCasts(const std::shared_ptr<Node>& scene, const float4& rayColor, const float4& collidingRayColor);
-
-        void restart();
-
-        void update(
-            const vireo::CommandList& commandList,
-            uint32 frameIndex);
-
-        void render(
-            vireo::CommandList& commandList,
-            const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
-            uint32 frameIndex);
 
         const auto& getConfiguration() const { return config; }
 
@@ -72,64 +56,11 @@ export namespace lysa {
         void DrawText3D(JPH::RVec3Arg inPosition, const std::string_view &inString, JPH::ColorArg inColor, float inHeight) override {}
 #endif
 
-        virtual ~DebugRenderer() = default;
+        ~DebugRenderer() override = default;
         DebugRenderer(DebugRenderer&) = delete;
         DebugRenderer& operator=(DebugRenderer&) = delete;
 
     private:
         const DebugConfig& config;
-        const std::wstring name;
-
-        struct GlobalUniform {
-            float4x4 projection{1.0f};
-            float4x4 view{1.0f};
-        };
-
-        struct Vertex {
-            alignas(16) float3 position;
-            alignas(16) float4 color;
-        };
-
-        struct FrameData {
-            std::shared_ptr<vireo::Buffer> globalUniform;
-            std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-        };
-
-        const std::vector<vireo::VertexAttributeDesc> vertexAttributes{
-            {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position)},
-            {"COLOR",    vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)}
-        };
-
-        vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc = {{ .blendEnable = false }},
-            .cullMode = vireo::CullMode::NONE,
-        };
-
-        vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{ }},
-        };
-
-        vireo::Extent currentExtent{};
-        std::vector<FrameData> framesData;
-
-        // Vertex buffer needs to be re-uploaded to GPU
-        bool vertexBufferDirty{true};
-        // All the vertices for lines
-        std::vector<Vertex> linesVertices;
-        // All the vertices for triangles
-        std::vector<Vertex> triangleVertices;
-        // Number of vertices for the currently allocated buffers, used to check if we need to resize the buffers
-        uint32 vertexCount{0};
-        // Staging vertex buffer used when updating GPU memory
-        std::shared_ptr<vireo::Buffer> stagingBuffer;
-        // Vertex buffer in GPU memory
-        std::shared_ptr<vireo::Buffer> vertexBuffer;
-        // Used when we need to postpone the buffers destruction when they are in use by another frame in flight
-        std::list<std::shared_ptr<vireo::Buffer>> oldBuffers;
-
-        std::shared_ptr<vireo::GraphicPipeline> pipelineLines;
-        std::shared_ptr<vireo::GraphicPipeline> pipelineTriangles;
-        std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-
     };
 }

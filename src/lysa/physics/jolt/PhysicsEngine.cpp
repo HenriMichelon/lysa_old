@@ -185,7 +185,7 @@ namespace lysa {
         physicsSystem.SetContactListener(&contactListener);
         bodyDrawSettings = JPH::BodyManager::DrawSettings{
             .mDrawShape = debugConfig.drawShape,
-            .mDrawShapeWireframe = debugConfig.shapeWireframe,
+            .mDrawShapeWireframe = true,
             .mDrawShapeColor = static_cast<JPH::BodyManager::EShapeColor>(debugConfig.shapeColor),
             .mDrawBoundingBox = debugConfig.drawBoundingBox,
             .mDrawCenterOfMassTransform = debugConfig.drawCenterOfMass,
@@ -206,7 +206,6 @@ namespace lysa {
             }
             physicsSystem.DrawBodies(bodyDrawSettings, &debugRenderer, nullptr);
         }
-
     }
 
     float3 JoltPhysicsScene::getGravity() const {

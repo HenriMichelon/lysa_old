@@ -19,8 +19,8 @@ endif()
 #######################################################
 set(LYSA_TARGET ${PROJECT_NAME})
 set(DIRECTX_BACKEND ON)
-set(PHYSIC_ENGINE_JOLT OFF)
-set(PHYSIC_ENGINE_PHYSX ON)
+set(PHYSIC_ENGINE_JOLT ON)
+set(PHYSIC_ENGINE_PHYSX OFF)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
@@ -84,7 +84,7 @@ file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 #        "${SHADERS_SRC_DIR}/*.slang"
 #)
 set(SHADERS_SOURCE_FILES
-        "${SHADERS_SRC_DIR}/debug.slang"
+        "${SHADERS_SRC_DIR}/vector.slang"
         "${SHADERS_SRC_DIR}/default.vert.slang"
         "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
         "${SHADERS_SRC_DIR}/forward.frag.slang"
@@ -232,6 +232,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/DebugRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
+        ${ENGINE_SRC_DIR}/renderers/VectorRenderer.cpp
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
@@ -307,6 +308,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/DebugRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
+        ${ENGINE_SRC_DIR}/renderers/VectorRenderer.ixx
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.ixx
