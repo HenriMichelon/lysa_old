@@ -88,6 +88,10 @@ export namespace lysa {
 
         ~RigidBody() override = default;
 
+#ifdef PHYSIC_ENGINE_JOLT
+        void scale(float scale) override;
+#endif
+
     protected:
         float gravityFactor{1.0f};
         float density{100.0f};

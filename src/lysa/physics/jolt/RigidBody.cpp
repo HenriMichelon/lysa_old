@@ -52,6 +52,11 @@ namespace lysa {
         }
     }
 
+    void RigidBody::scale(const float scale) {
+        PhysicsBody::scale(scale);
+        setMass(mass);
+    }
+
     void RigidBody::setGravityFactor(const float factor) {
         gravityFactor = factor;
         if (bodyId.IsInvalid() || !bodyInterface) { return; }
@@ -100,6 +105,7 @@ namespace lysa {
         const auto joltShape = bodyInterface->GetShape(bodyId);
         if (joltShape) {
             setMass(joltShape->GetVolume() * density);
+            mass = -1.0f;
         }
     }
 
@@ -123,6 +129,7 @@ namespace lysa {
             const auto joltShape = bodyInterface->GetShape(bodyId);
             if (joltShape) {
                 setMass(joltShape->GetVolume() * density);
+                mass = -1.0f;
             }
         }
     }
