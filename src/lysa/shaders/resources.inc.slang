@@ -36,10 +36,11 @@ struct MeshSurface {
     uint indexCount;
     uint indicesIndex;
     uint verticesIndex;
-    uint materialIndex;
 };
 
 struct Instance {
-    uint meshInstanceIndex;
-    uint meshSurfaceIndex;
+    uint  meshInstanceIndex;
+    uint  meshSurfaceIndex;
+    uint  materialIndex;
+    float _pad0;
 }

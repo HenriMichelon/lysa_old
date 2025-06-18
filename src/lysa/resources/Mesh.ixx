@@ -49,7 +49,6 @@ export namespace lysa {
         uint32 indexCount;
         uint32 indicesIndex;
         uint32 verticesIndex;
-        uint32 materialIndex;
     };
 
     /**

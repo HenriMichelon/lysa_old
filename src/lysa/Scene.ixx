@@ -33,6 +33,7 @@ export namespace lysa {
     struct alignas(8) InstanceData {
         uint32 meshInstanceIndex;
         uint32 meshSurfaceIndex;
+        uint32 materialIndex;
     };
 
     struct DrawCommand {
@@ -155,7 +156,7 @@ export namespace lysa {
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
 
             void addInstance(
-                const std::shared_ptr<Mesh>& mesh,
+                const std::shared_ptr<MeshInstance>& meshInstance,
                 const MemoryBlock& instanceMemoryBlock,
                 const MemoryBlock& meshInstanceMemoryBlock);
         };

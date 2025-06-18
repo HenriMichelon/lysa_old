@@ -124,6 +124,8 @@ namespace lysa {
         for (int i = 0; i < SHADER_MATERIAL_MAX_PARAMETERS; i++) {
             parameters[i] = orig->parameters[i];
         }
+        upload();
+        Application::getResources().setUpdated();
     }
 
     ShaderMaterial::ShaderMaterial(const std::wstring &fragShaderFileName,

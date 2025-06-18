@@ -81,7 +81,7 @@ namespace lysa {
             surfaceData[i].indexCount = surface->indexCount;
             surfaceData[i].indicesIndex = indicesMemoryBlock.instanceIndex + surface->firstIndex;
             surfaceData[i].verticesIndex = verticesMemoryBlock.instanceIndex;
-            surfaceData[i].materialIndex = material->getMaterialIndex();
+            // surfaceData[i].materialIndex = material->getMaterialIndex();
         }
         resources.getMeshSurfaceArray().write(surfacesMemoryBlock, surfaceData.data());
     }

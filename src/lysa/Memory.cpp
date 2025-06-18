@@ -100,6 +100,10 @@ namespace lysa {
         if (!pendingWrites.empty()) {
             commandList.copy(stagingBuffer, buffer, pendingWrites);
             pendingWrites.clear();
+            commandList.barrier(
+               *buffer,
+               vireo::ResourceState::COPY_DST,
+               vireo::ResourceState::SHADER_READ);
         }
     }
 

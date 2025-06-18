@@ -6,6 +6,7 @@
 */
 module lysa.nodes.mesh_instance;
 
+import lysa.application;
 import lysa.window;
 import lysa.nodes.node;
 import lysa.resources.mesh;
@@ -25,6 +26,25 @@ namespace lysa {
             .visible = isVisible() ? 1u : 0u,
         };
     }
+
+    const std::shared_ptr<Material>& MeshInstance::getSurfaceMaterial(const uint32 surfaceIndex) const {
+        if (overrideMaterials.contains(surfaceIndex)) {
+            return overrideMaterials.at(surfaceIndex);
+        }
+        return getMesh()->getSurfaces()[surfaceIndex]->material;
+    }
+
+    void MeshInstance::setSurfaceOverrideMaterial(const uint32 surfaceIndex, const std::shared_ptr<Material>& material) {
+        overrideMaterials[surfaceIndex] = material;
+    }
+
+    std::shared_ptr<Material> MeshInstance::getSurfaceOverrideMaterial(const uint32 surfaceIndex) {
+        if (overrideMaterials.contains(surfaceIndex)) {
+            return overrideMaterials.at(surfaceIndex);
+        }
+        return nullptr;
+    }
+
 
     std::shared_ptr<Node> MeshInstance::duplicateInstance() const {
         return std::make_shared<MeshInstance>(*this);

@@ -91,10 +91,6 @@ namespace lysa {
                 commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->drawCommands.data());
                 pipelineData->instancesUpdated = false;
                 commandList.barrier(
-                    *pipelineData->instancesArray.getBuffer(),
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::SHADER_READ);
-                commandList.barrier(
                     *pipelineData->drawCommandsBuffer,
                     vireo::ResourceState::COPY_DST,
                     vireo::ResourceState::SHADER_READ);
@@ -143,10 +139,6 @@ namespace lysa {
         if (meshInstancesDataUpdated) {
             meshInstancesDataArray.flush(commandList);
             meshInstancesDataUpdated = false;
-            commandList.barrier(
-                *meshInstancesDataArray.getBuffer(),
-                vireo::ResourceState::COPY_DST,
-                vireo::ResourceState::SHADER_READ);
         }
 
         updatePipelineData(commandList, opaquePipelinesData);
@@ -211,7 +203,8 @@ namespace lysa {
 
             auto haveTransparentMaterial{false};
             auto nodePipelineIds = std::set<uint32>{};
-            for (const auto& material : mesh->getMaterials()) {
+            for (int i = 0; i < mesh->getMaterials().size(); i++) {
+                const auto material = meshInstance->getSurfaceMaterial(i);
                 material->setMaxUpdates(framesInFlight);
                 haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
                 auto id = material->getPipelineId();
@@ -264,8 +257,6 @@ namespace lysa {
             break;
         case Node::MESH_INSTANCE:{
             const auto& meshInstance = static_pointer_cast<MeshInstance>(node);
-            const auto& mesh = meshInstance->getMesh();
-
             if (!meshInstancesDataMemoryBlocks.contains(meshInstance)) {
                 break;
             }
@@ -384,17 +375,19 @@ namespace lysa {
         const auto& mesh = meshInstance->getMesh();
         const auto instanceMemoryBlock = instancesArray.alloc(mesh->getSurfaces().size());
         instancesMemoryBlocks[meshInstance] = instanceMemoryBlock;
-        addInstance(mesh, instanceMemoryBlock, meshInstancesDataMemoryBlocks.at(meshInstance));
+        addInstance(meshInstance, instanceMemoryBlock, meshInstancesDataMemoryBlocks.at(meshInstance));
     }
 
     void Scene::PipelineData::addInstance(
-        const std::shared_ptr<Mesh>& mesh,
+        const std::shared_ptr<MeshInstance>& meshInstance,
         const MemoryBlock& instanceMemoryBlock,
         const MemoryBlock& meshInstanceMemoryBlock) {
+        const auto& mesh = meshInstance->getMesh();
         auto instancesData = std::vector<InstanceData>{};
         for (uint32 i = 0; i < mesh->getSurfaces().size(); i++) {
             const auto& surface = mesh->getSurfaces()[i];
-            if (surface->material->getPipelineId() == pipelineId) {
+            const auto& material = meshInstance->getSurfaceMaterial(i);
+            if (material->getPipelineId() == pipelineId) {
                 const uint32 id = instanceMemoryBlock.instanceIndex + instancesData.size();
                 drawCommands[drawCommandsCount] = {
                     .instanceIndex = id,
@@ -409,6 +402,7 @@ namespace lysa {
                 instancesData.push_back(InstanceData {
                     .meshInstanceIndex = meshInstanceMemoryBlock.instanceIndex,
                     .meshSurfaceIndex = mesh->getSurfacesIndex() + i,
+                    .materialIndex = material->getMaterialIndex(),
                 });
                 drawCommandsCount++;
             }
@@ -428,7 +422,7 @@ namespace lysa {
             drawCommandsCount = 0;
             for (const auto& instance : std::views::keys(instancesMemoryBlocks)) {
                 addInstance(
-                    instance->getMesh(),
+                    instance,
                     instancesMemoryBlocks.at(instance),
                     meshInstancesDataMemoryBlocks.at(instance));
             }

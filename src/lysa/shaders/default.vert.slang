@@ -27,6 +27,6 @@ VertexOutput vertexMain(VertexInput input) {
     output.bitangent = normalize(cross(normalW, tangentW));
 
     output.uv = float2(input.position.w, input.normal.w);
-    output.materialIndex = surface.materialIndex;
+    output.materialIndex = instance.materialIndex;
     return output;
 }

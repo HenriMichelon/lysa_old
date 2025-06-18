@@ -37,26 +37,6 @@ export namespace lysa {
         const auto& getMesh() const { return mesh; }
 
         /**
-         * Set to `true` to have the Mesh outlined starting to the next frame
-         */
-        // void setOutlined(const bool o) { outlined = o; }
-
-        /**
-         * Returns `true` if the Mesh is outlined during the next frame
-         */
-        // auto isOutlined() const { return outlined; }
-
-        /**
-         * Sets the outline material. The material **must** belong to the OutlineMaterials collection.
-         */
-        // void setOutlineMaterial(const std::shared_ptr<ShaderMaterial> &material) { outlineMaterial = material; }
-
-        /**
-         * Returns the current outlining material
-         */
-        // auto& getOutlineMaterial() { return outlineMaterial; }
-
-        /**
          * Returns the world space axis aligned bounding box
          */
         const auto& getAABB() const { return worldAABB; }
@@ -67,15 +47,25 @@ export namespace lysa {
             return a.mesh < b.mesh;
         }
 
+        const auto& getSurfaceOverrideMaterials() const { return overrideMaterials; }
+
+        void setSurfaceOverrideMaterial(uint32 surfaceIndex, const std::shared_ptr<Material>& material);
+
+        std::shared_ptr<Material> getSurfaceOverrideMaterial(uint32 surfaceIndex);
+
+        /**
+        * Returns the material for a given surface
+        * @param surfaceIndex Zero-based index of the surface
+        */
+        const std::shared_ptr<Material>& getSurfaceMaterial(uint32 surfaceIndex) const;
+
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
 
     private:
         AABB worldAABB;
         std::shared_ptr<Mesh> mesh;
-
-        // bool                            outlined{false};
-        // std::shared_ptr<ShaderMaterial> outlineMaterial;
+        std::unordered_map<uint32, std::shared_ptr<Material>> overrideMaterials;
 
         void updateGlobalTransform() override;
     };
