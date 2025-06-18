@@ -20,6 +20,7 @@ export namespace lysa {
     class Application {
     public:
         friend class Node;
+        static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
 
         Application(ApplicationConfiguration& config);
 
@@ -98,7 +99,6 @@ export namespace lysa {
         std::unique_ptr<PhysicsEngine> physicsEngine;
 
         // Fixed delta time for the physics
-        static constexpr float FIXED_DELTA_TIME{1.0f/60.0f};
         double currentTime{0.0};
         double accumulator{0.0};
 

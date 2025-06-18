@@ -8,6 +8,7 @@ module;
 #include <PxPhysicsAPI.h>
 module lysa.nodes.rigid_body;
 
+import lysa.application;
 import lysa.constants;
 
 namespace lysa {
@@ -27,6 +28,11 @@ namespace lysa {
                     physx::PxActorType::eRIGID_DYNAMIC,
                     name,
                     RIGID_BODY) {
+    }
+
+    void RigidBody::createShape() {
+        PhysicsBody::createShape();
+        setMass(mass);
     }
 
     void RigidBody::createBody(const std::shared_ptr<Shape> &shape) {

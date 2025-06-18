@@ -50,6 +50,11 @@ namespace lysa {
 
     void CollisionObject::releaseResources() {
         if (actor && scene) {
+            for (const auto& pxShape : shapes) {
+                actor->detachShape(*pxShape);
+                pxShape->release();
+            }
+            shapes.clear();
             scene->removeActor(*actor);
             actor->release();
             actor = nullptr;
@@ -91,6 +96,9 @@ namespace lysa {
     void CollisionObject::scale(const float scale) {
         Node::scale(scale);
         if (!actor || !scene) { return; }
+        if (scale != 1.0f) {
+            createShape();
+        }
     }
 
     void CollisionObject::process(const float alpha) {

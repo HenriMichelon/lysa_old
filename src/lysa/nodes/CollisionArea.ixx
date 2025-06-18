@@ -46,6 +46,10 @@ export namespace lysa {
         std::shared_ptr<Node> duplicateInstance() const override;
 
         void attachToViewport(Viewport* viewport) override;
+
+#ifdef PHYSIC_ENGINE_PHYSX
+        void createShape() override;
+#endif
     };
 
 }

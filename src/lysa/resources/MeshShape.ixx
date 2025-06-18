@@ -4,6 +4,14 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef PHYSIC_ENGINE_JOLT
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.resources.mesh_shape;
 
 import lysa.nodes.node;
@@ -23,23 +31,17 @@ export namespace lysa {
          */
         MeshShape(
             const std::shared_ptr<Node> &node,
-            PhysicsMaterial* material = nullptr,
+            const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"MeshShape");
 
-        /**
-         * Creates a MeshShape using the triangles of the Mesh of first MeshInstance found in the `node` tree
-         */
-        MeshShape(
-            const Node &node,
-            PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"MeshShape");
-
+#ifdef PHYSIC_ENGINE_JOLT
+        JPH::ShapeSettings* getShapeSettings() override;
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
+#endif
     private:
-        void tryCreateShape(
-            const std::shared_ptr<Node>& node);
-
-        void createShape(
-            const std::shared_ptr<MeshInstance>& meshInstance);
+        std::shared_ptr<MeshInstance> meshInstance;
     };
 
 }

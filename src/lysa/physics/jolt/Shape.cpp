@@ -65,7 +65,8 @@ namespace lysa {
         const float radius,
         const PhysicsMaterial* material,
         const std::wstring &resName):
-        Shape{material, resName} {
+        Shape{material, resName},
+        radius{radius} {
         shapeSettings = new JPH::SphereShapeSettings(
             radius,
             reinterpret_cast<JPH::PhysicsMaterial*>(this->material));

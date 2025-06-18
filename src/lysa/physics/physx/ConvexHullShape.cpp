@@ -12,7 +12,13 @@ import lysa.global;
 
 namespace lysa {
 
-    void ConvexHullShape::createShape() {
+     std::unique_ptr<physx::PxGeometry> ConvexHullShape::getGeometry(const float3& scale) const {
+        std::list<float3> points;
+        const auto &transform = meshInstance->getTransform();
+        for (const auto &vertex : meshInstance->getMesh()->getVertices()) {
+            auto point = mul(float4{vertex.position, 1.0f}, transform);
+            points.push_back(point.xyz);
+        }
         std::vector<physx::PxVec3> pxPoints;
         for (const auto &vertex : points) {
             pxPoints.push_back(physx::PxVec3{vertex.x, vertex.y, vertex.z});
@@ -30,7 +36,7 @@ namespace lysa {
             throw Exception("ConvexHullShape cooking failed");
         }
         physx::PxDefaultMemoryInputData input(blob.getData(), blob.getSize());
-        geometry = std::make_unique<physx::PxConvexMeshGeometry>(getPhysx()->createConvexMesh(input));
+        return std::make_unique<physx::PxConvexMeshGeometry>(getPhysx()->createConvexMesh(input));
     }
 
 }

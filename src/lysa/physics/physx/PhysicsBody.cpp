@@ -55,12 +55,23 @@ namespace lysa {
         if (debug) {
             actor->setActorFlag(physx::PxActorFlag::eVISUALIZATION, 1.0f);
         }
+        createShape();
+    }
+
+    void PhysicsBody::createShape() {
+        for (const auto& pxShape : shapes) {
+            actor->detachShape(*pxShape);
+            pxShape->release();
+        }
+        shapes.clear();
+        const auto debug = getViewport()->getConfiguration().debugConfig.enabled;
+        const auto& physx = physX.getPhysics();
 
         physx::PxFilterData filterData;
         filterData.word0 = collisionLayer;
         if (const auto& compound = std::dynamic_pointer_cast<StaticCompoundShape>(shape)) {
             for (const auto& subshape : compound->getSubShapes()) {
-                auto pxShape = physx->createShape(subshape.shape->getGeometry(), subshape.shape->getMaterial(), true);
+                auto pxShape = physx->createShape(*subshape.shape->getGeometry(getScale()), subshape.shape->getMaterial(), true);
                 if (debug) {
                     pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
                 }
@@ -78,7 +89,7 @@ namespace lysa {
                 actor->attachShape(*pxShape);
             }
         } else {
-            const auto pxShape = physx->createShape(shape->getGeometry(), shape->getMaterial(), true);
+            const auto pxShape = physx->createShape(*shape->getGeometry(getScale()), shape->getMaterial(), true);
             if (debug) {
                 pxShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, 1.0f);
             }

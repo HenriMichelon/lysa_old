@@ -40,15 +40,15 @@ export namespace lysa {
 
 #ifdef PHYSIC_ENGINE_JOLT
     public:
-        auto getShapeSettings() const { return shapeSettings; }
+        virtual JPH::ShapeSettings* getShapeSettings() { return shapeSettings; }
     protected:
         JPH::ShapeSettings* shapeSettings{nullptr};
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
     public:
-        auto& getGeometry() const { return *geometry; }
+        virtual std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const { return nullptr; }
     protected:
-        std::unique_ptr<physx::PxGeometry> geometry;
+        // std::unique_ptr<physx::PxGeometry> geometry;
         static auto getPhysx() {
             return dynamic_cast<PhysXPhysicsEngine&>(Application::getPhysicsEngine()).getPhysics();
         }
@@ -70,6 +70,9 @@ export namespace lysa {
 
         std::shared_ptr<Resource> duplicate() const override;
 
+#ifdef PHYSIC_ENGINE_PHYSX
+        std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
+#endif
     private:
         const float3 extends;
     };
@@ -87,8 +90,12 @@ export namespace lysa {
             const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"SphereShape");
 
+#ifdef PHYSIC_ENGINE_PHYSX
+        std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
+#endif
     private:
-        SphereShape(const std::wstring &resName, PhysicsMaterial* material) : Shape(material, resName) {}
+        const float radius;
+        // SphereShape(const std::wstring &resName, PhysicsMaterial* material) : Shape(material, resName), radius {0}{}
     };
 
     /**
@@ -112,7 +119,11 @@ export namespace lysa {
             const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"AABBShape");
 
+#ifdef PHYSIC_ENGINE_PHYSX
+        std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
+#endif
     private:
+        float3 extends;
         AABBShape(
             PhysicsMaterial* material,
             const std::wstring &resName) :

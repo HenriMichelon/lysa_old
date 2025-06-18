@@ -4,6 +4,14 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef PHYSIC_ENGINE_JOLT
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+#include <PxPhysicsAPI.h>
+#endif
 export module lysa.resources.convex_hull_shape;
 
 import std;
@@ -12,7 +20,6 @@ import lysa.nodes.node;
 import lysa.nodes.mesh_instance;
 import lysa.physics.physics_material;
 import lysa.resources.shape;
-import lysa.resources.mesh;
 
 export namespace lysa {
 
@@ -27,40 +34,19 @@ export namespace lysa {
          */
         ConvexHullShape(
             const std::shared_ptr<Node> &node,
-            PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"ConvexHullShape");
-
-        /**
-         * Creates a ConvexHullShape using the vertices of the Mesh
-         */
-        ConvexHullShape(
-            const std::shared_ptr<Mesh> &mesh,
-            PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"ConvexHullShape");
-
-        /**
-         * Creates a ConvexHullShape using a list of vertices
-         */
-        ConvexHullShape(
-            const std::vector<float3>& points,
-            PhysicsMaterial* material = nullptr,
+            const PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"ConvexHullShape");
 
         std::shared_ptr<Resource> duplicate()  const override;
 
+#ifdef PHYSIC_ENGINE_JOLT
+        JPH::ShapeSettings* getShapeSettings() override;
+#endif
+#ifdef PHYSIC_ENGINE_PHYSX
+        std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
+#endif
     private:
-        std::vector<float3> points;
-
-        void tryCreateShape(
-            const std::shared_ptr<Node> &node);
-
-        void createShape(
-            const std::shared_ptr<MeshInstance>& meshInstance);
-
-        void createShape(
-            const std::shared_ptr<Mesh> &mesh);
-
-        void createShape();
+        std::shared_ptr<MeshInstance> meshInstance;
     };
 
 }

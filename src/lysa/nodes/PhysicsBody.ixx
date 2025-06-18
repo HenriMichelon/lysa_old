@@ -63,6 +63,7 @@ export namespace lysa {
                     physx::PxActorType::Enum actorType,
                     const std::wstring& name = TypeNames[PHYSICS_BODY],
                     Type type = PHYSICS_BODY);
+        void createShape() override;
 #endif
     };
 

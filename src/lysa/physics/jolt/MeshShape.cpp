@@ -13,13 +13,14 @@ import lysa.application;
 
 namespace lysa {
 
-    void MeshShape::createShape(
-        const std::shared_ptr<MeshInstance>& meshInstance) {
-        const auto & vertices  = meshInstance->getMesh()->getVertices();
+    JPH::ShapeSettings* MeshShape::getShapeSettings() {
+        const auto & vertices = meshInstance->getMesh()->getVertices();
+        const auto &transform = meshInstance->getTransform();
         JPH::VertexList vertexList;
         vertexList.reserve(vertices.size());
         for (const auto &vertex : vertices) {
-            vertexList.push_back(JPH::Float3{vertex.position.x, vertex.position.y, vertex.position.z});
+            auto point = mul(float4{vertex.position, 1.0f}, transform);
+            vertexList.push_back(JPH::Float3{point.x, point.y, point.z});
         }
         const auto & indices = meshInstance->getMesh()->getIndices();
         JPH::IndexedTriangleList triangles;
@@ -30,8 +31,8 @@ namespace lysa {
             triangles.push_back({indices[i + 0], indices[i + 1], indices[i + 2]});
             materials.push_back(joltMaterial);
         }
-
         shapeSettings = new JPH::MeshShapeSettings(vertexList, triangles);
+        return shapeSettings;
     }
 
 }

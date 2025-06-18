@@ -102,6 +102,7 @@ export namespace lysa {
 #ifdef PHYSIC_ENGINE_PHYSX
         bool forceApplied{false};
         void process(float delta) override;
+        void createShape() override;
 #endif
 
     };

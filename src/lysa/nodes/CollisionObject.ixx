@@ -78,6 +78,8 @@ export namespace lysa {
 
         void setVisible(bool visible = true) override;
 
+        void scale(float scale) override;
+
         auto sharedPtr() { return shared_from_this(); }
 
         CollisionObject(const CollisionObject&);
@@ -116,8 +118,6 @@ export namespace lysa {
 
         void resume() override;
 
-        void scale(float scale) override;
-
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::BodyInterface* bodyInterface{nullptr};
         JPH::EActivation activationMode{JPH::EActivation::Activate};
@@ -133,11 +133,14 @@ export namespace lysa {
         PhysXPhysicsEngine& physX;
         physx::PxRigidActor *actor{nullptr};
         physx::PxScene* scene{nullptr};
-        std::list<physx::PxShape*> shapes{nullptr};
+        std::list<physx::PxShape*> shapes;
 
         void setActor(physx::PxRigidActor *actor);
 
+        virtual void createShape() {}
+
         physx::PxScene* getPxScene() const;
+
     public:
         auto getActor() const { return actor; }
 #endif

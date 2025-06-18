@@ -13,7 +13,13 @@ import lysa.application;
 
 namespace lysa {
 
-    void ConvexHullShape::createShape() {
+    JPH::ShapeSettings* ConvexHullShape::getShapeSettings() {
+        std::list<float3> points;
+        const auto &transform = meshInstance->getTransform();
+        for (const auto &vertex : meshInstance->getMesh()->getVertices()) {
+            auto point = mul(float4{vertex.position, 1.0f}, transform);
+            points.push_back(point.xyz);
+        }
         JPH::Array<JPH::Vec3> jphPoints;
         for (const auto &vertex : points) {
             jphPoints.push_back(JPH::Vec3{vertex.x, vertex.y, vertex.z});
@@ -22,6 +28,7 @@ namespace lysa {
             jphPoints,
             JPH::cDefaultConvexRadius,
             reinterpret_cast<JPH::PhysicsMaterial*>(material));
+        return shapeSettings;
     }
 
 }

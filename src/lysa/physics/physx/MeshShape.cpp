@@ -12,14 +12,16 @@ import lysa.global;
 
 namespace lysa {
 
-    void MeshShape::createShape(const std::shared_ptr<MeshInstance>& meshInstance) {
+    std::unique_ptr<physx::PxGeometry> MeshShape::getGeometry(const float3& scale) const {
         const auto & vertices  = meshInstance->getMesh()->getVertices();
         const auto& indices = meshInstance->getMesh()->getIndices();
+        const auto &transform = meshInstance->getTransform();
 
         std::vector<physx::PxVec3> pxVertices;
         pxVertices.reserve(vertices.size());
         for (const auto& v : vertices) {
-            pxVertices.emplace_back(v.position.x, v.position.y, v.position.z);
+            auto point = mul(float4{v.position, 1.0f}, transform);
+            pxVertices.emplace_back(point.x, point.y, point.z);
         }
 
         std::vector<physx::PxU32> pxIndices;
@@ -41,10 +43,9 @@ namespace lysa {
         physx::PxDefaultMemoryOutputStream stream;
         if (!PxCookTriangleMesh(cookingParams, meshDesc, stream)) {
             throw Exception("MeshShape Failed to cook triangle mesh");
-            return;
         }
         physx::PxDefaultMemoryInputData input(stream.getData(), stream.getSize());
-        geometry = std::make_unique<physx::PxTriangleMeshGeometry>(getPhysx()->createTriangleMesh(input));
+        return std::make_unique<physx::PxTriangleMeshGeometry>(getPhysx()->createTriangleMesh(input));
     }
 
 }
