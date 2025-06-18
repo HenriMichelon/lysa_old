@@ -93,11 +93,11 @@ export namespace lysa {
         Material(Type type, const std::wstring &name);
 
     private:
-        const Type       type;
-        vireo::CullMode  cullMode{vireo::CullMode::NONE};
-        Transparency     transparency{Transparency::DISABLED};
-        float            alphaScissor{0.1f};
-        MemoryBlock      memoryBloc;
+        const Type      type;
+        vireo::CullMode cullMode{vireo::CullMode::NONE};
+        Transparency    transparency{Transparency::DISABLED};
+        float           alphaScissor{0.1f};
+        MemoryBlock     memoryBloc;
     };
 
     /**

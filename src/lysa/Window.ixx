@@ -86,8 +86,6 @@ export namespace lysa {
 
         const auto& getConfiguration() const { return config; }
 
-        auto& getOutlinesRenderer() const { return *outlinesRenderer; }
-
         virtual ~Window();
         Window(Window&) = delete;
         Window& operator=(Window&) = delete;
@@ -116,8 +114,6 @@ export namespace lysa {
         // Scene renderer
         std::unique_ptr<Renderer>              renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
-
-        std::unique_ptr<OutlinesRenderer>      outlinesRenderer;
 
         void* createWindow();
 

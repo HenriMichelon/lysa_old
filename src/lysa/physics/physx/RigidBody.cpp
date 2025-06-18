@@ -36,11 +36,13 @@ namespace lysa {
     }
 
     void RigidBody::createBody(const std::shared_ptr<Shape> &shape) {
-        PhysicsBody::createBody(shape);
-        const auto body = static_cast<physx::PxRigidDynamic*>(actor);
-        body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
-        body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
-        setMass(mass);
+        if (!actor) {
+            PhysicsBody::createBody(shape);
+            const auto body = static_cast<physx::PxRigidDynamic*>(actor);
+            body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, gravityFactor == 0.0f);
+            body->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, getType() == KINEMATIC_BODY);
+            setMass(mass);
+        }
     }
 
     void RigidBody::setDensity(const float density) {

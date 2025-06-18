@@ -130,7 +130,7 @@ namespace lysa {
             auto lock = std::lock_guard(frameDataMutex);
             for (auto& frame : framesData) {
                 if (async) {
-                    frame.addedNodesAsync.push_back(node );
+                    frame.addedNodesAsync.push_back(node);
                 } else {
                     frame.addedNodes.push_back(node );
                 }

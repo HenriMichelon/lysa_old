@@ -53,6 +53,7 @@ namespace lysa {
         const vireo::Buffer& input,
         const vireo::Buffer& output,
         const vireo::Buffer& counter) {
+        if (drawCommandsCount == 0) { return; }
         auto global = Global{
             .drawCommandsCount = drawCommandsCount,
         };

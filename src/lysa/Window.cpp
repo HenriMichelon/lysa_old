@@ -39,7 +39,6 @@ namespace lysa {
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
         viewport->setRootNode(rootNode);
-        outlinesRenderer = std::make_unique<OutlinesRenderer>(config.renderingConfig);
         show();
     }
 
@@ -83,7 +82,6 @@ namespace lysa {
 
     void Window::physicsProcess(const float delta) const {
         if (stopped) { return; }
-        outlinesRenderer->restart();
         for (const auto& viewport : viewports) {
             viewport->physicsProcess(delta);
         }
@@ -112,7 +110,6 @@ namespace lysa {
             renderer->update(frame.commandListUpdate, scene);
             viewport->updateDebug(*frame.commandListUpdate, frameIndex);
         }
-        outlinesRenderer->update(*frame.commandListUpdate, frameIndex);
         frame.commandListUpdate->end();
 
         auto& commandList = frame.commandList;
@@ -123,12 +120,6 @@ namespace lysa {
                 commandList,
                 scene,
                 viewport == mainViewport,
-                frameIndex);
-            outlinesRenderer->render(
-                *commandList,
-                scene,
-                renderer->getColorRenderTarget(frameIndex),
-                renderer->getDepthRenderTarget(frameIndex),
                 frameIndex);
             viewport->drawDebug(
                 *commandList,

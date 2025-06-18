@@ -142,7 +142,9 @@ namespace lysa {
 
     void CollisionObject::exitScene() {
         if (!bodyId.IsInvalid() && bodyInterface) {
-            releaseResources();
+            if (bodyInterface->IsAdded(bodyId)) {
+                bodyInterface->RemoveBody(bodyId);
+            }
         }
         Node::exitScene();
     }

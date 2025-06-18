@@ -37,8 +37,10 @@ namespace lysa {
     }
 
     void RigidBody::createBody(const std::shared_ptr<Shape> &shape) {
-        PhysicsBody::createBody(shape);
-        setMass(mass);
+        if (bodyId.IsInvalid()) {
+            PhysicsBody::createBody(shape);
+            setMass(mass);
+        }
     }
 
     void RigidBody::setVelocity(const float3& velocity) {

@@ -269,23 +269,16 @@ namespace lysa {
             if (!meshInstancesDataMemoryBlocks.contains(meshInstance)) {
                 break;
             }
-            meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
-            meshInstancesDataMemoryBlocks.erase(meshInstance);
-
-            auto haveTransparentMaterial{false};
-            auto nodePipelineIds = std::set<uint32>{};
-            for (const auto& material : mesh->getMaterials()) {
-                auto id = material->getPipelineId();
-                haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
-                nodePipelineIds.insert(id);
-            }
-            for (const auto& pipelineId : nodePipelineIds) {
-                if (haveTransparentMaterial) {
+            for (const auto& pipelineId : std::views::keys(pipelineIds)) {
+                if (transparentPipelinesData.contains(pipelineId)) {
                     transparentPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
-                } else {
+                }
+                if (opaquePipelinesData.contains(pipelineId)) {
                     opaquePipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
                 }
             }
+            meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
+            meshInstancesDataMemoryBlocks.erase(meshInstance);
             break;
         }
         case Node::DIRECTIONAL_LIGHT:
@@ -420,8 +413,10 @@ namespace lysa {
                 drawCommandsCount++;
             }
         }
-        instancesArray.write(instanceMemoryBlock, instancesData.data());
-        instancesUpdated = true;
+        if (!instancesData.empty()) {
+            instancesArray.write(instanceMemoryBlock, instancesData.data());
+            instancesUpdated = true;
+        }
     }
 
     void Scene::PipelineData::removeNode(
@@ -430,13 +425,13 @@ namespace lysa {
         if (instancesMemoryBlocks.contains(meshInstance)) {
             instancesArray.free(instancesMemoryBlocks.at(meshInstance));
             instancesMemoryBlocks.erase(meshInstance);
-        }
-        drawCommandsCount = 0;
-        for (const auto& instance : std::views::keys(instancesMemoryBlocks)) {
-            addInstance(
-                instance->getMesh(),
-                instancesMemoryBlocks.at(instance),
-                meshInstancesDataMemoryBlocks.at(instance));
+            drawCommandsCount = 0;
+            for (const auto& instance : std::views::keys(instancesMemoryBlocks)) {
+                addInstance(
+                    instance->getMesh(),
+                    instancesMemoryBlocks.at(instance),
+                    meshInstancesDataMemoryBlocks.at(instance));
+            }
         }
     }
 

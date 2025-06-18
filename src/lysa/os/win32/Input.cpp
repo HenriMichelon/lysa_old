@@ -33,9 +33,9 @@ namespace lysa {
         std::array<int, static_cast<int>(GamepadButton::LAST) + 1> indexButtons;
     };
 
-    static std::map<uint32_t, _DirectInputState> _directInputStates{};
-    static std::map<uint32_t, XINPUT_STATE>      _xinputStates{};
-    static LPDIRECTINPUT8                        _directInput = nullptr;
+    static std::map<uint32, _DirectInputState> _directInputStates{};
+    static std::map<uint32, XINPUT_STATE>      _xinputStates{};
+    static LPDIRECTINPUT8                      _directInput = nullptr;
 
     static std::map<GamepadButton, int> GAMEPABUTTON2XINPUT{
             {GamepadButton::A, XINPUT_GAMEPAD_A},
@@ -64,8 +64,8 @@ namespace lysa {
             dipr.diph.dwHeaderSize = sizeof(dipr.diph);
             dipr.diph.dwObj        = doi->dwType;
             dipr.diph.dwHow        = DIPH_BYID;
-            dipr.lMin              = -Input::DI_AXIS_RANGE;
-            dipr.lMax              = Input::DI_AXIS_RANGE;
+            dipr.lMin              = -DI_AXIS_RANGE;
+            dipr.lMax              = DI_AXIS_RANGE;
             if (FAILED(data->device->SetProperty(DIPROP_RANGE, &dipr.diph))) {
                 return DIENUM_CONTINUE;
             }
@@ -76,8 +76,8 @@ namespace lysa {
     BOOL CALLBACK Input::enumGamepadsCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *) {
         if (_directInput) {
             _DirectInputState state{
-                    .device = nullptr,
-                    .name = std::string{to_string(pdidInstance->tszProductName)}
+                .device = nullptr,
+                .name = std::string{to_string(pdidInstance->tszProductName)}
             };
             if (FAILED(_directInput->CreateDevice(pdidInstance->guidInstance,
                 &state.device,
@@ -119,10 +119,10 @@ namespace lysa {
             if (memcmp(&pdidInstance->guidProduct.Data4[2], "PIDVID", 6) == 0) {
                 std::sprintf(guid,
                         "03000000%02x%02x0000%02x%02x000000000000",
-                        static_cast<uint8_t>(pdidInstance->guidProduct.Data1),
-                        static_cast<uint8_t>(pdidInstance->guidProduct.Data1 >> 8),
-                        static_cast<uint8_t>(pdidInstance->guidProduct.Data1 >> 16),
-                        static_cast<uint8_t>(pdidInstance->guidProduct.Data1 >> 24));
+                        static_cast<uint8>(pdidInstance->guidProduct.Data1),
+                        static_cast<uint8>(pdidInstance->guidProduct.Data1 >> 8),
+                        static_cast<uint8>(pdidInstance->guidProduct.Data1 >> 16),
+                        static_cast<uint8>(pdidInstance->guidProduct.Data1 >> 24));
             } else {
                 std::sprintf(guid,
                         "05000000%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x00",
@@ -176,7 +176,7 @@ namespace lysa {
                                     state.indexButtons[static_cast<int>(GamepadButton::BACK)] = index;
                                 if (parts[0] == "start")
                                     state.indexButtons[static_cast<int>(GamepadButton::START)] = index;
-                            } catch (const std::invalid_argument &e) {
+                            } catch (const std::invalid_argument &) {
                             }
                         }
                     }
@@ -188,7 +188,7 @@ namespace lysa {
     }
 
     void Input::initInput() {
-        for (uint32_t i = 0; i < XUSER_MAX_COUNT; ++i) {
+        for (uint32 i = 0; i < XUSER_MAX_COUNT; ++i) {
             XINPUT_STATE state;
             ZeroMemory(&state, sizeof(XINPUT_STATE));
             if (XInputGetState(i, &state) == ERROR_SUCCESS) {
@@ -221,8 +221,8 @@ namespace lysa {
         }
     }
 
-    uint32_t Input::getConnectedJoypads() {
-        uint32_t count = 0;
+    uint32 Input::getConnectedJoypads() {
+        uint32 count = 0;
         if (useXInput) {
             count = _xinputStates.size();
         } else {
@@ -231,7 +231,7 @@ namespace lysa {
         return count;
     }
 
-    bool Input::isGamepad(const uint32_t index) {
+    bool Input::isGamepad(const uint32 index) {
         if (useXInput) {
             if (_xinputStates.contains(index)) {
                 XINPUT_CAPABILITIES xinputCapabilities;
@@ -313,7 +313,7 @@ namespace lysa {
         }
     }
 
-    bool Input::isGamepadButtonPressed(const uint32_t index, const GamepadButton gamepadButton) {
+    bool Input::isGamepadButtonPressed(const uint32 index, const GamepadButton gamepadButton) {
         if (useXInput && _xinputStates.contains(index)) {
             return _xinputStates[index].Gamepad.wButtons & GAMEPABUTTON2XINPUT[gamepadButton];
         } else if (_directInputStates.contains(index)) {
@@ -323,7 +323,7 @@ namespace lysa {
         return false;
     }
 
-    float2 Input::getGamepadVector(const uint32_t index, const GamepadAxisJoystick axisJoystick) {
+    float2 Input::getGamepadVector(const uint32 index, const GamepadAxisJoystick axisJoystick) {
         if (useXInput && _xinputStates.contains(index)) {
             const auto gamepad        = _xinputStates[index].Gamepad;
             const auto xAxis          = axisJoystick == GamepadAxisJoystick::LEFT ? gamepad.sThumbLX : gamepad.sThumbRX;
@@ -352,7 +352,7 @@ namespace lysa {
         return FLOAT2ZERO;
     }
 
-    std::string Input::getJoypadName(const uint32_t index) {
+    std::string Input::getJoypadName(const uint32 index) {
         if (useXInput) {
             return "XInput";
         }
@@ -380,8 +380,8 @@ namespace lysa {
         return modifiers;
     }
 
-    uint32_t _getMouseButtonState(const WPARAM wParam) {
-        uint32_t state{0};
+    uint32 _getMouseButtonState(const WPARAM wParam) {
+        uint32 state{0};
         if (wParam & MK_LBUTTON) state += static_cast<int>(MouseButton::LEFT);
         if (wParam & MK_MBUTTON) state += static_cast<int>(MouseButton::MIDDLE);
         if (wParam & MK_RBUTTON) state += static_cast<int>(MouseButton::RIGHT);
