@@ -8,15 +8,19 @@ module lysa.renderers.vector;
 
 import lysa.application;
 import lysa.virtual_fs;
-import lysa.nodes.ray_cast;
 
 namespace lysa {
 
     VectorRenderer::VectorRenderer(
         const bool depthTestEnable,
         const RenderingConfiguration& renderingConfiguration,
-        const std::wstring& name) :
-        name{name} {
+        const std::wstring& name,
+        const std::wstring& shadersName,
+        const vireo::PushConstantsDesc& pushConstantsDesc,
+        const void* pushConstants) :
+        name{name},
+        pushConstantsDesc{pushConstantsDesc},
+        pushConstants{pushConstants} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(name);
         descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
@@ -36,14 +40,14 @@ namespace lysa {
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/vector.vert" + ext, tempBuffer);
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + shadersName + L".vert" + ext, tempBuffer);
         pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/vector.frag" + ext, tempBuffer);
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + shadersName + L".frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
            { descriptorLayout },
-           {},
-           L"Debug");
+           pushConstantsDesc,
+           name);
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::LINE_LIST;
         pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name);
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::TRIANGLE_LIST;
@@ -112,7 +116,7 @@ namespace lysa {
         if (vertexCount == 0) { return; }
         const auto globalUbo = GlobalUniform {
             .projection = scene.getCurrentCamera()->getProjection(),
-            .view       =  inverse(scene.getCurrentCamera()->getTransformGlobal()),
+            .view       = inverse(scene.getCurrentCamera()->getTransformGlobal()),
         };
         frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
 
@@ -126,11 +130,17 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         commandList.bindPipeline(pipelineLines);
         commandList.bindDescriptors({frame.descriptorSet});
+        if (pushConstants) {
+            commandList.pushConstants(pipelineConfig.resources, pushConstantsDesc, pushConstants);
+        }
         if (!linesVertices.empty()) {
             commandList.draw(linesVertices.size(), 1, 0, 0);
         }
         commandList.bindPipeline(pipelineTriangles);
         commandList.bindDescriptors({frame.descriptorSet});
+        if (pushConstants) {
+            commandList.pushConstants(pipelineConfig.resources, pushConstantsDesc, pushConstants);
+        }
         if (!triangleVertices.empty()) {
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
         }

@@ -13,7 +13,6 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.scene;
-import lysa.nodes.node;
 
 export namespace lysa {
 
@@ -22,7 +21,10 @@ export namespace lysa {
         VectorRenderer(
             bool depthTestEnable,
             const RenderingConfiguration& renderingConfiguration,
-            const std::wstring& name);
+            const std::wstring& name,
+            const std::wstring& shadersName = L"vector",
+            const vireo::PushConstantsDesc& pushConstantsDesc = {},
+            const void* pushConstants = nullptr);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
@@ -57,6 +59,9 @@ export namespace lysa {
         std::vector<Vertex> linesVertices;
         // All the vertices for triangles
         std::vector<Vertex> triangleVertices;
+
+        const void* pushConstants;
+        const vireo::PushConstantsDesc pushConstantsDesc;
 
     private:
         const std::wstring name;

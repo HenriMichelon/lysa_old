@@ -41,8 +41,7 @@ namespace lysa {
         if (config.debugConfig.enabled) {
             debugRenderer = std::make_shared<DebugRenderer>(
                 config.debugConfig,
-                window.getConfiguration().renderingConfig,
-                L"Debug Renderer");
+                window.getConfiguration().renderingConfig);
             displayDebug = config.debugConfig.displayAtStartup;
         }
     }

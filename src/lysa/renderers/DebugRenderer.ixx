@@ -41,8 +41,7 @@ export namespace lysa {
     public:
         DebugRenderer(
             const DebugConfig& config,
-            const RenderingConfiguration& renderingConfiguration,
-            const std::wstring& name);
+            const RenderingConfiguration& renderingConfiguration);
 
         void drawRayCasts(const std::shared_ptr<Node>& scene, const float4& rayColor, const float4& collidingRayColor);
 
@@ -55,10 +54,6 @@ export namespace lysa {
 
         void DrawText3D(JPH::RVec3Arg inPosition, const std::string_view &inString, JPH::ColorArg inColor, float inHeight) override {}
 #endif
-
-        ~DebugRenderer() override = default;
-        DebugRenderer(DebugRenderer&) = delete;
-        DebugRenderer& operator=(DebugRenderer&) = delete;
 
     private:
         const DebugConfig& config;

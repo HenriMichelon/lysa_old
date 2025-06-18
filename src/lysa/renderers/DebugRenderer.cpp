@@ -19,16 +19,14 @@ module;
 module lysa.renderers.debug;
 
 import lysa.application;
-import lysa.virtual_fs;
 import lysa.nodes.ray_cast;
 
 namespace lysa {
 
     DebugRenderer::DebugRenderer(
         const DebugConfig& config,
-        const RenderingConfiguration& renderingConfiguration,
-        const std::wstring& name) :
-        VectorRenderer{config.depthTestEnable, renderingConfiguration, name},
+        const RenderingConfiguration& renderingConfiguration) :
+        VectorRenderer{config.depthTestEnable, renderingConfiguration, L"Debug Renderer"},
         config{config}{
     }
 
