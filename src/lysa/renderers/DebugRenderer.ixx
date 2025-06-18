@@ -28,6 +28,7 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.scene;
+import lysa.nodes.node;
 
 export namespace lysa {
 
@@ -45,6 +46,8 @@ export namespace lysa {
         void drawLine(const float3& from, const float3& to, const float4& color);
 
         void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
+
+        void drawRayCasts(const std::shared_ptr<Node>& scene, const float4& rayColor, const float4& collidingRayColor);
 
         void restart();
 

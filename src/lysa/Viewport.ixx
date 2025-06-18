@@ -99,9 +99,18 @@ export namespace lysa {
             return *physicsScene;
         }
 
-        auto& getDebugRenderer() const {
-            return *debugRenderer;
+        auto getDebugRenderer() const {
+            return debugRenderer;
         }
+
+        void updateDebug(const vireo::CommandList& commandList, uint32 frameIndex) const;
+
+        void drawDebug(
+            vireo::CommandList& commandList,
+            const Scene& scene,
+            std::shared_ptr<vireo::RenderTarget> colorAttachment,
+            std::shared_ptr<vireo::RenderTarget> depthAttachment,
+            uint32 frameIndex) const;
 
         const auto& getConfiguration() const {
             return config;
@@ -150,7 +159,7 @@ export namespace lysa {
         bool                  lockDeferredUpdates{false};
 
         std::unique_ptr<PhysicsScene> physicsScene;
-        std::unique_ptr<DebugRenderer> debugRenderer;
+        std::shared_ptr<DebugRenderer> debugRenderer;
         bool displayDebug{false};
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }

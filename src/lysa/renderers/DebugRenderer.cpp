@@ -20,6 +20,7 @@ module lysa.renderers.debug;
 
 import lysa.application;
 import lysa.virtual_fs;
+import lysa.nodes.ray_cast;
 
 namespace lysa {
 
@@ -91,6 +92,15 @@ namespace lysa {
         vertexBufferDirty = true;
     }
 #endif
+
+    void DebugRenderer::drawRayCasts(const std::shared_ptr<Node>& scene, const float4& rayColor, const float4& collidingRayColor) {
+        for(const auto& rayCast : scene->findAllChildren<RayCast>(true)) {
+            drawLine(
+                rayCast->getPositionGlobal(),
+                rayCast->isColliding() ? rayCast->getCollisionPoint() : rayCast->toGlobal(rayCast->getTarget()),
+                rayCast->isColliding() ? collidingRayColor : rayColor);
+        }
+    }
 
     void DebugRenderer::restart() {
         linesVertices.clear();

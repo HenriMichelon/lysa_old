@@ -41,7 +41,7 @@ export namespace lysa {
         //! Draw all the rays of the RayCast objects
         bool                drawRayCast{false};
         //! Color for the non-colliding rays
-        float4              rayCastColor{1.0f, 0.5f, 0.0f, 1.0f};
+        float4              rayCastColor{0.0f, 0.5f, 1.0f, 1.0f};
         //! Color for the colliding rays
         float4              rayCastCollidingColor{0.95f, 0.275f, 0.76f, 1.0f};
         //! Draw the collision shapes of all collision objects

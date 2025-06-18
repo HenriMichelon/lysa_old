@@ -83,9 +83,6 @@ namespace lysa {
     void Window::physicsProcess(const float delta) const {
         if (stopped) { return; }
         for (const auto& viewport : viewports) {
-            if (viewport->getDisplayDebug()) {
-                viewport->getDebugRenderer().restart();
-            }
             viewport->physicsProcess(delta);
         }
     }
@@ -111,10 +108,7 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             renderer->update(frame.commandListUpdate, scene);
-            if (viewport->getDisplayDebug()) {
-                viewport->getPhysicsScene().debug(viewport->getDebugRenderer());
-                viewport->getDebugRenderer().update(*frame.commandListUpdate, frameIndex);
-            }
+            viewport->updateDebug(*frame.commandListUpdate, frameIndex);
         }
         frame.commandListUpdate->end();
 
@@ -127,14 +121,12 @@ namespace lysa {
                 scene,
                 viewport == mainViewport,
                 frameIndex);
-            if (viewport->getDisplayDebug()) {
-                viewport->getDebugRenderer().render(
-                    *commandList,
-                    scene,
-                    renderer->getColorRenderTarget(frameIndex),
-                    renderer->getDepthRenderTarget(frameIndex),
-                    frameIndex);
-            }
+            viewport->drawDebug(
+                *commandList,
+                scene,
+                renderer->getColorRenderTarget(frameIndex),
+                renderer->getDepthRenderTarget(frameIndex),
+                frameIndex);
         }
         renderer->postprocess(
             *commandList,

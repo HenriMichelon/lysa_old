@@ -39,7 +39,7 @@ namespace lysa {
         }
         resize(window.getExtent());
         if (config.debugConfig.enabled) {
-            debugRenderer = std::make_unique<DebugRenderer>(
+            debugRenderer = std::make_shared<DebugRenderer>(
                 config.debugConfig,
                 window.getConfiguration().renderingConfig,
                 L"Debug Renderer");
@@ -70,8 +70,40 @@ namespace lysa {
         }
     }
 
+    void Viewport::updateDebug(const vireo::CommandList& commandList, const uint32 frameIndex)  const {
+        if (displayDebug) {
+            if (config.debugConfig.drawRayCast) {
+                debugRenderer->drawRayCasts(
+                    rootNode,
+                    config.debugConfig.rayCastColor,
+                    config.debugConfig.rayCastCollidingColor);
+            }
+            physicsScene->debug(*debugRenderer);
+            debugRenderer->update(commandList, frameIndex);
+        }
+    }
+
+    void Viewport::drawDebug(
+        vireo::CommandList& commandList,
+        const Scene& scene,
+        std::shared_ptr<vireo::RenderTarget> colorAttachment,
+        std::shared_ptr<vireo::RenderTarget> depthAttachment,
+        const uint32 frameIndex)  const {
+        if (displayDebug) {
+            debugRenderer->render(
+                    commandList,
+                    scene,
+                    colorAttachment,
+                    depthAttachment,
+                    frameIndex);
+        }
+    }
+
     void Viewport::physicsProcess(const float delta) const {
         if (rootNode) {
+            if (displayDebug) {
+                debugRenderer->restart();
+            }
             physicsScene->update(delta);
             rootNode->physicsProcess(delta);
         }
