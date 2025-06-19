@@ -18,7 +18,6 @@ import lysa.memory;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
-import lysa.renderers.outlines;
 
 export namespace lysa {
     /**

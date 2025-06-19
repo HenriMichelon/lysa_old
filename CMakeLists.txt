@@ -232,7 +232,6 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/renderers/DebugRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
-        ${ENGINE_SRC_DIR}/renderers/OutlinesRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/VectorRenderer.cpp
 
@@ -309,7 +308,6 @@ target_sources(${LYSA_TARGET}
 
         ${ENGINE_SRC_DIR}/renderers/DebugRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
-        ${ENGINE_SRC_DIR}/renderers/OutlinesRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
         ${ENGINE_SRC_DIR}/renderers/VectorRenderer.ixx
 
