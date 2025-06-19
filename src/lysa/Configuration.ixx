@@ -87,6 +87,7 @@ export namespace lysa {
     };
 
     struct RenderingConfiguration {
+        RendererType       rendererType{RendererType::FORWARD};
         //! Swap chain image format
         vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
         //! Depth and stencil buffer format
@@ -100,7 +101,7 @@ export namespace lysa {
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
         //! Enable the forward depth pre pass
-        bool               forwardDepthPrepass{false};
+        // bool               forwardDepthPrepass{false};
     };
 
     /**

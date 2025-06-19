@@ -4,39 +4,42 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-module lysa.renderers.forward_renderer;
+module lysa.renderers.deferred_renderer;
 
 import vireo;
 import lysa.global;
 
 namespace lysa {
-    ForwardRenderer::ForwardRenderer(
+    DeferredRenderer::DeferredRenderer(
         const RenderingConfiguration& config,
         const std::wstring& name) :
-        Renderer{config, name},
-        forwardColorPass{config} {
+        Renderer{config, name} {
     }
 
-    void ForwardRenderer::update(const uint32 frameIndex) {
+    void DeferredRenderer::update(const uint32 frameIndex) {
         Renderer::update(frameIndex);
-        forwardColorPass.update(frameIndex);
+        // forwardColorPass.update(frameIndex);
     }
 
-    void ForwardRenderer::updatePipelines(
+    void DeferredRenderer::updatePipelines(
         const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         Renderer::updatePipelines(pipelineIds);
-        forwardColorPass.updatePipelines(pipelineIds);
+        // forwardColorPass.updatePipelines(pipelineIds);
     }
 
-    void ForwardRenderer::mainColorPass(
+    void DeferredRenderer::mainColorPass(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const bool clearAttachment,
         const uint32 frameIndex) {
-        forwardColorPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
+        // forwardColorPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
     }
 
+    void DeferredRenderer::resize(const vireo::Extent& extent) {
+        Renderer::resize(extent);
+        // forwardColorPass.resize(extent);
+    }
 
 }

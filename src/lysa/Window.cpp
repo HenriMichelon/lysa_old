@@ -10,6 +10,7 @@ import lysa.application;
 import lysa.global;
 import lysa.log;
 import lysa.nodes.node;
+import lysa.renderers.deferred_renderer;
 import lysa.renderers.forward_renderer;
 
 namespace lysa {
@@ -34,7 +35,11 @@ namespace lysa {
             frame.commandList = frame.commandAllocator->createCommandList();
             frame.commandListUpdate = frame.commandAllocator->createCommandList();
         }
-        renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
+        if (config.renderingConfig.rendererType == RendererType::FORWARD) {
+            renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
+        } else {
+            renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferred Renderer");
+        }
         renderer->resize(swapChain->getExtent());
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
@@ -63,7 +68,6 @@ namespace lysa {
 
     void Window::input(InputEvent &inputEvent) const {
         if (stopped) { return; }
-        // if (windowManager->onInput(inputEvent)) return;
         for (const auto& viewport : viewports) {
             viewport->input(inputEvent);
         }

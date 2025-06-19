@@ -14,6 +14,7 @@ import lysa.samplers;
 import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderpass.post_processing;
+import lysa.renderers.renderpass.depth_prepass;
 
 export namespace lysa {
     class Renderer {
@@ -30,7 +31,7 @@ export namespace lysa {
         virtual void resize(const vireo::Extent& extent);
 
         virtual void updatePipelines(
-            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) = 0;
+            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
         std::shared_ptr<vireo::Image> getColorImage(uint32 frameIndex) const;
 
@@ -72,11 +73,6 @@ export namespace lysa {
 
         virtual void update(uint32 frameIndex);
 
-        virtual void depthPrepass(
-            vireo::CommandList& commandList,
-            const Scene& scene,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment) = 0;
-
         virtual void mainColorPass(
             vireo::CommandList& commandList,
             const Scene& scene,
@@ -86,8 +82,10 @@ export namespace lysa {
             uint32 frameIndex) = 0;
 
     private:
-        vireo::Extent                                currentExtent{};
-        std::vector<FrameData>                       framesData;
+        vireo::Extent          currentExtent{};
+        std::vector<FrameData> framesData;
+        DepthPrepass           depthPrePass;
+
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };
 }

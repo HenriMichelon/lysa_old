@@ -635,4 +635,9 @@ export namespace lysa {
         MAX     = 2,
         MULTIPLY= 3,
     };
+
+    enum class RendererType : uint8 {
+        FORWARD  = 0,
+        DEFERRED = 1,
+    };
 }

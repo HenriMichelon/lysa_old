@@ -18,7 +18,7 @@ namespace lysa {
         Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
-        pipelineConfig.depthWriteEnable = !config.forwardDepthPrepass;
+        pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
@@ -31,7 +31,7 @@ namespace lysa {
             config.clearColor.b,
             1.0f};
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
-        renderingConfig.clearDepthStencil = !config.forwardDepthPrepass;
+        renderingConfig.clearDepthStencil = false; //!config.forwardDepthPrepass;
     }
 
     void ForwardColor::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
@@ -41,7 +41,7 @@ namespace lysa {
                 std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
                 std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
                 if (material->getType() == Material::SHADER) {
-                    const auto& shaderMaterial = dynamic_pointer_cast<const ShaderMaterial>(material);
+                    const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
                     if (!shaderMaterial->getVertFileName().empty()) {
                         vertShaderName = shaderMaterial->getVertFileName();
                     }

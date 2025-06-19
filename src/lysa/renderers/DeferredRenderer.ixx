@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-export module lysa.renderers.forward_renderer;
+export module lysa.renderers.deferred_renderer;
 
 import std;
 import vireo;
@@ -12,18 +12,20 @@ import lysa.configuration;
 import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderer;
-import lysa.renderers.renderpass.forward_color;
 
 export namespace lysa {
-    class ForwardRenderer : public Renderer {
+
+    class DeferredRenderer : public Renderer {
     public:
-        ForwardRenderer(
+        DeferredRenderer(
             const RenderingConfiguration& config,
             const std::wstring& name);
 
         void updatePipelines(
             const std::unordered_map<pipeline_id,
             std::vector<std::shared_ptr<Material>>>& pipelineIds) override;
+
+        void resize(const vireo::Extent& extent) override;
 
     protected:
         void update(uint32 frameIndex) override;
@@ -35,8 +37,5 @@ export namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             bool clearAttachment,
             uint32 frameIndex) override;
-
-    private:
-        ForwardColor forwardColorPass;
     };
 }

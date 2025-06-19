@@ -13,14 +13,21 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         config{config},
-        name{name} {
+        name{name},
+        depthPrePass{config} {
         framesData.resize(config.framesInFlight);
     }
 
     void Renderer::update(const uint32 frameIndex) {
+        depthPrePass.update(frameIndex);
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->update(frameIndex);
         }
+    }
+
+    void Renderer::updatePipelines(
+     const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+        depthPrePass.updatePipelines(pipelineIds);
     }
 
     void Renderer::update(
@@ -43,31 +50,25 @@ namespace lysa {
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_DEPTH);
-        if (config.forwardDepthPrepass) {
-            depthPrepass(*commandList, scene, frame.depthAttachment);
-        }
+        depthPrePass.render(*commandList, scene, frame.depthAttachment);
+        commandList->barrier(
+            frame.depthAttachment,
+            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            vireo::ResourceState::UNDEFINED);
+
+        commandList->barrier(
+            frame.depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_DEPTH);
         commandList->barrier(
             frame.colorAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
-        if (config.forwardDepthPrepass) {
-            commandList->barrier(
-                frame.depthAttachment,
-                vireo::ResourceState::RENDER_TARGET_DEPTH,
-                vireo::ResourceState::RENDER_TARGET_DEPTH_READ);
-        }
         mainColorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
-        if (config.forwardDepthPrepass) {
-            commandList->barrier(
-                frame.depthAttachment,
-                vireo::ResourceState::RENDER_TARGET_DEPTH_READ,
-                vireo::ResourceState::UNDEFINED);
-        } else {
-            commandList->barrier(
-                frame.depthAttachment,
-                vireo::ResourceState::RENDER_TARGET_DEPTH,
-                vireo::ResourceState::UNDEFINED);
-        }
+        commandList->barrier(
+            frame.depthAttachment,
+            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            vireo::ResourceState::UNDEFINED);
     }
 
     void Renderer::postprocess(
