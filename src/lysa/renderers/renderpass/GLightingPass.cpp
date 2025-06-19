@@ -37,6 +37,9 @@ namespace lysa {
             Scene::sceneDescriptorLayout,
             descriptorLayout},
             {}, name);
+        pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+        pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER);
+        pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
@@ -48,24 +51,6 @@ namespace lysa {
             config.clearColor.g,
             config.clearColor.b,
             1.0f};
-    }
-
-    void GLightingPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
-        for (const auto& [pipelineId, materials] : pipelineIds) {
-            if (!pipelines.contains(pipelineId)) {
-                const auto& material = materials.at(0);
-                std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
-                if (material->getType() == Material::SHADER) {
-                    const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
-                    if (!shaderMaterial->getFragFileName().empty()) {
-                        fragShaderName = shaderMaterial->getFragFileName();
-                    }
-                }
-                pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
-                pipelineConfig.fragmentShader = loadShader(fragShaderName);
-                pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
-            }
-        }
     }
 
     void GLightingPass::render(
@@ -86,19 +71,17 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
-        for (const auto& pipeline : std::views::values(pipelines)) {
-            commandList.bindPipeline(pipeline);
-            commandList.bindDescriptors({
-                 Application::getResources().getDescriptorSet(),
-                 Application::getResources().getSamplers().getDescriptorSet(),
-                 scene.getDescriptorSet(),
-                 frame.descriptorSet
-            });
-            commandList.beginRendering(renderingConfig);
-            commandList.setStencilReference(1);
-            commandList.draw(3);
-            commandList.endRendering();
-        }
+        commandList.bindPipeline(pipeline);
+        commandList.bindDescriptors({
+             Application::getResources().getDescriptorSet(),
+             Application::getResources().getSamplers().getDescriptorSet(),
+             scene.getDescriptorSet(),
+             frame.descriptorSet
+        });
+        commandList.beginRendering(renderingConfig);
+        commandList.setStencilReference(1);
+        commandList.draw(3);
+        commandList.endRendering();
     }
 
 }

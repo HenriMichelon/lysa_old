@@ -88,13 +88,17 @@ export namespace lysa {
 
         void compute(vireo::CommandList& commandList) const;
 
-        void setInitialState(vireo::CommandList& commandList) const;
+        void setInitialState(const vireo::CommandList& commandList) const;
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
         void drawTransparentModels(
+           vireo::CommandList& commandList,
+           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
+
+        void drawShaderMaterialModels(
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
@@ -175,6 +179,7 @@ export namespace lysa {
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> transparentPipelinesData;
+        std::unordered_map<uint32, std::unique_ptr<PipelineData>> shaderMaterialPipelinesData;
 
         void updatePipelinesData(
             vireo::CommandList& commandList,

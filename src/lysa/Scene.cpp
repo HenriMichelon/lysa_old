@@ -182,10 +182,12 @@ namespace lysa {
             if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
             auto haveTransparentMaterial{false};
+            auto haveShaderMaterial{false};
             auto nodePipelineIds = std::set<uint32>{};
             for (int i = 0; i < mesh->getSurfaces().size(); i++) {
                 const auto material = meshInstance->getSurfaceMaterial(i);
                 haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
+                haveShaderMaterial = material->getType() == Material::SHADER;
                 auto id = material->getPipelineId();
                 nodePipelineIds.insert(id);
                 if (!pipelineIds.contains(id)) {
@@ -195,7 +197,9 @@ namespace lysa {
             }
 
             for (const auto& pipelineId : nodePipelineIds) {
-                if (haveTransparentMaterial) {
+                if (haveShaderMaterial) {
+                    addNode(pipelineId, meshInstance, shaderMaterialPipelinesData);
+                } if (haveTransparentMaterial) {
                     addNode(pipelineId, meshInstance, transparentPipelinesData);
                 } else {
                     addNode(pipelineId, meshInstance, opaquePipelinesData);
@@ -246,6 +250,9 @@ namespace lysa {
                 if (opaquePipelinesData.contains(pipelineId)) {
                     opaquePipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
                 }
+                if (shaderMaterialPipelinesData.contains(pipelineId)) {
+                    shaderMaterialPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                }
             }
             meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
             meshInstancesDataMemoryBlocks.erase(meshInstance);
@@ -271,7 +278,13 @@ namespace lysa {
         drawModels(commandList, pipelines, transparentPipelinesData);
     }
 
-    void Scene::setInitialState(vireo::CommandList& commandList) const {
+    void Scene::drawShaderMaterialModels(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        drawModels(commandList, pipelines, shaderMaterialPipelinesData);
+    }
+
+    void Scene::setInitialState(const vireo::CommandList& commandList) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());

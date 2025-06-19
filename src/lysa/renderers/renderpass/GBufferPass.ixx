@@ -44,7 +44,9 @@ export namespace lysa {
             return framesData[frameIndex].albedoBuffer;
         }
 
-        // auto getMaterialBuffer(const uint32 frameIndex) const { return framesData[frameIndex].materialBuffer; }
+        // auto getMaterialBuffer(const uint32 frameIndex) const {
+            // return framesData[frameIndex].materialBuffer;
+        // }
 
     private:
         const std::wstring VERTEX_SHADER{L"default.vert"};
@@ -67,7 +69,7 @@ export namespace lysa {
                 vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Position, A: unsued (metallic ?)
                 vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Normal, A: unused (roughness ?)
                 vireo::ImageFormat::R8G8B8A8_UNORM,      // RGB: Albedo, A: unused (ao ?)
-                //vireo::ImageFormat::R8G8B8A8_UNORM,      // RGBA: Material index
+                // vireo::ImageFormat::R8_UNORM,            // R: MeshInstance material index
             },
             .colorBlendDesc      = {
                 {}, // Position

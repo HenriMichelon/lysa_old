@@ -114,7 +114,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_ALBEDO].clearValue,
                 vireo::MSAA::NONE,
                 L"Albedo");
-            // frame.materialBuffer = vireo->createRenderTarget(
+            // frame.materialBuffer = vireo.createRenderTarget(
             //     pipelineConfig.colorRenderFormats[BUFFER_MATERIAL],
             //     extent.width,extent.height,
             //     vireo::RenderTargetType::COLOR,

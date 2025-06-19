@@ -20,9 +20,6 @@ export namespace lysa {
     public:
         GLightingPass(const RenderingConfiguration& config, const GBufferPass& gBufferPass);
 
-        void updatePipelines(
-            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
-
         void render(
             vireo::CommandList& commandList,
             const Scene& scene,
@@ -33,7 +30,7 @@ export namespace lysa {
 
     private:
         const std::wstring VERTEX_SHADER{L"quad.vert"};
-        const std::wstring DEFAULT_FRAGMENT_SHADER{L"glighting.frag"};
+        const std::wstring FRAGMENT_SHADER{L"glighting.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{0};
         static constexpr vireo::DescriptorIndex BINDING_NORMAL_BUFFER{1};
@@ -65,7 +62,7 @@ export namespace lysa {
 
         const GBufferPass& gBufferPass;
         std::vector<FrameData> framesData;
+        std::shared_ptr<vireo::GraphicPipeline> pipeline;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-        std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
     };
 }

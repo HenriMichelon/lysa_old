@@ -10,11 +10,11 @@ struct FragmentOutput {
     float4   position : SV_TARGET0; // rgb = world-space position, a=unsued
     float4   normal   : SV_TARGET1; // rgb = world-space normal, a=unused
     float4   albedo   : SV_TARGET2; // rgb = albedo, a unused
-//     float2   material : SV_TARGET3; // r=shininess, g=AO
+    float    material : SV_TARGET3; // r = material index
 };
 
 FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
-    Material mat = materials[input.materialIndex];
+    Material mat = materials[input.meshSurfaceMaterialIndex];
 
     float4 color = mat.albedoColor;
         if (mat.diffuseTexture.index != -1) {
@@ -41,6 +41,6 @@ FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
     output.position = float4(input.worldPos, 0.0);
     output.normal = float4(normal, 0.0);
     output.albedo = float4(color.rgb, 1.0);
-//     output.material = float2(material.shininess, ao);
+    output.material = asfloat(input.materialIndex);
     return output;
 }
