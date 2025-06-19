@@ -28,5 +28,6 @@ VertexOutput vertexMain(VertexInput input) {
 
     output.uv = float2(input.position.w, input.normal.w);
     output.materialIndex = instance.materialIndex;
+    output.meshSurfaceMaterialIndex = instance.meshSurfaceMaterialIndex;
     return output;
 }

@@ -382,6 +382,7 @@ namespace lysa {
                     .meshInstanceIndex = meshInstanceMemoryBlock.instanceIndex,
                     .meshSurfaceIndex = mesh->getSurfacesIndex() + i,
                     .materialIndex = material->getMaterialIndex(),
+                    .meshSurfaceMaterialIndex = mesh->getSurfaceMaterial(i)->getMaterialIndex(),
                 });
                 drawCommandsCount++;
             }

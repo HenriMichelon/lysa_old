@@ -38,6 +38,7 @@ struct VertexOutput {
     float3 tangent   : TEXCOORD3;
     float3 bitangent : TEXCOORD4;
     nointerpolation uint materialIndex : TEXCOORD5;
+    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD6;
 };
 
 struct Scene {

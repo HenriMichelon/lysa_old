@@ -34,6 +34,7 @@ export namespace lysa {
         uint32 meshInstanceIndex;
         uint32 meshSurfaceIndex;
         uint32 materialIndex;
+        uint32 meshSurfaceMaterialIndex;
     };
 
     struct DrawCommand {

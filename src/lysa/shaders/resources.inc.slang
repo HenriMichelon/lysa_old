@@ -41,6 +41,6 @@ struct MeshSurface {
 struct Instance {
     uint  meshInstanceIndex;
     uint  meshSurfaceIndex;
-    uint  materialIndex;
-    float _pad0;
+    uint  materialIndex; // can be overridden in MeshInstance
+    uint  meshSurfaceMaterialIndex; // original when overridden
 }
