@@ -26,6 +26,7 @@ export namespace lysa {
 
         Renderer(
             const RenderingConfiguration& config,
+            bool withStencil,
             const std::wstring& name);
 
         virtual void resize(const vireo::Extent& extent);
@@ -69,7 +70,8 @@ export namespace lysa {
 
     protected:
         const RenderingConfiguration& config;
-        const std::wstring            name;
+        const std::wstring name;
+        const bool withStencil;
 
         virtual void update(uint32 frameIndex);
 

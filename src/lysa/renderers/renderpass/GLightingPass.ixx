@@ -46,12 +46,19 @@ export namespace lysa {
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = {{}},
+            .stencilTestEnable = true,
+            .frontStencilOpState = {
+                .failOp = vireo::StencilOp::KEEP,
+                .passOp = vireo::StencilOp::KEEP,
+                .depthFailOp = vireo::StencilOp::KEEP,
+                .compareOp = vireo::CompareOp::EQUAL,
+                .compareMask = 0xff,
+                .writeMask = 0x00
+            }
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{
-                .clear = false
-            }},
+            .colorRenderTargets = {{ }},
             .depthTestEnable    = pipelineConfig.depthTestEnable,
             .stencilTestEnable  = pipelineConfig.stencilTestEnable,
         };

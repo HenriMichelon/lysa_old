@@ -16,7 +16,7 @@ import lysa.renderers.renderpass;
 export namespace lysa {
     class DepthPrepass : public Renderpass {
     public:
-        DepthPrepass(const RenderingConfiguration& config);
+        DepthPrepass(const RenderingConfiguration& config, bool withStencil);
 
         void render(
             vireo::CommandList& commandList,
@@ -30,10 +30,18 @@ export namespace lysa {
             .cullMode            = vireo::CullMode::BACK,
             .depthTestEnable     = true,
             .depthWriteEnable    = true,
+            .frontStencilOpState = {
+                .failOp      = vireo::StencilOp::KEEP,
+                .passOp      = vireo::StencilOp::REPLACE,
+                .depthFailOp = vireo::StencilOp::KEEP,
+                .compareOp   = vireo::CompareOp::ALWAYS,
+                .compareMask = 0xff,
+                .writeMask   = 0xff
+            }
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .depthTestEnable   = true,
+            .depthTestEnable    = pipelineConfig.depthTestEnable,
             .clearDepthStencil = true,
         };
 

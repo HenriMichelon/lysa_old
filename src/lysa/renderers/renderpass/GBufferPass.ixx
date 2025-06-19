@@ -78,6 +78,15 @@ export namespace lysa {
             .cullMode            = vireo::CullMode::BACK,
             .depthTestEnable     = true,
             .depthWriteEnable    = false,
+            .stencilTestEnable   = true,
+            .frontStencilOpState = {
+                .failOp      = vireo::StencilOp::KEEP,
+                .passOp      = vireo::StencilOp::KEEP,
+                .depthFailOp = vireo::StencilOp::KEEP,
+                .compareOp   = vireo::CompareOp::EQUAL,
+                .compareMask = 0xff,
+                .writeMask   = 0x00
+            }
         };
 
         vireo::RenderingConfiguration renderingConfig {

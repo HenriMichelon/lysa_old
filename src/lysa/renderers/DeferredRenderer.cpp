@@ -13,7 +13,7 @@ namespace lysa {
     DeferredRenderer::DeferredRenderer(
         const RenderingConfiguration& config,
         const std::wstring& name) :
-        Renderer{config, name},
+        Renderer{config, true, name},
         gBufferPass{config},
         gLightingPass{config, gBufferPass} {
     }

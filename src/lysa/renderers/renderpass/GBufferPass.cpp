@@ -18,6 +18,7 @@ namespace lysa {
         Renderpass{config, L"GBuffer"} {
 
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
+        pipelineConfig.backStencilOpState = pipelineConfig.frontStencilOpState;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
@@ -92,6 +93,7 @@ namespace lysa {
            vireo::ResourceState::RENDER_TARGET_COLOR);
 
         commandList.beginRendering(renderingConfig);
+        commandList.setStencilReference(1);
         scene.drawOpaquesModels(
           commandList,
           pipelines);

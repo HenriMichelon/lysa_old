@@ -30,6 +30,7 @@ namespace lysa {
 
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
+        pipelineConfig.backStencilOpState = pipelineConfig.frontStencilOpState;
         pipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
@@ -90,6 +91,8 @@ namespace lysa {
         // frame.descriptorSet->update(BINDING_MATERIAL_BUFFER, gBufferPass.getMaterialBuffer(frameIndex)->getImage());
 
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
+        renderingConfig.colorRenderTargets[0].clear = clearAttachment;
+        renderingConfig.depthStencilRenderTarget = depthAttachment;
 
         for (const auto& pipeline : std::views::values(pipelines)) {
             commandList.bindPipeline(pipeline);
@@ -100,6 +103,7 @@ namespace lysa {
                  frame.descriptorSet
             });
             commandList.beginRendering(renderingConfig);
+            commandList.setStencilReference(1);
             commandList.draw(3);
             commandList.endRendering();
         }

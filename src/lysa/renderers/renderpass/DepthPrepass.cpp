@@ -14,16 +14,20 @@ import lysa.renderers.renderer;
 
 namespace lysa {
     DepthPrepass::DepthPrepass(
-        const RenderingConfiguration& config):
+        const RenderingConfiguration& config,
+        bool withStencil):
         Renderpass{config, L"Depth pre-pass"} {
         const auto& vireo = Application::getVireo();
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
+        pipelineConfig.stencilTestEnable = withStencil;
+        pipelineConfig.backStencilOpState = pipelineConfig.frontStencilOpState;
         pipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
             Scene::pipelineDescriptorLayout},
             Scene::instanceIndexConstantDesc, name);
+        renderingConfig.stencilTestEnable = pipelineConfig.stencilTestEnable;
     }
 
     void DepthPrepass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
@@ -49,6 +53,9 @@ namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment) {
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         commandList.beginRendering(renderingConfig);
+        if (pipelineConfig.stencilTestEnable) {
+            commandList.setStencilReference(1);
+        }
         scene.drawOpaquesModels(
           commandList,
           pipelines);

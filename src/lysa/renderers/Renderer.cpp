@@ -11,10 +11,12 @@ import lysa.application;
 namespace lysa {
     Renderer::Renderer(
         const RenderingConfiguration& config,
+        const bool withStencil,
         const std::wstring& name) :
         config{config},
         name{name},
-        depthPrePass{config} {
+        withStencil{withStencil},
+        depthPrePass{config, withStencil} {
         framesData.resize(config.framesInFlight);
     }
 
@@ -45,21 +47,22 @@ namespace lysa {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         update(frameIndex);
         const auto& frame = framesData[frameIndex];
+        const auto depthState = withStencil ? vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL : vireo::ResourceState::RENDER_TARGET_DEPTH;
         scene.setInitialState(*commandList);
         commandList->barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_DEPTH);
+            depthState);
         depthPrePass.render(*commandList, scene, frame.depthAttachment);
         commandList->barrier(
             frame.depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            depthState,
             vireo::ResourceState::UNDEFINED);
 
         commandList->barrier(
             frame.depthAttachment,
             vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_DEPTH);
+            depthState);
         commandList->barrier(
             frame.colorAttachment,
             vireo::ResourceState::UNDEFINED,
@@ -67,7 +70,7 @@ namespace lysa {
         mainColorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
         commandList->barrier(
             frame.depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            depthState,
             vireo::ResourceState::UNDEFINED);
     }
 
