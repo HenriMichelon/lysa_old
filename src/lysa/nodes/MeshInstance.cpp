@@ -34,6 +34,19 @@ namespace lysa {
         return getMesh()->getSurfaces()[surfaceIndex]->material;
     }
 
+    void MeshInstance::setSurfaceMaterial(const uint32 surfaceIndex, const std::shared_ptr<Material>& material) {
+        const auto oldPipelineId = getMesh()->getSurfaceMaterial(surfaceIndex)->getPipelineId();
+        getMesh()->setSurfaceMaterial(surfaceIndex, material);
+        if (oldPipelineId != material->getPipelineId()) {
+            const auto parent = getParent();
+            if (getViewport() && parent) {
+                const auto me = getSharedPtr();
+                parent->removeChild(me);
+                parent->addChild(me);
+            }
+        }
+    }
+
     void MeshInstance::setSurfaceOverrideMaterial(const uint32 surfaceIndex, const std::shared_ptr<Material>& material) {
         overrideMaterials[surfaceIndex] = material;
     }

@@ -126,16 +126,6 @@ namespace lysa {
             }
         }
 
-        for (const auto& [pipelineId, materials] : pipelineIds) {
-            for (const auto& material : materials) {
-                if (material->isUpdated()) {
-                    material->upload();
-                    Application::getResources().setUpdated();
-                    material->decrementUpdates();
-                }
-            }
-        }
-
         if (meshInstancesDataUpdated) {
             meshInstancesDataArray.flush(commandList);
             meshInstancesDataUpdated = false;
@@ -198,14 +188,12 @@ namespace lysa {
 
             meshInstancesDataMemoryBlocks[meshInstance] = meshInstancesDataArray.alloc(1);
             meshInstance->setMaxUpdates(framesInFlight);
-            mesh->setMaxUpdates(framesInFlight);
             if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
             auto haveTransparentMaterial{false};
             auto nodePipelineIds = std::set<uint32>{};
-            for (int i = 0; i < mesh->getMaterials().size(); i++) {
+            for (int i = 0; i < mesh->getSurfaces().size(); i++) {
                 const auto material = meshInstance->getSurfaceMaterial(i);
-                material->setMaxUpdates(framesInFlight);
                 haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
                 auto id = material->getPipelineId();
                 nodePipelineIds.insert(id);

@@ -85,7 +85,6 @@ file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 #)
 set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/vector.slang"
-        "${SHADERS_SRC_DIR}/outlines.slang"
         "${SHADERS_SRC_DIR}/default.vert.slang"
         "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
         "${SHADERS_SRC_DIR}/forward.frag.slang"

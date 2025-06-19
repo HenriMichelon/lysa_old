@@ -46,7 +46,7 @@ namespace lysa {
         assert([&]{return surfaceIndex < surfaces.size();}, "Invalid surface index");
         surfaces[surfaceIndex]->material = material;
         materials.insert(surfaces[surfaceIndex]->material);
-        setUpdated();
+        upload();
     }
 
     void Mesh::upload() {
@@ -81,9 +81,9 @@ namespace lysa {
             surfaceData[i].indexCount = surface->indexCount;
             surfaceData[i].indicesIndex = indicesMemoryBlock.instanceIndex + surface->firstIndex;
             surfaceData[i].verticesIndex = verticesMemoryBlock.instanceIndex;
-            // surfaceData[i].materialIndex = material->getMaterialIndex();
         }
         resources.getMeshSurfaceArray().write(surfacesMemoryBlock, surfaceData.data());
+        resources.setUpdated();
     }
 
     bool Mesh::operator==(const Mesh &other) const {

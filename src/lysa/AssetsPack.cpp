@@ -190,6 +190,7 @@ namespace lysa {
         for (auto materialIndex = 0; materialIndex < header.materialsCount; ++materialIndex) {
             auto& header = materialHeaders.at(materialIndex);
             auto material = std::make_shared<StandardMaterial>(to_wstring(header.name));
+            material->setBypassUpload(true);
             auto textureInfo = [&](const TextureInfo& info) {
                 auto texInfo = StandardMaterial::TextureInfo {
                     .texture = info.textureIndex == -1 ? nullptr : dynamic_pointer_cast<ImageTexture>(textures.at(info.textureIndex)),
@@ -213,6 +214,7 @@ namespace lysa {
             material->setNormalTexture(textureInfo(header.normalTexture));
             material->setNormalScale(header.normalScale);
             materials.at(materialIndex) = material;
+            material->setBypassUpload(false);
         }
 
         // Create the Mesh, Surface & Vertex objects

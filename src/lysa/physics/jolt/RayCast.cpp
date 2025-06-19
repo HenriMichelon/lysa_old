@@ -35,7 +35,7 @@ namespace lysa {
                 *this)) {
             const auto obj = reinterpret_cast<CollisionObject *>(
                    physicsScene.getBodyInterface().GetUserData(result.mBodyID));
-            collider = obj->sharedPtr();
+            collider = std::static_pointer_cast<CollisionObject>(obj->getSharedPtr());
             const auto posInRay = ray.GetPointOnRay(result.mFraction);
             hitPoint = float3{posInRay.GetX(), posInRay.GetY(), posInRay.GetZ()};
         } else {

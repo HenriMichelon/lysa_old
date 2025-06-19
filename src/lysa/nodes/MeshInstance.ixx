@@ -54,6 +54,13 @@ export namespace lysa {
         std::shared_ptr<Material> getSurfaceOverrideMaterial(uint32 surfaceIndex);
 
         /**
+         * Changes the material of a given surface
+         * @param surfaceIndex Zero-based index of the Surface
+         * @param material New material for the Surface
+         */
+        void setSurfaceMaterial(uint32 surfaceIndex, const std::shared_ptr<Material>& material);
+
+        /**
         * Returns the material for a given surface
         * @param surfaceIndex Zero-based index of the surface
         */

@@ -104,7 +104,10 @@ export namespace lysa {
         }
 
         /**
-         * Changes the material of a given surface
+         * Changes the material of a given surface.
+         * Warning: this will update the data in memory only but not the node in the scene.
+         * If the material needs a different pipeline the change will not appear.
+         * Use MeshInstance::setSurfaceMaterial instead.
          * @param surfaceIndex Zero-based index of the Surface
          * @param material New material for the Surface
          */

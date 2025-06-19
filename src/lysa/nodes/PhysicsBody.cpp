@@ -46,9 +46,9 @@ namespace lysa {
                     if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for", lysa::to_string(getName())); }
                     createBody(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
-                    createBody(std::make_shared<MeshShape>(sharedPtr()));
+                    createBody(std::make_shared<MeshShape>(getSharedPtr()));
                 } else if (parts.at(0) == "AABBShape") {
-                    createBody(std::make_shared<AABBShape>(sharedPtr()));
+                    createBody(std::make_shared<AABBShape>(getSharedPtr()));
                 } else if (parts.at(0) == "StaticCompoundShape") {
                     std::vector<SubShape> subShapes;
                     for (const auto &meshInstance : findAllChildren<MeshInstance>()) {

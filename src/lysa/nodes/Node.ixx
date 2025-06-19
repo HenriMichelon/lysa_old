@@ -16,7 +16,7 @@ export namespace lysa {
     /**
      * Base class for all 3D nodes
      */
-    class Node : public Object, public Updatable {
+    class Node : public Object, public Updatable, public std::enable_shared_from_this<Node> {
     public:
         friend class Viewport;
 
@@ -564,6 +564,8 @@ export namespace lysa {
          * Removes the `tween` from the processing list
          */
         void killTween(const std::shared_ptr<Tween> &tween);
+
+        auto getSharedPtr() { return shared_from_this(); }
 
         ~Node() override = default;
     

@@ -14,7 +14,7 @@ export namespace lysa {
     /**
      * Base class for resources.
      */
-    class Resource : public Object, public Updatable  {
+    class Resource : public Object  {
     public:
 
         Resource(const std::wstring& name);

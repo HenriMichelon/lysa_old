@@ -16,12 +16,14 @@ namespace lysa {
     }
 
     void Material::upload() {
+        if (bypassUpload) { return; }
         auto& resources = Application::getResources();
         if (!isUploaded()) {
             memoryBloc = resources.getMaterialArray().alloc(1);
         }
         const auto materialData = getMaterialData();
         resources.getMaterialArray().write(memoryBloc, &materialData);
+        resources.setUpdated();
     }
 
     MaterialData StandardMaterial::getMaterialData() const {
@@ -55,58 +57,59 @@ namespace lysa {
 
     void StandardMaterial::setAlbedoColor(const float4 &color) {
         albedoColor = color;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setDiffuseTexture(const TextureInfo &texture) {
         diffuseTexture = texture;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setNormalTexture(const TextureInfo &texture) {
         normalTexture = texture;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setMetallicTexture(const TextureInfo &texture) {
         metallicTexture = texture;
         if (metallicFactor == -1.0f) { metallicFactor = 0.0f; }
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setRoughnessTexture(const TextureInfo &texture) {
         roughnessTexture = texture;
         if (metallicFactor == -1.0f) { metallicFactor = 0.0f; }
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setEmissiveTexture(const TextureInfo &texture) {
         emissiveTexture = texture;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setMetallicFactor(const float metallic) {
         this->metallicFactor = metallic;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setRoughnessFactor(const float roughness) {
         this->roughnessFactor = roughness;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setEmissiveFactor(const float3& factor) {
         emissiveFactor = factor;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setEmissiveStrength(const float strength) {
         emissiveStrength = strength;
-        setUpdated();
+        upload();
     }
 
     void StandardMaterial::setNormalScale(const float scale) {
         normalScale = scale;
+        upload();
     }
 
     pipeline_id StandardMaterial::getPipelineId() const {
@@ -125,7 +128,6 @@ namespace lysa {
             parameters[i] = orig->parameters[i];
         }
         upload();
-        Application::getResources().setUpdated();
     }
 
     ShaderMaterial::ShaderMaterial(const std::wstring &fragShaderFileName,
@@ -134,11 +136,12 @@ namespace lysa {
         Material{SHADER, name},
         fragFileName{fragShaderFileName},
         vertFileName{vertShaderFileName} {
+        upload();
     }
 
     void ShaderMaterial::setParameter(const int index, const float4& value) {
         parameters[index] = value;
-        setUpdated();
+        upload();
     }
 
     uint32 ShaderMaterial::getPipelineId() const {

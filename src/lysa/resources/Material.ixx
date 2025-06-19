@@ -89,6 +89,8 @@ export namespace lysa {
 
         auto getType() const { return type; }
 
+        void setBypassUpload(const bool bypass) { bypassUpload = bypass; }
+
     protected:
         Material(Type type, const std::wstring &name);
 
@@ -98,6 +100,7 @@ export namespace lysa {
         Transparency    transparency{Transparency::DISABLED};
         float           alphaScissor{0.1f};
         MemoryBlock     memoryBloc;
+        bool            bypassUpload{false};
     };
 
     /**
