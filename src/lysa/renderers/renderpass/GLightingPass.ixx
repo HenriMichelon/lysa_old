@@ -32,7 +32,7 @@ export namespace lysa {
             uint32 frameIndex);
 
     private:
-        const std::wstring DEFAULT_VERTEX_SHADER{L"quad.vert"};
+        const std::wstring VERTEX_SHADER{L"quad.vert"};
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"glighting.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{0};

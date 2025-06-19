@@ -53,12 +53,8 @@ namespace lysa {
                 pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.depthWriteEnable = true; //material->getTransparency() == Transparency::DISABLED;
-                auto tempBuffer = std::vector<char>{};
-                const auto& ext = Application::getVireo().getShaderFileExtension();
-                VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + vertShaderName + ext, tempBuffer);
-                pipelineConfig.vertexShader = Application::getVireo().createShaderModule(tempBuffer);
-                VirtualFS::loadBinaryData(L"app://"+ Application::getConfiguration().shaderDir + L"/" + fragShaderName + ext, tempBuffer);
-                pipelineConfig.fragmentShader = Application::getVireo().createShaderModule(tempBuffer);
+                pipelineConfig.vertexShader = loadShader(vertShaderName);
+                pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
             }
         }

@@ -47,8 +47,8 @@ export namespace lysa {
         // auto getMaterialBuffer(const uint32 frameIndex) const { return framesData[frameIndex].materialBuffer; }
 
     private:
-        const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
-        const std::wstring DEFAULT_FRAGMENT_SHADER{L"gbuffers.frag"};
+        const std::wstring VERTEX_SHADER{L"default.vert"};
+        const std::wstring FRAGMENT_SHADER{L"gbuffers.frag"};
 
         static constexpr int BUFFER_POSITION{0};
         static constexpr int BUFFER_NORMAL{1};

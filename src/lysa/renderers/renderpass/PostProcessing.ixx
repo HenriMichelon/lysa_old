@@ -42,6 +42,8 @@ export namespace lysa {
         const auto& getFragShaderName() const { return fragShaderName; }
 
     protected:
+        const std::wstring VERTEX_SHADER{L"quad.vert"};
+
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
         static constexpr vireo::DescriptorIndex BINDING_INPUT{1};
         static constexpr vireo::DescriptorIndex BINDING_DATA{2};
@@ -67,12 +69,12 @@ export namespace lysa {
             .colorRenderTargets = {{}}
         };
 
-        const std::wstring                          fragShaderName;
-        void*                                       data{nullptr};
-        std::shared_ptr<vireo::Buffer>              dataUniform{nullptr};
-        std::vector<FrameData>                      framesData;
-        std::shared_ptr<vireo::DescriptorLayout>    descriptorLayout;
-        std::shared_ptr<vireo::GraphicPipeline>     pipeline;
+        const std::wstring                       fragShaderName;
+        void*                                    data{nullptr};
+        std::shared_ptr<vireo::Buffer>           dataUniform{nullptr};
+        std::vector<FrameData>                   framesData;
+        std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
+        std::shared_ptr<vireo::GraphicPipeline>  pipeline;
 
     };
 }

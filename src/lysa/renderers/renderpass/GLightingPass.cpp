@@ -54,23 +54,15 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
-                std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
                 std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
                 if (material->getType() == Material::SHADER) {
                     const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
-                    if (!shaderMaterial->getVertFileName().empty()) {
-                        vertShaderName = shaderMaterial->getVertFileName();
-                    }
                     if (!shaderMaterial->getFragFileName().empty()) {
                         fragShaderName = shaderMaterial->getFragFileName();
                     }
                 }
-                auto tempBuffer = std::vector<char>{};
-                const auto& ext = Application::getVireo().getShaderFileExtension();
-                VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + vertShaderName + ext, tempBuffer);
-                pipelineConfig.vertexShader = Application::getVireo().createShaderModule(tempBuffer);
-                VirtualFS::loadBinaryData(L"app://"+ Application::getConfiguration().shaderDir + L"/" + fragShaderName + ext, tempBuffer);
-                pipelineConfig.fragmentShader = Application::getVireo().createShaderModule(tempBuffer);
+                pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+                pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
             }
         }

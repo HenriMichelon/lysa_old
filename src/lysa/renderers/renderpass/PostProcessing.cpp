@@ -39,12 +39,8 @@ namespace lysa {
             Application::getResources().getSamplers().getDescriptorLayout()},
             {},
             name);
-        auto tempBuffer = std::vector<char>{};
-        const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/quad.vert" + ext, tempBuffer);
-        pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + fragShaderName + L".frag" + ext, tempBuffer);
-        pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
+        pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+        pipelineConfig.fragmentShader = loadShader(fragShaderName + L".frag");
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
@@ -71,7 +67,7 @@ namespace lysa {
         const vireo::Rect& scissor,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         vireo::CommandList& commandList,
-        const bool recordLastBarrier) {
+        const bool) {
         auto& frame = framesData[frameIndex];
 
         frame.descriptorSet->update(BINDING_INPUT, colorAttachment->getImage());

@@ -8,10 +8,8 @@ export module lysa.renderers.renderpass;
 
 import std;
 import vireo;
-import lysa.global;
+import lysa.types;
 import lysa.configuration;
-import lysa.samplers;
-import lysa.scene;
 
 export namespace lysa {
     class Renderpass {
@@ -27,8 +25,11 @@ export namespace lysa {
         virtual ~Renderpass() = default;
         Renderpass(Renderpass&) = delete;
         Renderpass& operator=(Renderpass&) = delete;
+
     protected:
         const std::wstring name;
         const RenderingConfiguration& config;
+
+        std::shared_ptr<vireo::ShaderModule> loadShader(const std::wstring& shaderName) const;
     };
 }
