@@ -82,27 +82,18 @@ namespace lysa {
         }
     }
 
-    void Scene::updatePipelineData(
+    void Scene::updatePipelinesData(
         vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
+        const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            if (pipelineData->instancesUpdated) {
-                pipelineData->instancesArray.flush(commandList);
-                commandList.upload(pipelineData->drawCommandsBuffer, pipelineData->drawCommands.data());
-                pipelineData->instancesUpdated = false;
-                commandList.barrier(
-                    *pipelineData->drawCommandsBuffer,
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::SHADER_READ);
-                commandList.barrier(
-                    *pipelineData->culledDrawCommandsBuffer,
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::INDIRECT_DRAW);
-            }
+            pipelineData->updateData(commandList, drawCommandsStagingBufferRecycleBin);
         }
     }
 
     void Scene::update(vireo::CommandList& commandList) {
+        if (!drawCommandsStagingBufferRecycleBin.empty()) {
+            drawCommandsStagingBufferRecycleBin.clear();
+        }
         meshInstancesDataArray.restart();
 
         auto sceneUniform = SceneData {
@@ -131,8 +122,8 @@ namespace lysa {
             meshInstancesDataUpdated = false;
         }
 
-        updatePipelineData(commandList, opaquePipelinesData);
-        updatePipelineData(commandList, transparentPipelinesData);
+        updatePipelinesData(commandList, opaquePipelinesData);
+        updatePipelinesData(commandList, transparentPipelinesData);
 
         if (Application::getResources().isUpdated()) {
             Application::getResources().flush(commandList);
@@ -414,6 +405,36 @@ namespace lysa {
                     instancesMemoryBlocks.at(instance),
                     meshInstancesDataMemoryBlocks.at(instance));
             }
+        }
+    }
+
+    void Scene::PipelineData::updateData(
+            vireo::CommandList& commandList,
+            std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin) {
+        if (instancesUpdated) {
+            instancesArray.flush(commandList);
+            if (drawCommandsStagingBufferCount < drawCommandsCount) {
+                if (drawCommandsStagingBuffer) {
+                    drawCommandsStagingBufferRecycleBin.insert(drawCommandsStagingBuffer);
+                }
+                drawCommandsStagingBuffer = Application::getVireo().createBuffer(
+                    vireo::BufferType::BUFFER_UPLOAD,
+                    sizeof(DrawCommand) * drawCommandsCount);
+                drawCommandsStagingBufferCount = drawCommandsCount;
+                drawCommandsStagingBuffer->map();
+            }
+            drawCommandsStagingBuffer->write(drawCommands.data(),
+                sizeof(DrawCommand) * drawCommandsCount);
+            commandList.upload(drawCommandsBuffer, drawCommands.data());
+            instancesUpdated = false;
+            commandList.barrier(
+                *drawCommandsBuffer,
+                vireo::ResourceState::COPY_DST,
+                vireo::ResourceState::SHADER_READ);
+            commandList.barrier(
+                *culledDrawCommandsBuffer,
+                vireo::ResourceState::COPY_DST,
+                vireo::ResourceState::INDIRECT_DRAW);
         }
     }
 

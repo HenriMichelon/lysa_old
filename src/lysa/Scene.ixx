@@ -126,6 +126,8 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> lightsBuffer;
         uint32 lightsBufferCount{1};
 
+        std::unordered_set<std::shared_ptr<vireo::Buffer>> drawCommandsStagingBufferRecycleBin;
+
         struct PipelineData {
             pipeline_id pipelineId;
             const SceneConfiguration& config;
@@ -141,6 +143,9 @@ export namespace lysa {
             std::shared_ptr<vireo::Buffer> drawCommandsBuffer;
             std::shared_ptr<vireo::Buffer> culledDrawCommandsCountBuffer;
             std::shared_ptr<vireo::Buffer> culledDrawCommandsBuffer;
+
+            std::shared_ptr<vireo::Buffer> drawCommandsStagingBuffer;
+            uint32 drawCommandsStagingBufferCount{0};
 
             PipelineData::PipelineData(
                 const SceneConfiguration& config,
@@ -159,14 +164,18 @@ export namespace lysa {
                 const std::shared_ptr<MeshInstance>& meshInstance,
                 const MemoryBlock& instanceMemoryBlock,
                 const MemoryBlock& meshInstanceMemoryBlock);
+
+            void updateData(
+                vireo::CommandList& commandList,
+                std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin);
         };
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> transparentPipelinesData;
 
-        void updatePipelineData(
+        void updatePipelinesData(
             vireo::CommandList& commandList,
-            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
+            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
 
         void compute(
             vireo::CommandList& commandList,
