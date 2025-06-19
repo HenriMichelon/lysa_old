@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene.inc.slang"
+#include "instances.inc.slang"
 
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;

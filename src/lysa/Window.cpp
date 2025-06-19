@@ -38,7 +38,7 @@ namespace lysa {
         if (config.renderingConfig.rendererType == RendererType::FORWARD) {
             renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
         } else {
-            renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferred Renderer");
+            renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferrer Renderer");
         }
         renderer->resize(swapChain->getExtent());
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);

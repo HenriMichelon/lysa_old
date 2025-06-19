@@ -12,6 +12,8 @@ import lysa.configuration;
 import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderer;
+import lysa.renderers.renderpass.gbuffer_pass;
+import lysa.renderers.renderpass.glighting_pass;
 
 export namespace lysa {
 
@@ -28,8 +30,6 @@ export namespace lysa {
         void resize(const vireo::Extent& extent) override;
 
     protected:
-        void update(uint32 frameIndex) override;
-
         void mainColorPass(
             vireo::CommandList& commandList,
             const Scene& scene,
@@ -37,5 +37,9 @@ export namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             bool clearAttachment,
             uint32 frameIndex) override;
+
+    private:
+        GBufferPass gBufferPass;
+        GLightingPass gLightingPass;
     };
 }

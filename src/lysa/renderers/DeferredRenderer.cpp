@@ -13,18 +13,16 @@ namespace lysa {
     DeferredRenderer::DeferredRenderer(
         const RenderingConfiguration& config,
         const std::wstring& name) :
-        Renderer{config, name} {
-    }
-
-    void DeferredRenderer::update(const uint32 frameIndex) {
-        Renderer::update(frameIndex);
-        // forwardColorPass.update(frameIndex);
+        Renderer{config, name},
+        gBufferPass{config},
+        gLightingPass{config, gBufferPass} {
     }
 
     void DeferredRenderer::updatePipelines(
         const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         Renderer::updatePipelines(pipelineIds);
-        // forwardColorPass.updatePipelines(pipelineIds);
+        gBufferPass.updatePipelines(pipelineIds);
+        gLightingPass.updatePipelines(pipelineIds);
     }
 
     void DeferredRenderer::mainColorPass(
@@ -34,12 +32,13 @@ namespace lysa {
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const bool clearAttachment,
         const uint32 frameIndex) {
-        // forwardColorPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
+        gBufferPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
+        gLightingPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
     }
 
     void DeferredRenderer::resize(const vireo::Extent& extent) {
         Renderer::resize(extent);
-        // forwardColorPass.resize(extent);
+        gBufferPass.resize(extent);
     }
 
 }

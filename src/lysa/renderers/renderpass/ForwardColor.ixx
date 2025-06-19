@@ -18,7 +18,8 @@ export namespace lysa {
     public:
         ForwardColor(const RenderingConfiguration& config);
 
-        void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
+        void updatePipelines(
+            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
         void render(
             vireo::CommandList& commandList,

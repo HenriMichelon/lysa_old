@@ -102,6 +102,8 @@ export namespace lysa {
 
         auto isMaterialsUpdated() const { return materialsUpdated; }
 
+        auto getDescriptorSet() const { return descriptorSet; }
+
         virtual ~Scene() = default;
         Scene(Scene&) = delete;
         Scene& operator=(Scene&) = delete;
@@ -188,9 +190,9 @@ export namespace lysa {
             std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
 
         void drawModels(
-           vireo::CommandList& commandList,
-           const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
-           const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
+            vireo::CommandList& commandList,
+            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
+            const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
     };
 
 }

@@ -62,4 +62,3 @@ float2 uvTransform(const TextureInfo texture, const float2 UV) {
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
 
-[[vk::binding(0, 3)]] StructuredBuffer<Instance> instances : register(t0, space3);

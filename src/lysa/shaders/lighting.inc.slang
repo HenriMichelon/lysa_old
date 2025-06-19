@@ -6,7 +6,6 @@
 */
 #include "scene.inc.slang"
 
-
 struct Light {
     // light params
     int type; // Light::LightType

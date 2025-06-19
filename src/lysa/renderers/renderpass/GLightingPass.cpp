@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-module lysa.renderers.renderpass.forward_color;
+module lysa.renderers.renderpass.glighting_pass;
 
 import lysa.application;
 import lysa.resources;
@@ -13,29 +13,43 @@ import lysa.resources.mesh;
 import lysa.renderers.renderer;
 
 namespace lysa {
-    ForwardColor::ForwardColor(
-        const RenderingConfiguration& config):
-        Renderpass{config, L"Forward Color"} {
+
+    GLightingPass::GLightingPass(
+        const RenderingConfiguration& config,
+        const GBufferPass& gBufferPass):
+        Renderpass{config, L"GLighting"},
+        gBufferPass{gBufferPass} {
+        const auto& vireo = Application::getVireo();
+
+        descriptorLayout = vireo.createDescriptorLayout();
+        descriptorLayout->add(BINDING_POSITION_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayout->add(BINDING_NORMAL_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayout->add(BINDING_ALBEDO_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        // descriptorLayout->add(BINDING_MATERIAL_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayout->build();
+
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
-        pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
-        pipelineConfig.resources = Application::getVireo().createPipelineResources({
+        pipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            Scene::pipelineDescriptorLayout},
-            Scene::instanceIndexConstantDesc, name);
-        pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
+            descriptorLayout},
+            {}, name);
+
+        framesData.resize(config.framesInFlight);
+        for (auto& frame : framesData) {
+            frame.descriptorSet = vireo.createDescriptorSet(descriptorLayout);
+        }
 
         renderingConfig.colorRenderTargets[0].clearValue = {
             config.clearColor.r,
             config.clearColor.g,
             config.clearColor.b,
             1.0f};
-        renderingConfig.clearDepthStencil = false; //!config.forwardDepthPrepass;
     }
 
-    void ForwardColor::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+    void GLightingPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
@@ -50,9 +64,6 @@ namespace lysa {
                         fragShaderName = shaderMaterial->getFragFileName();
                     }
                 }
-                pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
-                pipelineConfig.cullMode = material->getCullMode();
-                pipelineConfig.depthWriteEnable = true; //material->getTransparency() == Transparency::DISABLED;
                 auto tempBuffer = std::vector<char>{};
                 const auto& ext = Application::getVireo().getShaderFileExtension();
                 VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + vertShaderName + ext, tempBuffer);
@@ -64,25 +75,34 @@ namespace lysa {
         }
     }
 
-    void ForwardColor::render(
+    void GLightingPass::render(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const bool clearAttachment,
-        const uint32) {
-        renderingConfig.colorRenderTargets[0].clear = clearAttachment;
-        renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
-        renderingConfig.depthStencilRenderTarget = depthAttachment;
-        renderingConfig.discardDepthStencilAfterRender = true;
+        const uint32 frameIndex) {
+        const auto& frame = framesData[frameIndex];
 
-        commandList.beginRendering(renderingConfig);
-        scene.drawOpaquesModels(
-          commandList,
-          pipelines);
-        scene.drawTransparentModels(
-          commandList,
-          pipelines);
-        commandList.endRendering();
+        frame.descriptorSet->update(BINDING_POSITION_BUFFER, gBufferPass.getPositionBuffer(frameIndex)->getImage());
+        frame.descriptorSet->update(BINDING_NORMAL_BUFFER, gBufferPass.getNormalBuffer(frameIndex)->getImage());
+        frame.descriptorSet->update(BINDING_ALBEDO_BUFFER, gBufferPass.getAlbedoBuffer(frameIndex)->getImage());
+        // frame.descriptorSet->update(BINDING_MATERIAL_BUFFER, gBufferPass.getMaterialBuffer(frameIndex)->getImage());
+
+        renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
+
+        for (const auto& pipeline : std::views::values(pipelines)) {
+            commandList.bindPipeline(pipeline);
+            commandList.bindDescriptors({
+                 Application::getResources().getDescriptorSet(),
+                 Application::getResources().getSamplers().getDescriptorSet(),
+                 scene.getDescriptorSet(),
+                 frame.descriptorSet
+            });
+            commandList.beginRendering(renderingConfig);
+            commandList.draw(3);
+            commandList.endRendering();
+        }
     }
+
 }
