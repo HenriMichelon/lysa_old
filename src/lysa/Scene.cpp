@@ -63,6 +63,7 @@ namespace lysa {
 
     void Scene::compute(vireo::CommandList& commandList) const {
         compute(commandList, opaquePipelinesData);
+        compute(commandList, shaderMaterialPipelinesData);
         compute(commandList, transparentPipelinesData);
     }
 
@@ -123,6 +124,7 @@ namespace lysa {
         }
 
         updatePipelinesData(commandList, opaquePipelinesData);
+        updatePipelinesData(commandList, shaderMaterialPipelinesData);
         updatePipelinesData(commandList, transparentPipelinesData);
 
         if (Application::getResources().isUpdated()) {
@@ -199,7 +201,7 @@ namespace lysa {
             for (const auto& pipelineId : nodePipelineIds) {
                 if (haveShaderMaterial) {
                     addNode(pipelineId, meshInstance, shaderMaterialPipelinesData);
-                } if (haveTransparentMaterial) {
+                } else if (haveTransparentMaterial) {
                     addNode(pipelineId, meshInstance, transparentPipelinesData);
                 } else {
                     addNode(pipelineId, meshInstance, opaquePipelinesData);
@@ -269,18 +271,21 @@ namespace lysa {
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        if (opaquePipelinesData.empty()) { return; }
         drawModels(commandList, pipelines, opaquePipelinesData);
     }
 
     void Scene::drawTransparentModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        if (transparentPipelinesData.empty()) { return; }
         drawModels(commandList, pipelines, transparentPipelinesData);
     }
 
     void Scene::drawShaderMaterialModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
+        if (shaderMaterialPipelinesData.empty()) { return; }
         drawModels(commandList, pipelines, shaderMaterialPipelinesData);
     }
 

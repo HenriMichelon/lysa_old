@@ -76,6 +76,9 @@ namespace lysa {
         scene.drawOpaquesModels(
           commandList,
           pipelines);
+        scene.drawShaderMaterialModels(
+          commandList,
+          pipelines);
         scene.drawTransparentModels(
           commandList,
           pipelines);
