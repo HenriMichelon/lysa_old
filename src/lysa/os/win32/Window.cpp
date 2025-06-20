@@ -47,37 +47,35 @@ namespace lysa {
         int h = config.height;
         DWORD style{0};
         DWORD exStyle{0};
-        if (config.mode == WindowMode::WINDOWED) {
-            if (w == 0 || h == 0 || config.mode == WindowMode::WINDOWED_MAXIMIZED) {
-                exStyle = WS_EX_APPWINDOW;
-                style = WS_POPUP | WS_MAXIMIZE;
-                auto monitorRect = RECT{};
-                const auto hPrimary = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
-                auto monitorInfo = MONITORINFOEX{};
-                monitorInfo.cbSize = sizeof(MONITORINFOEX);
-                if (GetMonitorInfo(hPrimary, &monitorInfo)) {
-                    monitorRect = monitorInfo.rcMonitor;
-                } else {
-                    auto monitorData = MonitorEnumData {};
-                    EnumDisplayMonitors(nullptr, nullptr, monitorEnumProc, reinterpret_cast<LPARAM>(&monitorData));
-                    monitorRect = monitorData.monitorRect;
-                }
-                w = monitorRect.right - monitorRect.left;
-                h = monitorRect.bottom - monitorRect.top;
-                x = monitorRect.left;
-                y = monitorRect.top;
+        if (w == 0 || h == 0 || config.mode == WindowMode::WINDOWED_MAXIMIZED) {
+            exStyle = WS_EX_APPWINDOW;
+            style = WS_POPUP | WS_MAXIMIZE;
+            auto monitorRect = RECT{};
+            const auto hPrimary = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+            auto monitorInfo = MONITORINFOEX{};
+            monitorInfo.cbSize = sizeof(MONITORINFOEX);
+            if (GetMonitorInfo(hPrimary, &monitorInfo)) {
+                monitorRect = monitorInfo.rcMonitor;
             } else {
-                style = WS_OVERLAPPEDWINDOW;
-                exStyle = 0;
-                auto windowRect = RECT{0, 0, static_cast<LONG>(w), static_cast<LONG>(h)};
-                AdjustWindowRect(&windowRect, style, FALSE);
-                x = config.x == -1 ?
-                    (GetSystemMetrics(SM_CXSCREEN) - (windowRect.right - windowRect.left)) / 2 :
-                    config.x;
-                y = config.y == -1 ?
-                (GetSystemMetrics(SM_CYSCREEN) - (windowRect.bottom - windowRect.top)) / 2 :
-                    config.y;
+                auto monitorData = MonitorEnumData {};
+                EnumDisplayMonitors(nullptr, nullptr, monitorEnumProc, reinterpret_cast<LPARAM>(&monitorData));
+                monitorRect = monitorData.monitorRect;
             }
+            w = monitorRect.right - monitorRect.left;
+            h = monitorRect.bottom - monitorRect.top;
+            x = monitorRect.left;
+            y = monitorRect.top;
+        } else {
+            style = WS_OVERLAPPEDWINDOW;
+            exStyle = 0;
+            auto windowRect = RECT{0, 0, static_cast<LONG>(w), static_cast<LONG>(h)};
+            AdjustWindowRect(&windowRect, style, FALSE);
+            x = config.x == -1 ?
+                (GetSystemMetrics(SM_CXSCREEN) - (windowRect.right - windowRect.left)) / 2 :
+                config.x;
+            y = config.y == -1 ?
+            (GetSystemMetrics(SM_CYSCREEN) - (windowRect.bottom - windowRect.top)) / 2 :
+                config.y;
         }
 
         rect.left = x;
@@ -103,6 +101,7 @@ namespace lysa {
 
     LRESULT CALLBACK Window::windowProcedure(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam) {
         auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        if (!window) { return DefWindowProc(hWnd, message, wParam, lParam); }
         switch (message) {
             case WM_SIZE:
                 if (IsIconic(hWnd)) {
