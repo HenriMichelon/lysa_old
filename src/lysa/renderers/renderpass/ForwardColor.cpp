@@ -74,10 +74,16 @@ namespace lysa {
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         renderingConfig.discardDepthStencilAfterRender = true;
 
+        const auto depthStage =
+            config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
+            config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
+            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+            vireo::ResourceState::RENDER_TARGET_DEPTH;
+
         commandList.barrier(
             depthAttachment,
             vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_DEPTH);
+            depthStage);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::UNDEFINED,
@@ -98,7 +104,7 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED);
         commandList.barrier(
             depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            depthStage,
             vireo::ResourceState::UNDEFINED);
     }
 }

@@ -17,9 +17,9 @@ struct QuadOutput {
 // [[vk::binding(3, 3)]] Texture2D    materialBuffer   : register(t3, space3);
 
 float4 getColor(QuadOutput input) {
-    float3 worldPos = positionBuffer.Sample(samplers[2], input.uv).rgb;
-    float3 normal = normalBuffer.Sample(samplers[2], input.uv).rgb;
-    float3 albedo = albedoBuffer.Sample(samplers[2], input.uv).rgb;
+    float3 worldPos = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
+    float3 normal = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
+    float3 albedo = albedoBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
 //     uint materialIndex = asuint(materialBuffer.Sample(samplers[2], input.uv).r);
 
     float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;

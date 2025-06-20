@@ -20,12 +20,13 @@ namespace lysa {
         const void* pushConstants) :
         name{name},
         pushConstantsDesc{pushConstantsDesc},
-        pushConstants{pushConstants} {
+        pushConstants{pushConstants},
+        config{renderingConfiguration} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(name);
         descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
         descriptorLayout->build();
-        framesData.resize(renderingConfiguration.framesInFlight);
+        framesData.resize(config.framesInFlight);
         for (auto& frameData : framesData) {
             frameData.globalUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform), 1, name);
             frameData.globalUniform->map();
@@ -33,6 +34,7 @@ namespace lysa {
             frameData.descriptorSet->update(0, frameData.globalUniform);
         }
         renderingConfig.depthTestEnable = depthTestEnable;
+        pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthTestEnable = depthTestEnable;
         pipelineConfig.depthWriteEnable = depthTestEnable;
         pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
@@ -122,10 +124,16 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
+        const auto depthStage =
+            config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
+            config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
+            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+            vireo::ResourceState::RENDER_TARGET_DEPTH;
+
         commandList.barrier(
             depthAttachment,
             vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_DEPTH);
+            depthStage);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::UNDEFINED,
@@ -151,7 +159,7 @@ namespace lysa {
         commandList.endRendering();
         commandList.barrier(
             depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            depthStage,
             vireo::ResourceState::UNDEFINED);
         commandList.barrier(
             colorAttachment,

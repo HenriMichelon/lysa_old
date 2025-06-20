@@ -20,10 +20,10 @@ bool isApproximatelyEqual(float a, float b) {
 }
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    float revealage = revealBuffer.Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv).r;
+    float revealage = revealBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).r;
     if (isApproximatelyEqual(revealage, 1.0f)) {
         discard;
     }
-    float4 accum = accumBuffer.Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
+    float4 accum = accumBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     return float4(accum.rgb / max(accum.a, 0.00001f), revealage);
 }

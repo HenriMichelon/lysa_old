@@ -62,6 +62,7 @@ export namespace lysa {
 
         const void* pushConstants;
         const vireo::PushConstantsDesc pushConstantsDesc;
+        const RenderingConfiguration& config;
 
     private:
         const std::wstring name;
