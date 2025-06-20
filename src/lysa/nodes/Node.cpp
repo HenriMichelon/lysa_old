@@ -42,6 +42,13 @@ namespace lysa {
     }
 
     void Node::physicsProcess(const float delta) {
+        for (auto it = tweens.begin(); it != tweens.end();) {
+            if ((*it)->update(delta)) {
+                it = tweens.erase(it);
+            } else {
+                ++it;
+            }
+        }
         for (const auto& child : children) {
             child->physicsProcess(delta);
         }
