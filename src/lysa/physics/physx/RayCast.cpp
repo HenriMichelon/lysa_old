@@ -72,11 +72,10 @@ namespace lysa {
             this);
         if (status && hit.hasBlock) {
             auto* obj = reinterpret_cast<CollisionObject*>(hit.block.actor->userData);
-            collider = obj->sharedPtr();
+            collider = static_pointer_cast<CollisionObject>(obj->getSharedPtr());
             const auto& p = hit.block.position;
             hitPoint = float3{p.x, p.y, p.z};
         }
-
     }
 
     void RayCast::setCollisionLayer(const collision_layer layer) {
