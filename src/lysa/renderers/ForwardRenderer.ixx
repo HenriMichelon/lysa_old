@@ -28,7 +28,7 @@ export namespace lysa {
     protected:
         void update(uint32 frameIndex) override;
 
-        void mainColorPass(
+        void colorPass(
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,

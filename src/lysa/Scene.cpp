@@ -63,7 +63,6 @@ namespace lysa {
 
     void Scene::compute(vireo::CommandList& commandList) const {
         compute(commandList, opaquePipelinesData);
-        compute(commandList, shaderMaterialPipelinesData);
         compute(commandList, transparentPipelinesData);
     }
 
@@ -124,7 +123,6 @@ namespace lysa {
         }
 
         updatePipelinesData(commandList, opaquePipelinesData);
-        updatePipelinesData(commandList, shaderMaterialPipelinesData);
         updatePipelinesData(commandList, transparentPipelinesData);
 
         if (Application::getResources().isUpdated()) {
@@ -183,13 +181,13 @@ namespace lysa {
             meshInstance->setMaxUpdates(framesInFlight);
             if (!meshInstance->isUpdated()) { meshInstance->setUpdated(); }
 
-            auto haveTransparentMaterial{false};
-            auto haveShaderMaterial{false};
+            auto haveTransparentOrShaderMaterial{false};
             auto nodePipelineIds = std::set<uint32>{};
             for (int i = 0; i < mesh->getSurfaces().size(); i++) {
                 const auto material = meshInstance->getSurfaceMaterial(i);
-                haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
-                haveShaderMaterial = material->getType() == Material::SHADER;
+                haveTransparentOrShaderMaterial =
+                    material->getTransparency() != Transparency::DISABLED |
+                    material->getType() == Material::SHADER;
                 auto id = material->getPipelineId();
                 nodePipelineIds.insert(id);
                 if (!pipelineIds.contains(id)) {
@@ -199,9 +197,7 @@ namespace lysa {
             }
 
             for (const auto& pipelineId : nodePipelineIds) {
-                if (haveShaderMaterial) {
-                    addNode(pipelineId, meshInstance, shaderMaterialPipelinesData);
-                } else if (haveTransparentMaterial) {
+                if (haveTransparentOrShaderMaterial) {
                     addNode(pipelineId, meshInstance, transparentPipelinesData);
                 } else {
                     addNode(pipelineId, meshInstance, opaquePipelinesData);
@@ -252,9 +248,6 @@ namespace lysa {
                 if (opaquePipelinesData.contains(pipelineId)) {
                     opaquePipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
                 }
-                if (shaderMaterialPipelinesData.contains(pipelineId)) {
-                    shaderMaterialPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
-                }
             }
             meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
             meshInstancesDataMemoryBlocks.erase(meshInstance);
@@ -280,13 +273,6 @@ namespace lysa {
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (transparentPipelinesData.empty()) { return; }
         drawModels(commandList, pipelines, transparentPipelinesData);
-    }
-
-    void Scene::drawShaderMaterialModels(
-        vireo::CommandList& commandList,
-        const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
-        if (shaderMaterialPipelinesData.empty()) { return; }
-        drawModels(commandList, pipelines, shaderMaterialPipelinesData);
     }
 
     void Scene::setInitialState(const vireo::CommandList& commandList) const {

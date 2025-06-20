@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-export module lysa.renderers.renderpass.glighting_pass;
+export module lysa.renderers.renderpass.lighting_pass;
 
 import std;
 import vireo;
@@ -16,9 +16,9 @@ import lysa.renderers.renderpass.gbuffer_pass;
 
 export namespace lysa {
 
-    class GLightingPass : public Renderpass {
+    class LightingPass : public Renderpass {
     public:
-        GLightingPass(const RenderingConfiguration& config, const GBufferPass& gBufferPass);
+        LightingPass(const RenderingConfiguration& config, const GBufferPass& gBufferPass);
 
         void render(
             vireo::CommandList& commandList,

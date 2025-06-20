@@ -47,31 +47,9 @@ namespace lysa {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         update(frameIndex);
         const auto& frame = framesData[frameIndex];
-        const auto depthState = withStencil ? vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL : vireo::ResourceState::RENDER_TARGET_DEPTH;
         scene.setInitialState(*commandList);
-        commandList->barrier(
-            frame.depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            depthState);
         depthPrePass.render(*commandList, scene, frame.depthAttachment);
-        commandList->barrier(
-            frame.depthAttachment,
-            depthState,
-            vireo::ResourceState::UNDEFINED);
-
-        commandList->barrier(
-            frame.depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            depthState);
-        commandList->barrier(
-            frame.colorAttachment,
-            vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_COLOR);
-        mainColorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
-        commandList->barrier(
-            frame.depthAttachment,
-            depthState,
-            vireo::ResourceState::UNDEFINED);
+        colorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
     }
 
     void Renderer::postprocess(
@@ -80,15 +58,10 @@ namespace lysa {
         const vireo::Rect&scissor,
         uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (postProcessingPasses.empty()) {
-            commandList.barrier(
-            frame.colorAttachment,
-            vireo::ResourceState::RENDER_TARGET_COLOR,
-            vireo::ResourceState::UNDEFINED);
-        } else {
+        if (!postProcessingPasses.empty()) {
             commandList.barrier(
                 frame.colorAttachment,
-                vireo::ResourceState::RENDER_TARGET_COLOR,
+                vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::SHADER_READ);
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(

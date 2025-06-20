@@ -73,21 +73,27 @@ namespace lysa {
             return colorRenderTarget.renderTarget;
         });
         commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL);
+        commandList.barrier(
            {renderTargets.begin(), renderTargets.end()},
            vireo::ResourceState::SHADER_READ,
            vireo::ResourceState::RENDER_TARGET_COLOR);
-
         commandList.beginRendering(renderingConfig);
         commandList.setStencilReference(1);
         scene.drawOpaquesModels(
           commandList,
           pipelines);
         commandList.endRendering();
-
         commandList.barrier(
             {renderTargets.begin(), renderTargets.end()},
             vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::SHADER_READ);
+        commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL,
+            vireo::ResourceState::UNDEFINED);
     }
 
     void GBufferPass::resize(const vireo::Extent& extent) {

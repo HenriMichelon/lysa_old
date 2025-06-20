@@ -119,13 +119,17 @@ namespace lysa {
             .view       = inverse(scene.getCurrentCamera()->getTransformGlobal()),
         };
         frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
-
-        commandList.barrier(
-                depthAttachment,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::RENDER_TARGET_DEPTH);
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
+
+        commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_DEPTH);
+        commandList.barrier(
+            colorAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.bindVertexBuffer(vertexBuffer);
         commandList.beginRendering(renderingConfig);
         commandList.bindPipeline(pipelineLines);
@@ -148,6 +152,10 @@ namespace lysa {
         commandList.barrier(
             depthAttachment,
             vireo::ResourceState::RENDER_TARGET_DEPTH,
+            vireo::ResourceState::UNDEFINED);
+        commandList.barrier(
+            colorAttachment,
+            vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::UNDEFINED);
     }
 

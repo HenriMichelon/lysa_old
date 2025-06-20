@@ -14,7 +14,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, false, name},
-        forwardColorPass{config} {
+        forwardColorPass{config, false} {
     }
 
     void ForwardRenderer::update(const uint32 frameIndex) {
@@ -28,7 +28,7 @@ namespace lysa {
         forwardColorPass.updatePipelines(pipelineIds);
     }
 
-    void ForwardRenderer::mainColorPass(
+    void ForwardRenderer::colorPass(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,

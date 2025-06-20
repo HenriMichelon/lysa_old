@@ -14,8 +14,10 @@ import lysa.renderers.renderer;
 
 namespace lysa {
     ForwardColor::ForwardColor(
-        const RenderingConfiguration& config):
-        Renderpass{config, L"Forward Color"} {
+        const RenderingConfiguration& config,
+        const bool transparentOnly):
+        Renderpass{config, L"Forward Color"},
+        transparentOnly{transparentOnly} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
@@ -72,16 +74,31 @@ namespace lysa {
         renderingConfig.depthStencilRenderTarget = depthAttachment;
         renderingConfig.discardDepthStencilAfterRender = true;
 
+        commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_DEPTH);
+        commandList.barrier(
+            colorAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
-        scene.drawOpaquesModels(
-          commandList,
-          pipelines);
-        scene.drawShaderMaterialModels(
-          commandList,
-          pipelines);
+        if (!transparentOnly) {
+            scene.drawOpaquesModels(
+            commandList,
+                pipelines);
+        }
         scene.drawTransparentModels(
           commandList,
           pipelines);
         commandList.endRendering();
+        commandList.barrier(
+            colorAttachment,
+            vireo::ResourceState::RENDER_TARGET_COLOR,
+            vireo::ResourceState::UNDEFINED);
+        commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::RENDER_TARGET_DEPTH,
+            vireo::ResourceState::UNDEFINED);
     }
 }

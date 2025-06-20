@@ -47,7 +47,14 @@ namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment) {
+        const auto depthState = pipelineConfig.stencilTestEnable ?
+            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+            vireo::ResourceState::RENDER_TARGET_DEPTH;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
+        commandList.barrier(
+            depthAttachment,
+            vireo::ResourceState::UNDEFINED,
+            depthState);
         commandList.beginRendering(renderingConfig);
         if (pipelineConfig.stencilTestEnable) {
             commandList.setStencilReference(1);
@@ -56,5 +63,10 @@ namespace lysa {
           commandList,
           pipelines);
         commandList.endRendering();
+        commandList.barrier(
+            depthAttachment,
+            depthState,
+            vireo::ResourceState::UNDEFINED);
+
     }
 }

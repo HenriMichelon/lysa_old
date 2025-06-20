@@ -16,7 +16,7 @@ import lysa.renderers.renderpass;
 export namespace lysa {
     class ForwardColor : public Renderpass {
     public:
-        ForwardColor(const RenderingConfiguration& config);
+        ForwardColor(const RenderingConfiguration& config, bool transparentOnly);
 
         void updatePipelines(
             const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
@@ -43,6 +43,7 @@ export namespace lysa {
             .depthTestEnable = true,
         };
 
+        const bool transparentOnly;
         std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
 
     };

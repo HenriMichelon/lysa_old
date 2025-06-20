@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-module lysa.renderers.renderpass.glighting_pass;
+module lysa.renderers.renderpass.lighting_pass;
 
 import lysa.application;
 import lysa.resources;
@@ -14,10 +14,10 @@ import lysa.renderers.renderer;
 
 namespace lysa {
 
-    GLightingPass::GLightingPass(
+    LightingPass::LightingPass(
         const RenderingConfiguration& config,
         const GBufferPass& gBufferPass):
-        Renderpass{config, L"GLighting"},
+        Renderpass{config, L"Deferred Lighting"},
         gBufferPass{gBufferPass} {
         const auto& vireo = Application::getVireo();
 
@@ -53,7 +53,7 @@ namespace lysa {
             1.0f};
     }
 
-    void GLightingPass::render(
+    void LightingPass::render(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
@@ -71,6 +71,14 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
+        commandList.barrier(
+             depthAttachment,
+             vireo::ResourceState::UNDEFINED,
+             vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL);
+        commandList.barrier(
+             colorAttachment,
+             vireo::ResourceState::UNDEFINED,
+             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors({
              Application::getResources().getDescriptorSet(),
@@ -82,6 +90,14 @@ namespace lysa {
         commandList.setStencilReference(1);
         commandList.draw(3);
         commandList.endRendering();
+        commandList.barrier(
+           depthAttachment,
+           vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL,
+           vireo::ResourceState::UNDEFINED);
+        commandList.barrier(
+           colorAttachment,
+           vireo::ResourceState::RENDER_TARGET_COLOR,
+           vireo::ResourceState::UNDEFINED);
     }
 
 }
