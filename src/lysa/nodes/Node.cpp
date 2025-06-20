@@ -120,7 +120,7 @@ namespace lysa {
                 setPosition(position);
                 return;
             }
-            localTransform[3] = mul(inverse(parent->globalTransform), float4{position, 1.0});
+            localTransform[3] = mul(float4{position, 1.0}, inverse(parent->globalTransform));
             updateGlobalTransform();
         }
     }
@@ -288,7 +288,7 @@ namespace lysa {
         const auto tm = float4x4::translation(getPosition());
         const auto rm = float4x4{quat};
         const auto sm = float4x4::scale(getScale());
-        localTransform = mul(tm, mul(rm, sm));
+        localTransform = mul(mul(rm, sm), tm);
         updateGlobalTransform();
     }
 
@@ -312,9 +312,11 @@ namespace lysa {
             setRotation(quat);
             return;
         }
-        const auto rm = mul(float4x4::scale(getScale()), float4x4{quat});
-        localTransform = mul(inverse(parent->globalTransform), rm);
-        localTransform[3] = float4(getPositionGlobal(), 1.0f);
+        const auto tm = float4x4::translation(getPositionGlobal());
+        const auto rm = float4x4{quat};
+        const auto sm = float4x4::scale(getScaleGlobal());
+        const auto newGlobalTransform = mul(mul(rm, sm), tm);
+        localTransform = mul(newGlobalTransform, inverse(parent->globalTransform));
         updateGlobalTransform();
     }
 
