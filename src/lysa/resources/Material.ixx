@@ -23,15 +23,25 @@ export namespace lysa {
 
     struct MaterialData {
         float4 albedoColor{0.9f, 0.0f, 0.6f, 1.0f};
-        uint32 pipelineId;
+
         int    transparency{0};
         float  alphaScissor{0.1f};
+        float  metallicFactor{-1.0f}; // -1.0f -> non PBR material
+        float  roughnessFactor{1.0f};
+
+        float3 emissiveFactor{0.0f};
+        float  emissiveStrength{1.0f};
+
         float  normalScale{1.0f};
-        TextureInfoData diffuseTexture;
-        TextureInfoData normalTexture;
+        uint32 pipelineId;
+
+        TextureInfoData diffuseTexture{};
+        TextureInfoData normalTexture{};
+        TextureInfoData metallicTexture{};
+        TextureInfoData roughnessTexture{};
+        TextureInfoData emissiveTexture{};
         float4 parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
-    // static_assert(sizeof(MaterialData) == 176, "MaterialData struct must be 176 bytes for StructuredBuffer alignment");
 
     /**
      * Base class for all materials of models surfaces

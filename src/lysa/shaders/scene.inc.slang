@@ -31,14 +31,15 @@ cbuffer IndirectRootConstant : register(b0, space4) {
 #endif
 
 struct VertexOutput {
-    float4 position  : SV_POSITION;
-    float3 worldPos  : TEXCOORD0;
-    float3 normal    : TEXCOORD1;
-    float2 uv        : TEXCOORD2;
-    float3 tangent   : TEXCOORD3;
-    float3 bitangent : TEXCOORD4;
-    nointerpolation uint materialIndex : TEXCOORD5;
-    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD6;
+    float4 position      : SV_POSITION;
+    float3 worldPos      : TEXCOORD0;
+    float3 normal        : TEXCOORD1;
+    float2 uv            : TEXCOORD2;
+    float3 tangent       : TEXCOORD3;
+    float3 bitangent     : TEXCOORD4;
+    float3 viewDirection : TEXCOORD5;
+    nointerpolation uint materialIndex            : TEXCOORD6;
+    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD7;
 };
 
 struct Scene {
@@ -53,6 +54,15 @@ struct Scene {
 // Apply texture UV transforms
 float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;
+}
+
+// Converts a color from sRGB gamma to linear light gamma
+float4 toLinear(float4 sRGB) {
+    float3 cutoff = step(float3(0.04045), sRGB.rgb);
+    float3 higher = pow((sRGB.rgb + float3(0.055)) / float3(1.055), float3(2.));
+    float3 lower  = sRGB.rgb / float3(12.92);
+    float3 linearRGB = lerp(lower, higher, cutoff);
+    return float4(linearRGB, sRGB.a);
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);

@@ -25,7 +25,7 @@ float4 getColor(QuadOutput input) {
     float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;
     float3 lit = 0.0f;
     for (uint i = 0; i < scene.lightsCount; i++) {
-        lit += calcDirectionalLight(lights.light[i], worldPos, normal, 128.0);
+//         lit += calcDirectionalLight(lights.light[i], worldPos, normal, 128.0);
     }
 
     return float4(albedo * (lit + ambient), 1.0);

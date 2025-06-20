@@ -23,12 +23,20 @@ struct TextureInfo {
 
 struct Material {
     float4 albedoColor;
-    uint   pipelineId;
     int    transparency;
     float  alphaScissor;
+    float  metallicFactor; // -1.0f -> non PBR material
+    float  roughnessFactor;
+    float3 emissiveFactor;
+    float  emissiveStrength;
     float  normalScale;
+    uint   pipelineId;
+    float2 _pad0;
     TextureInfo diffuseTexture;
     TextureInfo normalTexture;
+    TextureInfo metallicTexture;
+    TextureInfo roughnessTexture;
+    TextureInfo emissiveTexture;
     float4 parameters[4];
 }
 

@@ -29,10 +29,14 @@ namespace lysa {
     MaterialData StandardMaterial::getMaterialData() const {
         auto data = MaterialData {
             .albedoColor = albedoColor,
-            .pipelineId = getPipelineId(),
             .transparency = static_cast<int>(getTransparency()),
             .alphaScissor = getAlphaScissor(),
+            .metallicFactor = metallicFactor,
+            .roughnessFactor = roughnessFactor,
+            .emissiveFactor = emissiveFactor,
+            .emissiveStrength = emissiveStrength,
             .normalScale = normalScale,
+            .pipelineId = getPipelineId(),
         };
         if (diffuseTexture.texture) {
             data.diffuseTexture = {
@@ -46,6 +50,27 @@ namespace lysa {
                 .index = static_cast<int32>(normalTexture.texture->getImage()->getIndex()),
                 .samplerIndex = normalTexture.texture->getSamplerIndex(),
                 .transform = float4x4{normalTexture.transform},
+            };
+        }
+        if (metallicTexture.texture) {
+            data.metallicTexture = {
+                .index = static_cast<int32>(metallicTexture.texture->getImage()->getIndex()),
+                .samplerIndex = metallicTexture.texture->getSamplerIndex(),
+                .transform = float4x4{metallicTexture.transform},
+            };
+        }
+        if (roughnessTexture.texture) {
+            data.roughnessTexture = {
+                .index = static_cast<int32>(roughnessTexture.texture->getImage()->getIndex()),
+                .samplerIndex = roughnessTexture.texture->getSamplerIndex(),
+                .transform = float4x4{roughnessTexture.transform},
+            };
+        }
+        if (emissiveTexture.texture) {
+            data.emissiveTexture = {
+                .index = static_cast<int32>(emissiveTexture.texture->getImage()->getIndex()),
+                .samplerIndex = emissiveTexture.texture->getSamplerIndex(),
+                .transform = float4x4{emissiveTexture.transform},
             };
         }
         return data;
