@@ -226,37 +226,6 @@ namespace lysa {
         };
     }
 
-    /*
-
-    void Node::setScale(const float3& scale) {
-        if (any(scale != getScale())) {
-            float3 x = normalize(localTransform[0].xyz);
-            float3 y = normalize(localTransform[1].xyz);
-            float3 z = normalize(localTransform[2].xyz);
-            localTransform[0].xyz = x * scale.x;
-            localTransform[1].xyz = y * scale.y;
-            localTransform[2].xyz = z * scale.z;
-            updateGlobalTransform();
-        }
-    }
-    
-    void Node::setScale(const float scale) {
-        setScale(float3{scale, scale, scale});
-    }
-
-    void Node::rotateTowards(const quaternion& targetRotation, const float maxAngle) {
-        updateGlobalTransform();
-    }
-
-    float3 Node::getScaleGlobal() const {
-        float3 scale;
-        scale.x = length(globalTransform[0].xyz);
-        scale.y = length(globalTransform[1].xyz);
-        scale.z = length(globalTransform[2].xyz);
-        return scale;
-    }
-*/
-
     float Node::getRotationX() const {
         const auto angles = eulerAngles(getRotation());
         return angles.x;
@@ -285,11 +254,13 @@ namespace lysa {
     }
 
     void Node::setRotation(const quaternion& quat) {
-        const auto tm = float4x4::translation(getPosition());
-        const auto rm = float4x4{quat};
-        const auto sm = float4x4::scale(getScale());
-        localTransform = mul(mul(rm, sm), tm);
-        updateGlobalTransform();
+        if (any(quat != getRotation())) {
+            const auto tm = float4x4::translation(getPosition());
+            const auto rm = float4x4{quat};
+            const auto sm = float4x4::scale(getScale());
+            localTransform = mul(mul(rm, sm), tm);
+            updateGlobalTransform();
+        }
     }
 
     void Node::rotateX(const float angle) {
@@ -308,16 +279,18 @@ namespace lysa {
     }
 
     void Node::setRotationGlobal(const quaternion& quat) {
-        if (!parent) {
-            setRotation(quat);
-            return;
+        if (any(quat != getRotationGlobal())) {
+            if (!parent) {
+                setRotation(quat);
+                return;
+            }
+            const auto tm = float4x4::translation(getPositionGlobal());
+            const auto rm = float4x4{quat};
+            const auto sm = float4x4::scale(getScaleGlobal());
+            const auto newGlobalTransform = mul(mul(rm, sm), tm);
+            localTransform = mul(newGlobalTransform, inverse(parent->globalTransform));
+            updateGlobalTransform();
         }
-        const auto tm = float4x4::translation(getPositionGlobal());
-        const auto rm = float4x4{quat};
-        const auto sm = float4x4::scale(getScaleGlobal());
-        const auto newGlobalTransform = mul(mul(rm, sm), tm);
-        localTransform = mul(newGlobalTransform, inverse(parent->globalTransform));
-        updateGlobalTransform();
     }
 
     quaternion Node::getRotation() const {
