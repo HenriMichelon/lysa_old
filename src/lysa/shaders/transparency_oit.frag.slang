@@ -11,28 +11,14 @@ struct FragmentOutput {
     float  reveal : SV_TARGET1;
 };
 
-float weightDepth(float z, float4 color) {
-    return clamp(pow(min(1.0, color.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
-}
-
-float weightColor(float z, float4 color) {
-    return max(min(1.0, max(max(color.r, color.g), color.b) * color.a), color.a) *
-        clamp(0.03 / (1e-5 + pow(z / 200, 4.0)), 1e-2, 3e3);
-}
-
 FragmentOutput fragmentMain(VertexOutput input) {
     float4 color = getColor(input, input.materialIndex);
-    if (color.a >= 1.0f) {
-        FragmentOutput out;
-        out.accum = float4(color.rgb, 1.0f) * 1e6;
-        out.reveal = 0.0f;
-        return out;
-    }
 
-    float weight = weightDepth(input.position.z, color);
+    // https://casual-effects.blogspot.com/2015/03/implemented-weighted-blended-order.html
+    float weight = clamp(pow(min(1.0, color.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - input.position.z * 0.9, 3.0), 1e-2, 3e3);
 
     FragmentOutput output;
-    output.accum = float4(color.rgb * color.a, color.a) * weight;
+    output.accum = color * weight;
     output.reveal = color.a;
     return output;
 }

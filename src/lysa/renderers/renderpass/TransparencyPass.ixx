@@ -110,6 +110,7 @@ export namespace lysa {
 
         vireo::RenderingConfiguration compositeRenderingConfig {
             .colorRenderTargets = {{}},
+            .depthTestEnable = compositePipelineConfig.depthTestEnable,
         };
 
         int buffersResized{0};
