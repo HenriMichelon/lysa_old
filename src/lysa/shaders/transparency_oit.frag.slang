@@ -22,6 +22,13 @@ float weightColor(float z, float4 color) {
 
 FragmentOutput fragmentMain(VertexOutput input) {
     float4 color = getColor(input, input.materialIndex);
+    if (color.a >= 1.0f) {
+        FragmentOutput out;
+        out.accum = float4(color.rgb, 1.0f) * 1e6;
+        out.reveal = 0.0f;
+        return out;
+    }
+
     float weight = weightDepth(input.position.z, color);
 
     FragmentOutput output;

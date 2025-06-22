@@ -14,10 +14,8 @@ import lysa.renderers.renderer;
 
 namespace lysa {
     ForwardColor::ForwardColor(
-        const RenderingConfiguration& config,
-        const bool transparentOnly):
-        Renderpass{config, L"Forward Color"},
-        transparentOnly{transparentOnly} {
+        const RenderingConfiguration& config):
+        Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
@@ -91,14 +89,9 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
-        if (!transparentOnly) {
-            scene.drawOpaquesModels(
-            commandList,
-                pipelines);
-        }
-        scene.drawTransparentModels(
-          commandList,
-          pipelines);
+        scene.drawOpaquesModels(
+        commandList,
+            pipelines);
         commandList.endRendering();
         commandList.barrier(
             colorAttachment,

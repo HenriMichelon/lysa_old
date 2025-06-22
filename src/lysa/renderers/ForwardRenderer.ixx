@@ -13,6 +13,7 @@ import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.renderpass.forward_color;
+import lysa.renderers.renderpass.transparency_pass;
 
 export namespace lysa {
     class ForwardRenderer : public Renderer {
@@ -20,6 +21,8 @@ export namespace lysa {
         ForwardRenderer(
             const RenderingConfiguration& config,
             const std::wstring& name);
+
+        void resize(const vireo::Extent& extent) override;
 
         void updatePipelines(
             const std::unordered_map<pipeline_id,
@@ -38,5 +41,6 @@ export namespace lysa {
 
     private:
         ForwardColor forwardColorPass;
+        TransparencyPass transparencyPass;
     };
 }

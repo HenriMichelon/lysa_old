@@ -94,7 +94,7 @@ export namespace lysa {
         vireo::GraphicPipelineConfiguration compositePipelineConfig {
             .colorBlendDesc = {
             {
-                    .blendEnable = false,
+                    .blendEnable = true,
                     .srcColorBlendFactor = vireo::BlendFactor::ONE_MINUS_SRC_ALPHA,
                     .dstColorBlendFactor = vireo::BlendFactor::SRC_ALPHA,
                     .colorBlendOp = vireo::BlendOp::ADD,
