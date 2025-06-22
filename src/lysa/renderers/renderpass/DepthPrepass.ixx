@@ -29,9 +29,9 @@ export namespace lysa {
         const std::wstring VERTEX_SHADER{L"depth_prepass.vert"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .cullMode            = vireo::CullMode::BACK,
-            .depthTestEnable     = true,
-            .depthWriteEnable    = true,
+            .cullMode = vireo::CullMode::BACK,
+            .depthTestEnable = true,
+            .depthWriteEnable = true,
             .frontStencilOpState = {
                 .failOp      = vireo::StencilOp::KEEP,
                 .passOp      = vireo::StencilOp::REPLACE,
@@ -43,7 +43,7 @@ export namespace lysa {
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .depthTestEnable    = pipelineConfig.depthTestEnable,
+            .depthTestEnable = pipelineConfig.depthTestEnable,
             .clearDepthStencil = true,
         };
 

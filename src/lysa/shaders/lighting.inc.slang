@@ -135,14 +135,15 @@ float3 calcDirectionalLight(
 // }
 
 float3 calcLight(
-    VertexOutput input,
+    float3 viewDirection,
     float3 color,
     float3 normal,
+    float4 ambientColor,
     bool ispbr,
     float metallic,
     float roughness,
     float3 emissiveColor) {
-    float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;
+    float3 ambient = ambientColor.rgb * ambientColor.w * color;
     float3 diffuse = float3(0.0f);
     if (ispbr) {
         // for ndfGGX()
@@ -153,7 +154,7 @@ float3 calcLight(
         // Fresnel reflectance at normal incidence (for metals use albedo color).
         const float3 F0 = lerp(Fdielectric, color.rgb, metallic);
         // Specular reflection vector.
-        const float cosLo = max(0.0, dot(normal, input.viewDirection));
+        const float cosLo = max(0.0, dot(normal, viewDirection));
         // Calculate the diffuse light from the scene's lights
         for (uint i = 0; i < scene.lightsCount; i++) {
             Light light = lights.light[i];
@@ -162,12 +163,13 @@ float3 calcLight(
                 case LIGHT_DIRECTIONAL: {
                     diffuse += factor * calcDirectionalLight(
                         light, color.rgb, normal, metallic, roughness,
-                        input.viewDirection, F0, cosLo, alphaSq, alphaDirectLighting);
+                        viewDirection, F0, cosLo, alphaSq, alphaDirectLighting);
                     break;
                 }
             }
             diffuse = clamp(diffuse, 0.0, 1.0);
         }
+        ambient *= (1.0 - metallic);
     }
     return float3(diffuse + ambient + emissiveColor);
 }

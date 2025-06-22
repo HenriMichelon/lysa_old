@@ -44,9 +44,9 @@ export namespace lysa {
             return framesData[frameIndex].albedoBuffer;
         }
 
-        // auto getMaterialBuffer(const uint32 frameIndex) const {
-            // return framesData[frameIndex].materialBuffer;
-        // }
+        auto getEmissiveBuffer(const uint32 frameIndex) const {
+            return framesData[frameIndex].emissiveBuffer;
+        }
 
     private:
         const std::wstring VERTEX_SHADER{L"default.vert"};
@@ -55,27 +55,27 @@ export namespace lysa {
         static constexpr int BUFFER_POSITION{0};
         static constexpr int BUFFER_NORMAL{1};
         static constexpr int BUFFER_ALBEDO{2};
-        static constexpr int BUFFER_MATERIAL{3};
+        static constexpr int BUFFER_EMISSIVE{3};
 
         struct FrameData {
             std::shared_ptr<vireo::RenderTarget>  positionBuffer;
             std::shared_ptr<vireo::RenderTarget>  normalBuffer;
             std::shared_ptr<vireo::RenderTarget>  albedoBuffer;
-            // std::shared_ptr<vireo::RenderTarget>  materialBuffer;
+            std::shared_ptr<vireo::RenderTarget>  emissiveBuffer;
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorRenderFormats  = {
-                vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Position, A: unsued (metallic ?)
-                vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Normal, A: unused (roughness ?)
+                vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Position, A: metallic
+                vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Normal, A: roughness
                 vireo::ImageFormat::R8G8B8A8_UNORM,      // RGB: Albedo, A: unused (ao ?)
-                // vireo::ImageFormat::R8_UNORM,            // R: MeshInstance material index
+                vireo::ImageFormat::R8G8B8A8_UNORM,      // RGB: emissive color, A: have material+roughness?
             },
             .colorBlendDesc      = {
                 {}, // Position
                 {}, // Normal
                 {}, // Albedo
-                // {} // Material
+                {}  // Emissive
             },
             .cullMode            = vireo::CullMode::BACK,
             .depthTestEnable     = true,
@@ -96,7 +96,7 @@ export namespace lysa {
                 { .clear = true }, // Position
                 { .clear = true }, // Normal
                 { .clear = true }, // Albedo
-                // { .clear = true }, // Material
+                { .clear = true }, // Emissive
             },
             .depthTestEnable    = pipelineConfig.depthTestEnable,
             .stencilTestEnable  = pipelineConfig.stencilTestEnable,

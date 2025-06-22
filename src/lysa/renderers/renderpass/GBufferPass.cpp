@@ -56,7 +56,7 @@ namespace lysa {
                     frame.positionBuffer,
                     frame.normalBuffer,
                     frame.albedoBuffer,
-                    // frame.materialBuffer
+                    frame.emissiveBuffer
                 },
                 vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::SHADER_READ);
@@ -66,7 +66,7 @@ namespace lysa {
         renderingConfig.colorRenderTargets[BUFFER_POSITION].renderTarget = frame.positionBuffer;
         renderingConfig.colorRenderTargets[BUFFER_NORMAL].renderTarget = frame.normalBuffer;
         renderingConfig.colorRenderTargets[BUFFER_ALBEDO].renderTarget = frame.albedoBuffer;
-        // renderingConfig.colorRenderTargets[BUFFER_MATERIAL].renderTarget = frame.materialBuffer;
+        renderingConfig.colorRenderTargets[BUFFER_EMISSIVE].renderTarget = frame.emissiveBuffer;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
         auto renderTargets = std::views::transform(renderingConfig.colorRenderTargets, [](const auto& colorRenderTarget) {
@@ -120,11 +120,13 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_ALBEDO].clearValue,
                 vireo::MSAA::NONE,
                 L"Albedo");
-            // frame.materialBuffer = vireo.createRenderTarget(
-            //     pipelineConfig.colorRenderFormats[BUFFER_MATERIAL],
-            //     extent.width,extent.height,
-            //     vireo::RenderTargetType::COLOR,
-            //     renderingConfig.colorRenderTargets[BUFFER_MATERIAL].clearValue);
+            frame.emissiveBuffer = vireo.createRenderTarget(
+                pipelineConfig.colorRenderFormats[BUFFER_EMISSIVE],
+                extent.width,extent.height,
+                vireo::RenderTargetType::COLOR,
+                renderingConfig.colorRenderTargets[BUFFER_EMISSIVE].clearValue,
+                vireo::MSAA::NONE,
+                L"Emissive");
         }
         buffersResized = config.framesInFlight;
     }

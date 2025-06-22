@@ -11,22 +11,28 @@ struct QuadOutput {
     float2 uv       : TEXCOORD;
 };
 
-[[vk::binding(0, 3)]] Texture2D    positionBuffer   : register(t0, space3);
-[[vk::binding(1, 3)]] Texture2D    normalBuffer     : register(t1, space3);
-[[vk::binding(2, 3)]] Texture2D    albedoBuffer     : register(t2, space3);
-// [[vk::binding(3, 3)]] Texture2D    materialBuffer   : register(t3, space3);
+[[vk::binding(0, 3)]] Texture2D positionBuffer : register(t0, space3);
+[[vk::binding(1, 3)]] Texture2D normalBuffer   : register(t1, space3);
+[[vk::binding(2, 3)]] Texture2D albedoBuffer   : register(t2, space3);
+[[vk::binding(3, 3)]] Texture2D emissiveBuffer : register(t3, space3);
 
 float4 getColor(QuadOutput input) {
-    float3 worldPos = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
-    float3 normal = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
+    float4 value = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 worldPos = value.rgb;
+    float metallic = value.a;
+    float3 viewDirection = normalize(scene.cameraPosition - worldPos);
+
+    value = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 normal = value.rgb;
+    float roughness = value.a;
+
     float3 albedo = albedoBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
-//     uint materialIndex = asuint(materialBuffer.Sample(samplers[2], input.uv).r);
 
-    float3 ambient = scene.ambientLight.rgb * scene.ambientLight.w;
-    float3 lit = 0.0f;
-    for (uint i = 0; i < scene.lightsCount; i++) {
-//         lit += calcDirectionalLight(lights.light[i], worldPos, normal, 128.0);
-    }
+    value = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 emissiveColor = value.rgb;
+    bool ispbr = value.a == 1.0;
 
-    return float4(albedo * (lit + ambient), 1.0);
+    return float4(
+        calcLight(viewDirection, albedo, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
+        1.0);
 }

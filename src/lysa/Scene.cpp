@@ -186,8 +186,9 @@ namespace lysa {
             for (int i = 0; i < mesh->getSurfaces().size(); i++) {
                 const auto material = meshInstance->getSurfaceMaterial(i);
                 haveTransparentOrShaderMaterial =
-                    material->getTransparency() != Transparency::DISABLED |
+                    material->getTransparency() != Transparency::DISABLED ||
                     material->getType() == Material::SHADER;
+                // INFO(lysa::to_string(material->getName()), " : ", haveTransparentOrShaderMaterial ? "Transparent" : "Opaque");
                 auto id = material->getPipelineId();
                 nodePipelineIds.insert(id);
                 if (!pipelineIds.contains(id)) {
@@ -428,9 +429,10 @@ namespace lysa {
                 drawCommandsStagingBufferCount = drawCommandsCount;
                 drawCommandsStagingBuffer->map();
             }
+
             drawCommandsStagingBuffer->write(drawCommands.data(),
                 sizeof(DrawCommand) * drawCommandsCount);
-            commandList.upload(drawCommandsBuffer, drawCommands.data());
+            commandList.copy(drawCommandsStagingBuffer, drawCommandsBuffer, sizeof(DrawCommand) * drawCommandsCount);
             instancesUpdated = false;
             commandList.barrier(
                 *drawCommandsBuffer,

@@ -52,9 +52,11 @@ namespace lysa {
                         fragShaderName = shaderMaterial->getFragFileName();
                     }
                 }
-                pipelineConfig.colorBlendDesc[0].blendEnable = material->getTransparency() != Transparency::DISABLED;
+                const bool transparent = material->getTransparency() != Transparency::DISABLED;
+                pipelineConfig.colorBlendDesc[0].blendEnable = transparent;
                 pipelineConfig.cullMode = material->getCullMode();
-                pipelineConfig.depthWriteEnable = true; //material->getTransparency() == Transparency::DISABLED;
+                pipelineConfig.depthWriteEnable = false;
+                pipelineConfig.depthBiasEnable = false;
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
@@ -72,7 +74,7 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
-        renderingConfig.discardDepthStencilAfterRender = true;
+        // renderingConfig.discardDepthStencilAfterRender = true;
 
         const auto depthStage =
             config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||

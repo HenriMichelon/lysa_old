@@ -35,7 +35,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{0};
         static constexpr vireo::DescriptorIndex BINDING_NORMAL_BUFFER{1};
         static constexpr vireo::DescriptorIndex BINDING_ALBEDO_BUFFER{2};
-        // static constexpr vireo::DescriptorIndex BINDING_MATERIAL_BUFFER{3};
+        static constexpr vireo::DescriptorIndex BINDING_EMISSIVE_BUFFER{3};
 
         struct FrameData {
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
