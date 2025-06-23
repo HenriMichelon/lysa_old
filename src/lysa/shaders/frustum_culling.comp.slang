@@ -31,7 +31,6 @@ struct DrawIndexedIndirectCommand {
 struct DrawCommand {
     uint instanceIndex;
     DrawIndexedIndirectCommand command;
-    float depth;
 };
 
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
@@ -67,9 +66,9 @@ void main(uint3 id : SV_DispatchThreadID) {
         }
     }
 
-    float3 worldCenter = 0.5 * (meshInstance.aabbMin + meshInstance.aabbMax);
-    float3 viewPos = mul(float4(worldCenter, 1.0), global.viewMatrix).xyz;
-    command.depth = -viewPos.z;
+//     float3 worldCenter = 0.5 * (meshInstance.aabbMin + meshInstance.aabbMax);
+//     float3 viewPos = mul(float4(worldCenter, 1.0), global.viewMatrix).xyz;
+//     command.depth = -viewPos.z;
 
     output.Append(command);
 }

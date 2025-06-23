@@ -496,7 +496,7 @@ export namespace lysa {
         /**
          * Duplicates a node. Warning : not implemented on all node types, check documentation for the node type before using it.
          */
-        std::shared_ptr<Node> duplicate() const;
+        std::shared_ptr<Node> duplicate(bool recursiveFilter = false) const;
 
         /**
          * Transforms a local vector from this node's local space to world space.
@@ -617,6 +617,9 @@ export namespace lysa {
         void unlockViewportUpdates();
 
         float4x4 rotate(const float4x4& m, float angle, const float3& axis);
+
+        friend class Loader;
+        void setParent(Node *p) { parent = p; }
     };
 
 }

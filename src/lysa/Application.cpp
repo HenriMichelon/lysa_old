@@ -8,6 +8,14 @@ module lysa.application;
 
 import lysa.input;
 import lysa.scene;
+import lysa.type_registry;
+import lysa.nodes.camera;
+import lysa.nodes.collision_area;
+import lysa.nodes.directional_light;
+import lysa.nodes.environment;
+import lysa.nodes.ray_cast;
+import lysa.nodes.rigid_body;
+import lysa.nodes.static_body;
 import lysa.nodes.node;
 // using namespace std::chrono;
 
@@ -29,6 +37,7 @@ namespace lysa {
             Log::open(log);
         }
         Scene::createDescriptorLayouts();
+        registerTypes();
     }
 
     Application::~Application() {
@@ -111,6 +120,20 @@ namespace lysa {
         for (const auto& window : windows) {
             window->drawFrame();
         }
+    }
+
+    void Application::registerTypes() const {
+        TypeRegistry::registerType<Camera>("Camera");
+        TypeRegistry::registerType<CollisionArea>("CollisionArea");
+        TypeRegistry::registerType<DirectionalLight>("DirectionalLight");
+        TypeRegistry::registerType<Environment>("Environment");
+        TypeRegistry::registerType<Node>("Node");
+        // TypeRegistry::registerType<OmniLight>("OmniLight");
+        TypeRegistry::registerType<RayCast>("RayCast");
+        TypeRegistry::registerType<RigidBody>("RigidBody");
+        // TypeRegistry::registerType<Skybox>("Skybox");
+        // TypeRegistry::registerType<SpotLight>("SpotLight");
+        TypeRegistry::registerType<StaticBody>("StaticBody");
     }
 
 }

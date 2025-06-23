@@ -40,7 +40,6 @@ export namespace lysa {
     struct DrawCommand {
         uint32 instanceIndex;
         vireo::DrawIndexedIndirectCommand command;
-        float depth;
     };
 
     class Scene {

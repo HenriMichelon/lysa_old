@@ -21,3 +21,4 @@ A 3D Game Engine.
 - [xxHash](https://github.com/Cyan4973/xxHash) : Extremely fast non-cryptographic hash algorithm by Yann Collet
 - [JoltPhysics](https://github.com/jrouwe/JoltPhysics) : A multicore-friendly rigid body physics and collision detection library by Jorrit Rouwe
 - [PhysX](https://github.com/NVIDIA-Omniverse/PhysX) : A physics library by NVIDIA
+- [json](https://github.com/nlohmann/json) : JSON for Modern C++ by Niels Lohmann

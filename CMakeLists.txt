@@ -80,9 +80,6 @@ set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
 #######################################################
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
-#file(GLOB_RECURSE SHADERS_SOURCE_FILES
-#        "${SHADERS_SRC_DIR}/*.slang"
-#)
 set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/default.vert.slang"
         "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
@@ -97,11 +94,6 @@ set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/transparency_oit_composite.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
-
-#set(SHADERS_SOURCE_FILES_FORWARD
-#        "${SHADERS_SRC_DIR}/default.vert.slang"
-#)
-#add_shaders(${LYSA_TARGET}_shaders_forward ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES_FORWARD} )
 
 #######################################################
 # xxHash library
@@ -194,6 +186,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Log.cpp
         ${ENGINE_SRC_DIR}/Input.cpp
         ${ENGINE_SRC_DIR}/Memory.cpp
+        ${ENGINE_SRC_DIR}/Loader.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
         ${ENGINE_SRC_DIR}/Resources.cpp
         ${ENGINE_SRC_DIR}/Scene.cpp
@@ -266,6 +259,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/InputEvent.ixx
         ${ENGINE_SRC_DIR}/Frustum.ixx
         ${ENGINE_SRC_DIR}/Global.ixx
+        ${ENGINE_SRC_DIR}/Loader.ixx
         ${ENGINE_SRC_DIR}/Log.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
         ${ENGINE_SRC_DIR}/Memory.ixx
@@ -276,6 +270,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Signal.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
         ${ENGINE_SRC_DIR}/Tween.ixx
+        ${ENGINE_SRC_DIR}/TypeRegistry.ixx
         ${ENGINE_SRC_DIR}/Viewport.ixx
         ${ENGINE_SRC_DIR}/VirtualFS.ixx
         ${ENGINE_SRC_DIR}/Window.ixx
@@ -334,7 +329,7 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR})
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${SRC_DIR}/json)
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE

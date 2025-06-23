@@ -106,6 +106,8 @@ export namespace lysa {
 
         void mainLoop();
 
+        // Registers all nodes types
+        void registerTypes() const;
     };
 
 };

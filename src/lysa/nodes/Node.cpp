@@ -332,7 +332,7 @@ namespace lysa {
             // setScale(to_float3(value));
         } else if (property == "groups") {
             for(const auto groupName : split(value, ';')) {
-                addToGroup(to_wstring(groupName.data()));
+                addToGroup(std::to_wstring(groupName.data()));
             }
         } else if (property == "process_mode") {
             const auto v = to_lower(value);
@@ -356,11 +356,13 @@ namespace lysa {
         }
     }
 
-    std::shared_ptr<Node> Node::duplicate() const {
+    std::shared_ptr<Node> Node::duplicate(const bool recursiveFilter) const {
         std::shared_ptr<Node> dup = duplicateInstance();
         dup->children.clear();
         for (const auto &child : children) {
-            dup->addChild(child->duplicate());
+            if (!recursiveFilter || child->getType() == ANIMATION_PLAYER) {
+                dup->addChild(child->duplicate());
+            }
         }
         dup->id   = currentId++;
         dup->name = name;
