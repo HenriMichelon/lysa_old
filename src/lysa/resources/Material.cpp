@@ -34,7 +34,6 @@ namespace lysa {
             .metallicFactor = metallicFactor,
             .roughnessFactor = roughnessFactor,
             .emissiveFactor = emissiveFactor,
-            .emissiveStrength = emissiveStrength,
             .normalScale = normalScale,
             .pipelineId = getPipelineId(),
         };
@@ -124,11 +123,6 @@ namespace lysa {
 
     void StandardMaterial::setEmissiveFactor(const float3& factor) {
         emissiveFactor = factor;
-        upload();
-    }
-
-    void StandardMaterial::setEmissiveStrength(const float strength) {
-        emissiveStrength = strength;
         upload();
     }
 

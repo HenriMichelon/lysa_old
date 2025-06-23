@@ -40,8 +40,7 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
     float3 emissiveColor = mat.emissiveFactor;
     if (mat.emissiveTexture.index != -1) {
         emissiveColor *= toLinear(textures[mat.emissiveTexture.index].Sample(
-            samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb
-            * mat.emissiveStrength;
+            samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb;
     }
 
     return float4(

@@ -41,20 +41,8 @@ namespace lysa {
                 const auto& material = materials.at(0);
                 std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
                 std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
-                // if (material->getType() == Material::SHADER) {
-                //     const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
-                //     if (!shaderMaterial->getVertFileName().empty()) {
-                //         vertShaderName = shaderMaterial->getVertFileName();
-                //     }
-                //     if (!shaderMaterial->getFragFileName().empty()) {
-                //         fragShaderName = shaderMaterial->getFragFileName();
-                //     }
-                // }
-                const bool transparent = false; //material->getTransparency() != Transparency::DISABLED;
-                pipelineConfig.colorBlendDesc[0].blendEnable = transparent;
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.depthWriteEnable = true;
-                // pipelineConfig.depthBiasEnable = !transparent;
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);

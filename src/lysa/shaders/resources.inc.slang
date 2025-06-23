@@ -42,10 +42,9 @@ struct Material {
     float  metallicFactor; // -1.0f -> non PBR material
     float  roughnessFactor;
     float3 emissiveFactor;
-    float  emissiveStrength;
     float  normalScale;
     uint   pipelineId;
-    float2 _pad0;
+    float3 _pad0;
     TextureInfo diffuseTexture;
     TextureInfo normalTexture;
     TextureInfo metallicTexture;

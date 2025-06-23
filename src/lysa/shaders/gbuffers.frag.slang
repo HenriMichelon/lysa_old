@@ -52,8 +52,7 @@ FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
     float3 emissiveColor = mat.emissiveFactor;
     if (mat.emissiveTexture.index != -1) {
          emissiveColor *= toLinear(textures[mat.emissiveTexture.index].Sample(
-             samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb
-             * mat.emissiveStrength;
+             samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb;
     }
 
     FragmentOutput output;

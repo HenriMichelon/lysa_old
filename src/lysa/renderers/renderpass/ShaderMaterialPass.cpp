@@ -89,7 +89,7 @@ namespace lysa {
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
         scene.drawShaderMaterialModels(
-        commandList,
+            commandList,
             pipelines);
         commandList.endRendering();
         commandList.barrier(

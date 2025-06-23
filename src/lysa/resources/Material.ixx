@@ -30,7 +30,6 @@ export namespace lysa {
         float  roughnessFactor{1.0f};
 
         float3 emissiveFactor{0.0f};
-        float  emissiveStrength{1.0f};
 
         float  normalScale{1.0f};
         uint32 pipelineId;
@@ -222,16 +221,6 @@ export namespace lysa {
         void setEmissiveTexture(const TextureInfo& texture);
 
         /**
-         * Returns the emmisibe colors strength
-         */
-        auto getEmissiveStrength() const { return emissiveStrength; }
-
-        /**
-         * Sets the emmisibe colors strength
-         */
-        void setEmissiveStrength(float emissive);
-
-        /**
          * Returns the scale applied to the normal image texture.
          * See https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_normaltextureinfo_scale
          */
@@ -255,7 +244,6 @@ export namespace lysa {
         float        roughnessFactor{1.0f};
         TextureInfo  roughnessTexture{};
         float3       emissiveFactor{0.0f};
-        float        emissiveStrength{1.0f};
         TextureInfo  emissiveTexture;
         TextureInfo  normalTexture{};
         float        normalScale{1.0f};

@@ -306,6 +306,7 @@ namespace lysa {
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
+            if (pipelineData->drawCommandsCount == 0) { continue; }
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
             commandList.bindDescriptors({

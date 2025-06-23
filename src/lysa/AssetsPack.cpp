@@ -209,7 +209,6 @@ namespace lysa {
             material->setRoughnessFactor(header.roughnessFactor);
             material->setRoughnessTexture(textureInfo(header.roughnessTexture));
             material->setEmissiveFactor(header.emissiveFactor);
-            material->setEmissiveStrength(header.emissiveStrength);
             material->setEmissiveTexture(textureInfo(header.emissiveTexture));
             material->setNormalTexture(textureInfo(header.normalTexture));
             material->setNormalScale(header.normalScale);
