@@ -123,7 +123,9 @@ float3 calcPointLight(
         const float theta = dot(lightDir, normalize(-light.direction.xyz));
         const float epsilon = light.cutOff - light.outerCutOff;
         const float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-        if (theta <= light.outerCutOff) return float3(0.0f);
+        if (theta <= light.outerCutOff) {
+            return float3(0.0f);
+        }
         return min(intensity * diffuse, float3(1.0f));
     } else {
         return min(diffuse, float3(1.0f));

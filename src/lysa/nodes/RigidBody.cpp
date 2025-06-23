@@ -22,7 +22,7 @@ namespace lysa {
     }
 
      void RigidBody::setProperty(const std::string &property, const std::string &value) {
-        CollisionObject::setProperty(property, value);
+        PhysicsBody::setProperty(property, value);
         if (property == "mass") {
             setMass(stof(value));
         }

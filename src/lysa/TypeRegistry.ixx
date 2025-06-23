@@ -23,7 +23,7 @@ export namespace lysa {
          * Creates a new shared pointer to a new instance of type `clazz` with casting to the type `T`
          */
         template<typename T> static std::shared_ptr<T> makeShared(const std::string&clazz) {
-            if (!typeMap->contains(clazz)) { throw Exception("Type", clazz, "not registered in TypeRegistry"); }
+            if (!typeMap->contains(clazz)) { throw Exception("Type '", clazz, "' not registered in TypeRegistry"); }
             return std::shared_ptr<T>(reinterpret_pointer_cast<T>(typeMap->at(clazz)()));
         }
 

@@ -13,8 +13,10 @@ import lysa.nodes.camera;
 import lysa.nodes.collision_area;
 import lysa.nodes.directional_light;
 import lysa.nodes.environment;
+import lysa.nodes.omni_light;
 import lysa.nodes.ray_cast;
 import lysa.nodes.rigid_body;
+import lysa.nodes.spot_light;
 import lysa.nodes.static_body;
 import lysa.nodes.node;
 // using namespace std::chrono;
@@ -128,11 +130,11 @@ namespace lysa {
         TypeRegistry::registerType<DirectionalLight>("DirectionalLight");
         TypeRegistry::registerType<Environment>("Environment");
         TypeRegistry::registerType<Node>("Node");
-        // TypeRegistry::registerType<OmniLight>("OmniLight");
+        TypeRegistry::registerType<OmniLight>("OmniLight");
         TypeRegistry::registerType<RayCast>("RayCast");
         TypeRegistry::registerType<RigidBody>("RigidBody");
         // TypeRegistry::registerType<Skybox>("Skybox");
-        // TypeRegistry::registerType<SpotLight>("SpotLight");
+        TypeRegistry::registerType<SpotLight>("SpotLight");
         TypeRegistry::registerType<StaticBody>("StaticBody");
     }
 

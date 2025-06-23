@@ -10,6 +10,7 @@ module lysa.loader;
 
 import lysa.assets_pack;
 import lysa.global;
+import lysa.log;
 import lysa.type_registry;
 import lysa.virtual_fs;
 
@@ -25,7 +26,7 @@ namespace lysa {
         if (filepath.ends_with(L".assets")) {
             AssetsPack::load(*rootNode, filepath);
         } else {
-            throw Exception("Loader : unsupported file format for", lysa::to_string(filepath));
+            throw Exception("Loader : unsupported file format for ", lysa::to_string(filepath));
         }
         if (usecache) {
             auto lock = std::lock_guard(resourcesMutex);
@@ -43,9 +44,9 @@ namespace lysa {
                          const SceneNode &nodeDesc) {
         constexpr auto log_name{"Scene loader :"};
         if (nodeTree.contains(nodeDesc.id)) {
-            throw Exception(log_name, "Node with id", nodeDesc.id, "already exists in the scene tree");
+            throw Exception(log_name, "Node with id ", nodeDesc.id, " already exists in the scene tree");
         }
-        // DEBUG("Loader::addNode ", nodeDesc.id);
+        INFO("Loader::addNode ", nodeDesc.id);
         sceneTree[nodeDesc.id] = nodeDesc;
         std::shared_ptr<Node> node;
         if (nodeDesc.isResource) {
@@ -62,10 +63,10 @@ namespace lysa {
                     node = resource->getChildByPath(lysa::to_wstring(nodeDesc.resourcePath));
                     if (node == nullptr) {
                         resource->printTree();
-                        throw Exception(log_name, "Mesh with path", nodeDesc.resourcePath, "not found");
+                        throw Exception(log_name, "Mesh with path ", nodeDesc.resourcePath, " not found");
                     }
                 } else {
-                    throw Exception(log_name, "Resource with id", nodeDesc.resource, "not found");
+                    throw Exception(log_name, "Resource with id ", nodeDesc.resource, " not found");
                 }
             }
         } else {
@@ -89,7 +90,7 @@ namespace lysa {
                         child = findFirst(lysa::to_wstring(name));
                     }
                     if (child == nullptr) {
-                        throw Exception(log_name, "Child node", nodeDesc.child->id, "not found");
+                        throw Exception(log_name, "Child node ", nodeDesc.child->id, " not found");
                     }
                 }
                 if (nodeDesc.child->needDuplicate) {
@@ -120,7 +121,7 @@ namespace lysa {
                         parentNode->addChild(childNode);
                     }
                 } else {
-                    // _LOG("Loader child addNode ", child.id);
+                    INFO("Loader child addNode ", child.id);
                     addNode(parentNode.get(), nodeTree, sceneTree, child);
                 }
             }

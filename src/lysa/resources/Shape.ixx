@@ -63,7 +63,7 @@ export namespace lysa {
         /**
          * Creates a BoxShape with the given extents
          */
-        explicit BoxShape(
+        BoxShape(
             const float3& extends,
             PhysicsMaterial* material = nullptr,
             const std::wstring &resName = L"BoxShape");
