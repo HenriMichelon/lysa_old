@@ -7,5 +7,10 @@
 #include "forward.inc.slang"
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-   return getColor(input, input.materialIndex);
+    Material mat = materials[input.materialIndex];
+    float4 color = fetchColor(input, mat);
+    if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
+       discard;
+    }
+    return getColor(input, mat, color);
 }

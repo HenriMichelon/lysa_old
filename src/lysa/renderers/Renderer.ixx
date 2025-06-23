@@ -15,6 +15,8 @@ import lysa.scene;
 import lysa.resources.material;
 import lysa.renderers.renderpass.post_processing;
 import lysa.renderers.renderpass.depth_prepass;
+import lysa.renderers.renderpass.shader_material_pass;
+import lysa.renderers.renderpass.transparency_pass;
 
 export namespace lysa {
     class Renderer {
@@ -87,6 +89,8 @@ export namespace lysa {
         vireo::Extent          currentExtent{};
         std::vector<FrameData> framesData;
         DepthPrepass           depthPrePass;
+        ShaderMaterialPass     shaderMaterialPass;
+        TransparencyPass       transparencyPass;
 
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };

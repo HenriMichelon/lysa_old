@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-module lysa.renderers.renderpass.forward_color;
+module lysa.renderers.renderpass.shader_material_pass;
 
 import lysa.application;
 import lysa.resources;
@@ -13,9 +13,9 @@ import lysa.resources.mesh;
 import lysa.renderers.renderer;
 
 namespace lysa {
-    ForwardColor::ForwardColor(
+    ShaderMaterialPass::ShaderMaterialPass(
         const RenderingConfiguration& config):
-        Renderpass{config, L"Forward Color"} {
+        Renderpass{config, L"ShaderMaterialPass"} {
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
@@ -35,21 +35,21 @@ namespace lysa {
         renderingConfig.clearDepthStencil = false; //!config.forwardDepthPrepass;
     }
 
-    void ForwardColor::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+    void ShaderMaterialPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
                 std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
                 std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
-                // if (material->getType() == Material::SHADER) {
-                //     const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
-                //     if (!shaderMaterial->getVertFileName().empty()) {
-                //         vertShaderName = shaderMaterial->getVertFileName();
-                //     }
-                //     if (!shaderMaterial->getFragFileName().empty()) {
-                //         fragShaderName = shaderMaterial->getFragFileName();
-                //     }
-                // }
+                if (material->getType() == Material::SHADER) {
+                    const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
+                    if (!shaderMaterial->getVertFileName().empty()) {
+                        vertShaderName = shaderMaterial->getVertFileName();
+                    }
+                    if (!shaderMaterial->getFragFileName().empty()) {
+                        fragShaderName = shaderMaterial->getFragFileName();
+                    }
+                }
                 const bool transparent = false; //material->getTransparency() != Transparency::DISABLED;
                 pipelineConfig.colorBlendDesc[0].blendEnable = transparent;
                 pipelineConfig.cullMode = material->getCullMode();
@@ -62,7 +62,7 @@ namespace lysa {
         }
     }
 
-    void ForwardColor::render(
+    void ShaderMaterialPass::render(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
@@ -88,10 +88,7 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
-        scene.drawOpaquesModels(
-        commandList,
-            pipelines);
-        scene.drawTransparentModels(
+        scene.drawShaderMaterialModels(
         commandList,
             pipelines);
         commandList.endRendering();

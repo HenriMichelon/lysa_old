@@ -16,7 +16,9 @@ namespace lysa {
         config{config},
         name{name},
         withStencil{withStencil},
-        depthPrePass{config, withStencil} {
+        depthPrePass{config, withStencil},
+        shaderMaterialPass{config},
+        transparencyPass{config} {
         framesData.resize(config.framesInFlight);
     }
 
@@ -30,6 +32,8 @@ namespace lysa {
     void Renderer::updatePipelines(
      const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         depthPrePass.updatePipelines(pipelineIds);
+        shaderMaterialPass.updatePipelines(pipelineIds);
+        transparencyPass.updatePipelines(pipelineIds);
     }
 
     void Renderer::update(
@@ -50,6 +54,8 @@ namespace lysa {
         scene.setInitialState(*commandList);
         depthPrePass.render(*commandList, scene, frame.depthAttachment);
         colorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
+        shaderMaterialPass.render(*commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
+        transparencyPass.render(*commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
     }
 
     void Renderer::postprocess(
@@ -104,6 +110,7 @@ namespace lysa {
                 config.msaa,
                 name + L" DepthStencil");
         }
+        transparencyPass.resize(extent);
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->resize(extent);
         }

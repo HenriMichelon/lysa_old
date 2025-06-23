@@ -35,9 +35,9 @@ export namespace lysa {
         //! The material will use the texture's alpha values for transparency.
         ALPHA = 1,
         //! The material will cut off all values below a threshold, the rest will remain opaque.
-        SCISSOR = 2,
+        // SCISSOR = 2,
         //! The material will cut off all values below a threshold, the rest will use the texture's alpha values for transparency.
-        SCISSOR_ALPHA = 3,
+        // SCISSOR_ALPHA = 3,
     };
 
     /**

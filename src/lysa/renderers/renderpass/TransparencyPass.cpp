@@ -58,12 +58,6 @@ namespace lysa {
             if (!oitPipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
                 std::wstring fragShaderName = FRAGMENT_SHADER_OIT;
-                // if (material->getType() == Material::SHADER) {
-                    // const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
-                    // if (!shaderMaterial->getFragFileName().empty()) {
-                        // fragShaderName = shaderMaterial->getFragFileName();
-                    // }
-                // }
                 oitPipelineConfig.cullMode = material->getCullMode();
                 oitPipelineConfig.vertexShader = loadShader(VERTEX_SHADER_OIT);
                 oitPipelineConfig.fragmentShader = loadShader(fragShaderName);
@@ -95,10 +89,16 @@ namespace lysa {
         oitRenderingConfig.colorRenderTargets[BINDING_REVEALAGE_BUFFER].renderTarget = frame.revealageBuffer;
         oitRenderingConfig.depthStencilRenderTarget = depthAttachment;
 
+        const auto depthStage =
+         config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
+         config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
+         vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+         vireo::ResourceState::RENDER_TARGET_DEPTH;
+
         commandList.barrier(
                 depthAttachment,
                 vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL);
+                depthStage);
         commandList.barrier(
             {frame.accumBuffer, frame.revealageBuffer},
             vireo::ResourceState::SHADER_READ,
@@ -112,7 +112,7 @@ namespace lysa {
             vireo::ResourceState::SHADER_READ);
         commandList.barrier(
             depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL,
+            depthStage,
             vireo::ResourceState::UNDEFINED);
 
         frame.compositeDescriptorSet->update(BINDING_ACCUM_BUFFER, frame.accumBuffer->getImage());

@@ -15,15 +15,13 @@ namespace lysa {
         const std::wstring& name) :
         Renderer{config, true, name},
         gBufferPass{config},
-        lightingPass{config, gBufferPass},
-        transparencyPass{config} {
+        lightingPass{config, gBufferPass} {
     }
 
     void DeferredRenderer::updatePipelines(
         const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         Renderer::updatePipelines(pipelineIds);
         gBufferPass.updatePipelines(pipelineIds);
-        transparencyPass.updatePipelines(pipelineIds);
     }
 
     void DeferredRenderer::colorPass(
@@ -35,13 +33,11 @@ namespace lysa {
         const uint32 frameIndex) {
         gBufferPass.render(commandList, scene, colorAttachment, depthAttachment, false, frameIndex);
         lightingPass.render(commandList, scene, colorAttachment, depthAttachment, true, frameIndex);
-        transparencyPass.render(commandList, scene, colorAttachment, depthAttachment, false, frameIndex);
     }
 
     void DeferredRenderer::resize(const vireo::Extent& extent) {
         Renderer::resize(extent);
         gBufferPass.resize(extent);
-        transparencyPass.resize(extent);
     }
 
 }

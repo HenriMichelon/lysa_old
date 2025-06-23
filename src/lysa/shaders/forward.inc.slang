@@ -6,24 +6,7 @@
 */
 #include "lighting.inc.slang"
 
-float4 getColor(VertexOutput input, uint materialIndex) {
-    Material mat = materials[materialIndex];
-    float4 color = mat.albedoColor;
-    if (mat.diffuseTexture.index != -1) {
-        color = textures[mat.diffuseTexture.index].Sample(
-            samplers[mat.diffuseTexture.samplerIndex],
-            uvTransform(mat.diffuseTexture, input.uv));
-    }
-
-    if (((mat.transparency == Transparency::SCISSOR) ||
-        (mat.transparency == Transparency::SCISSOR_ALPHA))
-        && (color.a < mat.alphaScissor)) {
-        discard;
-    }
-    const float transparency = (
-        mat.transparency == Transparency::ALPHA ||
-        mat.transparency == Transparency::SCISSOR_ALPHA) ? color.a : 1.0;
-
+float4 getColor(VertexOutput input, Material mat, float4 color) {
     float3 normal;
     if (mat.normalTexture.index != -1) {
         // Get current fragment's normal and transform to world space.
@@ -63,5 +46,5 @@ float4 getColor(VertexOutput input, uint materialIndex) {
 
     return float4(
         calcLight(input.viewDirection, color.rgb, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
-        transparency);
+        color.a);
 }

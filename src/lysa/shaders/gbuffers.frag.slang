@@ -14,16 +14,10 @@ struct FragmentOutput {
 };
 
 FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
-    Material mat = materials[input.meshSurfaceMaterialIndex];
-
-    float4 color = mat.albedoColor;
-    if (mat.diffuseTexture.index != -1) {
-        color = textures[mat.diffuseTexture.index].Sample(
-            samplers[mat.diffuseTexture.samplerIndex],
-            uvTransform(mat.diffuseTexture, input.uv));
-    }
+    Material mat = materials[input.materialIndex];
+    float4 color = fetchColor(input, mat);
     if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
-        discard;
+       discard;
     }
 
     float3 normal;

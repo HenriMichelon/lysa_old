@@ -65,3 +65,13 @@ float4 toLinear(float4 sRGB) {
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
 
+
+float4 fetchColor(VertexOutput input, Material mat) {
+    float4 color = mat.albedoColor;
+    if (mat.diffuseTexture.index != -1) {
+        color = textures[mat.diffuseTexture.index].Sample(
+            samplers[mat.diffuseTexture.samplerIndex],
+            uvTransform(mat.diffuseTexture, input.uv));
+    }
+    return color;
+}

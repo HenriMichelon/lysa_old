@@ -245,6 +245,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/LightingPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.cpp
 
         ${OS_SRC}
@@ -325,6 +326,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/LightingPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
 
         ${OS_MODULES}

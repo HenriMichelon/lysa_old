@@ -7,8 +7,8 @@
 enum class Transparency {
     DISABLED = 0,
     ALPHA = 1,
-    SCISSOR = 2,
-    SCISSOR_ALPHA = 3,
+//     SCISSOR = 2,
+//     SCISSOR_ALPHA = 3,
 };
 
 
