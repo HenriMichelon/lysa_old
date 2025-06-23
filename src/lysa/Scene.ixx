@@ -18,7 +18,6 @@ import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.resources.mesh;
 import lysa.pipelines.frustum_culling;
-import lysa.pipelines.draw_command_sort;
 
 export namespace lysa {
 
@@ -138,7 +137,6 @@ export namespace lysa {
             const SceneConfiguration& config;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
             FrustumCulling frustumCullingPipeline;
-            DrawCommandSort drawCommandSortPipeline;
 
             bool instancesUpdated{false};
             DeviceMemoryArray instancesArray;

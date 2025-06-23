@@ -89,7 +89,6 @@ set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/forward.frag.slang"
         "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
         "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
-        "${SHADERS_SRC_DIR}/mesh_sort.comp.slang"
         "${SHADERS_SRC_DIR}/gbuffers.frag.slang"
         "${SHADERS_SRC_DIR}/glighting.frag.slang"
         "${SHADERS_SRC_DIR}/quad.vert.slang"
@@ -221,7 +220,6 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/nodes/StaticBody.cpp
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.cpp
-        ${ENGINE_SRC_DIR}/pipelines/DrawCommandSort.cpp
 
         ${ENGINE_SRC_DIR}/physics/PhysicsEngine.cpp
 
@@ -298,7 +296,6 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/nodes/StaticBody.ixx
 
         ${ENGINE_SRC_DIR}/pipelines/FrustumCulling.ixx
-        ${ENGINE_SRC_DIR}/pipelines/DrawCommandSort.ixx
 
         ${ENGINE_SRC_DIR}/physics/Configuration.ixx
         ${ENGINE_SRC_DIR}/physics/PhysicsEngine.ixx
