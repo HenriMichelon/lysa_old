@@ -17,6 +17,6 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
     }
     float3 emissiveColor = fetchEmissiveColor(input, mat);
     return float4(
-        calcLight(input.viewDirection, color.rgb, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
+        calcLight(input.viewDirection, input.worldPos, color.rgb, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
         color.a);
 }

@@ -35,20 +35,6 @@ struct Lights {
 
 [[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
 
-// float3 calcDirectionalLight(Light light, float3 worldPos, float3 normal, float shininess) {
-//     float3 L = -light.direction.xyz;
-//     float3 V = normalize(scene.cameraPosition - worldPos);
-//     float3 R = reflect(-L, normal);
-// 
-//     float diff = max(dot(normal, L), 0.0);
-//     float spec = pow(max(dot(V, R), 0.0), shininess);
-// 
-//     float3 diffuse = diff * light.color.rgb * light.color.w;
-//     float3 specular = spec * light.color.rgb * light.color.w;
-// 
-//     return diffuse + specular;
-// }
-
 float3 Radiance(
     // base color
     const float3 albedo,
@@ -116,26 +102,37 @@ float3 calcDirectionalLight(
         Radiance(albedo, normal, viewDirection,  metallic, roughness,  -light.direction.xyz, F0, cosLo, alphaSq, alphaDirectLighting);
 }
 
-// float3 calcPointLight(Light light, float3 albedo, float3 normal,float metallic, float roughness, float3 viewDirection, float3 fragPos, float3 F0, const float cosLo, const float alphaSq, const float alphaDirectLighting) {
-//     const float attenuation = clamp(1.0 - length(light.position - fragPos)/light.range, 0.0, 1.0);
-//     const float3 lightDir = normalize(light.position - fragPos);
-//     const float3 diffuse = light.color.rgb * light.color.w * attenuation *
-//                         Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir,F0, cosLo, alphaSq, alphaDirectLighting);
-//     float intensity = 1.0f;
-//     if (light.type == LIGHT_SPOT) {
-//         const float theta = dot(lightDir, normalize(-light.direction));
-//         const float epsilon = light.cutOff - light.outerCutOff;
-//         const float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-//         if (theta <= light.outerCutOff) return float3(0.0f);
-//         return min(intensity * diffuse, float3(1.0f));
-//     } else {
-//         return min(diffuse, float3(1.0f));
-//
-//     }
-// }
+float3 calcPointLight(
+    Light light,
+    float3 albedo,
+    float3 normal,
+    float metallic,
+    float roughness,
+    float3 viewDirection,
+    float3 fragPos,
+    float3 F0,
+    const float cosLo,
+    const float alphaSq,
+    const float alphaDirectLighting) {
+    const float attenuation = clamp(1.0 - length(light.position.xyz - fragPos)/light.range, 0.0, 1.0);
+    const float3 lightDir = normalize(light.position.xyz - fragPos);
+    const float3 diffuse = light.color.rgb * light.color.w * attenuation *
+                        Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir,F0, cosLo, alphaSq, alphaDirectLighting);
+    float intensity = 1.0f;
+    if (light.type == LIGHT_SPOT) {
+        const float theta = dot(lightDir, normalize(-light.direction.xyz));
+        const float epsilon = light.cutOff - light.outerCutOff;
+        const float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+        if (theta <= light.outerCutOff) return float3(0.0f);
+        return min(intensity * diffuse, float3(1.0f));
+    } else {
+        return min(diffuse, float3(1.0f));
+    }
+}
 
 float3 calcLight(
     float3 viewDirection,
+    float3 worldPos,
     float3 color,
     float3 normal,
     float4 ambientColor,
@@ -164,6 +161,14 @@ float3 calcLight(
                     diffuse += factor * calcDirectionalLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, F0, cosLo, alphaSq, alphaDirectLighting);
+                    break;
+                }
+                case LIGHT_OMNI: {
+                    if (distance(worldPos, light.position.xyz) <= light.range) {
+                        diffuse += factor * calcPointLight(
+                            light, color.rgb, normal, metallic, roughness,
+                            viewDirection, worldPos, F0, cosLo, alphaSq, alphaDirectLighting);
+                    }
                     break;
                 }
             }

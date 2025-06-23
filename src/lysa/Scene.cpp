@@ -215,6 +215,7 @@ namespace lysa {
             break;
         }
         case Node::DIRECTIONAL_LIGHT:
+        case Node::OMNI_LIGHT:
             lights.push_back(static_pointer_cast<Light>(node));
             break;
         default:
@@ -266,6 +267,7 @@ namespace lysa {
             break;
         }
         case Node::DIRECTIONAL_LIGHT:
+        case Node::OMNI_LIGHT:
             lights.remove(static_pointer_cast<Light>(node));
             break;
         default:

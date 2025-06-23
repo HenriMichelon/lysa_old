@@ -42,6 +42,7 @@ export import lysa.nodes.kinematic_body;
 export import lysa.nodes.light;
 export import lysa.nodes.mesh_instance;
 export import lysa.nodes.node;
+export import lysa.nodes.omni_light;
 export import lysa.nodes.physics_body;
 export import lysa.nodes.ray_cast;
 export import lysa.nodes.rigid_body;

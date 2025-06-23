@@ -207,6 +207,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/nodes/Light.cpp
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.cpp
         ${ENGINE_SRC_DIR}/nodes/Node.cpp
+        ${ENGINE_SRC_DIR}/nodes/OmniLight.cpp
         ${ENGINE_SRC_DIR}/nodes/PhysicsBody.cpp
         ${ENGINE_SRC_DIR}/nodes/RayCast.cpp
         ${ENGINE_SRC_DIR}/nodes/RigidBody.cpp
@@ -286,6 +287,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/nodes/Light.ixx
         ${ENGINE_SRC_DIR}/nodes/MeshInstance.ixx
         ${ENGINE_SRC_DIR}/nodes/Node.ixx
+        ${ENGINE_SRC_DIR}/nodes/OmniLight.ixx
         ${ENGINE_SRC_DIR}/nodes/PhysicsBody.ixx
         ${ENGINE_SRC_DIR}/nodes/RayCast.ixx
         ${ENGINE_SRC_DIR}/nodes/RigidBody.ixx

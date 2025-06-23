@@ -36,8 +36,6 @@ export namespace lysa {
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = { { } },
             .depthTestEnable = true,
-            .depthBiasConstantFactor = 0.0f,
-            .depthBiasSlopeFactor = 1.0f,
         };
 
         vireo::RenderingConfiguration renderingConfig {

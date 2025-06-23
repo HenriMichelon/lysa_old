@@ -33,6 +33,6 @@ float4 getColor(QuadOutput input) {
     bool ispbr = value.a == 1.0;
 
     return float4(
-        calcLight(viewDirection, albedo, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
+        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
         1.0);
 }
