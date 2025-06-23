@@ -44,6 +44,7 @@ export namespace lysa {
         struct Global {
             uint32 drawCommandsCount;
             Frustum::Plane planes[6];
+            float4x4 viewMatrix;
         };
 
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;

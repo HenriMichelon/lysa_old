@@ -56,6 +56,7 @@ namespace lysa {
         if (drawCommandsCount == 0) { return; }
         auto global = Global{
             .drawCommandsCount = drawCommandsCount,
+            .viewMatrix = inverse(camera.getTransformGlobal()),
         };
         Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
         globalBuffer->write(&global);

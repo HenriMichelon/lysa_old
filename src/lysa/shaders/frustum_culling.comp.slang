@@ -17,6 +17,7 @@ struct Plane {
 struct Global {
     uint drawCommandsCount;
     Plane planes[6];
+    float4x4 viewMatrix;
 };
 
 struct DrawIndexedIndirectCommand {
@@ -30,6 +31,7 @@ struct DrawIndexedIndirectCommand {
 struct DrawCommand {
     uint instanceIndex;
     DrawIndexedIndirectCommand command;
+    float depth;
 };
 
 [[vk::binding(0, 0)]] ConstantBuffer<Global> global  : register(b0, space0);
@@ -64,6 +66,10 @@ void main(uint3 id : SV_DispatchThreadID) {
             return;
         }
     }
+
+    float3 worldCenter = 0.5 * (meshInstance.aabbMin + meshInstance.aabbMax);
+    float3 viewPos = mul(float4(worldCenter, 1.0), global.viewMatrix).xyz;
+    command.depth = -viewPos.z;
 
     output.Append(command);
 }

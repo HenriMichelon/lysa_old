@@ -79,6 +79,10 @@ namespace lysa {
                 *pipelineData->drawCommandsBuffer,
                 cullingBuffer,
                 *pipelineData->culledDrawCommandsCountBuffer);
+            // pipelineData->drawCommandSortPipeline.dispatch(
+                // commandList,
+                // pipelineData->drawCommandsCount,
+                // cullingBuffer);
         }
     }
 

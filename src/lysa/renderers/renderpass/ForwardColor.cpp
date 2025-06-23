@@ -53,8 +53,8 @@ namespace lysa {
                 const bool transparent = material->getTransparency() != Transparency::DISABLED;
                 pipelineConfig.colorBlendDesc[0].blendEnable = transparent;
                 pipelineConfig.cullMode = material->getCullMode();
-                pipelineConfig.depthWriteEnable = false;
-                pipelineConfig.depthBiasEnable = false;
+                pipelineConfig.depthWriteEnable = true;
+                // pipelineConfig.depthBiasEnable = !transparent;
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
@@ -92,6 +92,9 @@ namespace lysa {
         scene.drawOpaquesModels(
         commandList,
             pipelines);
+        // scene.drawTransparentModels(
+        // commandList,
+            // pipelines);
         commandList.endRendering();
         commandList.barrier(
             colorAttachment,

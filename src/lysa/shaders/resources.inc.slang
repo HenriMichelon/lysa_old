@@ -4,6 +4,12 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+struct Vertex {
+    float4 position; // position + uv.x
+    float4 normal;   // normal + uv.y
+    float4 tangent;  // tangent + sign
+};
+
 struct MeshInstance {
     float4x4 transform;
     float3   aabbMin;
