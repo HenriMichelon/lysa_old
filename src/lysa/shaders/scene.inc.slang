@@ -65,7 +65,6 @@ float4 toLinear(float4 sRGB) {
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
 
-
 float4 fetchColor(VertexOutput input, Material mat) {
     float4 color = mat.albedoColor;
     if (mat.diffuseTexture.index != -1) {
@@ -74,4 +73,46 @@ float4 fetchColor(VertexOutput input, Material mat) {
             uvTransform(mat.diffuseTexture, input.uv));
     }
     return color;
+}
+
+float3 fetchNormal(VertexOutput input, Material mat) {
+    float3 normal;
+    if (mat.normalTexture.index != -1) {
+        // Get current fragment's normal and transform to world space.
+        normal = textures[mat.normalTexture.index].Sample(
+                     samplers[mat.normalTexture.samplerIndex],
+                     uvTransform(mat.normalTexture, input.uv)).rgb;
+        normal = normalize(normal * 2.0 - 1.0);
+        float3x3 TBN = float3x3(input.tangent, input.bitangent, input.normal);
+        normal = normalize(mul(normal, TBN)) * float3(mat.normalScale, mat.normalScale, 1.0f);
+    } else {
+        // We don't have a texture, get the calculated normal
+        normal = input.normal;
+    }
+    return normal;
+}
+
+float fetchMetallic(VertexOutput input, Material mat) {
+    return mat.metallicTexture.index == -1 ?
+           mat.metallicFactor :
+           mat.metallicFactor *
+               textures[mat.metallicTexture.index].Sample(samplers[mat.metallicTexture.samplerIndex],
+               uvTransform(mat.metallicTexture, input.uv)).b;
+}
+
+float fetchRoughness(VertexOutput input, Material mat) {
+    return mat.roughnessTexture.index == -1 ?
+           mat.roughnessFactor :
+           mat.roughnessFactor *
+               textures[mat.roughnessTexture.index].Sample(samplers[mat.roughnessTexture.samplerIndex],
+               uvTransform(mat.roughnessTexture, input.uv)).g;
+}
+
+float3 fetchEmissiveColor(VertexOutput input, Material mat) {
+    float3 emissiveColor = mat.emissiveFactor;
+    if (mat.emissiveTexture.index != -1) {
+        emissiveColor *= toLinear(textures[mat.emissiveTexture.index].Sample(
+           samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb;
+    }
+    return emissiveColor;
 }

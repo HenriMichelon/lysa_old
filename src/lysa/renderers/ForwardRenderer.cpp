@@ -14,8 +14,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, false, name},
-        forwardColorPass{config},
-        transparencyPass{config} {
+        forwardColorPass{config} {
     }
 
     void ForwardRenderer::update(const uint32 frameIndex) {
@@ -27,7 +26,6 @@ namespace lysa {
         const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         Renderer::updatePipelines(pipelineIds);
         forwardColorPass.updatePipelines(pipelineIds);
-        transparencyPass.updatePipelines(pipelineIds);
     }
 
     void ForwardRenderer::colorPass(
@@ -38,11 +36,9 @@ namespace lysa {
         const bool clearAttachment,
         const uint32 frameIndex) {
         forwardColorPass.render(commandList, scene, colorAttachment, depthAttachment, clearAttachment, frameIndex);
-        transparencyPass.render(commandList, scene, colorAttachment, depthAttachment, false, frameIndex);
     }
 
     void ForwardRenderer::resize(const vireo::Extent& extent) {
         Renderer::resize(extent);
-        transparencyPass.resize(extent);
     }
 }

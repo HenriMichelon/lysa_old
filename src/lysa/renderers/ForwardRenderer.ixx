@@ -41,6 +41,5 @@ export namespace lysa {
 
     private:
         ForwardColor forwardColorPass;
-        TransparencyPass transparencyPass;
     };
 }
