@@ -46,6 +46,7 @@ export import lysa.nodes.omni_light;
 export import lysa.nodes.physics_body;
 export import lysa.nodes.ray_cast;
 export import lysa.nodes.rigid_body;
+export import lysa.nodes.spot_light;
 export import lysa.nodes.static_body;
 
 export import lysa.physics.configuration;

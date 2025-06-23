@@ -109,13 +109,13 @@ float3 calcPointLight(
     float metallic,
     float roughness,
     float3 viewDirection,
-    float3 fragPos,
+    float3 worldPos,
     float3 F0,
     const float cosLo,
     const float alphaSq,
     const float alphaDirectLighting) {
-    const float attenuation = clamp(1.0 - length(light.position.xyz - fragPos)/light.range, 0.0, 1.0);
-    const float3 lightDir = normalize(light.position.xyz - fragPos);
+    const float attenuation = clamp(1.0 - length(light.position.xyz - worldPos)/light.range, 0.0, 1.0);
+    const float3 lightDir = normalize(light.position.xyz - worldPos);
     const float3 diffuse = light.color.rgb * light.color.w * attenuation *
                         Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir,F0, cosLo, alphaSq, alphaDirectLighting);
     float intensity = 1.0f;
@@ -163,7 +163,8 @@ float3 calcLight(
                         viewDirection, F0, cosLo, alphaSq, alphaDirectLighting);
                     break;
                 }
-                case LIGHT_OMNI: {
+                case LIGHT_OMNI:
+                case LIGHT_SPOT: {
                     if (distance(worldPos, light.position.xyz) <= light.range) {
                         diffuse += factor * calcPointLight(
                             light, color.rgb, normal, metallic, roughness,
