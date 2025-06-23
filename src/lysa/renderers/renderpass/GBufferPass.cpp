@@ -85,6 +85,9 @@ namespace lysa {
         scene.drawOpaquesModels(
           commandList,
           pipelines);
+        scene.drawTransparentModels(
+          commandList,
+          pipelines);
         commandList.endRendering();
         commandList.barrier(
             {renderTargets.begin(), renderTargets.end()},

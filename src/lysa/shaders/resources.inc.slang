@@ -4,6 +4,14 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+enum class Transparency {
+    DISABLED = 0,
+    ALPHA = 1,
+    SCISSOR = 2,
+    SCISSOR_ALPHA = 3,
+};
+
+
 struct Vertex {
     float4 position; // position + uv.x
     float4 normal;   // normal + uv.y

@@ -17,11 +17,14 @@ FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
     Material mat = materials[input.meshSurfaceMaterialIndex];
 
     float4 color = mat.albedoColor;
-        if (mat.diffuseTexture.index != -1) {
-            color = textures[mat.diffuseTexture.index].Sample(
-                samplers[mat.diffuseTexture.samplerIndex],
-                uvTransform(mat.diffuseTexture, input.uv));
-        }
+    if (mat.diffuseTexture.index != -1) {
+        color = textures[mat.diffuseTexture.index].Sample(
+            samplers[mat.diffuseTexture.samplerIndex],
+            uvTransform(mat.diffuseTexture, input.uv));
+    }
+    if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
+        discard;
+    }
 
     float3 normal;
     if (mat.normalTexture.index != -1) {

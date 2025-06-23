@@ -7,13 +7,6 @@
 #include "samplers.inc.slang"
 #include "resources.inc.slang"
 
-enum class Transparency {
-    DISABLED = 0,
-    ALPHA = 1,
-    SCISSOR = 2,
-    SCISSOR_ALPHA = 3,
-};
-
 struct VertexInput {
     float4 position : POSITION; // position + uv.x
     float4 normal   : NORMAL;   // normal + uv.y
