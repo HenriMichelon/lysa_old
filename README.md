@@ -2,7 +2,7 @@
 
 A 3D Game Engine.
 
-## (Futures) Features
+## Some Features
 
 - GPU-driven rendering
 - [Vulkan 1.3](https://www.vulkan.org/) & DirectX 12 support
