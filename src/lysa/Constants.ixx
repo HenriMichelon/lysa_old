@@ -77,7 +77,7 @@ export namespace lysa {
     /**
     * Unit quaternion with no rotation
     */
-    const quaternion QUATERNION_IDENTITY{1.0f, 0.0f, 0.0f, 0.0f};
+    const quaternion QUATERNION_IDENTITY{0.0f, 0.0f, 0.0f, 1.0f};
 
     /**
     * The Basis of 3D transform.

@@ -83,17 +83,9 @@ def convert_vector(vec):
 def convert_scale(vec):
     return str(vec.x) + "," + str(vec.z) + "," + str(vec.y)
 
-# converts a vec in degrees then into a string
-def convert_vector_degrees(vec):
-    if vec.x == 0:
-        x = 0
-    else:
-        x = vec.x;
-    if vec.y == 0:
-        y = 0
-    else:
-        y = -vec.y;
-    return str(math.degrees(x)) + "," + str(math.degrees(vec.z)) + "," + str(math.degrees(y))
+# converts a quaternion into a string
+def convert_quat(quat):
+    return str(quat.x) + "," + str(quat.z) + "," + str(-quat.y) + "," + str(quat.w)
 
 def show_message(message="", title="Error", icon='ERROR'):
     def draw(self):
@@ -139,10 +131,10 @@ def add_node(obj):
             node["properties"] = custom_props
     node["properties"]["position"] = convert_vector(obj.matrix_local.to_translation());
     if obj.rotation_mode == "QUATERNION":
-        rot = obj.rotation_quaternion.to_euler('XYZ');
+        rot = obj.rotation_quaternion;
     else:
-        rot = obj.rotation_euler
-    node["properties"]["rotation"] = convert_vector_degrees(rot);
+        rot = obj.rotation_euler.to_quaternion()
+    node["properties"]["rotation"] = convert_quat(rot);
     node["properties"]["scale"] = convert_scale(obj.scale);
     if obj.hide_get():
         node["properties"]["visible"] = "false"
@@ -164,7 +156,7 @@ def add_node(obj):
         node["properties"] = {
             "color" : str(obj.data.color.r) + "," + str(obj.data.color.g) + "," + str(obj.data.color.b) + "," + str(obj.data.energy/10.0),
             "position" : convert_vector(obj.location),
-            "rotation" : convert_vector_degrees(new_rotation.to_euler('XYZ'))
+            "rotation" : convert_quat(new_rotation.to_quaternion())
         }
         if obj.data.use_shadow:
             node["properties"]["cast_shadows"] = "true"
@@ -255,9 +247,6 @@ class ExportOperator(bpy.types.Operator):
             return {'CANCELLED'}
         if not os.path.exists(settings.project_directory + "/" + settings.models_directory):
             show_message("Incorrect model directory " + settings.models_directory)
-            return {'CANCELLED'}
-        if settings.convert_assets and not os.path.isfile(gltf2lysa):
-            show_message("Please set the gltf2lysa directory in the scene properties first")
             return {'CANCELLED'}
         blend_file_name = os.path.basename(blend_file_path)
         file_name = os.path.splitext(blend_file_name)[0];

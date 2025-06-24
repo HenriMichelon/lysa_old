@@ -327,7 +327,7 @@ namespace lysa {
         if (property == "position") {
             setPosition(to_float3(value));
         } else if (property == "rotation") {
-            setRotation(quaternion{to_float3(value)});
+            setRotation(quaternion{to_float4(value)});
         } else if (property == "scale") {
             // setScale(to_float3(value));
         } else if (property == "groups") {

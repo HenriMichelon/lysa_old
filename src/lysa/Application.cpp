@@ -7,6 +7,7 @@
 module lysa.application;
 
 import lysa.input;
+import lysa.loader;
 import lysa.scene;
 import lysa.type_registry;
 import lysa.nodes.camera;
@@ -47,6 +48,7 @@ namespace lysa {
         windows.clear();
         Scene::destroyDescriptorLayouts();
         resources.cleanup();
+        Loader::clearCache();
         vireo.reset();
         if constexpr (isLoggingEnabled()) {
             Log::close();
