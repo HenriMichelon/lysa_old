@@ -49,7 +49,7 @@ NODES_CLASSES = [
     ("PhysicsBody", "PhysicsBody", "PhysicsBody"),
     ("RayCast", "RayCast", "RayCast"),
     ("RigidBody", "RigidBody", "RigidBody"),
-    # ("Skybox", "Skybox", "Skybox"),
+    ("Skybox", "Skybox", "Skybox"),
     ("SpotLight", "SpotLight", "SpotLight"),
     ("StaticBody", "StaticBody", "StaticBody"),
 ]
