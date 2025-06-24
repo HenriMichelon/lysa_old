@@ -24,7 +24,7 @@ export namespace lysa {
          */
         template<typename T> static std::shared_ptr<T> makeShared(const std::string&clazz) {
             if (!typeMap->contains(clazz)) { throw Exception("Type '", clazz, "' not registered in TypeRegistry"); }
-            return std::shared_ptr<T>(reinterpret_pointer_cast<T>(typeMap->at(clazz)()));
+            return std::reinterpret_pointer_cast<T>(typeMap->at(clazz)());
         }
 
         /**

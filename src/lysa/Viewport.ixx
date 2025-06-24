@@ -55,7 +55,7 @@ export namespace lysa {
         void activateCamera(const std::shared_ptr<Camera> &camera);
 
         // Add a node to the current scene
-        void addNode(const std::shared_ptr<Node> &node, bool async);
+        void addNode(const std::shared_ptr<Node> &node, bool async, bool attachToViewport);
 
         // Remove a node from the current scene
         void removeNode(const std::shared_ptr<Node> &node, bool async);

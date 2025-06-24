@@ -145,8 +145,6 @@ namespace lysa {
         for (const auto &nodeDesc : loadSceneDescriptionFromJSON(filepath)) {
             addNode(rootNode.get(), nodeTree, sceneTree, nodeDesc);
         }
-        // https://jrouwe.github.io/JoltPhysics/class_physics_system.html#ab3cd9f2562f0f051c032b3bc298d9604
-        // app()._getPhysicsSystem().OptimizeBroadPhase();
         // const auto last_time = chrono::duration<float, milli>(chrono::high_resolution_clock::now() - tStart).count();
         // log("loadScene loading time ", to_string(last_time));
     }

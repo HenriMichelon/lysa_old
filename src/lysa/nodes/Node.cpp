@@ -89,6 +89,7 @@ namespace lysa {
     }
 
     void Node::attachToViewport(Viewport* viewport) {
+        assert([&]{ return this->viewport == nullptr; }, "Node already attached to a viewport");
         this->viewport = viewport;
         for (const auto& child : children) {
             child->attachToViewport(viewport);
@@ -103,7 +104,6 @@ namespace lysa {
     }
 
     void Node::enterScene() {
-        this->viewport = viewport;
         for (const auto& child : children) {
             child->enterScene();
         }
@@ -173,7 +173,7 @@ namespace lysa {
         children.push_back(child);
         child->updateGlobalTransform();
         if (viewport) {
-            viewport->addNode(child, async);
+            viewport->addNode(child, async, true);
             child->ready();
         }
         child->visible = visible && child->visible;
