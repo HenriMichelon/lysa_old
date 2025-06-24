@@ -116,9 +116,8 @@ float3 calcPointLight(
     const float alphaDirectLighting) {
     const float attenuation = clamp(1.0 - length(light.position.xyz - worldPos)/light.range, 0.0, 1.0);
     const float3 lightDir = normalize(light.position.xyz - worldPos);
-    const float3 diffuse = light.color.rgb * light.color.w * attenuation *
-                        Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir,F0, cosLo, alphaSq, alphaDirectLighting);
-    float intensity = 1.0f;
+    const float3 diffuse = light.color.rgb * light.color.w * attenuation
+            * Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir, F0, cosLo, alphaSq, alphaDirectLighting);
     if (light.type == LIGHT_SPOT) {
         const float theta = dot(lightDir, normalize(-light.direction.xyz));
         const float epsilon = light.cutOff - light.outerCutOff;
@@ -177,7 +176,7 @@ float3 calcLight(
             }
             diffuse = clamp(diffuse, 0.0, 1.0);
         }
-        ambient *= (1.0 - metallic);
+//         ambient *= (1.0 - metallic);
     }
     return float3(diffuse + ambient + emissiveColor);
 }
