@@ -46,7 +46,7 @@ namespace lysa {
         if (nodeTree.contains(nodeDesc.id)) {
             throw Exception(log_name, "Node with id ", nodeDesc.id, " already exists in the scene tree");
         }
-        INFO("Loader::addNode ", nodeDesc.id);
+        //INFO("Loader::addNode ", nodeDesc.id);
         sceneTree[nodeDesc.id] = nodeDesc;
         std::shared_ptr<Node> node;
         if (nodeDesc.isResource) {
@@ -121,7 +121,7 @@ namespace lysa {
                         parentNode->addChild(childNode);
                     }
                 } else {
-                    INFO("Loader child addNode ", child.id);
+                    //INFO("Loader child addNode ", child.id);
                     addNode(parentNode.get(), nodeTree, sceneTree, child);
                 }
             }
