@@ -100,6 +100,7 @@ namespace lysa {
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
                 {config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f},
+                1,
                 config.msaa,
                 name);
             frame.depthAttachment = Application::getVireo().createRenderTarget(
@@ -107,6 +108,7 @@ namespace lysa {
                 extent.width, extent.height,
                 vireo::RenderTargetType::DEPTH,
                 { .depthStencil = { .depth = 1.0f, .stencil = 0 } },
+                1,
                 config.msaa,
                 name + L" DepthStencil");
         }

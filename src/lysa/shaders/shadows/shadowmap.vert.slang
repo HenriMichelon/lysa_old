@@ -28,12 +28,12 @@ VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
     Instance instance = instances[instanceIndex];
     float4x4 model = meshInstances[instance.meshInstanceIndex].transform;
-    Material mat = materials[instance.materialIndex;];
-    if (pushConstants.transparency != 0) {
-        // discard in case of transparency, any mode
-        gl_Position = vec4(0);
+    Material mat = materials[instance.materialIndex];
+    if (mat.transparency != Transparency.DISABLED) {
+        output.position = float4(0);
     } else {
         float4 positionW = mul(model, float4(input.position.xyz, 1.0));
-        gl_Position = global.lightSpace[pushConstants.lightSpaceIndex] * ;
+        output.position = mul(global.lightSpace, positionW);
     }
+    return output;
 }

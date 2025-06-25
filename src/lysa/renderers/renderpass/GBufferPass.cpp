@@ -107,6 +107,7 @@ namespace lysa {
                 extent.width,extent.height,
                 vireo::RenderTargetType::COLOR,
                 renderingConfig.colorRenderTargets[BUFFER_POSITION].clearValue,
+                1,
                 vireo::MSAA::NONE,
                 L"Position");
             frame.normalBuffer = vireo.createRenderTarget(
@@ -114,6 +115,7 @@ namespace lysa {
                 extent.width,extent.height,
                 vireo::RenderTargetType::COLOR,
                 renderingConfig.colorRenderTargets[BUFFER_NORMAL].clearValue,
+                1,
                 vireo::MSAA::NONE,
                 L"Normal");
             frame.albedoBuffer = vireo.createRenderTarget(
@@ -121,6 +123,7 @@ namespace lysa {
                 extent.width,extent.height,
                 vireo::RenderTargetType::COLOR,
                 renderingConfig.colorRenderTargets[BUFFER_ALBEDO].clearValue,
+                1,
                 vireo::MSAA::NONE,
                 L"Albedo");
             frame.emissiveBuffer = vireo.createRenderTarget(
@@ -128,6 +131,7 @@ namespace lysa {
                 extent.width,extent.height,
                 vireo::RenderTargetType::COLOR,
                 renderingConfig.colorRenderTargets[BUFFER_EMISSIVE].clearValue,
+                1,
                 vireo::MSAA::NONE,
                 L"Emissive");
         }

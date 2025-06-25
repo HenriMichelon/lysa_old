@@ -300,6 +300,33 @@ namespace lysa {
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
     }
 
+    void Scene::drawOpaquesAndShaderMaterialsModels(
+       vireo::CommandList& commandList,
+       const uint32 set) const {
+        for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            commandList.drawIndexedIndirectCount(
+                pipelineData->culledDrawCommandsBuffer,
+                0,
+                pipelineData->culledDrawCommandsCountBuffer,
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
+        }
+        for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
+            commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            commandList.drawIndexedIndirectCount(
+                pipelineData->culledDrawCommandsBuffer,
+                0,
+                pipelineData->culledDrawCommandsCountBuffer,
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
+        }
+    }
+
     void Scene::drawModels(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,

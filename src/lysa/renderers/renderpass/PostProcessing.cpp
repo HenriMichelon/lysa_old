@@ -98,6 +98,7 @@ namespace lysa {
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
     {},
+                1,
                 config.msaa,
                 name);
             frame.params.imageSize.x = extent.width;

@@ -81,17 +81,18 @@ set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
-        "${SHADERS_SRC_DIR}/default.vert.slang"
-        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
-        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
-        "${SHADERS_SRC_DIR}/quad.vert.slang"
-        "${SHADERS_SRC_DIR}/vector.slang"
-        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
-        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
+#        "${SHADERS_SRC_DIR}/default.vert.slang"
+#        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
+#        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
+#        "${SHADERS_SRC_DIR}/quad.vert.slang"
+#        "${SHADERS_SRC_DIR}/vector.slang"
+#        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
+#        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 
@@ -241,6 +242,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.cpp
 
         ${OS_SRC}
@@ -326,6 +328,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/PostProcessing.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
 
         ${OS_MODULES}

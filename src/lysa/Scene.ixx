@@ -102,6 +102,10 @@ export namespace lysa {
            vireo::CommandList& commandList,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
+        void drawOpaquesAndShaderMaterialsModels(
+           vireo::CommandList& commandList,
+           uint32 set) const;
+
         const auto& getPipelineIds() const { return pipelineIds; }
 
         auto isMaterialsUpdated() const { return materialsUpdated; }
