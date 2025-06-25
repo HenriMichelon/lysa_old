@@ -7,10 +7,10 @@
 #include "../scene.inc.slang"
 
 struct FragmentOutput {
-    float4   position : SV_TARGET0; // rgb = world-space position, a=metallic
-    float4   normal   : SV_TARGET1; // rgb = world-space normal, a=roughness
-    float4   albedo   : SV_TARGET2; // rgb = albedo, a unused
-    float4   emissive : SV_TARGET3; // rgb = emissive color
+    float4 position : SV_TARGET0; // rgb = world-space position, a=metallic
+    float4 normal   : SV_TARGET1; // rgb = world-space normal, a=roughness
+    float4 albedo   : SV_TARGET2; // rgb = albedo, a unused
+    float4 emissive : SV_TARGET3; // rgb = emissive color
 };
 
 FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
