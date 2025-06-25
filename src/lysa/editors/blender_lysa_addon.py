@@ -278,8 +278,8 @@ class ExportOperator(bpy.types.Operator):
             bpy.ops.export_scene.gltf(
                 filepath=glb_export_path, 
                 export_format='GLB',
-                export_jpeg_quality=85,
-                export_image_quality=85,
+                export_jpeg_quality=98,
+                export_image_quality=98,
                 export_tangents=True,
                 export_cameras=False,
                 export_unused_images=False,
