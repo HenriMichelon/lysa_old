@@ -83,7 +83,8 @@ float3 fetchNormal(VertexOutput input, Material mat) {
                      uvTransform(mat.normalTexture, input.uv)).rgb;
         normal = normalize((normal * 2.0 - 1.0) * mat.normalScale);
         normal = normalize(mul(normal, input.TBN));
-    } else {
+    } else
+    {
         // We don't have a texture, get the calculated normal
         normal = input.normal;
     }

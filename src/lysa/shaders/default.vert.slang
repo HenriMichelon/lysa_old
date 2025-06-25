@@ -29,9 +29,9 @@ VertexOutput vertexMain(VertexInput input) {
     float4 position = float4(input.position.xyz, 1.0);
     float4 positionW = mul(model, position);
     float3x3 normalMatrix = transpose(inverse3x3((float3x3)model));
-    float3 tangentW = mul(model, float4(input.tangent.xyz * input.tangent.w, 0.0)).xyz;
-    float3 normalW = mul(model, float4(input.normal.xyz, 0.0)).xyz;
-    float3 bitangent = input.tangent.w * normalize(cross(normalW, tangentW));
+    float3 normalW = normalize(mul(model, float4(input.normal.xyz, 0.0)).xyz);
+    float3 tangentW = normalize(mul(model, float4(input.tangent.xyz * input.tangent.w, 0.0)).xyz);
+    float3 bitangentW = normalize(input.tangent.w * cross(normalW, tangentW));
 
     output.worldPos = positionW.xyz;
     output.position = mul(scene.projection, mul(scene.view, positionW));
@@ -40,7 +40,7 @@ VertexOutput vertexMain(VertexInput input) {
     output.materialIndex = instance.materialIndex;
     output.meshSurfaceMaterialIndex = instance.meshSurfaceMaterialIndex;
     output.viewDirection = normalize(scene.cameraPosition - output.worldPos);
-    output.TBN = float3x3(tangentW, bitangent, normalW);
+    output.TBN = float3x3(tangentW, bitangentW, input.normal.xyz);
     return output;
 }
 
