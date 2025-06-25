@@ -66,10 +66,10 @@ export namespace lysa {
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorRenderFormats  = {
-                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: Position, A: metallic
-                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: Normal, A: roughness
-                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: Albedo, A: unused (ao ?)
-                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: emissive color, A: have material+roughness?
+                vireo::ImageFormat::R16G16B16A16_SFLOAT, // RGB: Position, A: metallic
+                vireo::ImageFormat::R8G8B8A8_SNORM, // RGB: Normal, A: roughness
+                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: Albedo
+                vireo::ImageFormat::R8G8B8A8_UNORM, // RGB: emissive color
             },
             .colorBlendDesc      = {
                 {}, // Position

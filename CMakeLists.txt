@@ -82,16 +82,16 @@ set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/default.vert.slang"
-        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
-        "${SHADERS_SRC_DIR}/forward.frag.slang"
-        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
-        "${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
+        #"${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
+        #"${SHADERS_SRC_DIR}/forward.frag.slang"
+        #"${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
+        #"${SHADERS_SRC_DIR}/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/gbuffers.frag.slang"
         "${SHADERS_SRC_DIR}/glighting.frag.slang"
-        "${SHADERS_SRC_DIR}/quad.vert.slang"
-        "${SHADERS_SRC_DIR}/vector.slang"
-        "${SHADERS_SRC_DIR}/transparency_oit.frag.slang"
-        "${SHADERS_SRC_DIR}/transparency_oit_composite.frag.slang"
+        #"${SHADERS_SRC_DIR}/quad.vert.slang"
+        #"${SHADERS_SRC_DIR}/vector.slang"
+        #"${SHADERS_SRC_DIR}/transparency_oit.frag.slang"
+        #"${SHADERS_SRC_DIR}/transparency_oit_composite.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 

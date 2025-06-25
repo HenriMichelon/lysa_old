@@ -10,7 +10,7 @@ struct FragmentOutput {
     float4   position : SV_TARGET0; // rgb = world-space position, a=metallic
     float4   normal   : SV_TARGET1; // rgb = world-space normal, a=roughness
     float4   albedo   : SV_TARGET2; // rgb = albedo, a unused
-    float4   emissive : SV_TARGET3; // rgb = emissive color, a = have material+roughness?
+    float4   emissive : SV_TARGET3; // rgb = emissive color
 };
 
 FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
@@ -20,19 +20,14 @@ FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
        discard;
     }
     float3 normal = fetchNormal(input, mat);
-    float metallic;
-    float roughness;
-    bool ispbr =  (mat.metallicFactor != -1);
-    if (ispbr) {
-        metallic = fetchMetallic(input, mat);
-        roughness = fetchRoughness(input, mat);
-    }
+    float metallic = fetchMetallic(input, mat);
+    float roughness = fetchRoughness(input, mat);
     float3 emissiveColor = fetchEmissiveColor(input, mat);
 
     FragmentOutput output;
     output.position = float4(input.worldPos, metallic);
     output.normal = float4(normal, roughness);
-    output.albedo = float4(color.rgb, 1.0);
-    output.emissive = float4(emissiveColor, ispbr ? 1.0 : 0.0);
+    output.albedo = float4(color.rgb, 0.0);
+    output.emissive = float4(emissiveColor, 0.0);
     return output;
 }

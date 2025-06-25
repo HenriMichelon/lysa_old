@@ -212,7 +212,7 @@ namespace lysa {
             material->setEmissiveFactor(header.emissiveFactor);
             material->setEmissiveTexture(textureInfo(header.emissiveTexture));
             material->setNormalTexture(textureInfo(header.normalTexture));
-            material->setNormalScale(header.normalScale);
+            material->setNormalScale(header.normalScale > 0.0f ? header.normalScale : 1.0f);
             materials.at(materialIndex) = material;
             material->setBypassUpload(false);
         }

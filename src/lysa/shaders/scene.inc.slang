@@ -28,11 +28,10 @@ struct VertexOutput {
     float3 worldPos      : TEXCOORD0;
     float3 normal        : TEXCOORD1;
     float2 uv            : TEXCOORD2;
-    float3 tangent       : TEXCOORD3;
-    float3 bitangent     : TEXCOORD4;
-    float3 viewDirection : TEXCOORD5;
-    nointerpolation uint materialIndex            : TEXCOORD6;
-    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD7;
+    float3 viewDirection : TEXCOORD3;
+    nointerpolation uint materialIndex            : TEXCOORD4;
+    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD5;
+    float3x3 TBN         : TEXCOORD6;
 };
 
 struct Scene {
@@ -82,9 +81,8 @@ float3 fetchNormal(VertexOutput input, Material mat) {
         normal = textures[mat.normalTexture.index].Sample(
                      samplers[mat.normalTexture.samplerIndex],
                      uvTransform(mat.normalTexture, input.uv)).rgb;
-        normal = normalize(normal * 2.0 - 1.0);
-        float3x3 TBN = float3x3(input.tangent, input.bitangent, input.normal);
-        normal = normalize(mul(normal, TBN)) * float3(mat.normalScale, mat.normalScale, 1.0f);
+        normal = normalize((normal * 2.0 - 1.0) * mat.normalScale);
+        normal = normalize(mul(normal, input.TBN));
     } else {
         // We don't have a texture, get the calculated normal
         normal = input.normal;

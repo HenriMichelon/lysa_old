@@ -29,13 +29,13 @@ namespace lysa {
     MaterialData StandardMaterial::getMaterialData() const {
         auto data = MaterialData {
             .albedoColor = albedoColor,
+            .pipelineId = getPipelineId(),
             .transparency = static_cast<int>(getTransparency()),
             .alphaScissor = getAlphaScissor(),
+            .normalScale = normalScale,
             .metallicFactor = metallicFactor,
             .roughnessFactor = roughnessFactor,
             .emissiveFactor = emissiveFactor,
-            .normalScale = normalScale,
-            .pipelineId = getPipelineId(),
         };
         if (diffuseTexture.texture) {
             data.diffuseTexture = {

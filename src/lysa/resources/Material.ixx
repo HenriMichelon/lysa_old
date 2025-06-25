@@ -23,16 +23,15 @@ export namespace lysa {
 
     struct MaterialData {
         float4 albedoColor{0.9f, 0.0f, 0.6f, 1.0f};
+        uint32 pipelineId;
 
         int    transparency{0};
         float  alphaScissor{0.1f};
+        float  normalScale{1.0f};
+
         float  metallicFactor{-1.0f}; // -1.0f -> non PBR material
         float  roughnessFactor{1.0f};
-
         float3 emissiveFactor{0.0f};
-
-        float  normalScale{1.0f};
-        uint32 pipelineId;
 
         TextureInfoData diffuseTexture{};
         TextureInfoData normalTexture{};
@@ -239,7 +238,7 @@ export namespace lysa {
     private:
         float4       albedoColor{1.0f, 0.0f, 0.5f, 1.0f};
         TextureInfo  diffuseTexture{};
-        float        metallicFactor{-1.0f}; // -1 -> non PBR material
+        float        metallicFactor{0.0f};
         TextureInfo  metallicTexture{};
         float        roughnessFactor{1.0f};
         TextureInfo  roughnessTexture{};

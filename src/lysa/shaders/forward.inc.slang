@@ -8,15 +8,19 @@
 
 float4 getColor(VertexOutput input, Material mat, float4 color) {
     float3 normal = fetchNormal(input, mat);
-    float metallic;
-    float roughness;
-    bool ispbr =  (mat.metallicFactor != -1);
-    if (ispbr) {
-        metallic  = fetchMetallic(input, mat);
-        roughness = fetchRoughness(input, mat);
-    }
+    float metallic = fetchMetallic(input, mat);
+    float roughness = fetchRoughness(input, mat);
     float3 emissiveColor = fetchEmissiveColor(input, mat);
+//     return float4(normal, 1.0);
     return float4(
-        calcLight(input.viewDirection, input.worldPos, color.rgb, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
+        calcLight(
+            input.viewDirection,
+            input.worldPos,
+            color.rgb,
+            normal,
+            scene.ambientLight,
+            metallic,
+            roughness,
+            emissiveColor),
         color.a);
 }

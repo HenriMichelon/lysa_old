@@ -17,22 +17,17 @@ struct QuadOutput {
 [[vk::binding(3, 3)]] Texture2D emissiveBuffer : register(t3, space3);
 
 float4 getColor(QuadOutput input) {
-    float4 value = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
-    float3 worldPos = value.rgb;
-    float metallic = value.a;
-    float3 viewDirection = normalize(scene.cameraPosition - worldPos);
-
-    value = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
-    float3 normal = value.rgb;
-    float roughness = value.a;
-
+    float4 positionValue = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 worldPos = positionValue.rgb;
+    float metallic = positionValue.a;
+    float4 normalValue = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 normal = normalValue.rgb;
+    float roughness = normalValue.a;
     float3 albedo = albedoBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
-
-    value = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
-    float3 emissiveColor = value.rgb;
-    bool ispbr = value.a == 1.0;
-
+    float3 emissiveColor = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
+    float3 viewDirection = normalize(scene.cameraPosition - worldPos);
+//     return float4(albedo, 1.0);
     return float4(
-        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, ispbr, metallic, roughness, emissiveColor),
+        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, metallic, roughness, emissiveColor),
         1.0);
 }
