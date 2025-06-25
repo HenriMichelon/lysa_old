@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "lighting.inc.slang"
+#include "../lighting/lighting.inc.slang"
 
 struct QuadOutput {
     float4 position : SV_POSITION;

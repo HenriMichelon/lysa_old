@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "samplers.inc.slang"
+#include "../samplers.inc.slang"
 
 struct VertexOutput {
     float4 position : SV_POSITION;

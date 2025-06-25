@@ -173,7 +173,7 @@ export namespace lysa {
                 const MemoryBlock& meshInstanceMemoryBlock);
 
             void updateData(
-                vireo::CommandList& commandList,
+                const vireo::CommandList& commandList,
                 std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin);
         };
 

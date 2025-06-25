@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene.inc.slang"
+#include "../scene.inc.slang"
 
 struct FragmentOutput {
     float4   position : SV_TARGET0; // rgb = world-space position, a=metallic

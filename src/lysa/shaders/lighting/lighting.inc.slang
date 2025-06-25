@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "scene.inc.slang"
+#include "../scene.inc.slang"
 #include "pbr.inc.slang"
 
 static const int LIGHT_DIRECTIONAL = 0;

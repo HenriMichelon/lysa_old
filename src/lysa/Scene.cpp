@@ -80,10 +80,6 @@ namespace lysa {
                 *pipelineData->drawCommandsBuffer,
                 cullingBuffer,
                 *pipelineData->culledDrawCommandsCountBuffer);
-            // pipelineData->drawCommandSortPipeline.dispatch(
-                // commandList,
-                // pipelineData->drawCommandsCount,
-                // cullingBuffer);
         }
     }
 
@@ -194,7 +190,6 @@ namespace lysa {
                 const auto material = meshInstance->getSurfaceMaterial(i);
                 haveTransparentMaterial = material->getTransparency() != Transparency::DISABLED;
                 haveShaderMaterial = material->getType() == Material::SHADER;
-                // INFO(lysa::to_string(material->getName()), " : ", haveTransparentOrShaderMaterial ? "Transparent" : "Opaque");
                 auto id = material->getPipelineId();
                 nodePipelineIds.insert(id);
                 if (!pipelineIds.contains(id)) {
@@ -438,8 +433,8 @@ namespace lysa {
     }
 
     void Scene::PipelineData::updateData(
-            vireo::CommandList& commandList,
-            std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin) {
+        const vireo::CommandList& commandList,
+        std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin) {
         if (instancesUpdated) {
             instancesArray.flush(commandList);
             if (drawCommandsStagingBufferCount < drawCommandsCount) {

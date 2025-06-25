@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-#include "lighting.inc.slang"
+#include "../lighting/lighting.inc.slang"
 
 float4 getColor(VertexOutput input, Material mat, float4 color) {
     float3 normal = fetchNormal(input, mat);
