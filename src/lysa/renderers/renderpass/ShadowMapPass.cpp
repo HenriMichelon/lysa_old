@@ -19,7 +19,7 @@ namespace lysa {
     ShadowMapPass::ShadowMapPass(
         const RenderingConfiguration& config,
         const std::shared_ptr<Light>& light):
-        Renderpass{config, L"ShaderMaterialPass"},
+        Renderpass{config, L"ShadowMapPass"},
         light{light} {
         const auto& vireo = Application::getVireo();
 
@@ -52,7 +52,7 @@ namespace lysa {
             pipelineConfig.depthStencilImageFormat,
             SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
             vireo::RenderTargetType::DEPTH,
-            {}, 1);
+            {}, 1, vireo::MSAA::NONE, L"ShadowMap");
         renderingConfig.depthStencilRenderTarget = shadowMap;
     }
 
@@ -104,17 +104,16 @@ namespace lysa {
 
     void ShadowMapPass::render(
         vireo::CommandList& commandList,
-        const Scene& scene) const {
+        const Scene& scene) {
         descriptorSet->update(BINDING_GLOBAL, globalUniformBuffer[0]);
 
         commandList.barrier(
             shadowMap,
             firstPass ? vireo::ResourceState::UNDEFINED : vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::RENDER_TARGET_DEPTH);
+        firstPass = false;
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
-        commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
 
         commandList.beginRendering(renderingConfig);
         commandList.bindPipeline(pipeline);

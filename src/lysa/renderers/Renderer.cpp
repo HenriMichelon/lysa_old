@@ -55,10 +55,12 @@ namespace lysa {
         const bool clearAttachment,
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
+        const auto& frame = framesData[frameIndex];
+        commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
+        commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
         for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
             static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
         }
-        const auto& frame = framesData[frameIndex];
         scene.setInitialState(commandList);
         depthPrePass.render(commandList, scene, frame.depthAttachment);
         colorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);

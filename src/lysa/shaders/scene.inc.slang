@@ -43,6 +43,10 @@ struct Scene {
     uint     lightsCount;
 }
 
+struct Lights {
+    Light[100] light;
+}
+
 // Apply texture UV transforms
 float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;
@@ -63,6 +67,8 @@ float4 toLinear(float4 sRGB) {
 
 [[vk::binding(0, 2)]] ConstantBuffer<Scene> scene  : register(b0, space2);
 [[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
+[[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
+[[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
 
 float4 fetchColor(VertexOutput input, Material mat) {
     float4 color = mat.albedoColor;

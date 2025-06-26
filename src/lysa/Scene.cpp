@@ -344,8 +344,6 @@ namespace lysa {
     void Scene::setInitialState(const vireo::CommandList& commandList) const {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
-        commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
-        commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
     }
 
     void Scene::drawOpaquesAndShaderMaterialsModels(
@@ -537,7 +535,6 @@ namespace lysa {
                 vireo::ResourceState::INDIRECT_DRAW);
         }
     }
-
 
     void Scene::enableLightShadowCasting(const std::shared_ptr<Node>&node) {
         if (const auto& light = std::dynamic_pointer_cast<Light>(node)) {

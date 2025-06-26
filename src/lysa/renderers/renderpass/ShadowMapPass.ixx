@@ -29,7 +29,7 @@ export namespace lysa {
 
         void render(
             vireo::CommandList& commandList,
-            const Scene& scene) const;
+            const Scene& scene);
 
         auto getShadowMap() const { return shadowMap; }
 
@@ -74,9 +74,9 @@ export namespace lysa {
             .depthStencilImageFormat = vireo::ImageFormat::D32_SFLOAT,
             .depthTestEnable = true,
             .depthWriteEnable = true,
-            .depthBiasEnable = true,
-            .depthBiasConstantFactor = 1.25f,
-            .depthBiasSlopeFactor = 1.75f,
+            // .depthBiasEnable = true,
+            // .depthBiasConstantFactor = 1.25f,
+            // .depthBiasSlopeFactor = 1.75f,
         };
 
         vireo::RenderingConfiguration renderingConfig {
