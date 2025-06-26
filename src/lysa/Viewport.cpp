@@ -33,6 +33,7 @@ namespace lysa {
         for (auto& frame : framesData) {
             frame.scene = std::make_shared<Scene>(
                 config.sceneConfig,
+                window.getConfiguration().renderingConfig,
                 framesInFlight,
                 viewport,
                 scissors);

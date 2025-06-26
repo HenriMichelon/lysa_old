@@ -51,6 +51,8 @@ export namespace lysa {
             const std::shared_ptr<vireo::CommandList>& commandList,
             Scene& scene) const;
 
+        void update(const Scene& scene, uint32 frameIndex) const;
+
         virtual void update(uint32 frameIndex);
 
         void render(
@@ -68,10 +70,6 @@ export namespace lysa {
         void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0);
 
         void removePostprocessing(const std::wstring& fragShaderName);
-
-        void addShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass);
-
-        void removeShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass);
 
         virtual ~Renderer() = default;
         Renderer(Renderer&) = delete;
@@ -98,6 +96,5 @@ export namespace lysa {
         TransparencyPass       transparencyPass;
 
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
-        std::list<std::shared_ptr<ShadowMapPass>> shadowMapPasses;
     };
 }

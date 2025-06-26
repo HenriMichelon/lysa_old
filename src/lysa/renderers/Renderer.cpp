@@ -22,10 +22,13 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
     }
 
-    void Renderer::update(const uint32 frameIndex) {
-        for (const auto& shadowMapPass : shadowMapPasses) {
-            shadowMapPass->update(frameIndex);
+    void Renderer::update(const Scene& scene, const uint32 frameIndex) const {
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            shadowMapRenderer->update(frameIndex);
         }
+    }
+
+    void Renderer::update(const uint32 frameIndex) {
         depthPrePass.update(frameIndex);
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->update(frameIndex);
@@ -52,8 +55,8 @@ namespace lysa {
         const bool clearAttachment,
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
-        for (const auto& shadowMapPass : shadowMapPasses) {
-            shadowMapPass->render(commandList, scene, frameIndex);
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene, frameIndex);
         }
         const auto& frame = framesData[frameIndex];
         scene.setInitialState(commandList);
@@ -139,14 +142,5 @@ namespace lysa {
             return item->getFragShaderName() == fragShaderName;
         });
     }
-
-    void Renderer::addShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass) {
-        shadowMapPasses.push_back(shadowMapPass);
-    }
-
-    void Renderer::removeShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass) {
-        shadowMapPasses.remove(shadowMapPass);
-    }
-
 
 }

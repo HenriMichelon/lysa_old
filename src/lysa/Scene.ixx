@@ -15,9 +15,10 @@ import lysa.nodes.environment;
 import lysa.nodes.light;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;
+import lysa.pipelines.frustum_culling;
+import lysa.renderers.renderpass;
 import lysa.resources.material;
 import lysa.resources.mesh;
-import lysa.pipelines.frustum_culling;
 
 export namespace lysa {
 
@@ -48,6 +49,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
         static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
+        static constexpr vireo::DescriptorIndex BINDING_SHADOW_MAPS{3};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
         static constexpr uint32 SET_PIPELINE{3};
@@ -68,6 +70,7 @@ export namespace lysa {
 
         Scene(
             const SceneConfiguration& config,
+            const RenderingConfiguration& renderingConfig,
             uint32 framesInFlight,
             const vireo::Viewport& viewport,
             const vireo::Rect& scissors);
@@ -112,12 +115,15 @@ export namespace lysa {
 
         auto getDescriptorSet() const { return descriptorSet; }
 
+        auto getShadowMapRenderers() const { return std::views::values(shadowMapRenderers); }
+
         virtual ~Scene() = default;
         Scene(Scene&) = delete;
         Scene& operator=(Scene&) = delete;
 
     private:
         const SceneConfiguration& config;
+        const RenderingConfiguration& renderingConfig;
         const uint32 framesInFlight;
         const vireo::Viewport& viewport;
         const vireo::Rect& scissors;
@@ -125,6 +131,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         std::shared_ptr<Camera> currentCamera{};
         std::shared_ptr<Environment> currentEnvironment{};
+        std::map<std::shared_ptr<Light>, std::shared_ptr<Renderpass>> shadowMapRenderers;
 
         DeviceMemoryArray meshInstancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
@@ -202,6 +209,11 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
             const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
+
+        void enableLightShadowCasting(const std::shared_ptr<Node>&node);
+
+        void disableLightShadowCasting(const std::shared_ptr<Node>&node);
+
     };
 
 }

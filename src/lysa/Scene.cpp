@@ -11,6 +11,7 @@ import lysa.application;
 import lysa.log;
 import lysa.viewport;
 import lysa.window;
+import lysa.renderers.renderpass.shadow_map_pass;
 
 namespace lysa {
 
@@ -19,6 +20,7 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
+        // sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, );
         sceneDescriptorLayout->build();
 
         pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
@@ -33,6 +35,7 @@ namespace lysa {
 
     Scene::Scene(
         const SceneConfiguration& config,
+        const RenderingConfiguration& renderingConfig,
         const uint32 framesInFlight,
         const vireo::Viewport& viewport,
         const vireo::Rect& scissors) :
@@ -54,7 +57,8 @@ namespace lysa {
             L"Scene Data")},
         scissors{scissors},
         viewport{viewport},
-        framesInFlight{framesInFlight} {
+        framesInFlight{framesInFlight},
+        renderingConfig{renderingConfig} {
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, meshInstancesDataArray.getBuffer());
@@ -215,7 +219,7 @@ namespace lysa {
         case Node::OMNI_LIGHT:
         case Node::SPOT_LIGHT:
             lights.push_back(static_pointer_cast<Light>(node));
-            node->getViewport()->getWindow().enableLightShadowCasting(node);
+            enableLightShadowCasting(node);
             break;
         default:
             break;
@@ -492,6 +496,20 @@ namespace lysa {
                 vireo::ResourceState::COPY_DST,
                 vireo::ResourceState::INDIRECT_DRAW);
         }
+    }
+
+
+    void Scene::enableLightShadowCasting(const std::shared_ptr<Node>&node) {
+        if (const auto& light = std::dynamic_pointer_cast<Light>(node)) {
+            if (light->getCastShadows() && !shadowMapRenderers.contains(light)) {
+                const auto shadowMapRenderer = make_shared<ShadowMapPass>(renderingConfig, light);
+                shadowMapRenderers[light] = shadowMapRenderer;
+            }
+        }
+    }
+
+    void Scene::disableLightShadowCasting(const std::shared_ptr<Node>&node) {
+        throw Exception("not implemented");
     }
 
 }
