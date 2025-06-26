@@ -189,7 +189,7 @@ namespace lysa {
                 if (count > config.sceneConfig.maxAsyncNodesUpdatedPerFrame) { break; }
             }
         }
-        // Add to the renderer the nodes previously added to the scene tree
+        // Add to the scene the nodes previously added to the scene tree
         // Immediate additions
         if (!data.addedNodes.empty()) {
             for (const auto &node : data.addedNodes) {
@@ -265,6 +265,5 @@ namespace lysa {
         }
         return false;
     }
-
 
 }

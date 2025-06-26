@@ -16,8 +16,10 @@ import lysa.configuration;
 import lysa.input_event;
 import lysa.memory;
 import lysa.viewport;
+import lysa.nodes.light;
 import lysa.nodes.node;
 import lysa.renderers.renderer;
+import lysa.renderers.renderpass.shadow_map_pass;
 
 export namespace lysa {
     /**
@@ -85,12 +87,15 @@ export namespace lysa {
 
         const auto& getConfiguration() const { return config; }
 
+        void enableLightShadowCasting(const std::shared_ptr<Node>&node);
+
+        void disableLightShadowCasting(const std::shared_ptr<Node>&node);
+
         virtual ~Window();
         Window(Window&) = delete;
         Window& operator=(Window&) = delete;
 
     private:
-
         // Per frame data
         struct FrameData {
             // frames rendering & presenting synchronization
@@ -112,6 +117,9 @@ export namespace lysa {
         std::shared_ptr<vireo::SwapChain>      swapChain{nullptr};
         // Scene renderer
         std::unique_ptr<Renderer>              renderer;
+        // Maximum number of shadow renderers per window
+        static constexpr uint32 MAX_SHADOW_MAP_RENDERERS{20};
+        std::map<std::shared_ptr<Light>, std::shared_ptr<ShadowMapPass>> shadowMapRenderers;
         std::vector<std::shared_ptr<Viewport>> viewports;
 
         void* createWindow();

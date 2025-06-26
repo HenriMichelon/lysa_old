@@ -82,6 +82,7 @@ namespace lysa {
                 renderer->updatePipelines(viewport->getScene(frameIndex)->getPipelineIds());
             }
         }
+        renderer->update(frameIndex);
     }
 
     void Window::physicsProcess(const float delta) const {
@@ -121,7 +122,7 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             renderer->render(
-                commandList,
+                *commandList,
                 scene,
                 viewport == mainViewport,
                 frameIndex);
@@ -179,6 +180,20 @@ namespace lysa {
     void Window::removePostprocessing(const std::wstring& fragShaderName) const {
         waitIdle();
         renderer->removePostprocessing(fragShaderName);
+    }
+
+    void Window::enableLightShadowCasting(const std::shared_ptr<Node>&node) {
+        if (const auto& light = std::dynamic_pointer_cast<Light>(node)) {
+            if (light->getCastShadows() && !shadowMapRenderers.contains(light) && (shadowMapRenderers.size() < MAX_SHADOW_MAP_RENDERERS)) {
+                const auto shadowMapRenderer = make_shared<ShadowMapPass>(config.renderingConfig, light);
+                shadowMapRenderers[light] = shadowMapRenderer;
+                renderer->addShadowMapPass(shadowMapRenderer);
+            }
+        }
+    }
+
+    void Window::disableLightShadowCasting(const std::shared_ptr<Node>&node) {
+        throw Exception("not implemented");
     }
 
 }

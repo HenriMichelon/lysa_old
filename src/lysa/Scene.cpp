@@ -9,6 +9,8 @@ module lysa.scene;
 import vireo;
 import lysa.application;
 import lysa.log;
+import lysa.viewport;
+import lysa.window;
 
 namespace lysa {
 
@@ -213,6 +215,7 @@ namespace lysa {
         case Node::OMNI_LIGHT:
         case Node::SPOT_LIGHT:
             lights.push_back(static_pointer_cast<Light>(node));
+            node->getViewport()->getWindow().enableLightShadowCasting(node);
             break;
         default:
             break;
@@ -266,6 +269,7 @@ namespace lysa {
         case Node::OMNI_LIGHT:
         case Node::SPOT_LIGHT:
             lights.remove(static_pointer_cast<Light>(node));
+            // node->getViewport()->getWindow().disableLightShadowCasting(node);
             break;
         default:
             break;

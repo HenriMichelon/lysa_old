@@ -16,6 +16,7 @@ import lysa.resources.material;
 import lysa.renderers.renderpass.post_processing;
 import lysa.renderers.renderpass.depth_prepass;
 import lysa.renderers.renderpass.shader_material_pass;
+import lysa.renderers.renderpass.shadow_map_pass;
 import lysa.renderers.renderpass.transparency_pass;
 
 export namespace lysa {
@@ -50,8 +51,10 @@ export namespace lysa {
             const std::shared_ptr<vireo::CommandList>& commandList,
             Scene& scene) const;
 
+        virtual void update(uint32 frameIndex);
+
         void render(
-            const std::shared_ptr<vireo::CommandList>& commandList,
+            vireo::CommandList& commandList,
             const Scene& scene,
             bool clearAttachment,
             uint32 frameIndex);
@@ -66,6 +69,10 @@ export namespace lysa {
 
         void removePostprocessing(const std::wstring& fragShaderName);
 
+        void addShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass);
+
+        void removeShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass);
+
         virtual ~Renderer() = default;
         Renderer(Renderer&) = delete;
         Renderer& operator=(Renderer&) = delete;
@@ -74,8 +81,6 @@ export namespace lysa {
         const RenderingConfiguration& config;
         const std::wstring name;
         const bool withStencil;
-
-        virtual void update(uint32 frameIndex);
 
         virtual void colorPass(
             vireo::CommandList& commandList,
@@ -93,5 +98,6 @@ export namespace lysa {
         TransparencyPass       transparencyPass;
 
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
+        std::list<std::shared_ptr<ShadowMapPass>> shadowMapPasses;
     };
 }

@@ -23,6 +23,9 @@ namespace lysa {
     }
 
     void Renderer::update(const uint32 frameIndex) {
+        for (const auto& shadowMapPass : shadowMapPasses) {
+            shadowMapPass->update(frameIndex);
+        }
         depthPrePass.update(frameIndex);
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->update(frameIndex);
@@ -44,18 +47,20 @@ namespace lysa {
     }
 
     void Renderer::render(
-        const std::shared_ptr<vireo::CommandList>& commandList,
+        vireo::CommandList& commandList,
         const Scene& scene,
         const bool clearAttachment,
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
-        update(frameIndex);
+        for (const auto& shadowMapPass : shadowMapPasses) {
+            shadowMapPass->render(commandList, scene, frameIndex);
+        }
         const auto& frame = framesData[frameIndex];
-        scene.setInitialState(*commandList);
-        depthPrePass.render(*commandList, scene, frame.depthAttachment);
-        colorPass(*commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
-        shaderMaterialPass.render(*commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
-        transparencyPass.render(*commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
+        scene.setInitialState(commandList);
+        depthPrePass.render(commandList, scene, frame.depthAttachment);
+        colorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
+        shaderMaterialPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
+        transparencyPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
     }
 
     void Renderer::postprocess(
@@ -134,5 +139,14 @@ namespace lysa {
             return item->getFragShaderName() == fragShaderName;
         });
     }
+
+    void Renderer::addShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass) {
+        shadowMapPasses.push_back(shadowMapPass);
+    }
+
+    void Renderer::removeShadowMapPass(const std::shared_ptr<ShadowMapPass>& shadowMapPass) {
+        shadowMapPasses.remove(shadowMapPass);
+    }
+
 
 }
