@@ -71,3 +71,25 @@ struct Instance {
     uint  materialIndex; // can be overridden in MeshInstance
     uint  meshSurfaceMaterialIndex; // original when overridden
 }
+
+static const int LIGHT_DIRECTIONAL = 0;
+static const int LIGHT_OMNI        = 1;
+static const int LIGHT_SPOT        = 2;
+
+struct Light {
+    // light params
+    int type; // Light::LightType
+    float range;
+    float cutOff;
+    float outerCutOff;
+    float4 position;
+    float4 direction;
+    float4 color; // RGB + Intensity;
+    // shadow map params
+    int mapIndex;
+    float farPlane;
+    uint cascadesCount;
+	float _pad0;
+    float4 cascadeSplitDepth;
+    float4x4 lightSpace[6];
+};

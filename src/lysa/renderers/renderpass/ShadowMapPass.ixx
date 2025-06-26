@@ -29,8 +29,13 @@ export namespace lysa {
 
         void render(
             vireo::CommandList& commandList,
-            const Scene& scene,
-            uint32 frameIndex);
+            const Scene& scene) const;
+
+        auto getShadowMap() const { return shadowMap; }
+
+        const auto& getLightSpace(const uint32 index) const {
+            return globalUniform[index].lightSpace;
+        }
 
     private:
         const std::wstring VERTEX_SHADER{L"shadowmap.vert"};
@@ -56,12 +61,10 @@ export namespace lysa {
             float    farPlane;
         };
 
-        struct FrameData {
-            GlobalUniform globalUniform[6];
-            std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
-            std::shared_ptr<vireo::RenderTarget> shadowMap;
-            std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-        };
+        GlobalUniform globalUniform[6];
+        std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
+        std::shared_ptr<vireo::RenderTarget> shadowMap;
+        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
             {"POSITION", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, position)},
@@ -79,12 +82,14 @@ export namespace lysa {
         vireo::RenderingConfiguration renderingConfig {
             .depthTestEnable = pipelineConfig.depthTestEnable,
             .clearDepthStencil = true,
+            .discardDepthStencilAfterRender = false,
         };
+
+        bool firstPass{true};
 
         vireo::Rect scissors;
         vireo::Viewport viewport;
         std::shared_ptr<Light> light;
-        std::vector<FrameData> framesData;
         std::shared_ptr<vireo::GraphicPipeline> pipeline;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
     };

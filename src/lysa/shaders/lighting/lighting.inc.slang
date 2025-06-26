@@ -7,33 +7,51 @@
 #include "../scene.inc.slang"
 #include "pbr.inc.slang"
 
-static const int LIGHT_DIRECTIONAL = 0;
-static const int LIGHT_OMNI        = 1;
-static const int LIGHT_SPOT        = 2;
-
-struct Light {
-    // light params
-    int type; // Light::LightType
-    float range;
-    float cutOff;
-    float outerCutOff;
-    float4 position;
-    float4 direction;
-    float4 color; // RGB + Intensity;
-    // shadow map params
-    int mapIndex;
-    float farPlane;
-    uint cascadesCount;
-	float _pad0;
-    float4 cascadeSplitDepth;
-    float4x4 lightSpace[6];
-};
-
 struct Lights {
     Light[100] light;
 }
 
 [[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
+[[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
+
+static const float SHADOW_FACTOR = 0.2;
+
+float shadowFactor(Light light, int cascadeIndex, float3 worldPos, float2 uv) {
+    const float4 shadowCoord = mul(light.lightSpace[cascadeIndex], float4(worldPos, 1.0));
+    float3 projCoords = shadowCoord.xyz / shadowCoord.w;
+    //if (projCoords.z > 1.0) {
+    //    return 1.0;
+    //}
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+    //const bool outOfView = (projCoords.x < 0.001f || projCoords.x > 0.999f || projCoords.y < 0.001f || projCoords.y > 0.999f);
+    //if (outOfView) {
+    //    return 1.0;
+    //}
+    const float closestDepth = shadowMaps[0]
+        .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], uv).r;
+    return closestDepth;
+    //const float currentDepth = projCoords.z;
+    //return currentDepth > closestDepth  ? 0.0 : 1.0;
+//    float bias = max(0.05 * (1.0 - dot(normal, light.direction)), 0.005);
+//    float bias = 0.005;
+//    return shadowCoord.w; //currentDepth - bias > closestDepth ? SHADOW_FACTOR : 1.0;
+
+    // PCF
+//     uint width, height;
+//     shadowMaps[light.mapIndex].GetDimensions(width, height);
+//     const float2 texelSize = 1.0 / float2(width, height);
+//     const float bias   = 0.0005;
+//     float shadow       = 0.0;
+//     for(int x = -1; x <= 1; ++x)  {
+//         for(int y = -1; y <= 1; ++y) {
+//             float pcfDepth = shadowMaps[light.mapIndex]
+//                 .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
+//             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
+//         }
+//     }
+//     return shadow /= 9.0;
+}
+
 
 float3 Radiance(
     // base color
@@ -124,6 +142,7 @@ float3 calcPointLight(
 }
 
 float3 calcLight(
+    float2 uv,
     float3 viewDirection,
     float3 worldPos,
     float3 color,
@@ -150,8 +169,18 @@ float3 calcLight(
                 break;
             }
             case LIGHT_OMNI:
+                if (distance(worldPos, light.position.xyz) <= light.range) {
+                    diffuse += factor * calcPointLight(
+                        light, color.rgb, normal, metallic, roughness,
+                        viewDirection, worldPos, F0, cosLo);
+                }
+                break;
             case LIGHT_SPOT: {
                 if (distance(worldPos, light.position.xyz) <= light.range) {
+                    if (light.mapIndex != -1) {
+                        factor = shadowFactor(light, 0, worldPos, uv);
+                        return float3(factor, factor, factor);
+                    }
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, worldPos, F0, cosLo);

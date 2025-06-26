@@ -20,7 +20,7 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
-        // sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, );
+        sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS);
         sceneDescriptorLayout->build();
 
         pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
@@ -59,10 +59,18 @@ namespace lysa {
         viewport{viewport},
         framesInFlight{framesInFlight},
         renderingConfig{renderingConfig} {
+
+        shadowMaps.resize(MAX_SHADOW_MAPS);
+        for (int i = 0; i < shadowMaps.size(); i++) {
+            shadowMaps[i] = Application::getResources().getBlankImage();
+        }
+
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, meshInstancesDataArray.getBuffer());
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
+        descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
+
         sceneUniformBuffer->map();
         lightsBuffer->map();
     }
@@ -90,7 +98,7 @@ namespace lysa {
     }
 
     void Scene::updatePipelinesData(
-        vireo::CommandList& commandList,
+        const vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             pipelineData->updateData(commandList, drawCommandsStagingBufferRecycleBin);
@@ -102,6 +110,11 @@ namespace lysa {
             drawCommandsStagingBufferRecycleBin.clear();
         }
         meshInstancesDataArray.restart();
+
+        if (shadowMapsUpdated) {
+            descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
+            shadowMapsUpdated = false;
+        }
 
         auto sceneUniform = SceneData {
             .cameraPosition = currentCamera->getPositionGlobal(),
@@ -155,6 +168,33 @@ namespace lysa {
             for (const auto& light : lights) {
                 if (light->isVisible()) {
                     lightsArray[lightIndex] = light->getLightData();
+                    if (shadowMapRenderers.contains(light)) {
+                        const auto&shadowMapRenderer = std::static_pointer_cast<ShadowMapPass>(shadowMapRenderers[light]);
+                        lightsArray[lightIndex].mapIndex = shadowMapIndex[light];
+                        switch (light->getLightType()) {
+                            case Light::LIGHT_DIRECTIONAL: {
+                                // lightsArray[lightIndex].cascadesCount = shadowMapRenderer->getCascadesCount(currentFrame);
+                                // for (int cascadeIndex = 0; cascadeIndex < lightsArray[lightIndex].cascadesCount ; cascadeIndex++) {
+                                    // lightsArray[lightIndex].lightSpace[cascadeIndex] = shadowMapRenderer->getLightSpace(cascadeIndex, currentFrame);
+                                    // lightsArray[lightIndex].cascadeSplitDepth[cascadeIndex] = shadowMapRenderer->getCascadeSplitDepth(cascadeIndex, currentFrame);
+                                // }
+                                break;
+                            }
+                            case Light::LIGHT_SPOT: {
+                                lightsArray[lightIndex].lightSpace[0] = shadowMapRenderer->getLightSpace(0);
+                                break;
+                            }
+                            case Light::LIGHT_OMNI: {
+                                // lightsArray[lightIndex].farPlane = shadowMapRenderer->getFarPlane();
+                                // for (int faceIndex = 0; faceIndex < 6; faceIndex++) {
+                                    // lightsArray[lightIndex].lightSpace[faceIndex] =
+                                            // shadowMapRenderer->getLightSpace(faceIndex, currentFrame);
+                                // }
+                                break;
+                            }
+                            default:;
+                        }
+                    }
                     lightIndex++;
                 }
             }
@@ -501,9 +541,19 @@ namespace lysa {
 
     void Scene::enableLightShadowCasting(const std::shared_ptr<Node>&node) {
         if (const auto& light = std::dynamic_pointer_cast<Light>(node)) {
-            if (light->getCastShadows() && !shadowMapRenderers.contains(light)) {
+            if (light->getCastShadows() && !shadowMapRenderers.contains(light) && (shadowMapRenderers.size() < MAX_SHADOW_MAPS)) {
                 const auto shadowMapRenderer = make_shared<ShadowMapPass>(renderingConfig, light);
                 shadowMapRenderers[light] = shadowMapRenderer;
+                const auto& blankImage = Application::getResources().getBlankImage();
+                for (uint32 index = 0; index < shadowMaps.size(); index++) {
+                    if (shadowMaps[index] == blankImage) {
+                        shadowMaps[index] = shadowMapRenderer->getShadowMap()->getImage();
+                        shadowMapIndex[light] = index;
+                        shadowMapsUpdated = true;
+                        return;
+                    }
+                }
+                throw Exception("Out of memory for shadow map");
             }
         }
     }

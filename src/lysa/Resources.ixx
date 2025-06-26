@@ -57,6 +57,8 @@ export namespace lysa {
 
         auto& getMutex() { return mutex; }
 
+        auto getBlankImage() { return blankImage; }
+
         Resources(Resources&) = delete;
         Resources& operator = (Resources&) = delete;
 

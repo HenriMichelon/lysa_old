@@ -45,6 +45,8 @@ export namespace lysa {
 
     class Scene {
     public:
+        static constexpr uint32 MAX_SHADOW_MAPS{20};
+
         static constexpr uint32 SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
@@ -132,6 +134,9 @@ export namespace lysa {
         std::shared_ptr<Camera> currentCamera{};
         std::shared_ptr<Environment> currentEnvironment{};
         std::map<std::shared_ptr<Light>, std::shared_ptr<Renderpass>> shadowMapRenderers;
+        std::vector<std::shared_ptr<vireo::Image>> shadowMaps;
+        std::map<std::shared_ptr<Light>, uint32> shadowMapIndex;
+        bool shadowMapsUpdated{false};
 
         DeviceMemoryArray meshInstancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
@@ -193,7 +198,7 @@ export namespace lysa {
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> transparentPipelinesData;
 
         void updatePipelinesData(
-            vireo::CommandList& commandList,
+            const vireo::CommandList& commandList,
             const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData);
 
         void compute(

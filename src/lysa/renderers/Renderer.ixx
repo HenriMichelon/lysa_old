@@ -51,7 +51,7 @@ export namespace lysa {
             const std::shared_ptr<vireo::CommandList>& commandList,
             Scene& scene) const;
 
-        void update(const Scene& scene, uint32 frameIndex) const;
+        void update(const Scene& scene) const;
 
         virtual void update(uint32 frameIndex);
 

@@ -26,8 +26,7 @@ VertexOutput vertexMain(VertexInput input) {
     Instance instance = instances[instanceIndex];
     MeshSurface surface = meshSurfaces[instance.meshSurfaceIndex];
     float4x4 model = meshInstances[instance.meshInstanceIndex].transform;
-    float4 position = float4(input.position.xyz, 1.0);
-    float4 positionW = mul(model, position);
+    float4 positionW = mul(model, float4(input.position.xyz, 1.0));
     float3x3 normalMatrix = transpose(inverse3x3((float3x3)model));
     float3 normalW = normalize(mul(model, float4(input.normal.xyz, 0.0)).xyz);
     float3 tangentW = normalize(mul(model, float4(input.tangent.xyz * input.tangent.w, 0.0)).xyz);

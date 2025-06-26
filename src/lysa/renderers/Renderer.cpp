@@ -22,9 +22,9 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
     }
 
-    void Renderer::update(const Scene& scene, const uint32 frameIndex) const {
+    void Renderer::update(const Scene& scene) const {
         for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            shadowMapRenderer->update(frameIndex);
+            shadowMapRenderer->update(0);
         }
     }
 
@@ -56,7 +56,7 @@ namespace lysa {
         const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene, frameIndex);
+            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
         }
         const auto& frame = framesData[frameIndex];
         scene.setInitialState(commandList);

@@ -28,6 +28,6 @@ float4 getColor(QuadOutput input) {
     float3 viewDirection = normalize(scene.cameraPosition - worldPos);
 //     return float4(albedo, 1.0);
     return float4(
-        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, metallic, roughness, emissiveColor),
+        calcLight(input.uv, viewDirection, worldPos, albedo, normal, scene.ambientLight, metallic, roughness, emissiveColor),
         1.0);
 }

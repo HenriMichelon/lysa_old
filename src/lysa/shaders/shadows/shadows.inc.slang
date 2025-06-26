@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2024-present Henri Michelon
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+*/
+static const float SHADOW_FACTOR = 0.2;
+
+float shadowFactor(Light light, int cascadeIndex, float3 worldPos, float2 uv) {
+    const float4 shadowCoord = mul(light.lightSpace[cascadeIndex], float4(worldPos, 1.0));
+    float3 projCoords = shadowCoord.xyz / shadowCoord.w;
+    //if (projCoords.z > 1.0) {
+    //    return 1.0;
+    //}
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+    //const bool outOfView = (projCoords.x < 0.001f || projCoords.x > 0.999f || projCoords.y < 0.001f || projCoords.y > 0.999f);
+    //if (outOfView) {
+    //    return 1.0;
+    //}
+    const float closestDepth = shadowMaps[0]
+        .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], uv).r;
+    return closestDepth;
+    //const float currentDepth = projCoords.z;
+    //return currentDepth > closestDepth  ? 0.0 : 1.0;
+//    float bias = max(0.05 * (1.0 - dot(normal, light.direction)), 0.005);
+//    float bias = 0.005;
+//    return shadowCoord.w; //currentDepth - bias > closestDepth ? SHADOW_FACTOR : 1.0;
+
+    // PCF
+//     uint width, height;
+//     shadowMaps[light.mapIndex].GetDimensions(width, height);
+//     const float2 texelSize = 1.0 / float2(width, height);
+//     const float bias   = 0.0005;
+//     float shadow       = 0.0;
+//     for(int x = -1; x <= 1; ++x)  {
+//         for(int y = -1; y <= 1; ++y) {
+//             float pcfDepth = shadowMaps[light.mapIndex]
+//                 .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
+//             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
+//         }
+//     }
+//     return shadow /= 9.0;
+}
+/*
+const vec3 sampleOffsetDirections[20] = vec3[] (
+    vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
+    vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+    vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+    vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+    vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);
+
+float shadowFactorCubemap(Light light, vec3 fragPos) {
+    // https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows
+    const float bias         = 0.15;
+    const int   samples      = 20;
+    const float viewDistance = length(global.cameraPosition - fragPos);
+    const float diskRadius   = (1.0 + (viewDistance / light.farPlane)) / 25.0;
+
+    // get vector between fragment position and light position
+    const vec3 fragToLight = fragPos - light.position;
+    const float currentDepth = length(fragToLight);
+//    const float closestDepth = texture(shadowMapsCubemap[light.mapIndex], fragToLight).r * light.farPlane;
+//    return currentDepth - bias > closestDepth ? SHADOW_FACTOR : 1.0;
+
+    // PCF
+    float shadow = 0.0;
+    for(int i = 0; i < samples; ++i) {
+//         use the light to fragment vector to sample from the depth map
+//         it is currently in linear range between [0,1]. Re-transform back to original value
+        shadow += currentDepth >
+                texture(shadowMapsCubemap[light.mapIndex], fragToLight + sampleOffsetDirections[i] * diskRadius).r * light.farPlane
+                ? SHADOW_FACTOR : 1.0;
+    }
+    return (shadow /= samples);
+}
+*/

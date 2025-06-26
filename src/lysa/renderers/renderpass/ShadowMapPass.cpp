@@ -43,25 +43,22 @@ namespace lysa {
         scissors.width = SHADOWMAP_WIDTH;
         scissors.height = SHADOWMAP_HEIGHT;
 
-        framesData.resize(config.framesInFlight);
-        for (auto& frameData : framesData) {
-            for (int i = 0; i < 1; i++) {
-                frameData.globalUniformBuffer[i] = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
-                frameData.globalUniformBuffer[i]->map();
-            }
-            frameData.descriptorSet = vireo.createDescriptorSet(descriptorLayout);
-            frameData.shadowMap = vireo.createRenderTarget(
-                pipelineConfig.depthStencilImageFormat,
-                SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
-                vireo::RenderTargetType::DEPTH,
-                {}, 1);
+        for (int i = 0; i < 1; i++) {
+            globalUniformBuffer[i] = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
+            globalUniformBuffer[i]->map();
         }
+        descriptorSet = vireo.createDescriptorSet(descriptorLayout);
+        shadowMap = vireo.createRenderTarget(
+            pipelineConfig.depthStencilImageFormat,
+            SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
+            vireo::RenderTargetType::DEPTH,
+            {}, 1);
+        renderingConfig.depthStencilRenderTarget = shadowMap;
     }
 
     void ShadowMapPass::update(const uint32 frameIndex) {
-        auto& data = framesData[frameIndex];
         if (!light->isVisible()) { return; }
-        const auto aspectRatio = data.shadowMap->getImage()->getWidth() / data.shadowMap->getImage()->getHeight();
+        const auto aspectRatio = shadowMap->getImage()->getWidth() / shadowMap->getImage()->getHeight();
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
                 throw Exception{"Directional light not supported"};
@@ -97,8 +94,8 @@ namespace lysa {
                     0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
                     0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
 
-                data.globalUniform[0].lightSpace = mul(lightView, lightProjection);
-                data.globalUniformBuffer[0]->write(&data.globalUniform[0]);
+                globalUniform[0].lightSpace = mul(lightView, lightProjection);
+                globalUniformBuffer[0]->write(&globalUniform[0]);
                 break;
             }
             default:;
@@ -107,16 +104,12 @@ namespace lysa {
 
     void ShadowMapPass::render(
         vireo::CommandList& commandList,
-        const Scene& scene,
-        const uint32 frameIndex) {
-        const auto& frameData = framesData[frameIndex];
-
-        frameData.descriptorSet->update(BINDING_GLOBAL, frameData.globalUniformBuffer[0]);
-        renderingConfig.depthStencilRenderTarget = frameData.shadowMap;
+        const Scene& scene) const {
+        descriptorSet->update(BINDING_GLOBAL, globalUniformBuffer[0]);
 
         commandList.barrier(
-            frameData.shadowMap,
-            vireo::ResourceState::UNDEFINED,
+            shadowMap,
+            firstPass ? vireo::ResourceState::UNDEFINED : vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::RENDER_TARGET_DEPTH);
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
@@ -127,12 +120,12 @@ namespace lysa {
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
         commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
-        commandList.bindDescriptor(frameData.descriptorSet, SET_PASS);
+        commandList.bindDescriptor(descriptorSet, SET_PASS);
         scene.drawOpaquesAndShaderMaterialsModels(commandList, SET_PIPELINE);
         commandList.endRendering();
         commandList.barrier(
-            frameData.shadowMap,
+            shadowMap,
             vireo::ResourceState::RENDER_TARGET_DEPTH,
-            vireo::ResourceState::UNDEFINED);
+            vireo::ResourceState::SHADER_READ);
     }
 }
