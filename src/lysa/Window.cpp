@@ -32,8 +32,9 @@ namespace lysa {
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo.createFence(true, L"Present Fence");
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
-            frame.commandList = frame.commandAllocator->createCommandList();
-            frame.commandListUpdate = frame.commandAllocator->createCommandList();
+            frame.renderCommandList = frame.commandAllocator->createCommandList();
+            frame.prerenderCommandList = frame.commandAllocator->createCommandList();
+            frame.prerenderSemaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
         }
         if (config.renderingConfig.rendererType == RendererType::FORWARD) {
             renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
@@ -107,19 +108,24 @@ namespace lysa {
 
         const auto& frame = framesData[frameIndex];
         if (!swapChain->acquire(frame.inFlightFence)) { return; }
-
-        frame.commandAllocator->reset();
         const auto& mainViewport = viewports.front();
+        frame.commandAllocator->reset();
 
-        frame.commandListUpdate->begin();
+        frame.prerenderCommandList->begin();
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            renderer->update(frame.commandListUpdate, scene);
-            viewport->updateDebug(*frame.commandListUpdate, frameIndex);
+            renderer->prerender(*frame.prerenderCommandList, scene, frameIndex);
+            viewport->updateDebug(*frame.prerenderCommandList, frameIndex);
         }
-        frame.commandListUpdate->end();
+        frame.prerenderCommandList->end();
+        Application::getGraphicQueue()->submit(
+            vireo::WaitStage::ALL_COMMANDS,
+            frame.prerenderSemaphore,
+            {frame.prerenderCommandList});
 
-        auto& commandList = frame.commandList;
+        Application::getGraphicQueue()->waitIdle();
+
+        auto& commandList = frame.renderCommandList;
         commandList->begin();
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
@@ -149,9 +155,11 @@ namespace lysa {
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
         Application::getGraphicQueue()->submit(
+            frame.prerenderSemaphore,
+            vireo::WaitStage::VERTEX_INPUT,
             frame.inFlightFence,
             swapChain,
-            {frame.commandListUpdate, commandList});
+            {commandList});
         swapChain->present();
         swapChain->nextFrameIndex();
     }

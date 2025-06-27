@@ -47,10 +47,6 @@ export namespace lysa {
             return framesData[frameIndex].depthAttachment;
         }
 
-        void update(
-            const std::shared_ptr<vireo::CommandList>& commandList,
-            Scene& scene) const;
-
         void update(const Scene& scene) const;
 
         virtual void update(uint32 frameIndex);
@@ -59,6 +55,11 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene,
             bool clearAttachment,
+            uint32 frameIndex);
+
+        void prerender(
+            vireo::CommandList& commandList,
+            Scene& scene,
             uint32 frameIndex);
 
         void postprocess(

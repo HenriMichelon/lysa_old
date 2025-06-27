@@ -42,11 +42,21 @@ namespace lysa {
         transparencyPass.updatePipelines(pipelineIds);
     }
 
-    void Renderer::update(
-        const std::shared_ptr<vireo::CommandList>& commandList,
-        Scene& scene) const {
-        scene.update(*commandList);
-        scene.compute(*commandList);
+    void Renderer::prerender(
+           vireo::CommandList& commandList,
+           Scene& scene,
+           const uint32 frameIndex) {
+        auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
+        scene.update(commandList);
+        scene.compute(commandList);
+        const auto& frame = framesData[frameIndex];
+        commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
+        commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
+        }
+        scene.setInitialState(commandList);
+        depthPrePass.render(commandList, scene, frame.depthAttachment);
     }
 
     void Renderer::render(
@@ -58,11 +68,7 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
-        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
-        }
         scene.setInitialState(commandList);
-        depthPrePass.render(commandList, scene, frame.depthAttachment);
         colorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
         shaderMaterialPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);
         transparencyPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);

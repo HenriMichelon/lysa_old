@@ -20,10 +20,15 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos, float2 uv) {
     if (outOfView) {
        return 1.0;
     }
-    const float closestDepth = shadowMaps[light.mapIndex]
-        .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], uv).r;
-    const float currentDepth = projCoords.z;
-    return currentDepth > closestDepth  ? 0.0 : 1.0;
+    uint width, height;
+    shadowMaps[light.mapIndex].GetDimensions(width, height);
+    int2 texelCoord = int2(uv * float2(width, height));
+    return shadowMaps[light.mapIndex].Load(int3(0, 0, 0)).r;
+//     const float closestDepth = shadowMaps[light.mapIndex]
+//         .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], uv).r;
+//     const float currentDepth = projCoords.z;
+//     return closestDepth;
+//     return currentDepth > closestDepth  ? 0.0 : 1.0;
 //    float bias = max(0.05 * (1.0 - dot(normal, light.direction)), 0.005);
 //    float bias = 0.005;
 //    return shadowCoord.w; //currentDepth - bias > closestDepth ? SHADOW_FACTOR : 1.0;
@@ -169,10 +174,10 @@ float3 calcLight(
                 break;
             case LIGHT_SPOT: {
                 if (distance(worldPos, light.position.xyz) <= light.range) {
-//                     if (light.mapIndex != -1) {
-//                         factor = shadowFactor(light, 0, worldPos, uv);
-//                         return float3(factor, factor, factor);
-//                     }
+                    if (light.mapIndex != -1) {
+                        factor = shadowFactor(light, 0, worldPos, uv);
+                        return float3(factor, factor, factor);
+                    }
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, worldPos, F0, cosLo);

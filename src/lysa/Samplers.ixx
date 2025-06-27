@@ -21,12 +21,22 @@ export namespace lysa {
             vireo::Filter maxFilter;
             vireo::AddressMode samplerAddressModeU;
             vireo::AddressMode samplerAddressModeV;
+            float minLod;
+            float maxLod;
+            bool anisotropyEnable;
+            vireo::MipMapMode mipMapMode;
+            vireo::CompareOp samplerCompareOp;
 
             friend bool operator==(const SamplerInfo&l, const SamplerInfo&r) {
                 return l.minFilter == r.minFilter &&
                     l.maxFilter == r.maxFilter &&
                     l.samplerAddressModeU == r.samplerAddressModeU &&
-                    l.samplerAddressModeV == r.samplerAddressModeV;
+                    l.samplerAddressModeV == r.samplerAddressModeV &&
+                    l.minLod == r.minLod &&
+                    l.maxLod == r.maxLod &&
+                    l.anisotropyEnable == r.anisotropyEnable &&
+                    l.mipMapMode == r.mipMapMode &&
+                    l.samplerCompareOp == r.samplerCompareOp;
             }
         };
 
@@ -34,7 +44,12 @@ export namespace lysa {
             vireo::Filter minFilter,
             vireo::Filter maxFilter,
             vireo::AddressMode samplerAddressModeU,
-            vireo::AddressMode samplerAddressModeV);
+            vireo::AddressMode samplerAddressModeV,
+            float minLod = 0.0f,
+            float maxLod = vireo::Sampler::LOD_CLAMP_NONE,
+            bool anisotropyEnable = true,
+            vireo::MipMapMode mipMapMode = vireo::MipMapMode::LINEAR,
+            vireo::CompareOp compareOp = vireo::CompareOp::NEVER);
 
         bool ipUpdated() const { return samplersUpdated; }
 
