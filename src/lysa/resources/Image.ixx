@@ -39,6 +39,9 @@ export namespace lysa {
 
         auto getIndex() const { return index; }
 
+        void save(const std::wstring& filepath) const;
+        static void save(const std::wstring& filepath, const std::shared_ptr<vireo::Image>& image);
+
         ~Image() override = default;
 
     protected:

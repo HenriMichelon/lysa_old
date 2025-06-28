@@ -9,44 +9,35 @@
 
 static const float SHADOW_FACTOR = 0.2;
 
-float shadowFactor(Light light, int cascadeIndex, float3 worldPos, float2 uv) {
+float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     const float4 shadowCoord = mul(light.lightSpace[cascadeIndex], float4(worldPos, 1.0));
     float3 projCoords = shadowCoord.xyz / shadowCoord.w;
     if (projCoords.z > 1.0) {
        return 1.0;
     }
     projCoords.xy = projCoords.xy * 0.5 + 0.5;
-    const bool outOfView = (projCoords.x < 0.001f || projCoords.x > 0.999f || projCoords.y < 0.001f || projCoords.y > 0.999f);
+    projCoords.y = 1.0 - projCoords.y;
+    const bool outOfView = (projCoords.x < 0.01 || projCoords.x > 0.99 || projCoords.y < 0.01|| projCoords.y > 0.99);
     if (outOfView) {
        return 1.0;
     }
+    const float closestDepth = shadowMaps[light.mapIndex]
+        .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy).r;
+    const float currentDepth = projCoords.z;
+
     uint width, height;
     shadowMaps[light.mapIndex].GetDimensions(width, height);
-    int2 texelCoord = int2(uv * float2(width, height));
-    return shadowMaps[light.mapIndex].Load(int3(0, 0, 0)).r;
-//     const float closestDepth = shadowMaps[light.mapIndex]
-//         .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], uv).r;
-//     const float currentDepth = projCoords.z;
-//     return closestDepth;
-//     return currentDepth > closestDepth  ? 0.0 : 1.0;
-//    float bias = max(0.05 * (1.0 - dot(normal, light.direction)), 0.005);
-//    float bias = 0.005;
-//    return shadowCoord.w; //currentDepth - bias > closestDepth ? SHADOW_FACTOR : 1.0;
-
-    // PCF
-//     uint width, height;
-//     shadowMaps[light.mapIndex].GetDimensions(width, height);
-//     const float2 texelSize = 1.0 / float2(width, height);
-//     const float bias   = 0.0005;
-//     float shadow       = 0.0;
-//     for(int x = -1; x <= 1; ++x)  {
-//         for(int y = -1; y <= 1; ++y) {
-//             float pcfDepth = shadowMaps[light.mapIndex]
-//                 .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
-//             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
-//         }
-//     }
-//     return shadow /= 9.0;
+    const float2 texelSize = 1.0 / float2(width, height);
+    const float bias = 0.0005;
+    float shadow = 0.0;
+    for(int x = -1; x <= 1; ++x)  {
+        for(int y = -1; y <= 1; ++y) {
+            float pcfDepth = shadowMaps[light.mapIndex]
+                .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
+            shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
+        }
+    }
+    return shadow /= 9.0;
 }
 
 
@@ -139,7 +130,6 @@ float3 calcPointLight(
 }
 
 float3 calcLight(
-    float2 uv,
     float3 viewDirection,
     float3 worldPos,
     float3 color,
@@ -175,8 +165,8 @@ float3 calcLight(
             case LIGHT_SPOT: {
                 if (distance(worldPos, light.position.xyz) <= light.range) {
                     if (light.mapIndex != -1) {
-                        factor = shadowFactor(light, 0, worldPos, uv);
-                        return float3(factor, factor, factor);
+                        factor = shadowFactor(light, 0, worldPos);
+//                         return float3(factor, factor, factor);
                     }
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,

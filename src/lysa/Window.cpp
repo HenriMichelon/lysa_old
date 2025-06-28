@@ -10,8 +10,10 @@ import lysa.application;
 import lysa.global;
 import lysa.log;
 import lysa.nodes.node;
+import lysa.resources.image;
 import lysa.renderers.deferred_renderer;
 import lysa.renderers.forward_renderer;
+import lysa.renderers.renderpass.shadow_map_pass;
 
 namespace lysa {
 
@@ -118,12 +120,17 @@ namespace lysa {
             viewport->updateDebug(*frame.prerenderCommandList, frameIndex);
         }
         frame.prerenderCommandList->end();
+
+        // auto& scene = mainViewport->getScene(frameIndex);
+        // auto it = std::static_pointer_cast<ShadowMapPass>(*scene->getShadowMapRenderers().begin());
+        // const auto image = it->getShadowMap()->getImage();
+        // frame.prerenderCommandList->barrier(image, vireo::ResourceState::SHADER_READ, vireo::ResourceState::COPY_SRC);
         Application::getGraphicQueue()->submit(
             vireo::WaitStage::ALL_COMMANDS,
             frame.prerenderSemaphore,
             {frame.prerenderCommandList});
-
         Application::getGraphicQueue()->waitIdle();
+        // Image::save(L"output.hdr", image);
 
         auto& commandList = frame.renderCommandList;
         commandList->begin();

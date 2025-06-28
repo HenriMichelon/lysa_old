@@ -14,7 +14,6 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
 //     return float4(normal, 1.0);
     return float4(
         calcLight(
-            input.uv,
             input.viewDirection,
             input.worldPos,
             color.rgb,

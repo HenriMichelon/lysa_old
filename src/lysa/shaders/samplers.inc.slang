@@ -8,6 +8,6 @@
 static const int SAMPLER_NEAREST_NEAREST_BORDER_LINEAR = 0;
 static const int SAMPLER_LINEAR_LINEAR_EDGE_LINEAR     = 1;
 static const int SAMPLER_LINEAR_LINEAR_REPEAT_REPEAT   = 2;
-static const int SAMPLER_NEAREST_NEAREST_BORDER_LINEAR_COMPARE = 3;
+// static const int SAMPLER_NEAREST_NEAREST_BORDER_LINEAR_COMPARE = 3;
 
 [[vk::binding(0, 1)]] SamplerState samplers[20] : register(s0, space1);

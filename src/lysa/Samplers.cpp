@@ -36,16 +36,6 @@ namespace lysa {
             vireo::Filter::LINEAR,
             vireo::AddressMode::REPEAT,
             vireo::AddressMode::REPEAT);
-        // Used to sample shadow maps
-        addSampler(
-            vireo::Filter::NEAREST,
-            vireo::Filter::NEAREST,
-            vireo::AddressMode::CLAMP_TO_BORDER,
-            vireo::AddressMode::CLAMP_TO_BORDER,
-            0.0f, vireo::Sampler::LOD_CLAMP_NONE,
-            true,
-            vireo::MipMapMode::LINEAR,
-            vireo::CompareOp::LESS_OR_EQUAL);
         for (int i = samplerCount; i < samplers.size(); i++) {
             samplers[i] = samplers[0];
         }
