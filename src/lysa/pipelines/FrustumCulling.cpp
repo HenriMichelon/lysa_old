@@ -74,6 +74,10 @@ namespace lysa {
         descriptorSet->update(BINDING_OUTPUT, output, counter);
         descriptorSet->update(BINDING_COUNTER, counter);
         commandList.barrier(
+            input,
+            vireo::ResourceState::INDIRECT_DRAW,
+            vireo::ResourceState::COMPUTE_READ);
+        commandList.barrier(
             output,
             vireo::ResourceState::INDIRECT_DRAW,
             vireo::ResourceState::COMPUTE_WRITE);
@@ -83,6 +87,10 @@ namespace lysa {
         commandList.barrier(
             output,
             vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::INDIRECT_DRAW);
+        commandList.barrier(
+            input,
+            vireo::ResourceState::COMPUTE_READ,
             vireo::ResourceState::INDIRECT_DRAW);
         commandList.barrier(
             counter,

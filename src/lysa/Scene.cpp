@@ -351,37 +351,21 @@ namespace lysa {
        const uint32 set) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.barrier(
-                *pipelineData->drawCommandsBuffer,
-                vireo::ResourceState::SHADER_READ,
-                vireo::ResourceState::INDIRECT_DRAW);
             commandList.drawIndexedIndirect(
                 pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
                 sizeof(uint32));
-            commandList.barrier(
-                *pipelineData->drawCommandsBuffer,
-                vireo::ResourceState::INDIRECT_DRAW,
-                vireo::ResourceState::SHADER_READ);
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.barrier(
-                *pipelineData->drawCommandsBuffer,
-                vireo::ResourceState::SHADER_READ,
-                vireo::ResourceState::INDIRECT_DRAW);
             commandList.drawIndexedIndirect(
                 pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
                 sizeof(uint32));
-            commandList.barrier(
-                *pipelineData->drawCommandsBuffer,
-                vireo::ResourceState::INDIRECT_DRAW,
-                vireo::ResourceState::SHADER_READ);
         }
     }
 
@@ -540,7 +524,7 @@ namespace lysa {
             commandList.barrier(
                 *drawCommandsBuffer,
                 vireo::ResourceState::COPY_DST,
-                vireo::ResourceState::SHADER_READ);
+                vireo::ResourceState::INDIRECT_DRAW);
             commandList.barrier(
                 *culledDrawCommandsBuffer,
                 vireo::ResourceState::COPY_DST,
