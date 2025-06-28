@@ -89,7 +89,7 @@ export namespace lysa {
 
         virtual void activateCamera(const std::shared_ptr<Camera> &camera);
 
-        void update(vireo::CommandList& commandList);
+        void update(const vireo::CommandList& commandList);
 
         void compute(vireo::CommandList& commandList) const;
 
@@ -109,7 +109,9 @@ export namespace lysa {
 
         void drawOpaquesAndShaderMaterialsModels(
            vireo::CommandList& commandList,
-           uint32 set) const;
+           uint32 set,
+           const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
+           const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const;
 
         const auto& getPipelineIds() const { return pipelineIds; }
 
@@ -122,34 +124,6 @@ export namespace lysa {
         virtual ~Scene() = default;
         Scene(Scene&) = delete;
         Scene& operator=(Scene&) = delete;
-
-    private:
-        const SceneConfiguration& config;
-        const RenderingConfiguration& renderingConfig;
-        const uint32 framesInFlight;
-        const vireo::Viewport& viewport;
-        const vireo::Rect& scissors;
-        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
-        std::shared_ptr<Camera> currentCamera{};
-        std::shared_ptr<Environment> currentEnvironment{};
-        std::map<std::shared_ptr<Light>, std::shared_ptr<Renderpass>> shadowMapRenderers;
-        std::vector<std::shared_ptr<vireo::Image>> shadowMaps;
-        std::map<std::shared_ptr<Light>, uint32> shadowMapIndex;
-        bool shadowMapsUpdated{false};
-
-        DeviceMemoryArray meshInstancesDataArray;
-        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
-        bool meshInstancesDataUpdated{false};
-
-        std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>> pipelineIds;
-        bool materialsUpdated{false};
-
-        std::list<std::shared_ptr<Light>> lights;
-        std::shared_ptr<vireo::Buffer> lightsBuffer;
-        uint32 lightsBufferCount{1};
-
-        std::unordered_set<std::shared_ptr<vireo::Buffer>> drawCommandsStagingBufferRecycleBin;
 
         struct PipelineData {
             pipeline_id pipelineId;
@@ -192,6 +166,34 @@ export namespace lysa {
                 const vireo::CommandList& commandList,
                 std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin);
         };
+
+    private:
+        const SceneConfiguration& config;
+        const RenderingConfiguration& renderingConfig;
+        const uint32 framesInFlight;
+        const vireo::Viewport& viewport;
+        const vireo::Rect& scissors;
+        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
+        std::shared_ptr<Camera> currentCamera{};
+        std::shared_ptr<Environment> currentEnvironment{};
+        std::map<std::shared_ptr<Light>, std::shared_ptr<Renderpass>> shadowMapRenderers;
+        std::vector<std::shared_ptr<vireo::Image>> shadowMaps;
+        std::map<std::shared_ptr<Light>, uint32> shadowMapIndex;
+        bool shadowMapsUpdated{false};
+
+        DeviceMemoryArray meshInstancesDataArray;
+        std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
+        bool meshInstancesDataUpdated{false};
+
+        std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>> pipelineIds;
+        bool materialsUpdated{false};
+
+        std::list<std::shared_ptr<Light>> lights;
+        std::shared_ptr<vireo::Buffer> lightsBuffer;
+        uint32 lightsBufferCount{1};
+
+        std::unordered_set<std::shared_ptr<vireo::Buffer>> drawCommandsStagingBufferRecycleBin;
 
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> opaquePipelinesData;
         std::unordered_map<uint32, std::unique_ptr<PipelineData>> shaderMaterialPipelinesData;

@@ -34,9 +34,6 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent);
 
-        virtual void updatePipelines(
-            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
-
         std::shared_ptr<vireo::Image> getColorImage(uint32 frameIndex) const;
 
         auto getColorRenderTarget(const uint32 frameIndex) const {
@@ -46,6 +43,8 @@ export namespace lysa {
         auto getDepthRenderTarget(const uint32 frameIndex) const {
             return framesData[frameIndex].depthAttachment;
         }
+
+        void updatePipelines(const Scene& scene);
 
         void update(const Scene& scene) const;
 
@@ -80,6 +79,9 @@ export namespace lysa {
         const RenderingConfiguration& config;
         const std::wstring name;
         const bool withStencil;
+
+        virtual void updatePipelines(
+            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) = 0;
 
         virtual void colorPass(
             vireo::CommandList& commandList,

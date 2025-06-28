@@ -12,18 +12,30 @@ import std;
 import vireo;
 import lysa.configuration;
 import lysa.math;
+import lysa.memory;
 import lysa.scene;
 import lysa.nodes.camera;
 import lysa.nodes.light;
 import lysa.resources.material;
 import lysa.resources.mesh;
 import lysa.renderers.renderpass;
+import lysa.pipelines.frustum_culling;
 
 export namespace lysa {
 
     class ShadowMapPass : public Renderpass {
     public:
-        ShadowMapPass(const RenderingConfiguration& config, const std::shared_ptr<Light>& light);
+        ShadowMapPass(
+            const SceneConfiguration& sceneConfig,
+            const RenderingConfiguration& config,
+            const std::shared_ptr<Light>& light,
+            const DeviceMemoryArray& meshInstancesDataArray);
+
+        void compute(
+            vireo::CommandList& commandList,
+            const std::unordered_map<uint32, std::unique_ptr<Scene::PipelineData>>& pipelinesData) const;
+
+        void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
         void update(uint32 frameIndex) override;
 
@@ -61,10 +73,14 @@ export namespace lysa {
             float    farPlane;
         };
 
+        float4x4 projection[6];
         GlobalUniform globalUniform[6];
         std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
         std::shared_ptr<vireo::RenderTarget> shadowMap;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        std::map<pipeline_id, std::unique_ptr<FrustumCulling>> frustumCullingPipeline;
+        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer;
+        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer;
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
             {"POSITION", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, position)},
@@ -86,6 +102,9 @@ export namespace lysa {
         };
 
         bool firstPass{true};
+
+        const SceneConfiguration& sceneConfig;
+        const DeviceMemoryArray& meshInstancesDataArray;
 
         vireo::Rect scissors;
         vireo::Viewport viewport;

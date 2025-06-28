@@ -21,7 +21,8 @@ export namespace lysa {
         void dispatch(
             vireo::CommandList& commandList,
             uint32 drawCommandsCount,
-            const Camera& camera,
+            const float4x4& view,
+            const float4x4& projection,
             const vireo::Buffer& instances,
             const vireo::Buffer& input,
             const vireo::Buffer& output,

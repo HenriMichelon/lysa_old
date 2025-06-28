@@ -7,7 +7,7 @@
 #include "../scene.inc.slang"
 #include "pbr.inc.slang"
 
-static const float SHADOW_FACTOR = 0.2;
+static const float SHADOW_FACTOR = 0.1;
 
 float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     const float4 shadowCoord = mul(light.lightSpace[cascadeIndex], float4(worldPos, 1.0));

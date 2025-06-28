@@ -17,10 +17,14 @@ import lysa.renderers.renderer;
 
 namespace lysa {
     ShadowMapPass::ShadowMapPass(
+        const SceneConfiguration& sceneConfig,
         const RenderingConfiguration& config,
-        const std::shared_ptr<Light>& light):
+        const std::shared_ptr<Light>& light,
+        const DeviceMemoryArray& meshInstancesDataArray):
         Renderpass{config, L"ShadowMapPass"},
-        light{light} {
+        light{light},
+        sceneConfig{sceneConfig},
+        meshInstancesDataArray{meshInstancesDataArray} {
         const auto& vireo = Application::getVireo();
 
         descriptorLayout = vireo.createDescriptorLayout();
@@ -56,6 +60,37 @@ namespace lysa {
         renderingConfig.depthStencilRenderTarget = shadowMap;
     }
 
+    void ShadowMapPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+        const auto& vireo = Application::getVireo();
+        for (const auto& pipelineId: std::views::keys(pipelineIds)) {
+            if (!frustumCullingPipeline.contains(pipelineId)) {
+                frustumCullingPipeline[pipelineId] = std::make_unique<FrustumCulling>(meshInstancesDataArray);
+                culledDrawCommandsCountBuffer[pipelineId] = vireo.createBuffer(
+                  vireo::BufferType::READWRITE_STORAGE,
+                  sizeof(uint32));
+                culledDrawCommandsBuffer[pipelineId] = vireo.createBuffer(
+                  vireo::BufferType::READWRITE_STORAGE,
+                  sizeof(DrawCommand) * sceneConfig.maxMeshSurfacePerPipeline);
+            }
+        }
+    }
+
+    void ShadowMapPass::compute(
+        vireo::CommandList& commandList,
+        const std::unordered_map<uint32, std::unique_ptr<Scene::PipelineData>>& pipelinesData) const {
+        for (const auto& [pipelineId, pipelineData] : pipelinesData) {
+            frustumCullingPipeline.at(pipelineId)->dispatch(
+                commandList,
+                pipelineData->drawCommandsCount,
+                light->getTransformGlobal(),
+                projection[0],
+                *pipelineData->instancesArray.getBuffer(),
+                *pipelineData->drawCommandsBuffer,
+                *culledDrawCommandsBuffer.at(pipelineId),
+                *culledDrawCommandsCountBuffer.at(pipelineId));
+        }
+    }
+
     void ShadowMapPass::update(const uint32 frameIndex) {
         if (!light->isVisible()) { return; }
         const auto aspectRatio = shadowMap->getImage()->getWidth() / shadowMap->getImage()->getHeight();
@@ -88,13 +123,13 @@ namespace lysa {
                 const auto far = spotLight->getRange();
                 const float zRange = near - far;
                 const float f = 1.0f / std::tan(spotLight->getFov() * 0.50f);
-                const auto lightProjection = float4x4{
+                projection[0] = float4x4{
                     f/aspectRatio, 0.0f,  0.0f,                          0.0f,
                     0.0f,          f,     0.0f,                          0.0f,
                     0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
                     0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
 
-                globalUniform[0].lightSpace = mul(lightView, lightProjection);
+                globalUniform[0].lightSpace = mul(lightView, projection[0]);
                 globalUniformBuffer[0]->write(&globalUniform[0]);
                 break;
             }
@@ -120,7 +155,11 @@ namespace lysa {
         commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
         commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
         commandList.bindDescriptor(descriptorSet, SET_PASS);
-        scene.drawOpaquesAndShaderMaterialsModels(commandList, SET_PIPELINE);
+        scene.drawOpaquesAndShaderMaterialsModels(
+            commandList,
+            SET_PIPELINE,
+            culledDrawCommandsBuffer,
+            culledDrawCommandsCountBuffer);
         commandList.endRendering();
         commandList.barrier(
             shadowMap,

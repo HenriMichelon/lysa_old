@@ -23,7 +23,7 @@ export namespace lysa {
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment);
 
-        void updatePipelines(const std::unordered_map<uint32, std::vector<std::shared_ptr<Material>>>& pipelineIds);
+        void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
     private:
         const std::wstring VERTEX_SHADER{L"depth_prepass.vert"};

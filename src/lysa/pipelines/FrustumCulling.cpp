@@ -48,7 +48,8 @@ namespace lysa {
     void FrustumCulling::dispatch(
         vireo::CommandList& commandList,
         const uint32 drawCommandsCount,
-        const Camera& camera,
+        const float4x4& view,
+        const float4x4& projection,
         const vireo::Buffer& instances,
         const vireo::Buffer& input,
         const vireo::Buffer& output,
@@ -56,9 +57,9 @@ namespace lysa {
         if (drawCommandsCount == 0) { return; }
         auto global = Global{
             .drawCommandsCount = drawCommandsCount,
-            .viewMatrix = inverse(camera.getTransformGlobal()),
+            .viewMatrix = inverse(view),
         };
-        Frustum::extractPlanes(global.planes, mul(inverse(camera.getTransformGlobal()), camera.getProjection()));
+        Frustum::extractPlanes(global.planes, mul(global.viewMatrix, projection));
         globalBuffer->write(&global);
         commandList.barrier(
             counter,
@@ -69,10 +70,12 @@ namespace lysa {
             counter,
             vireo::ResourceState::COPY_DST,
             vireo::ResourceState::COMPUTE_WRITE);
+
         descriptorSet->update(BINDING_INSTANCES, instances);
         descriptorSet->update(BINDING_INPUT, input);
         descriptorSet->update(BINDING_OUTPUT, output, counter);
         descriptorSet->update(BINDING_COUNTER, counter);
+
         commandList.barrier(
             input,
             vireo::ResourceState::INDIRECT_DRAW,

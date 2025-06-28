@@ -47,8 +47,8 @@ namespace lysa {
             L"Scene Lights")},
         meshInstancesDataArray{Application::getVireo(),
             sizeof(MeshInstanceData),
-            config.maxModelsPerFrame,
-            config.maxModelsPerFrame,
+            config.maxModelsPerScene,
+            config.maxModelsPerScene,
             vireo::BufferType::DEVICE_STORAGE,
             L"Models Data"},
         sceneUniformBuffer{Application::getVireo().createBuffer(
@@ -85,15 +85,19 @@ namespace lysa {
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            const auto& cullingBuffer = *pipelineData->culledDrawCommandsBuffer;
             pipelineData->frustumCullingPipeline.dispatch(
                 commandList,
                 pipelineData->drawCommandsCount,
-                *currentCamera,
+                currentCamera->getTransformGlobal(),
+                currentCamera->getProjection(),
                 *pipelineData->instancesArray.getBuffer(),
                 *pipelineData->drawCommandsBuffer,
-                cullingBuffer,
+                *pipelineData->culledDrawCommandsBuffer,
                 *pipelineData->culledDrawCommandsCountBuffer);
+            for (const auto& renderer : std::views::values(shadowMapRenderers)) {
+                const auto& shadowMapRenderer = std::static_pointer_cast<ShadowMapPass>(renderer);
+                shadowMapRenderer->compute(commandList, pipelinesData);
+            }
         }
     }
 
@@ -105,7 +109,7 @@ namespace lysa {
         }
     }
 
-    void Scene::update(vireo::CommandList& commandList) {
+    void Scene::update(const vireo::CommandList& commandList) {
         if (!drawCommandsStagingBufferRecycleBin.empty()) {
             drawCommandsStagingBufferRecycleBin.clear();
         }
@@ -347,12 +351,16 @@ namespace lysa {
     }
 
     void Scene::drawOpaquesAndShaderMaterialsModels(
-       vireo::CommandList& commandList,
-       const uint32 set) const {
+        vireo::CommandList& commandList,
+        const uint32 set,
+        const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
+        const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirect(
-                pipelineData->drawCommandsBuffer,
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
@@ -360,8 +368,10 @@ namespace lysa {
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirect(
-                pipelineData->drawCommandsBuffer,
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
@@ -415,14 +425,14 @@ namespace lysa {
         instancesArray{
             Application::getVireo(),
             sizeof(InstanceData),
-            config.maxMeshSurfacePerFrame,
-            config.maxMeshSurfacePerFrame,
+            config.maxMeshSurfacePerPipeline,
+            config.maxMeshSurfacePerPipeline,
             vireo::BufferType::DEVICE_STORAGE,
             L"Pipeline instances array"},
-        drawCommands(config.maxMeshSurfacePerFrame),
+        drawCommands(config.maxMeshSurfacePerPipeline),
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::DEVICE_STORAGE,
-            sizeof(DrawCommand) * config.maxMeshSurfacePerFrame,
+            sizeof(DrawCommand) * config.maxMeshSurfacePerPipeline,
             1,
             L"Pipeline draw commands")},
         culledDrawCommandsCountBuffer{Application::getVireo().createBuffer(
@@ -432,7 +442,7 @@ namespace lysa {
             L"Pipeline draw commands counter")},
         culledDrawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
-            sizeof(DrawCommand) * config.maxMeshSurfacePerFrame,
+            sizeof(DrawCommand) * config.maxMeshSurfacePerPipeline,
             1,
             L"Pipeline culled draw commands")}
     {
@@ -535,7 +545,11 @@ namespace lysa {
     void Scene::enableLightShadowCasting(const std::shared_ptr<Node>&node) {
         if (const auto& light = std::dynamic_pointer_cast<Light>(node)) {
             if (light->getCastShadows() && !shadowMapRenderers.contains(light) && (shadowMapRenderers.size() < MAX_SHADOW_MAPS)) {
-                const auto shadowMapRenderer = make_shared<ShadowMapPass>(renderingConfig, light);
+                const auto shadowMapRenderer = make_shared<ShadowMapPass>(
+                    config,
+                    renderingConfig,
+                    light,
+                    meshInstancesDataArray);
                 shadowMapRenderers[light] = shadowMapRenderer;
                 const auto& blankImage = Application::getResources().getBlankImage();
                 for (uint32 index = 0; index < shadowMaps.size(); index++) {

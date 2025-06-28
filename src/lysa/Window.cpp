@@ -84,7 +84,7 @@ namespace lysa {
             const auto& scene = viewport->getScene(frameIndex);
             if (scene->isMaterialsUpdated()) {
                 renderer->update(*scene);
-                renderer->updatePipelines(scene->getPipelineIds());
+                renderer->updatePipelines(*scene);
             }
         }
         renderer->update(frameIndex);
