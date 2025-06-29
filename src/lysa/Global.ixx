@@ -21,6 +21,10 @@ export namespace lysa {
 
     float radians(const float angle) { return radians(float1{angle}); }
 
+    float4x4 lookAt(const float3& eye, const float3& center, const float3& up);
+
+    float4x4 perspective(float fov, float aspect, float near, float far);
+
     float getCurrentTimeMilliseconds();
 
     std::wstring sanitizeName(const std::wstring &name);

@@ -19,6 +19,28 @@ namespace lysa {
         return newName;
     }
 
+    float4x4 lookAt(const float3& eye, const float3& center, const float3& up) {
+        const auto z = normalize(eye - center);
+        const auto x = normalize(cross(up, z));
+        const auto y = cross(z, x);
+        return float4x4{
+            x.x, y.x, z.x, 0,
+            x.y, y.y, z.y, 0,
+            x.z, y.z, z.z, 0,
+            -dot(x, eye), -dot(y, eye), -dot(z, eye), 1
+        };
+    }
+
+    float4x4 perspective(const float fov, const float aspect, const float znear, const float zfar) {
+        const float f = 1.0f / std::tan(fov * 0.50f);
+        const float zRange = znear - zfar;
+        return  float4x4{
+            f/aspect, 0.0f,  0.0f,                            0.0f,
+            0.0f,     f,     0.0f,                            0.0f,
+            0.0f,     0.0f,  (zfar + znear) / zRange,        -1.0f,
+            0.0f,     0.0f,  (2.0f * zfar * znear) / zRange,  0.0f};
+    }
+
     float3 eulerAngles(quaternion q) {
         q = normalize(q);
 

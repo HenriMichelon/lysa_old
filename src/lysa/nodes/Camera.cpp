@@ -81,14 +81,11 @@ namespace lysa {
             this->fov              = fov;
             nearDistance           = near;
             farDistance            = far;
-            const auto aspect      = getViewport()->getAspectRatio();
-            const float f = 1.0f / std::tan(radians(float1{fov}) * 0.5f);
-            const float zRange = near - far;
-            projectionMatrix = float4x4{
-                f / aspect, 0.0f,  0.0f,                         0.0f,
-                0.0f,       f,     0.0f,                         0.0f,
-                0.0f,       0.0f,  (far + near) / zRange,        -1.0f,
-                0.0f,       0.0f,  (2.0f * far * near) / zRange, 0.0f};
+            projectionMatrix = perspective(
+                radians(fov),
+                getViewport()->getAspectRatio(),
+                near,
+                far);
             setUpdated();
         }
     }

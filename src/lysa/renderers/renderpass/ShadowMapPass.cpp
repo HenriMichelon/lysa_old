@@ -103,7 +103,7 @@ namespace lysa {
 
     void ShadowMapPass::update(const uint32 frameIndex) {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
-        const auto aspectRatio = shadowMap[0]->getImage()->getWidth() / shadowMap[0]->getImage()->getHeight();
+        const auto aspectRatio = static_cast<float>(shadowMap[0]->getImage()->getWidth()) / shadowMap[0]->getImage()->getHeight();
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
                 throw Exception{"Directional light not supported"};
@@ -114,90 +114,36 @@ namespace lysa {
                 const auto lightPosition= light->getPositionGlobal();
                 const auto near = omniLight->getNearClipDistance();
                 const auto far = omniLight->getRange();
-                const float zRange = near - far;
-                const float f = 1.0f / std::tan(radians(90.0f) * 0.50f);
-                projection = float4x4{
-                    f/aspectRatio, 0.0f,  0.0f,                          0.0f,
-                    0.0f,          f,     0.0f,                          0.0f,
-                    0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
-                    0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
+                projection = perspective(radians(90.0f), aspectRatio, near, far);
                 {
                     const auto target = lightPosition + AXIS_RIGHT;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0,1.0, 0.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[0].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 1.0, 0.0};
+                    globalUniform[0].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 {
                     const auto target = lightPosition + AXIS_LEFT;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0,1.0, 0.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[1].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 1.0, 0.0};
+                    globalUniform[1].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 {
                     const auto target = lightPosition + AXIS_UP;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0, 0.0, 1.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[2].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 0.0, 1.0};
+                    globalUniform[2].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 {
                     const auto target = lightPosition + AXIS_DOWN;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0, 0.0, -1.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[3].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 0.0, -1.0};
+                    globalUniform[3].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 {
                     const auto target = lightPosition + AXIS_BACK;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0, 1.0, 0.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[4].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 1.0, 0.0};
+                    globalUniform[4].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 {
                     const auto target = lightPosition + AXIS_FRONT;
-                    const auto z = normalize(lightPosition - target);
-                    const auto x = normalize(cross(float3(0.0, 1.0, 0.0), z));
-                    const auto y = cross(z, x);
-                    const auto lightView = float4x4{
-                        x.x, y.x, z.x, 0,
-                        x.y, y.y, z.y, 0,
-                        x.z, y.z, z.z, 0,
-                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                    };
-                    globalUniform[5].lightSpace = mul(lightView, projection);
+                    const auto up = float3{0.0, 1.0, 0.0};
+                    globalUniform[5].lightSpace = mul(lookAt(lightPosition, target, up), projection);
                 }
                 for (int i = 0; i < 6; i++) {
                     globalUniform[i].lightPosition = float4(lightPosition, far);
@@ -210,28 +156,12 @@ namespace lysa {
                 const auto lightPosition= light->getPositionGlobal();
                 const auto lightDirection = spotLight->getFrontVector();
                 const auto target = lightPosition + lightDirection;
-
-                const auto z = normalize(lightPosition - target);
-                const auto x = normalize(cross(AXIS_UP, z));
-                const auto y = cross(z, x);
-                const auto lightView = float4x4{
-                    x.x, y.x, z.x, 0,
-                    x.y, y.y, z.y, 0,
-                    x.z, y.z, z.z, 0,
-                    -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
-                };
-
-                const auto near = spotLight->getNearClipDistance();
-                const auto far = spotLight->getRange();
-                const float zRange = near - far;
-                const float f = 1.0f / std::tan(spotLight->getFov() * 0.50f);
-                projection = float4x4{
-                    f/aspectRatio, 0.0f,  0.0f,                          0.0f,
-                    0.0f,          f,     0.0f,                          0.0f,
-                    0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
-                    0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
-
-                globalUniform[0].lightSpace = mul(lightView, projection);
+                projection = perspective(
+                    spotLight->getFov(),
+                    aspectRatio,
+                    spotLight->getNearClipDistance(),
+                    spotLight->getRange());
+                globalUniform[0].lightSpace = mul(lookAt(lightPosition, target, AXIS_UP), projection);
                 globalUniformBuffer[0]->write(&globalUniform[0]);
                 break;
             }
