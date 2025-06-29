@@ -19,7 +19,7 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
        return 1.0;
     }
     const float closestDepth = shadowMaps[light.mapIndex]
-        .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy).r;
+        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy).r;
     const float currentDepth = projCoords.z;
 
     uint width, height;
@@ -27,10 +27,12 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     const float2 texelSize = 1.0 / float2(width, height);
     const float bias = 0.0005;
     float shadow = 0.0;
+    [unroll]
     for(int x = -1; x <= 1; ++x)  {
+        [unroll]
         for(int y = -1; y <= 1; ++y) {
             float pcfDepth = shadowMaps[light.mapIndex]
-                .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
+                .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
         }
     }
@@ -70,17 +72,18 @@ float shadowFactorCubemap(Light light, float3 worldPos) {
     const float3 fragToLight = worldPos - light.position.xyz;
     const float currentDepth = length(fragToLight);
     const float3 dir = normalize(fragToLight);
-    const float bias = 0.05;
+    const float bias = 0.15;
 
 //     SampledCube sc = sampleCube(dir);
 //     float closestDepth = shadowMaps[light.mapIndex + sc.faceIndex]
-//         .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], sc.uv).r;
+//         .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
 //     closestDepth *= light.farPlane;
 //     return (currentDepth - bias) > closestDepth ? SHADOW_FACTOR : 1.0;
 
     const int samples = 20;
     const float sampleRadius = 0.03; // PCF cone radius
     float shadow = 0.0;
+    [unroll]
     for (int i = 0; i < samples; ++i) {
         SampledCube sc = sampleCube(dir);
         float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]

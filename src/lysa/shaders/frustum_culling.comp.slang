@@ -61,7 +61,7 @@ void main(uint3 id : SV_DispatchThreadID) {
             (plane.normal.y >= 0.0f) ? meshInstance.aabbMax.y : meshInstance.aabbMin.y,
             (plane.normal.z >= 0.0f) ? meshInstance.aabbMax.z : meshInstance.aabbMin.z
         );
-        if (plane.signedDistance(positiveVertex) < 0.0f) {
+        if (plane.signedDistance(positiveVertex) < -0.5f) {
             return;
         }
     }

@@ -23,8 +23,9 @@ namespace lysa {
         const DeviceMemoryArray& meshInstancesDataArray):
         Renderpass{config, L"ShadowMapPass"},
         light{light},
+        meshInstancesDataArray{meshInstancesDataArray},
         sceneConfig{sceneConfig},
-        meshInstancesDataArray{meshInstancesDataArray} {
+        isCubeMap{light->getLightType() == Light::LIGHT_OMNI} {
         const auto& vireo = Application::getVireo();
 
         descriptorLayout = vireo.createDescriptorLayout();
@@ -39,7 +40,7 @@ namespace lysa {
             Scene::instanceIndexConstantDesc, name);
 
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), vertexAttributes);
-        if (light->getLightType() == Light::LIGHT_OMNI) {
+        if (isCubeMap) {
             pipelineConfig.vertexShader = loadShader(VERTEX_SHADER_CUBEMAP);
             pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER_CUBEMAP);
         } else {
@@ -52,7 +53,7 @@ namespace lysa {
         scissors.width = SHADOWMAP_WIDTH;
         scissors.height = SHADOWMAP_HEIGHT;
 
-        subpassesCount = light->getLightType() == Light::LIGHT_OMNI ? 6 : 1;
+        subpassesCount = isCubeMap ? 6 : 1;
         for (int i = 0; i < subpassesCount; i++) {
             globalUniformBuffer[i] = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
             globalUniformBuffer[i]->map();
@@ -88,11 +89,11 @@ namespace lysa {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             for (int i = 0; i < subpassesCount; i++) {
-                frustumCullingPipeline[i].at(pipelineId)->dispatch(
+                    frustumCullingPipeline[i].at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
                     light->getTransformGlobal(),
-                    projection,
+                    isCubeMap ? globalUniform[i].lightSpace : projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
                     *culledDrawCommandsBuffer[i].at(pipelineId),

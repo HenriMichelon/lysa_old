@@ -78,6 +78,7 @@ export namespace lysa {
             float4   lightPosition; // XYZ: Position, W: far plane
         };
 
+        const bool isCubeMap;
         uint32 subpassesCount;
         float4x4 projection;
         std::shared_ptr<vireo::RenderTarget> shadowMap[6];

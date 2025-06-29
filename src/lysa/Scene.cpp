@@ -357,20 +357,20 @@ namespace lysa {
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirect(
-                pipelineData->drawCommandsBuffer,
-                0,
-                pipelineData->drawCommandsCount,
-                sizeof(DrawCommand),
-                sizeof(uint32));
-            // commandList.drawIndexedIndirectCount(
-            //     culledDrawCommandsBuffers.at(pipelineId),
-            //     0,
-            //     culledDrawCommandsCountBuffers.at(pipelineId),
+            // commandList.drawIndexedIndirect(
+            //     pipelineData->drawCommandsBuffer,
             //     0,
             //     pipelineData->drawCommandsCount,
             //     sizeof(DrawCommand),
             //     sizeof(uint32));
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
         }
         // for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
         //     commandList.bindDescriptor(pipelineData->descriptorSet, set);
