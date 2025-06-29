@@ -87,9 +87,8 @@ struct Light {
     float4 color; // RGB + Intensity;
     // shadow map params
     int mapIndex;
-    float farPlane;
     uint cascadesCount;
-	float _pad0;
+	float2 _pad0;
     float4 cascadeSplitDepth;
     float4x4 lightSpace[6];
 };

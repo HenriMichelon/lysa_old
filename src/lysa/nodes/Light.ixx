@@ -22,7 +22,6 @@ export namespace lysa {
         float4 color{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + Intensity;
         // shadow map params
         int32 mapIndex{-1};
-        float farPlane{0.0f};
         uint32 cascadesCount{0};
         float4 cascadeSplitDepth{0.0f};
         float4x4 lightSpace[6];
