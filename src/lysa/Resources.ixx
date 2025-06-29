@@ -59,6 +59,8 @@ export namespace lysa {
 
         auto getBlankImage() { return blankImage; }
 
+        auto getBlankCubeMap() { return blankCubeMap; }
+
         Resources(Resources&) = delete;
         Resources& operator = (Resources&) = delete;
 
@@ -72,6 +74,7 @@ export namespace lysa {
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
         std::vector<std::shared_ptr<vireo::Image>> textures;
         std::shared_ptr<vireo::Image> blankImage;
+        std::shared_ptr<vireo::Image> blankCubeMap;
         bool updated{false};
         bool textureUpdated{false};
         std::mutex mutex;

@@ -28,6 +28,7 @@ namespace lysa {
     LightData OmniLight::getLightData() const {
         auto data = Light::getLightData();
         data.range = range;
+        data.farPlane = range;
         return data;
     }
 

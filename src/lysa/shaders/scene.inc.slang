@@ -71,10 +71,6 @@ float4 toLinear(float4 sRGB) {
 [[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
 
 float4 fetchColor(VertexOutput input, Material mat) {
-//     uint width, height;
-//     shadowMaps[0].GetDimensions(width, height);
-//     int2 texelCoord = int2(input.uv * float2(width, height));
-//     return shadowMaps[0].Load(int3(texelCoord, 0));
     float4 color = mat.albedoColor;
     if (mat.diffuseTexture.index != -1) {
         color = textures[mat.diffuseTexture.index].Sample(

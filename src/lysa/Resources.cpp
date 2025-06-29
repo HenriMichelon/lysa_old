@@ -56,11 +56,20 @@ namespace lysa {
             descriptorLayout->build();
         }
 
-        const auto blankJPEG = createBlankJPEG();
+        auto blankJPEG = createBlankJPEG();
+        std::vector<void*> cubeFaces(6);
+        for (int i = 0; i < 6; i++) {
+            cubeFaces[i]= blankJPEG.data();
+        }
+
         blankImage = vireo.createImage(
             vireo::ImageFormat::R8G8B8A8_SRGB,
             1, 1,1, 1,
             L"Blank Image");
+        blankCubeMap = vireo.createImage(
+            vireo::ImageFormat::R8G8B8A8_SRGB,
+            1, 1,1, 6,
+            L"Blank CubeMap");
         const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = commandAllocator->createCommandList();
         commandList->begin();
@@ -71,6 +80,15 @@ namespace lysa {
         commandList->upload(blankImage, blankJPEG.data());
         commandList->barrier(
             blankImage,
+            vireo::ResourceState::COPY_DST,
+            vireo::ResourceState::SHADER_READ);
+        commandList->barrier(
+            blankCubeMap,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::COPY_DST);
+        commandList->uploadArray(blankCubeMap, cubeFaces);
+        commandList->barrier(
+            blankCubeMap,
             vireo::ResourceState::COPY_DST,
             vireo::ResourceState::SHADER_READ);
         commandList->end();
@@ -116,6 +134,7 @@ namespace lysa {
         samplers.cleanup();
         textures.clear();
         blankImage.reset();
+        blankCubeMap.reset();
         indexArray.cleanup();
         vertexArray.cleanup();
         materialArray.cleanup();

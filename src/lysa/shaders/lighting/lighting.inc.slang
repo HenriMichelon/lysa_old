@@ -40,6 +40,59 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     return shadow /= 9.0;
 }
 
+struct SampledCube {
+    int faceIndex;
+    float2 uv;
+};
+
+// https://www.gamedev.net/forums/topic/687535-implementing-a-cube-map-lookup-function/5337472/
+SampledCube sampleCube(const float3 v) {
+	float3 vAbs = abs(v);
+	float ma;
+	float2 uv;
+	int faceIndex;
+	if(vAbs.z >= vAbs.x && vAbs.z >= vAbs.y) {
+		faceIndex = v.z < 0.0 ? 5 : 4;
+		ma = 0.5 / vAbs.z;
+		uv = float2(v.z < 0.0 ? v.x : -v.x, -v.y);
+	}
+	else if(vAbs.y >= vAbs.x) {
+		faceIndex = v.y < 0.0 ? 3 : 2;
+		ma = 0.5 / vAbs.y;
+		uv = float2(v.x, v.y < 0.0 ? v.z : -v.z);
+	}
+	else {
+		faceIndex = v.x < 0.0 ? 1 : 0;
+		ma = 0.5 / vAbs.x;
+		uv = float2(v.x < 0.0 ? -v.z : v.z, -v.y);
+	}
+	return SampledCube(faceIndex, uv * ma + 0.5);
+}
+
+float shadowFactorCubemap(Light light, float3 worldPos) {
+    const float3 fragToLight = worldPos - light.position.xyz;
+    const float currentDepth = length(fragToLight);
+    const float3 dir = normalize(fragToLight);
+    const float bias = 0.05;
+
+//     SampledCube sc = sampleCube(dir);
+//     float closestDepth = shadowMaps[light.mapIndex + sc.faceIndex]
+//         .Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], sc.uv).r;
+//     closestDepth *= light.farPlane;
+//     return (currentDepth - bias) > closestDepth ? SHADOW_FACTOR : 1.0;
+
+    const int samples = 20;
+    const float sampleRadius = 0.03; // PCF cone radius
+    float shadow = 0.0;
+    for (int i = 0; i < samples; ++i) {
+        SampledCube sc = sampleCube(dir);
+        float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]
+            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
+        sampledDepth *= light.farPlane;
+        shadow += (currentDepth - bias) > sampledDepth ? SHADOW_FACTOR : 1.0;
+    }
+    return shadow /= samples;
+}
 
 float3 Radiance(
     // base color
@@ -157,6 +210,9 @@ float3 calcLight(
             }
             case LIGHT_OMNI:
                 if (distance(worldPos, light.position.xyz) <= light.range) {
+                    if (light.mapIndex != -1) {
+                       factor = shadowFactorCubemap(light, worldPos);
+                    }
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, worldPos, F0, cosLo);
@@ -166,7 +222,6 @@ float3 calcLight(
                 if (distance(worldPos, light.position.xyz) <= light.range) {
                     if (light.mapIndex != -1) {
                         factor = shadowFactor(light, 0, worldPos);
-//                         return float3(factor, factor, factor);
                     }
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,

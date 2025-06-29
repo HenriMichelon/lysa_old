@@ -20,7 +20,7 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
-        sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS);
+        sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS * 6);
         sceneDescriptorLayout->build();
 
         pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
@@ -60,7 +60,7 @@ namespace lysa {
         framesInFlight{framesInFlight},
         renderingConfig{renderingConfig} {
 
-        shadowMaps.resize(MAX_SHADOW_MAPS);
+        shadowMaps.resize(MAX_SHADOW_MAPS * 6);
         for (int i = 0; i < shadowMaps.size(); i++) {
             shadowMaps[i] = Application::getResources().getBlankImage();
         }
@@ -357,26 +357,32 @@ namespace lysa {
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirectCount(
-                culledDrawCommandsBuffers.at(pipelineId),
-                0,
-                culledDrawCommandsCountBuffers.at(pipelineId),
+            commandList.drawIndexedIndirect(
+                pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
                 sizeof(uint32));
+            // commandList.drawIndexedIndirectCount(
+            //     culledDrawCommandsBuffers.at(pipelineId),
+            //     0,
+            //     culledDrawCommandsCountBuffers.at(pipelineId),
+            //     0,
+            //     pipelineData->drawCommandsCount,
+            //     sizeof(DrawCommand),
+            //     sizeof(uint32));
         }
-        for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
-            commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirectCount(
-                culledDrawCommandsBuffers.at(pipelineId),
-                0,
-                culledDrawCommandsCountBuffers.at(pipelineId),
-                0,
-                pipelineData->drawCommandsCount,
-                sizeof(DrawCommand),
-                sizeof(uint32));
-        }
+        // for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
+        //     commandList.bindDescriptor(pipelineData->descriptorSet, set);
+        //     commandList.drawIndexedIndirectCount(
+        //         culledDrawCommandsBuffers.at(pipelineId),
+        //         0,
+        //         culledDrawCommandsCountBuffers.at(pipelineId),
+        //         0,
+        //         pipelineData->drawCommandsCount,
+        //         sizeof(DrawCommand),
+        //         sizeof(uint32));
+        // }
     }
 
     void Scene::drawModels(
@@ -552,10 +558,12 @@ namespace lysa {
                     meshInstancesDataArray);
                 shadowMapRenderers[light] = shadowMapRenderer;
                 const auto& blankImage = Application::getResources().getBlankImage();
-                for (uint32 index = 0; index < shadowMaps.size(); index++) {
+                for (uint32 index = 0; index < shadowMaps.size(); index += 6) {
                     if (shadowMaps[index] == blankImage) {
-                        shadowMaps[index] = shadowMapRenderer->getShadowMap()->getImage();
                         shadowMapIndex[light] = index;
+                        for (int i = 0; i < shadowMapRenderer->getShadowMapCount(); i++) {
+                            shadowMaps[index + i] = shadowMapRenderer->getShadowMap(i)->getImage();
+                        }
                         shadowMapsUpdated = true;
                         return;
                     }

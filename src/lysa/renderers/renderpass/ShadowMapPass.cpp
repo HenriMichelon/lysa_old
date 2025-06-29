@@ -39,7 +39,12 @@ namespace lysa {
             Scene::instanceIndexConstantDesc, name);
 
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), vertexAttributes);
-        pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+        if (light->getLightType() == Light::LIGHT_OMNI) {
+            pipelineConfig.vertexShader = loadShader(VERTEX_SHADER_CUBEMAP);
+            pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER_CUBEMAP);
+        } else {
+            pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+        }
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
         viewport.width = SHADOWMAP_WIDTH;
@@ -47,30 +52,32 @@ namespace lysa {
         scissors.width = SHADOWMAP_WIDTH;
         scissors.height = SHADOWMAP_HEIGHT;
 
-        for (int i = 0; i < 1; i++) {
+        subpassesCount = light->getLightType() == Light::LIGHT_OMNI ? 6 : 1;
+        for (int i = 0; i < subpassesCount; i++) {
             globalUniformBuffer[i] = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
             globalUniformBuffer[i]->map();
+            descriptorSet[i] = vireo.createDescriptorSet(descriptorLayout);
+            descriptorSet[i]->update(BINDING_GLOBAL, globalUniformBuffer[i]);
+            shadowMap[i] = vireo.createRenderTarget(
+                pipelineConfig.depthStencilImageFormat,
+                SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
+                vireo::RenderTargetType::DEPTH);
         }
-        descriptorSet = vireo.createDescriptorSet(descriptorLayout);
-        shadowMap = vireo.createRenderTarget(
-            pipelineConfig.depthStencilImageFormat,
-            SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
-            vireo::RenderTargetType::DEPTH,
-            {}, 1, vireo::MSAA::NONE, L"ShadowMap");
-        renderingConfig.depthStencilRenderTarget = shadowMap;
     }
 
     void ShadowMapPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         const auto& vireo = Application::getVireo();
         for (const auto& pipelineId: std::views::keys(pipelineIds)) {
-            if (!frustumCullingPipeline.contains(pipelineId)) {
-                frustumCullingPipeline[pipelineId] = std::make_unique<FrustumCulling>(meshInstancesDataArray);
-                culledDrawCommandsCountBuffer[pipelineId] = vireo.createBuffer(
-                  vireo::BufferType::READWRITE_STORAGE,
-                  sizeof(uint32));
-                culledDrawCommandsBuffer[pipelineId] = vireo.createBuffer(
-                  vireo::BufferType::READWRITE_STORAGE,
-                  sizeof(DrawCommand) * sceneConfig.maxMeshSurfacePerPipeline);
+            for (int i = 0; i < subpassesCount; i++) {
+                if (!frustumCullingPipeline[i].contains(pipelineId)) {
+                    frustumCullingPipeline[i][pipelineId] = std::make_unique<FrustumCulling>(meshInstancesDataArray);
+                    culledDrawCommandsCountBuffer[i][pipelineId] = vireo.createBuffer(
+                      vireo::BufferType::READWRITE_STORAGE,
+                      sizeof(uint32));
+                    culledDrawCommandsBuffer[i][pipelineId] = vireo.createBuffer(
+                      vireo::BufferType::READWRITE_STORAGE,
+                      sizeof(DrawCommand) * sceneConfig.maxMeshSurfacePerPipeline);
+                }
             }
         }
     }
@@ -78,29 +85,124 @@ namespace lysa {
     void ShadowMapPass::compute(
         vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::unique_ptr<Scene::PipelineData>>& pipelinesData) const {
+        if (!light->isVisible() || !light->getCastShadows()) { return; }
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            frustumCullingPipeline.at(pipelineId)->dispatch(
-                commandList,
-                pipelineData->drawCommandsCount,
-                light->getTransformGlobal(),
-                projection[0],
-                *pipelineData->instancesArray.getBuffer(),
-                *pipelineData->drawCommandsBuffer,
-                *culledDrawCommandsBuffer.at(pipelineId),
-                *culledDrawCommandsCountBuffer.at(pipelineId));
+            for (int i = 0; i < subpassesCount; i++) {
+                frustumCullingPipeline[i].at(pipelineId)->dispatch(
+                    commandList,
+                    pipelineData->drawCommandsCount,
+                    light->getTransformGlobal(),
+                    projection,
+                    *pipelineData->instancesArray.getBuffer(),
+                    *pipelineData->drawCommandsBuffer,
+                    *culledDrawCommandsBuffer[i].at(pipelineId),
+                    *culledDrawCommandsCountBuffer[i].at(pipelineId));
+            }
         }
     }
 
     void ShadowMapPass::update(const uint32 frameIndex) {
-        if (!light->isVisible()) { return; }
-        const auto aspectRatio = shadowMap->getImage()->getWidth() / shadowMap->getImage()->getHeight();
+        if (!light->isVisible() || !light->getCastShadows()) { return; }
+        const auto aspectRatio = shadowMap[0]->getImage()->getWidth() / shadowMap[0]->getImage()->getHeight();
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
                 throw Exception{"Directional light not supported"};
                 break;
             }
             case Light::LIGHT_OMNI: {
-                throw Exception{"Omni light not supported"};
+                const auto& omniLight = reinterpret_pointer_cast<OmniLight>(light);
+                const auto lightPosition= light->getPositionGlobal();
+                const auto near = omniLight->getNearClipDistance();
+                const auto far = omniLight->getRange();
+                const float zRange = near - far;
+                const float f = 1.0f / std::tan(radians(90.0f) * 0.50f);
+                projection = float4x4{
+                    f/aspectRatio, 0.0f,  0.0f,                          0.0f,
+                    0.0f,          f,     0.0f,                          0.0f,
+                    0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
+                    0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
+                {
+                    const auto target = lightPosition + AXIS_RIGHT;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0,1.0, 0.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[0].lightSpace = mul(lightView, projection);
+                }
+                {
+                    const auto target = lightPosition + AXIS_LEFT;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0,1.0, 0.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[1].lightSpace = mul(lightView, projection);
+                }
+                {
+                    const auto target = lightPosition + AXIS_UP;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0, 0.0, 1.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[2].lightSpace = mul(lightView, projection);
+                }
+                {
+                    const auto target = lightPosition + AXIS_DOWN;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0, 0.0, -1.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[3].lightSpace = mul(lightView, projection);
+                }
+                {
+                    const auto target = lightPosition + AXIS_BACK;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0, 1.0, 0.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[4].lightSpace = mul(lightView, projection);
+                }
+                {
+                    const auto target = lightPosition + AXIS_FRONT;
+                    const auto z = normalize(lightPosition - target);
+                    const auto x = normalize(cross(float3(0.0, 1.0, 0.0), z));
+                    const auto y = cross(z, x);
+                    const auto lightView = float4x4{
+                        x.x, y.x, z.x, 0,
+                        x.y, y.y, z.y, 0,
+                        x.z, y.z, z.z, 0,
+                        -dot(x, lightPosition), -dot(y, lightPosition), -dot(z, lightPosition), 1
+                    };
+                    globalUniform[5].lightSpace = mul(lightView, projection);
+                }
+                for (int i = 0; i < 6; i++) {
+                    globalUniform[i].lightPosition = float4(lightPosition, far);
+                    globalUniformBuffer[i]->write(&globalUniform[i]);
+                }
                 break;
             }
             case Light::LIGHT_SPOT: {
@@ -123,13 +225,13 @@ namespace lysa {
                 const auto far = spotLight->getRange();
                 const float zRange = near - far;
                 const float f = 1.0f / std::tan(spotLight->getFov() * 0.50f);
-                projection[0] = float4x4{
+                projection = float4x4{
                     f/aspectRatio, 0.0f,  0.0f,                          0.0f,
                     0.0f,          f,     0.0f,                          0.0f,
                     0.0f,          0.0f,  (far + near) / zRange,        -1.0f,
                     0.0f,          0.0f,  (2.0f * far * near) / zRange,  0.0f};
 
-                globalUniform[0].lightSpace = mul(lightView, projection[0]);
+                globalUniform[0].lightSpace = mul(lightView, projection);
                 globalUniformBuffer[0]->write(&globalUniform[0]);
                 break;
             }
@@ -140,30 +242,34 @@ namespace lysa {
     void ShadowMapPass::render(
         vireo::CommandList& commandList,
         const Scene& scene) {
-        descriptorSet->update(BINDING_GLOBAL, globalUniformBuffer[0]);
+        if (!light->isVisible() || !light->getCastShadows()) { return; }
 
-        commandList.barrier(
-            shadowMap,
-            firstPass ? vireo::ResourceState::UNDEFINED : vireo::ResourceState::SHADER_READ,
-            vireo::ResourceState::RENDER_TARGET_DEPTH);
-        firstPass = false;
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
 
-        commandList.beginRendering(renderingConfig);
-        commandList.bindPipeline(pipeline);
-        commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
-        commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
-        commandList.bindDescriptor(descriptorSet, SET_PASS);
-        scene.drawOpaquesAndShaderMaterialsModels(
-            commandList,
-            SET_PIPELINE,
-            culledDrawCommandsBuffer,
-            culledDrawCommandsCountBuffer);
-        commandList.endRendering();
-        commandList.barrier(
-            shadowMap,
-            vireo::ResourceState::RENDER_TARGET_DEPTH,
-            vireo::ResourceState::SHADER_READ);
+        for (int i = 0; i < subpassesCount; i++) {
+            commandList.barrier(
+                shadowMap[i],
+                firstPass ? vireo::ResourceState::UNDEFINED : vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::RENDER_TARGET_DEPTH);
+            renderingConfig.depthStencilRenderTarget = shadowMap[i];
+            commandList.beginRendering(renderingConfig);
+            commandList.bindPipeline(pipeline);
+            commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
+            commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
+            commandList.bindDescriptor(descriptorSet[i], SET_PASS);
+            scene.drawOpaquesAndShaderMaterialsModels(
+                commandList,
+                SET_PIPELINE,
+                culledDrawCommandsBuffer[i],
+                culledDrawCommandsCountBuffer[i]);
+            commandList.endRendering();
+            commandList.barrier(
+                shadowMap[i],
+                vireo::ResourceState::RENDER_TARGET_DEPTH,
+                vireo::ResourceState::SHADER_READ);
+        }
+        firstPass = false;
+
     }
 }

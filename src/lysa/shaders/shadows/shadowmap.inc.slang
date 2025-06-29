@@ -8,8 +8,7 @@
 
 struct Global {
     float4x4 lightSpace;
-    float3   lightPosition;
-    float    farPlane;
+    float4   lightPosition;  // XYZ: Position, W: far plane
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);

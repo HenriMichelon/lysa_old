@@ -93,6 +93,7 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
 

@@ -43,7 +43,11 @@ export namespace lysa {
             vireo::CommandList& commandList,
             const Scene& scene);
 
-        auto getShadowMap() const { return shadowMap; }
+        auto getShadowMapCount() const { return subpassesCount; }
+
+        auto getShadowMap(const uint32 index) const {
+            return shadowMap[index];
+        }
 
         const auto& getLightSpace(const uint32 index) const {
             return globalUniform[index].lightSpace;
@@ -51,6 +55,8 @@ export namespace lysa {
 
     private:
         const std::wstring VERTEX_SHADER{L"shadowmap.vert"};
+        const std::wstring VERTEX_SHADER_CUBEMAP{L"shadowmap_cubemap.vert"};
+        const std::wstring FRAGMENT_SHADER_CUBEMAP{L"shadowmap_cubemap.frag"};
 
         static constexpr uint32 SET_RESOURCES{0};
         static constexpr uint32 SET_SCENE{1};
@@ -58,8 +64,8 @@ export namespace lysa {
         static constexpr uint32 SET_PASS{3};
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
 
-        static constexpr uint32 SHADOWMAP_WIDTH = 1024;
-        static constexpr uint32 SHADOWMAP_HEIGHT = 1024;
+        static constexpr uint32 SHADOWMAP_WIDTH = 2048;
+        static constexpr uint32 SHADOWMAP_HEIGHT = 2048;
 
         static constexpr uint32 CASCADED_SHADOWMAP_MAX_LAYERS = 4;
 
@@ -69,18 +75,19 @@ export namespace lysa {
 
         struct GlobalUniform {
             float4x4 lightSpace;
-            float3   lightPosition;
-            float    farPlane;
+            float4   lightPosition; // XYZ: Position, W: far plane
         };
 
-        float4x4 projection[6];
+        uint32 subpassesCount;
+        float4x4 projection;
+        std::shared_ptr<vireo::RenderTarget> shadowMap[6];
+
         GlobalUniform globalUniform[6];
         std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
-        std::shared_ptr<vireo::RenderTarget> shadowMap;
-        std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-        std::map<pipeline_id, std::unique_ptr<FrustumCulling>> frustumCullingPipeline;
-        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer;
-        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer;
+        std::shared_ptr<vireo::DescriptorSet> descriptorSet[6];
+        std::map<pipeline_id, std::unique_ptr<FrustumCulling>> frustumCullingPipeline[6];
+        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer[6];
+        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer[6];
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
             {"POSITION", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, position)},
@@ -90,9 +97,9 @@ export namespace lysa {
             .depthStencilImageFormat = vireo::ImageFormat::D32_SFLOAT,
             .depthTestEnable = true,
             .depthWriteEnable = true,
-            // .depthBiasEnable = true,
-            // .depthBiasConstantFactor = 1.25f,
-            // .depthBiasSlopeFactor = 1.75f,
+            .depthBiasEnable = true,
+            .depthBiasConstantFactor = 1.25f,
+            .depthBiasSlopeFactor = 1.75f,
         };
 
         vireo::RenderingConfiguration renderingConfig {
