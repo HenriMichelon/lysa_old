@@ -73,9 +73,10 @@ set(ENGINE_SRC_DIR ${SRC_DIR}/${LYSA_TARGET})
 set(SHADERS_SRC_DIR ${ENGINE_SRC_DIR}/shaders)
 set(SHADERS_INCLUDE_DIR ${ENGINE_SRC_DIR}/shaders/include)
 set(SHADERS_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
+set(DEPENDS_SRC_DIR ${ENGINE_SRC_DIR}/depends)
 
 set(HLSLPP_TARGET hlslpp)
-set(HLSLPP_SRC_DIR ${SRC_DIR}/${HLSLPP_TARGET})
+set(HLSLPP_SRC_DIR ${DEPENDS_SRC_DIR}/${HLSLPP_TARGET})
 
 #######################################################
 # Slang shaders
@@ -249,7 +250,7 @@ add_library(${LYSA_TARGET} STATIC
 
         ${OS_SRC}
         ${PHYSICS_SRC}
-        ${SRC_DIR}/stb/stb.cpp
+        ${DEPENDS_SRC_DIR}/stb/stb.cpp
 )
 target_sources(${LYSA_TARGET}
     PUBLIC
@@ -338,7 +339,7 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${SRC_DIR}/json)
+target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${DEPENDS_SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${DEPENDS_SRC_DIR}/json)
 target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
