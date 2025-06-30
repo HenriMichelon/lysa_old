@@ -83,15 +83,13 @@ float4 fetchColor(VertexOutput input, Material mat) {
 float3 fetchNormal(VertexOutput input, Material mat) {
     float3 normal;
     if (mat.normalTexture.index != -1) {
-        // Get current fragment's normal and transform to world space.
         normal = textures[mat.normalTexture.index].Sample(
                      samplers[mat.normalTexture.samplerIndex],
                      uvTransform(mat.normalTexture, input.uv)).rgb;
-        normal = normalize((normal * 2.0 - 1.0) * mat.normalScale);
+        normal = normalize((normal * 2.0 - 1.0) * float3(mat.normalScale, mat.normalScale, 1.0f));
         normal = normalize(mul(normal, input.TBN));
     } else
     {
-        // We don't have a texture, get the calculated normal
         normal = input.normal;
     }
     return normal;

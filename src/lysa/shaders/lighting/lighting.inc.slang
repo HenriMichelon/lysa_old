@@ -12,46 +12,47 @@ float3 Radiance(
     // base color
     const float3 albedo,
     // Fragment normal in world space
-    const float3 N,
+    const float3 normal,
     // Angle between surface normal and outgoing light direction.
-    const float3 Lo,
+    const float3 viewDirection,
     // Material properties
     const float metallic, float roughness,
     // Direction to light
-    const float3 Li,
+    const float3 dirToLight,
     // Fresnel reflectance at normal incidence
     const float3 F0,
     // Specular reflection vector.
     const float cosLo) {
-   		// Half-vector between Li and Lo.
-   		float3 Lh = normalize(Li + Lo);
+    // Half-vector between Li and Lo.
+    float3 Lh = normalize(dirToLight + viewDirection);
 
-   		// Calculate angles between surface normal and various light vectors.
-   		float cosLi = max(0.0, dot(N, Li));
-   		float cosLh = max(0.0, dot(N, Lh));
+    // Calculate angles between surface normal and various light vectors.
+    float cosLi = max(0.0, dot(normal, dirToLight));
+    float cosLh = max(0.0, dot(normal, Lh));
 
-   		// Calculate Fresnel term for direct lighting.
-   		float3 F  = fresnelSchlick(F0, max(0.0, dot(Lh, Lo)));
-   		// Calculate normal distribution for specular BRDF.
-   		float D = ndfGGX(cosLh, roughness);
-   		// Calculate geometric attenuation for specular BRDF.
-   		float G = gaSchlickGGX(cosLi, cosLo, roughness);
+    // Calculate Fresnel term for direct lighting.
+    float3 F  = fresnelSchlick(F0, max(0.0, dot(Lh, viewDirection)));
+    // Calculate normal distribution for specular BRDF.
+    float D = ndfGGX(cosLh, roughness);
+    // Calculate geometric attenuation for specular BRDF.
+    float G = gaSchlickGGX(cosLi, cosLo, roughness);
 
-   		// Diffuse scattering happens due to light being refracted multiple times by a dielectric medium.
-   		// Metals on the other hand either reflect or absorb energy, so diffuse contribution is always zero.
-   		// To be energy conserving we must scale diffuse BRDF contribution based on Fresnel factor & metalness.
-   		float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
+    // Diffuse scattering happens due to light being refracted multiple times by a dielectric medium.
+    // Metals on the other hand either reflect or absorb energy, so diffuse contribution is always zero.
+    // To be energy conserving we must scale diffuse BRDF contribution based on Fresnel factor & metalness.
+    float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
 
-   		// Lambert diffuse BRDF.
-   		// We don't scale by 1/PI for lighting & material units to be more convenient.
-   		// See: https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
-   		float3 diffuseBRDF = kd * albedo;
+    // Lambert diffuse BRDF.
+    // We don't scale by 1/PI for lighting & material units to be more convenient.
+    // See: https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
+    float3 diffuseBRDF = kd * albedo;
 
-   		// Cook-Torrance specular microfacet BRDF.
-   		float3 specularBRDF = (F * D * G) / max(Epsilon, 4.0 * cosLi * cosLo);
+    // Cook-Torrance specular microfacet BRDF.
+    float3 specularBRDF = (F * D * G) / max(Epsilon, 4.0 * cosLi * cosLo);
 
-   		// Total contribution for this light.
-   		return (diffuseBRDF + specularBRDF) * cosLi;
+    // Total contribution for this light.
+//     return albedo * cosLi;
+    return (diffuseBRDF + specularBRDF) * cosLi;
 }
 
 float3 calcDirectionalLight(
@@ -70,19 +71,19 @@ float3 calcDirectionalLight(
 }
 
 float3 calcPointLight(
-    Light light,
-    float3 albedo,
-    float3 normal,
+    const Light light,
+    const float3 albedo,
+    const float3 normal,
     float metallic,
     float roughness,
-    float3 viewDirection,
-    float3 worldPos,
-    float3 F0,
+    const float3 viewDirection,
+    const float3 worldPos,
+    const float3 F0,
     const float cosLo) {
     const float attenuation = clamp(1.0 - length(light.position.xyz - worldPos)/light.range, 0.0, 1.0);
     const float3 lightDir = normalize(light.position.xyz - worldPos);
     const float3 diffuse = light.color.rgb * light.color.w * attenuation
-             * Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir, F0, cosLo);
+              * Radiance(albedo, normal, viewDirection, metallic, roughness, lightDir, F0, cosLo);
     if (light.type == LIGHT_SPOT) {
         const float theta = dot(lightDir, normalize(-light.direction.xyz));
         const float epsilon = light.cutOff - light.outerCutOff;
@@ -127,6 +128,10 @@ float3 calcLight(
                     if (light.mapIndex != -1) {
                        factor = shadowFactorCubemap(light, worldPos);
                     }
+//                     const float3 dirToLight = normalize(light.position.xyz - worldPos);
+//                     float3 Lh = normalize(dirToLight + viewDirection);
+//                      float cosLi = max(0.0, dot(normal, dirToLight));
+//                     return float3(cosLi.xxx * 0.5 + 0.5);
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, worldPos, F0, cosLo);
@@ -144,7 +149,7 @@ float3 calcLight(
                 break;
             }
         }
-        diffuse = clamp(diffuse, 0.0, 1.0);
     }
+    diffuse = clamp(diffuse, 0.0, 1.0);
     return float3(diffuse + ambient + emissiveColor);
 }
