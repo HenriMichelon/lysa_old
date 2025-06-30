@@ -24,6 +24,7 @@ namespace lysa {
             .aabbMin = worldAABB.min,
             .aabbMax = worldAABB.max,
             .visible = isVisible() ? 1u : 0u,
+            .castShadows = castShadows ? 1u : 0u,
         };
     }
 
@@ -70,6 +71,10 @@ namespace lysa {
         return nullptr;
     }
 
+    void MeshInstance::setCastShadows(const bool castShadows) {
+        this->castShadows = castShadows;
+        setUpdated();
+    }
 
     std::shared_ptr<Node> MeshInstance::duplicateInstance() const {
         return std::make_shared<MeshInstance>(*this);
@@ -78,6 +83,13 @@ namespace lysa {
     void MeshInstance::updateGlobalTransform() {
         Node::updateGlobalTransform() ;
         worldAABB = mesh->getAABB().toGlobal(globalTransform) ;
+    }
+
+    void MeshInstance::setProperty(const std::string &property, const std::string &value) {
+        Node::setProperty(property, value);
+       if (property == "cast_shadows") {
+            setCastShadows(value == "true");
+        }
     }
 
 }

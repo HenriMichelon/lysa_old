@@ -48,7 +48,7 @@ void main(uint3 id : SV_DispatchThreadID) {
     DrawCommand command = input[id.x];
     Instance instance = instances[command.instanceIndex];
     MeshInstance meshInstance = meshInstances[instance.meshInstanceIndex];
-    if (meshInstance.visible == 0) {
+    if (meshInstance.visible == 0 || meshInstance.castShadows == 0) {
         return;
     }
 
@@ -60,7 +60,7 @@ void main(uint3 id : SV_DispatchThreadID) {
             (plane.normal.y >= 0.0f) ? meshInstance.aabbMax.y : meshInstance.aabbMin.y,
             (plane.normal.z >= 0.0f) ? meshInstance.aabbMax.z : meshInstance.aabbMin.z
         );
-        if (plane.signedDistance(positiveVertex) < 0.0) {
+        if (plane.signedDistance(positiveVertex) < -0.0f) {
             return;
         }
     }

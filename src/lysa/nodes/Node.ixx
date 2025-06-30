@@ -400,6 +400,23 @@ export namespace lysa {
         }
 
         /**
+         * Finds all children by name
+         */
+        template <typename T = Node>
+        std::list<std::shared_ptr<T>> findAllChildren(const std::wstring& name, const bool recursive = true) const {
+            std::list<std::shared_ptr<T>> result;
+            for (const auto &node : children) {
+                if (node->name == name) {
+                    result.push_back(std::dynamic_pointer_cast<T>(node));
+                }
+                if (recursive) {
+                    result.append_range(node->template findAllChildren<T>(name, true));
+                }
+            }
+            return result;
+        }
+
+        /**
          * Finds all children by group
          */
         template <typename T = Node>

@@ -21,11 +21,12 @@ struct Vertex {
 struct MeshInstance {
     float4x4 transform;
     float3   aabbMin;
-    float   _pad0;
+    float    _pad0;
     float3   aabbMax;
-    float   _pad1;
+    float    _pad1;
     uint     visible;
-    float3  _pad2;
+    uint     castShadows;
+    float2   _pad2;
 };
 
 struct TextureInfo {

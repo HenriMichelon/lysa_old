@@ -372,17 +372,17 @@ namespace lysa {
                 sizeof(DrawCommand),
                 sizeof(uint32));
         }
-        // for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
-        //     commandList.bindDescriptor(pipelineData->descriptorSet, set);
-        //     commandList.drawIndexedIndirectCount(
-        //         culledDrawCommandsBuffers.at(pipelineId),
-        //         0,
-        //         culledDrawCommandsCountBuffers.at(pipelineId),
-        //         0,
-        //         pipelineData->drawCommandsCount,
-        //         sizeof(DrawCommand),
-        //         sizeof(uint32));
-        // }
+        for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
+            commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
+        }
     }
 
     void Scene::drawModels(
@@ -427,7 +427,7 @@ namespace lysa {
         const DeviceMemoryArray& meshInstancesDataArray) :
         pipelineId{pipelineId},
         config{config},
-        frustumCullingPipeline{ meshInstancesDataArray},
+        frustumCullingPipeline{true, meshInstancesDataArray},
         instancesArray{
             Application::getVireo(),
             sizeof(InstanceData),

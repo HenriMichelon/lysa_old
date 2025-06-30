@@ -83,6 +83,7 @@ export namespace lysa {
         float4x4 projection;
         std::shared_ptr<vireo::RenderTarget> shadowMap[6];
 
+        float4x4 viewMatrix[6];
         GlobalUniform globalUniform[6];
         std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
         std::shared_ptr<vireo::DescriptorSet> descriptorSet[6];

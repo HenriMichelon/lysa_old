@@ -351,8 +351,10 @@ namespace lysa {
             setVisible(value == "true");
         } else if (property == "name") {
             setName(std::to_wstring(value));
-        } else  if (property == "cast_shadows") {
-            // setCastShadows(value == "true");
+        } else if (property == "cast_shadows") {
+            for (const auto &node : children) {
+                node->setProperty(property, value);
+            }
         }
     }
 

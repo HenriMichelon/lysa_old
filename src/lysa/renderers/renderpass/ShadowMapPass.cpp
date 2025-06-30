@@ -71,7 +71,7 @@ namespace lysa {
         for (const auto& pipelineId: std::views::keys(pipelineIds)) {
             for (int i = 0; i < subpassesCount; i++) {
                 if (!frustumCullingPipeline[i].contains(pipelineId)) {
-                    frustumCullingPipeline[i][pipelineId] = std::make_unique<FrustumCulling>(meshInstancesDataArray);
+                    frustumCullingPipeline[i][pipelineId] = std::make_unique<FrustumCulling>(false, meshInstancesDataArray);
                     culledDrawCommandsCountBuffer[i][pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,
                       sizeof(uint32));
@@ -92,8 +92,8 @@ namespace lysa {
                     frustumCullingPipeline[i].at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
-                    light->getTransformGlobal(),
-                    isCubeMap ? globalUniform[i].lightSpace : projection,
+                    inverse(viewMatrix[i]),
+                    projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
                     *culledDrawCommandsBuffer[i].at(pipelineId),
@@ -115,38 +115,39 @@ namespace lysa {
                 const auto lightPosition= light->getPositionGlobal();
                 const auto near = omniLight->getNearClipDistance();
                 const auto far = omniLight->getRange();
-                projection = perspective(radians(90.0f), aspectRatio, near, far);
                 {
                     const auto target = lightPosition + AXIS_RIGHT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    globalUniform[0].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[0] = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_LEFT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    globalUniform[1].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[1] = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_UP;
                     const auto up = float3{0.0, 0.0, 1.0};
-                    globalUniform[2].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[2] = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_DOWN;
                     const auto up = float3{0.0, 0.0, -1.0};
-                    globalUniform[3].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[3] = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_BACK;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    globalUniform[4].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[4] = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_FRONT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    globalUniform[5].lightSpace = mul(lookAt(lightPosition, target, up), projection);
+                    viewMatrix[5] = lookAt(lightPosition, target, up);
                 }
+                projection = perspective(radians(90.0f), aspectRatio, near, far);
                 for (int i = 0; i < 6; i++) {
+                    globalUniform[i].lightSpace = mul(viewMatrix[i], projection);
                     globalUniform[i].lightPosition = float4(lightPosition, far);
                     globalUniformBuffer[i]->write(&globalUniform[i]);
                 }
@@ -162,7 +163,8 @@ namespace lysa {
                     aspectRatio,
                     spotLight->getNearClipDistance(),
                     spotLight->getRange());
-                globalUniform[0].lightSpace = mul(lookAt(lightPosition, target, AXIS_UP), projection);
+                viewMatrix[0] = lookAt(lightPosition, target, AXIS_UP);
+                globalUniform[0].lightSpace = mul(viewMatrix[0], projection);
                 globalUniformBuffer[0]->write(&globalUniform[0]);
                 break;
             }

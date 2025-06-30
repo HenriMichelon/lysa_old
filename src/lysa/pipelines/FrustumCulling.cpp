@@ -11,6 +11,7 @@ import lysa.virtual_fs;
 
 namespace lysa {
     FrustumCulling::FrustumCulling(
+        const bool isForScene,
         const DeviceMemoryArray& meshInstancesArray) {
         const auto& vireo = Application::getVireo();
         globalBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Global), 1, DEBUG_NAME);
@@ -40,7 +41,9 @@ namespace lysa {
             DEBUG_NAME);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/frustum_culling.comp" + ext, tempBuffer);
+        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" +
+            (isForScene ? SHADER_SCENE : SHADER_SHADOWMAP)
+            + ext, tempBuffer);
         const auto shader = vireo.createShaderModule(tempBuffer);
         pipeline = vireo.createComputePipeline(pipelineResources, shader, DEBUG_NAME);
     }

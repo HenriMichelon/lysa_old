@@ -19,6 +19,7 @@ export namespace lysa {
         float3   aabbMin;
         float3   aabbMax;
         uint     visible;
+        uint     castShadows;
     };
 
     /**
@@ -66,10 +67,17 @@ export namespace lysa {
         */
         const std::shared_ptr<Material>& getSurfaceMaterial(uint32 surfaceIndex) const;
 
+        void setCastShadows(bool castShadows);
+
+        auto getCastShadows() const { return castShadows; }
+
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
 
+        void setProperty(const std::string &property, const std::string &value) override;
+
     private:
+        bool castShadows{true};
         AABB worldAABB;
         std::shared_ptr<Mesh> mesh;
         std::unordered_map<uint32, std::shared_ptr<Material>> overrideMaterials;
