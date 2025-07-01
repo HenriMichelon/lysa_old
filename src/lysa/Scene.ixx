@@ -111,7 +111,8 @@ export namespace lysa {
            vireo::CommandList& commandList,
            uint32 set,
            const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
-           const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const;
+           const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers,
+           const std::map<pipeline_id, std::shared_ptr<FrustumCulling>>& frustumCullingPipelines) const;
 
         const auto& getPipelineIds() const { return pipelineIds; }
 

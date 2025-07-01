@@ -83,9 +83,9 @@ export namespace lysa {
             std::shared_ptr<vireo::RenderTarget> shadowMap;
             std::shared_ptr<vireo::Buffer> globalUniformBuffer;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-            std::map<pipeline_id, std::shared_ptr<FrustumCulling>> frustumCullingPipeline;
-            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer;
-            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer;
+            std::map<pipeline_id, std::shared_ptr<FrustumCulling>> frustumCullingPipelines;
+            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffers;
+            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffers;
         };
 
         const bool isCubeMap;

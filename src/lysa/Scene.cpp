@@ -354,10 +354,11 @@ namespace lysa {
         vireo::CommandList& commandList,
         const uint32 set,
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
-        const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const {
+        const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers,
+        const std::map<pipeline_id, std::shared_ptr<FrustumCulling>>& frustumCullingPipelines) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
-                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
+                frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
             commandList.drawIndexedIndirectCount(
                 culledDrawCommandsBuffers.at(pipelineId),
@@ -370,7 +371,7 @@ namespace lysa {
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
-                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
+                frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
             commandList.drawIndexedIndirectCount(
                 culledDrawCommandsBuffers.at(pipelineId),
@@ -383,7 +384,7 @@ namespace lysa {
         }
         for (const auto& [pipelineId, pipelineData] : transparentPipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
-                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
+                frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
             commandList.drawIndexedIndirectCount(
                 culledDrawCommandsBuffers.at(pipelineId),

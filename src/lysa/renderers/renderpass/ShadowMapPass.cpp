@@ -75,12 +75,12 @@ namespace lysa {
         const auto& vireo = Application::getVireo();
         for (const auto& pipelineId: std::views::keys(pipelineIds)) {
             for (auto& data : subpassData) {
-                if (!data.frustumCullingPipeline.contains(pipelineId)) {
-                    data.frustumCullingPipeline[pipelineId] = std::make_shared<FrustumCulling>(false, meshInstancesDataArray);
-                    data.culledDrawCommandsCountBuffer[pipelineId] = vireo.createBuffer(
+                if (!data.frustumCullingPipelines.contains(pipelineId)) {
+                    data.frustumCullingPipelines[pipelineId] = std::make_shared<FrustumCulling>(false, meshInstancesDataArray);
+                    data.culledDrawCommandsCountBuffers[pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,
                       sizeof(uint32));
-                    data.culledDrawCommandsBuffer[pipelineId] = vireo.createBuffer(
+                    data.culledDrawCommandsBuffers[pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,
                       sizeof(DrawCommand) * sceneConfig.maxMeshSurfacePerPipeline);
                 }
@@ -94,15 +94,15 @@ namespace lysa {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             for (const auto& data : subpassData) {
-                data.frustumCullingPipeline.at(pipelineId)->dispatch(
+                data.frustumCullingPipelines.at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
                     data.viewMatrix,
                     projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
-                    *data.culledDrawCommandsBuffer.at(pipelineId),
-                    *data.culledDrawCommandsCountBuffer.at(pipelineId));
+                    *data.culledDrawCommandsBuffers.at(pipelineId),
+                    *data.culledDrawCommandsCountBuffers.at(pipelineId));
             }
         }
     }
@@ -191,7 +191,7 @@ namespace lysa {
             }
 
             auto count{0};
-            for (const auto& frustumCulling : std::views::values(data.frustumCullingPipeline)) {
+            for (const auto& frustumCulling : std::views::values(data.frustumCullingPipelines)) {
                 count += frustumCulling->getDrawCommandsCount();
             }
             if (count == 0) {
@@ -212,8 +212,9 @@ namespace lysa {
             scene.drawModels(
                 commandList,
                 SET_PIPELINE,
-                data.culledDrawCommandsBuffer,
-                data.culledDrawCommandsCountBuffer);
+                data.culledDrawCommandsBuffers,
+                data.culledDrawCommandsCountBuffers,
+                data.frustumCullingPipelines);
             commandList.endRendering();
             commandList.barrier(
                 data.shadowMap,
