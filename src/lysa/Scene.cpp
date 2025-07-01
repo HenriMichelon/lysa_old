@@ -94,10 +94,10 @@ namespace lysa {
                 *pipelineData->drawCommandsBuffer,
                 *pipelineData->culledDrawCommandsBuffer,
                 *pipelineData->culledDrawCommandsCountBuffer);
-            for (const auto& renderer : std::views::values(shadowMapRenderers)) {
-                const auto& shadowMapRenderer = std::static_pointer_cast<ShadowMapPass>(renderer);
-                shadowMapRenderer->compute(commandList, pipelinesData);
-            }
+        }
+        for (const auto& renderer : std::views::values(shadowMapRenderers)) {
+            const auto& shadowMapRenderer = std::static_pointer_cast<ShadowMapPass>(renderer);
+            shadowMapRenderer->compute(commandList, pipelinesData);
         }
     }
 

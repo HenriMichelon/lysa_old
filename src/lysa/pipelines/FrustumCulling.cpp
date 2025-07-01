@@ -7,6 +7,7 @@
 module lysa.pipelines.frustum_culling;
 
 import lysa.application;
+import lysa.log;
 import lysa.virtual_fs;
 
 namespace lysa {
@@ -60,13 +61,6 @@ namespace lysa {
         const vireo::Buffer& input,
         const vireo::Buffer& output,
         const vireo::Buffer& counter) {
-        if (drawCommandsCount == 0) { return; }
-        auto global = Global{
-            .drawCommandsCount = drawCommandsCount,
-            .viewMatrix = inverse(view),
-        };
-        Frustum::extractPlanes(global.planes, mul(global.viewMatrix, projection));
-        globalBuffer->write(&global);
         commandList.barrier(
             counter,
             vireo::ResourceState::INDIRECT_DRAW,
@@ -76,6 +70,14 @@ namespace lysa {
             counter,
             vireo::ResourceState::COPY_DST,
             vireo::ResourceState::COMPUTE_WRITE);
+        if (drawCommandsCount == 0) { return; }
+
+        auto global = Global{
+            .drawCommandsCount = drawCommandsCount,
+            .viewMatrix = inverse(view),
+        };
+        Frustum::extractPlanes(global.planes, mul(global.viewMatrix, projection));
+        globalBuffer->write(&global);
 
         descriptorSet->update(BINDING_INSTANCES, instances);
         descriptorSet->update(BINDING_INPUT, input);

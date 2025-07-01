@@ -90,7 +90,7 @@ namespace lysa {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
             for (int i = 0; i < subpassesCount; i++) {
-                    frustumCullingPipeline[i].at(pipelineId)->dispatch(
+                frustumCullingPipeline[i].at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
                     inverse(viewMatrix[i]),
@@ -177,8 +177,6 @@ namespace lysa {
         vireo::CommandList& commandList,
         const Scene& scene) {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
-
-
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
 
