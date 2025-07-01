@@ -12,9 +12,13 @@ struct Global {
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);
+[[vk::binding(2, 0)]] Texture2D textures[] : register(t2, space0);
 
 [[vk::binding(1, 1)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space1);
 
 [[vk::binding(0, 2)]] StructuredBuffer<Instance> instances : register(t0, space2);
 
 [[vk::binding(0, 3)]] ConstantBuffer<Global> global : register(b0, space3);
+
+[[vk::binding(0, 4)]] SamplerState samplers[20] : register(s0, space4);
+

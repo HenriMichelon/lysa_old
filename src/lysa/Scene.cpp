@@ -350,7 +350,7 @@ namespace lysa {
         commandList.setScissors(scissors);
     }
 
-    void Scene::drawOpaquesAndShaderMaterialsModels(
+    void Scene::drawModels(
         vireo::CommandList& commandList,
         const uint32 set,
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
@@ -369,6 +369,19 @@ namespace lysa {
                 sizeof(uint32));
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
+            if (pipelineData->drawCommandsCount == 0 ||
+                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
+            commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
+        }
+        for (const auto& [pipelineId, pipelineData] : transparentPipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
                 pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);

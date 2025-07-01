@@ -10,6 +10,7 @@ import lysa.application;
 import lysa.global;
 import lysa.log;
 import lysa.resources;
+import lysa.samplers;
 import lysa.virtual_fs;
 import lysa.nodes.directional_light;
 import lysa.nodes.omni_light;
@@ -37,7 +38,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Scene::sceneDescriptorLayout,
             Scene::pipelineDescriptorLayout,
-            descriptorLayout},
+            descriptorLayout,
+            Application::getResources().getSamplers().getDescriptorLayout()},
             Scene::instanceIndexConstantDesc, name);
 
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), vertexAttributes);
@@ -206,7 +208,8 @@ namespace lysa {
             commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
             commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
             commandList.bindDescriptor(data.descriptorSet, SET_PASS);
-            scene.drawOpaquesAndShaderMaterialsModels(
+            commandList.bindDescriptor(Application::getResources().getSamplers().getDescriptorSet(), SET_SAMPLERS);
+            scene.drawModels(
                 commandList,
                 SET_PIPELINE,
                 data.culledDrawCommandsBuffer,

@@ -62,6 +62,7 @@ export namespace lysa {
         static constexpr uint32 SET_SCENE{1};
         static constexpr uint32 SET_PIPELINE{2};
         static constexpr uint32 SET_PASS{3};
+        static constexpr uint32 SET_SAMPLERS{4};
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
 
         static constexpr uint32 CASCADED_SHADOWMAP_MAX_LAYERS = 4;
