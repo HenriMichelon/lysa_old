@@ -8,6 +8,7 @@ module lysa.renderers.renderpass.shadow_map_pass;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.resources;
 import lysa.virtual_fs;
 import lysa.nodes.directional_light;
@@ -177,13 +178,29 @@ namespace lysa {
         const Scene& scene) {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
 
+
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
 
         for (int i = 0; i < subpassesCount; i++) {
+            if (firstPass) {
+                commandList.barrier(
+                  shadowMap[i],
+                  vireo::ResourceState::UNDEFINED,
+                  vireo::ResourceState::SHADER_READ);
+            }
+
+            auto count{0};
+            for (const auto& frustumCulling : std::views::values(frustumCullingPipeline[i])) {
+                count += frustumCulling->getDrawCommandsCount();
+            }
+            if (count == 0) {
+                continue;
+            }
+
             commandList.barrier(
                 shadowMap[i],
-                firstPass ? vireo::ResourceState::UNDEFINED : vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::RENDER_TARGET_DEPTH);
             renderingConfig.depthStencilRenderTarget = shadowMap[i];
             commandList.beginRendering(renderingConfig);
@@ -203,6 +220,6 @@ namespace lysa {
                 vireo::ResourceState::SHADER_READ);
         }
         firstPass = false;
-
     }
+
 }

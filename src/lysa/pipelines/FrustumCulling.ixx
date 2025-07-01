@@ -27,7 +27,9 @@ export namespace lysa {
             const vireo::Buffer& instances,
             const vireo::Buffer& input,
             const vireo::Buffer& output,
-            const vireo::Buffer& counter) ;
+            const vireo::Buffer& counter);
+
+        uint32 getDrawCommandsCount() const;
 
         virtual ~FrustumCulling() = default;
         FrustumCulling(FrustumCulling&) = delete;
@@ -55,6 +57,7 @@ export namespace lysa {
         std::shared_ptr<vireo::DescriptorSet>    descriptorSet;
         std::shared_ptr<vireo::Buffer>           globalBuffer;
         std::shared_ptr<vireo::Buffer>           commandClearCounterBuffer;
+        std::shared_ptr<vireo::Buffer>           downloadCounterBuffer;
         std::shared_ptr<vireo::Pipeline>         pipeline;
     };
 }

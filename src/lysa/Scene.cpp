@@ -356,13 +356,9 @@ namespace lysa {
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsBuffers,
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
+            if (pipelineData->drawCommandsCount == 0 ||
+                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            // commandList.drawIndexedIndirect(
-            //     pipelineData->drawCommandsBuffer,
-            //     0,
-            //     pipelineData->drawCommandsCount,
-            //     sizeof(DrawCommand),
-            //     sizeof(uint32));
             commandList.drawIndexedIndirectCount(
                 culledDrawCommandsBuffers.at(pipelineId),
                 0,
@@ -373,6 +369,8 @@ namespace lysa {
                 sizeof(uint32));
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
+            if (pipelineData->drawCommandsCount == 0 ||
+                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
             commandList.drawIndexedIndirectCount(
                 culledDrawCommandsBuffers.at(pipelineId),
@@ -390,7 +388,8 @@ namespace lysa {
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            if (pipelineData->drawCommandsCount == 0) { continue; }
+            if (pipelineData->drawCommandsCount == 0 ||
+                pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
             commandList.bindDescriptors({

@@ -22,6 +22,9 @@ namespace lysa {
         commandClearCounterBuffer->write(&clearValue);
         commandClearCounterBuffer->unmap();
 
+        downloadCounterBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_DOWNLOAD, sizeof(uint32));
+        downloadCounterBuffer->map();
+
         descriptorLayout = vireo.createDescriptorLayout(DEBUG_NAME);
         descriptorLayout->add(BINDING_GLOBAL, vireo::DescriptorType::UNIFORM);
         descriptorLayout->add(BINDING_MESHINSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
@@ -98,10 +101,20 @@ namespace lysa {
             input,
             vireo::ResourceState::COMPUTE_READ,
             vireo::ResourceState::INDIRECT_DRAW);
+
         commandList.barrier(
             counter,
             vireo::ResourceState::COMPUTE_WRITE,
+            vireo::ResourceState::COPY_SRC);
+        commandList.copy(counter, *downloadCounterBuffer);
+        commandList.barrier(
+            counter,
+            vireo::ResourceState::COPY_SRC,
             vireo::ResourceState::INDIRECT_DRAW);
+    }
+
+    uint32 FrustumCulling::getDrawCommandsCount() const {
+        return *reinterpret_cast<uint32*>(downloadCounterBuffer->getMappedAddress());
     }
 
 }
