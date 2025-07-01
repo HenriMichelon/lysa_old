@@ -35,7 +35,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            descriptorLayout},
+            descriptorLayout,
+            Scene::sceneDescriptorLayoutOptional1},
             {}, name);
         pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
         pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER);
@@ -84,7 +85,8 @@ namespace lysa {
              Application::getResources().getDescriptorSet(),
              Application::getResources().getSamplers().getDescriptorSet(),
              scene.getDescriptorSet(),
-             frame.descriptorSet
+             frame.descriptorSet,
+             scene.getDescriptorSetOptional1()
         });
         commandList.beginRendering(renderingConfig);
         commandList.setStencilReference(1);

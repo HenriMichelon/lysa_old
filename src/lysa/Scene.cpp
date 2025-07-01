@@ -23,6 +23,10 @@ namespace lysa {
         sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS * 6);
         sceneDescriptorLayout->build();
 
+        sceneDescriptorLayoutOptional1 = Application::getVireo().createDescriptorLayout(L"Scene op1");
+        sceneDescriptorLayoutOptional1->add(BINDING_SHADOW_MAP_TRANSPARENCY_COLOR, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS * 6);
+        sceneDescriptorLayoutOptional1->build();
+
         pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
         pipelineDescriptorLayout->add(BINDING_INSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
         pipelineDescriptorLayout->build();
@@ -30,6 +34,7 @@ namespace lysa {
 
     void Scene::destroyDescriptorLayouts() {
         sceneDescriptorLayout.reset();
+        sceneDescriptorLayoutOptional1.reset();
         pipelineDescriptorLayout.reset();
     }
 
@@ -61,8 +66,10 @@ namespace lysa {
         renderingConfig{renderingConfig} {
 
         shadowMaps.resize(MAX_SHADOW_MAPS * 6);
+        shadowTransparencyColorMaps.resize(MAX_SHADOW_MAPS * 6);
         for (int i = 0; i < shadowMaps.size(); i++) {
             shadowMaps[i] = Application::getResources().getBlankImage();
+            shadowTransparencyColorMaps[i] = Application::getResources().getBlankImage();
         }
 
         descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
@@ -70,6 +77,9 @@ namespace lysa {
         descriptorSet->update(BINDING_MODELS, meshInstancesDataArray.getBuffer());
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
+
+        descriptorSetOpt1 = Application::getVireo().createDescriptorSet(sceneDescriptorLayoutOptional1, L"Scene Opt1");
+        descriptorSetOpt1->update(BINDING_SHADOW_MAP_TRANSPARENCY_COLOR, shadowTransparencyColorMaps);
 
         sceneUniformBuffer->map();
         lightsBuffer->map();
@@ -117,6 +127,7 @@ namespace lysa {
 
         if (shadowMapsUpdated) {
             descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
+            descriptorSetOpt1->update(BINDING_SHADOW_MAP_TRANSPARENCY_COLOR, shadowTransparencyColorMaps);
             shadowMapsUpdated = false;
         }
 
@@ -326,23 +337,26 @@ namespace lysa {
 
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
+        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (opaquePipelinesData.empty()) { return; }
-        drawModels(commandList, pipelines, opaquePipelinesData);
+        drawModels(commandList, useOptional1DescriptorSet, pipelines, opaquePipelinesData);
     }
 
     void Scene::drawTransparentModels(
         vireo::CommandList& commandList,
+        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (transparentPipelinesData.empty()) { return; }
-        drawModels(commandList, pipelines, transparentPipelinesData);
+        drawModels(commandList, useOptional1DescriptorSet, pipelines, transparentPipelinesData);
     }
 
     void Scene::drawShaderMaterialModels(
         vireo::CommandList& commandList,
+        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (shaderMaterialPipelinesData.empty()) { return; }
-        drawModels(commandList, pipelines, shaderMaterialPipelinesData);
+        drawModels(commandList, useOptional1DescriptorSet, pipelines, shaderMaterialPipelinesData);
     }
 
     void Scene::setInitialState(const vireo::CommandList& commandList) const {
@@ -399,6 +413,7 @@ namespace lysa {
 
     void Scene::drawModels(
         vireo::CommandList& commandList,
+        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
@@ -406,12 +421,23 @@ namespace lysa {
                 pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
-            commandList.bindDescriptors({
-                Application::getResources().getDescriptorSet(),
-                Application::getResources().getSamplers().getDescriptorSet(),
-                descriptorSet,
-                pipelineData->descriptorSet
-            });
+            if (useOptional1DescriptorSet) {
+                commandList.bindDescriptors({
+                    Application::getResources().getDescriptorSet(),
+                    Application::getResources().getSamplers().getDescriptorSet(),
+                    descriptorSet,
+                    pipelineData->descriptorSet,
+                    descriptorSetOpt1,
+                });
+
+            } else {
+                commandList.bindDescriptors({
+                    Application::getResources().getDescriptorSet(),
+                    Application::getResources().getSamplers().getDescriptorSet(),
+                    descriptorSet,
+                    pipelineData->descriptorSet
+                });
+            }
             commandList.drawIndexedIndirectCount(
                 pipelineData->culledDrawCommandsBuffer,
                 0,
@@ -576,6 +602,7 @@ namespace lysa {
                         shadowMapIndex[light] = index;
                         for (int i = 0; i < shadowMapRenderer->getShadowMapCount(); i++) {
                             shadowMaps[index + i] = shadowMapRenderer->getShadowMap(i)->getImage();
+                            shadowTransparencyColorMaps[index + i] = shadowMapRenderer->getTransparencyColorMap(i)->getImage();
                         }
                         shadowMapsUpdated = true;
                         return;

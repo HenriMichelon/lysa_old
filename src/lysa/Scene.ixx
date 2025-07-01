@@ -47,14 +47,15 @@ export namespace lysa {
     public:
         static constexpr uint32 MAX_SHADOW_MAPS{20};
 
-        static constexpr uint32 SET_SCENE{2};
         static constexpr vireo::DescriptorIndex BINDING_SCENE{0};
         static constexpr vireo::DescriptorIndex BINDING_MODELS{1};
         static constexpr vireo::DescriptorIndex BINDING_LIGHTS{2};
         static constexpr vireo::DescriptorIndex BINDING_SHADOW_MAPS{3};
         inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayout{nullptr};
 
-        static constexpr uint32 SET_PIPELINE{3};
+        static constexpr vireo::DescriptorIndex BINDING_SHADOW_MAP_TRANSPARENCY_COLOR{0};
+        inline static std::shared_ptr<vireo::DescriptorLayout> sceneDescriptorLayoutOptional1{nullptr};
+
         static constexpr vireo::DescriptorIndex BINDING_INSTANCES{0};
         inline static std::shared_ptr<vireo::DescriptorLayout> pipelineDescriptorLayout{nullptr};
 
@@ -97,14 +98,17 @@ export namespace lysa {
 
         void drawOpaquesModels(
            vireo::CommandList& commandList,
+           bool useOptional1DescriptorSet,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
         void drawTransparentModels(
            vireo::CommandList& commandList,
+           bool useOptional1DescriptorSet,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
         void drawShaderMaterialModels(
            vireo::CommandList& commandList,
+           bool useOptional1DescriptorSet,
            const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const;
 
         void drawModels(
@@ -119,6 +123,8 @@ export namespace lysa {
         auto isMaterialsUpdated() const { return materialsUpdated; }
 
         auto getDescriptorSet() const { return descriptorSet; }
+
+        auto getDescriptorSetOptional1() const { return descriptorSetOpt1; }
 
         auto getShadowMapRenderers() const { return std::views::values(shadowMapRenderers); }
 
@@ -175,11 +181,13 @@ export namespace lysa {
         const vireo::Viewport& viewport;
         const vireo::Rect& scissors;
         std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+        std::shared_ptr<vireo::DescriptorSet> descriptorSetOpt1;
         std::shared_ptr<vireo::Buffer> sceneUniformBuffer;
         std::shared_ptr<Camera> currentCamera{};
         std::shared_ptr<Environment> currentEnvironment{};
         std::map<std::shared_ptr<Light>, std::shared_ptr<Renderpass>> shadowMapRenderers;
         std::vector<std::shared_ptr<vireo::Image>> shadowMaps;
+        std::vector<std::shared_ptr<vireo::Image>> shadowTransparencyColorMaps;
         std::map<std::shared_ptr<Light>, uint32> shadowMapIndex;
         bool shadowMapsUpdated{false};
 
@@ -215,6 +223,7 @@ export namespace lysa {
 
         void drawModels(
             vireo::CommandList& commandList,
+            bool useOptional1DescriptorSet,
             const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
             const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const;
 

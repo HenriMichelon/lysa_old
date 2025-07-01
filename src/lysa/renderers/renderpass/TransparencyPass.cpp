@@ -104,7 +104,7 @@ namespace lysa {
             vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(oitRenderingConfig);
-        scene.drawTransparentModels(commandList, oitPipelines);
+        scene.drawTransparentModels(commandList, false, oitPipelines);
         commandList.endRendering();
         commandList.barrier(
             {frame.accumBuffer, frame.revealageBuffer},

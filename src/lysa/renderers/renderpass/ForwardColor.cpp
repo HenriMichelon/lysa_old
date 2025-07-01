@@ -23,7 +23,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            Scene::pipelineDescriptorLayout},
+            Scene::pipelineDescriptorLayout,
+            Scene::sceneDescriptorLayoutOptional1},
             Scene::instanceIndexConstantDesc, name);
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
 
@@ -78,9 +79,11 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
         commandList,
+        true,
             pipelines);
         scene.drawTransparentModels(
         commandList,
+        true,
             pipelines);
         commandList.endRendering();
         commandList.barrier(

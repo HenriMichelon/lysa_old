@@ -68,6 +68,10 @@ namespace lysa {
                 pipelineConfig.depthStencilImageFormat,
                 size, size,
                 vireo::RenderTargetType::DEPTH);
+            data.transparencyColorMap = vireo.createRenderTarget(
+                pipelineConfig.colorRenderFormats[0],
+                size, size,
+                vireo::RenderTargetType::COLOR);
         }
     }
 
@@ -188,6 +192,10 @@ namespace lysa {
                   data.shadowMap,
                   vireo::ResourceState::UNDEFINED,
                   vireo::ResourceState::SHADER_READ);
+                commandList.barrier(
+                  data.transparencyColorMap,
+                  vireo::ResourceState::UNDEFINED,
+                  vireo::ResourceState::SHADER_READ);
             }
 
             auto count{0};
@@ -202,7 +210,12 @@ namespace lysa {
                 data.shadowMap,
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::RENDER_TARGET_DEPTH);
+            commandList.barrier(
+                data.transparencyColorMap,
+                vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::RENDER_TARGET_COLOR);
             renderingConfig.depthStencilRenderTarget = data.shadowMap;
+            renderingConfig.colorRenderTargets[0].renderTarget = data.transparencyColorMap;
             commandList.beginRendering(renderingConfig);
             commandList.bindPipeline(pipeline);
             commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
@@ -219,6 +232,10 @@ namespace lysa {
             commandList.barrier(
                 data.shadowMap,
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
+                vireo::ResourceState::SHADER_READ);
+            commandList.barrier(
+                data.transparencyColorMap,
+                vireo::ResourceState::RENDER_TARGET_COLOR,
                 vireo::ResourceState::SHADER_READ);
         }
         firstPass = false;

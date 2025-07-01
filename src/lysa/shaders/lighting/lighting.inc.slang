@@ -115,7 +115,7 @@ float3 calcLight(
     // Calculate the diffuse light from the scene's lights
     for (uint i = 0; i < scene.lightsCount; i++) {
         Light light = lights.light[i];
-        float factor = 1.0f;
+        float3 factor = float3(1.0, 1.0, 1.0);
         switch (light.type) {
             case LIGHT_DIRECTIONAL: {
                 diffuse += factor * calcDirectionalLight(

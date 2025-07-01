@@ -49,6 +49,10 @@ export namespace lysa {
             return subpassData[index].shadowMap;
         }
 
+        auto getTransparencyColorMap(const uint32 index) const {
+            return subpassData[index].transparencyColorMap;
+        }
+
         const auto& getLightSpace(const uint32 index) const {
             return subpassData[index].globalUniform.lightSpace;
         }
@@ -81,6 +85,7 @@ export namespace lysa {
             float4x4 inverseViewMatrix;
             GlobalUniform globalUniform;
             std::shared_ptr<vireo::RenderTarget> shadowMap;
+            std::shared_ptr<vireo::RenderTarget> transparencyColorMap;
             std::shared_ptr<vireo::Buffer> globalUniformBuffer;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
             std::map<pipeline_id, std::shared_ptr<FrustumCulling>> frustumCullingPipelines;
@@ -100,6 +105,8 @@ export namespace lysa {
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
+            .colorRenderFormats = { vireo::ImageFormat::R8G8B8A8_SNORM }, // Packed RGB + alpha
+            .colorBlendDesc = {{}},
             .depthStencilImageFormat = vireo::ImageFormat::D32_SFLOAT,
             .depthTestEnable = true,
             .depthWriteEnable = true,
@@ -109,6 +116,11 @@ export namespace lysa {
         };
 
         vireo::RenderingConfiguration renderingConfig {
+            .colorRenderTargets = {
+                {
+                    .clear = true,
+                    .clearValue{ .color = {0.0f, 0.0f, 0.0f, 1.0f} }
+                }},
             .depthTestEnable = pipelineConfig.depthTestEnable,
             .clearDepthStencil = true,
             .discardDepthStencilAfterRender = false,

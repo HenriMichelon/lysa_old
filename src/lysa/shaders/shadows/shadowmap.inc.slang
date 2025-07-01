@@ -45,6 +45,11 @@ struct VertexOutput {
     nointerpolation uint materialIndex : TEXCOORD2;
 }
 
+struct FragmentOutput {
+    float depth : SV_Depth;
+    float4 transparencyColor : SV_Target; // packed RGB + alpha
+}
+
 // Apply texture UV transforms
 float2 uvTransform(const TextureInfo texture, const float2 UV) {
     return mul(float3x3(texture.transform), float3(UV, 1)).xy;

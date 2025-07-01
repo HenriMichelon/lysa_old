@@ -6,11 +6,18 @@
 */
 #include "shadowmap.inc.slang"
 
-float fragmentMain(VertexOutput input) : SV_Depth {
+FragmentOutput fragmentMain(VertexOutput input) {
     Material mat = materials[input.materialIndex];
     float4 color = fetchColor(input, mat);
-    if (mat.transparency != Transparency.DISABLED && color.a < 0.50) {
-       discard;
+    FragmentOutput output;
+    if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
+        if (color.a < 0.1) {
+            discard;
+        }
+        output.transparencyColor = color;
+    } else {
+        output.transparencyColor = float4(0.0, 0.0, 0.0, 1.0);
     }
-    return length(input.worldPos.xyz - global.lightPosition.xyz) / global.lightPosition.w;
+    output.depth = length(input.worldPos.xyz - global.lightPosition.xyz) / global.lightPosition.w;
+    return output;
 }

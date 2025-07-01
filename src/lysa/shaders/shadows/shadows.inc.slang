@@ -6,7 +6,10 @@
 */
 static const float SHADOW_FACTOR = 0.1;
 
-float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
+[[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
+[[vk::binding(0, 4)]] Texture2D shadowTransparencyColorMaps[] : register(t0, space4);
+
+float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     const float4 shadowCoord = mul(light.lightSpace[cascadeIndex], float4(worldPos, 1.0));
     float3 projCoords = shadowCoord.xyz / shadowCoord.w;
     if (projCoords.z > 1.0) {
@@ -27,6 +30,7 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     const float2 texelSize = 1.0 / float2(width, height);
     const float bias = 0.0005;
     float shadow = 0.0;
+
     [unroll]
     for(int x = -1; x <= 1; ++x)  {
         [unroll]
@@ -36,7 +40,13 @@ float shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
         }
     }
-    return shadow /= 9.0;
+    float3 factor = float3(shadow /= 9.0);
+    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex]
+        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy);
+    if (transparencyColor.a != 1.0) {
+        return lerp(transparencyColor.rgb, float3(1.0), factor);
+    }
+    return factor;
 }
 
 struct SampledCube {
@@ -68,28 +78,30 @@ SampledCube sampleCube(const float3 v) {
 	return SampledCube(faceIndex, uv * ma + 0.5);
 }
 
-float shadowFactorCubemap(Light light, float3 worldPos) {
+float3 shadowFactorCubemap(Light light, float3 worldPos) {
     const float3 fragToLight = worldPos - light.position.xyz;
     const float currentDepth = length(fragToLight);
     const float3 dir = normalize(fragToLight);
     const float bias = 0.15;
 
-//     SampledCube sc = sampleCube(dir);
-//     float closestDepth = shadowMaps[light.mapIndex + sc.faceIndex]
-//         .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
-//     closestDepth *= light.farPlane;
-//     return (currentDepth - bias) > closestDepth ? SHADOW_FACTOR : 1.0;
-
     const int samples = 20;
     const float sampleRadius = 0.03; // PCF cone radius
     float shadow = 0.0;
+    SampledCube sc = sampleCube(dir);
+
     [unroll]
     for (int i = 0; i < samples; ++i) {
-        SampledCube sc = sampleCube(dir);
         float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]
             .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
         sampledDepth *= light.range;
         shadow += (currentDepth - bias) > sampledDepth ? SHADOW_FACTOR : 1.0;
     }
-    return shadow /= samples;
+
+    float3 factor = float3(shadow /= samples);
+    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex]
+        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv);
+    if (transparencyColor.a != 1.0) {
+        return lerp(transparencyColor.rgb, float3(1.0), factor);
+    }
+    return factor;
 }
