@@ -46,11 +46,11 @@ export namespace lysa {
         auto getShadowMapCount() const { return subpassesCount; }
 
         auto getShadowMap(const uint32 index) const {
-            return shadowMap[index];
+            return subpassData[index].shadowMap;
         }
 
         const auto& getLightSpace(const uint32 index) const {
-            return globalUniform[index].lightSpace;
+            return subpassData[index].globalUniform.lightSpace;
         }
 
     private:
@@ -64,9 +64,6 @@ export namespace lysa {
         static constexpr uint32 SET_PASS{3};
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
 
-        static constexpr uint32 SHADOWMAP_WIDTH = 1024;
-        static constexpr uint32 SHADOWMAP_HEIGHT = 1024;
-
         static constexpr uint32 CASCADED_SHADOWMAP_MAX_LAYERS = 4;
 
         // Lambda constant for split depth calculation :
@@ -78,18 +75,21 @@ export namespace lysa {
             float4   lightPosition; // XYZ: Position, W: far plane
         };
 
-        const bool isCubeMap;
-        uint32 subpassesCount;
-        float4x4 projection;
-        std::shared_ptr<vireo::RenderTarget> shadowMap[6];
+        struct SubpassData {
+            float4x4 viewMatrix;
+            GlobalUniform globalUniform;
+            std::shared_ptr<vireo::RenderTarget> shadowMap;
+            std::shared_ptr<vireo::Buffer> globalUniformBuffer;
+            std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+            std::map<pipeline_id, std::shared_ptr<FrustumCulling>> frustumCullingPipeline;
+            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer;
+            std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer;
+        };
 
-        float4x4 viewMatrix[6];
-        GlobalUniform globalUniform[6];
-        std::shared_ptr<vireo::Buffer> globalUniformBuffer[6];
-        std::shared_ptr<vireo::DescriptorSet> descriptorSet[6];
-        std::map<pipeline_id, std::unique_ptr<FrustumCulling>> frustumCullingPipeline[6];
-        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsBuffer[6];
-        std::map<pipeline_id, std::shared_ptr<vireo::Buffer>> culledDrawCommandsCountBuffer[6];
+        const bool isCubeMap;
+        float4x4 projection;
+        uint32 subpassesCount;
+        std::vector<SubpassData> subpassData;
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
             {"POSITION", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, position)},

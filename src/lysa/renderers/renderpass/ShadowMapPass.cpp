@@ -49,20 +49,22 @@ namespace lysa {
         }
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
-        viewport.width = SHADOWMAP_WIDTH;
-        viewport.height = SHADOWMAP_HEIGHT;
-        scissors.width = SHADOWMAP_WIDTH;
-        scissors.height = SHADOWMAP_HEIGHT;
+        const auto size = isCubeMap ? config.omniLightShadowMapSize : config.spotLightShadowMapSize;
+        viewport.width = static_cast<float>(size);
+        viewport.height = viewport.width;
+        scissors.width = size;
+        scissors.height = size;
 
         subpassesCount = isCubeMap ? 6 : 1;
-        for (int i = 0; i < subpassesCount; i++) {
-            globalUniformBuffer[i] = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
-            globalUniformBuffer[i]->map();
-            descriptorSet[i] = vireo.createDescriptorSet(descriptorLayout);
-            descriptorSet[i]->update(BINDING_GLOBAL, globalUniformBuffer[i]);
-            shadowMap[i] = vireo.createRenderTarget(
+        subpassData.resize(subpassesCount);
+        for (auto& data : subpassData) {
+            data.globalUniformBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
+            data.globalUniformBuffer->map();
+            data.descriptorSet = vireo.createDescriptorSet(descriptorLayout);
+            data.descriptorSet->update(BINDING_GLOBAL, data.globalUniformBuffer);
+            data.shadowMap = vireo.createRenderTarget(
                 pipelineConfig.depthStencilImageFormat,
-                SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT,
+                size, size,
                 vireo::RenderTargetType::DEPTH);
         }
     }
@@ -70,13 +72,13 @@ namespace lysa {
     void ShadowMapPass::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         const auto& vireo = Application::getVireo();
         for (const auto& pipelineId: std::views::keys(pipelineIds)) {
-            for (int i = 0; i < subpassesCount; i++) {
-                if (!frustumCullingPipeline[i].contains(pipelineId)) {
-                    frustumCullingPipeline[i][pipelineId] = std::make_unique<FrustumCulling>(false, meshInstancesDataArray);
-                    culledDrawCommandsCountBuffer[i][pipelineId] = vireo.createBuffer(
+            for (auto& data : subpassData) {
+                if (!data.frustumCullingPipeline.contains(pipelineId)) {
+                    data.frustumCullingPipeline[pipelineId] = std::make_shared<FrustumCulling>(false, meshInstancesDataArray);
+                    data.culledDrawCommandsCountBuffer[pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,
                       sizeof(uint32));
-                    culledDrawCommandsBuffer[i][pipelineId] = vireo.createBuffer(
+                    data.culledDrawCommandsBuffer[pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,
                       sizeof(DrawCommand) * sceneConfig.maxMeshSurfacePerPipeline);
                 }
@@ -89,23 +91,23 @@ namespace lysa {
         const std::unordered_map<uint32, std::unique_ptr<Scene::PipelineData>>& pipelinesData) const {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            for (int i = 0; i < subpassesCount; i++) {
-                frustumCullingPipeline[i].at(pipelineId)->dispatch(
+            for (const auto& data : subpassData) {
+                data.frustumCullingPipeline.at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
-                    inverse(viewMatrix[i]),
+                    inverse(data.viewMatrix),
                     projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
-                    *culledDrawCommandsBuffer[i].at(pipelineId),
-                    *culledDrawCommandsCountBuffer[i].at(pipelineId));
+                    *data.culledDrawCommandsBuffer.at(pipelineId),
+                    *data.culledDrawCommandsCountBuffer.at(pipelineId));
             }
         }
     }
 
     void ShadowMapPass::update(const uint32 frameIndex) {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
-        const auto aspectRatio = static_cast<float>(shadowMap[0]->getImage()->getWidth()) / shadowMap[0]->getImage()->getHeight();
+        static constexpr auto aspectRatio{1};
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
                 throw Exception{"Directional light not supported"};
@@ -119,38 +121,38 @@ namespace lysa {
                 {
                     const auto target = lightPosition + AXIS_RIGHT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    viewMatrix[0] = lookAt(lightPosition, target, up);
+                    subpassData[0].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_LEFT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    viewMatrix[1] = lookAt(lightPosition, target, up);
+                    subpassData[1].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_UP;
                     const auto up = float3{0.0, 0.0, 1.0};
-                    viewMatrix[2] = lookAt(lightPosition, target, up);
+                    subpassData[2].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_DOWN;
                     const auto up = float3{0.0, 0.0, -1.0};
-                    viewMatrix[3] = lookAt(lightPosition, target, up);
+                    subpassData[3].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_BACK;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    viewMatrix[4] = lookAt(lightPosition, target, up);
+                    subpassData[4].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 {
                     const auto target = lightPosition + AXIS_FRONT;
                     const auto up = float3{0.0, 1.0, 0.0};
-                    viewMatrix[5] = lookAt(lightPosition, target, up);
+                    subpassData[5].viewMatrix = lookAt(lightPosition, target, up);
                 }
                 projection = perspective(radians(90.0f), aspectRatio, near, far);
-                for (int i = 0; i < 6; i++) {
-                    globalUniform[i].lightSpace = mul(viewMatrix[i], projection);
-                    globalUniform[i].lightPosition = float4(lightPosition, far);
-                    globalUniformBuffer[i]->write(&globalUniform[i]);
+                for (auto& data : subpassData) {
+                    data.globalUniform.lightSpace = mul(data.viewMatrix, projection);
+                    data.globalUniform.lightPosition = float4(lightPosition, far);
+                    data.globalUniformBuffer->write(&data.globalUniform);
                 }
                 break;
             }
@@ -164,9 +166,9 @@ namespace lysa {
                     aspectRatio,
                     spotLight->getNearClipDistance(),
                     spotLight->getRange());
-                viewMatrix[0] = lookAt(lightPosition, target, AXIS_UP);
-                globalUniform[0].lightSpace = mul(viewMatrix[0], projection);
-                globalUniformBuffer[0]->write(&globalUniform[0]);
+                subpassData[0].viewMatrix = lookAt(lightPosition, target, AXIS_UP);
+                subpassData[0].globalUniform.lightSpace = mul(subpassData[0].viewMatrix, projection);
+                subpassData[0].globalUniformBuffer->write(&subpassData[0].globalUniform);
                 break;
             }
             default:;
@@ -180,16 +182,16 @@ namespace lysa {
         commandList.setViewport(viewport);
         commandList.setScissors(scissors);
 
-        for (int i = 0; i < subpassesCount; i++) {
+        for (const auto& data : subpassData) {
             if (firstPass) {
                 commandList.barrier(
-                  shadowMap[i],
+                  data.shadowMap,
                   vireo::ResourceState::UNDEFINED,
                   vireo::ResourceState::SHADER_READ);
             }
 
             auto count{0};
-            for (const auto& frustumCulling : std::views::values(frustumCullingPipeline[i])) {
+            for (const auto& frustumCulling : std::views::values(data.frustumCullingPipeline)) {
                 count += frustumCulling->getDrawCommandsCount();
             }
             if (count == 0) {
@@ -197,23 +199,23 @@ namespace lysa {
             }
 
             commandList.barrier(
-                shadowMap[i],
+                data.shadowMap,
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::RENDER_TARGET_DEPTH);
-            renderingConfig.depthStencilRenderTarget = shadowMap[i];
+            renderingConfig.depthStencilRenderTarget = data.shadowMap;
             commandList.beginRendering(renderingConfig);
             commandList.bindPipeline(pipeline);
             commandList.bindDescriptor(Application::getResources().getDescriptorSet(), SET_RESOURCES);
             commandList.bindDescriptor(scene.getDescriptorSet(), SET_SCENE);
-            commandList.bindDescriptor(descriptorSet[i], SET_PASS);
+            commandList.bindDescriptor(data.descriptorSet, SET_PASS);
             scene.drawOpaquesAndShaderMaterialsModels(
                 commandList,
                 SET_PIPELINE,
-                culledDrawCommandsBuffer[i],
-                culledDrawCommandsCountBuffer[i]);
+                data.culledDrawCommandsBuffer,
+                data.culledDrawCommandsCountBuffer);
             commandList.endRendering();
             commandList.barrier(
-                shadowMap[i],
+                data.shadowMap,
                 vireo::ResourceState::RENDER_TARGET_DEPTH,
                 vireo::ResourceState::SHADER_READ);
         }
