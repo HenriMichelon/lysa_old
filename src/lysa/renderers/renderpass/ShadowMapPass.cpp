@@ -43,11 +43,11 @@ namespace lysa {
             Scene::instanceIndexConstantDesc, name);
 
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), vertexAttributes);
+        pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
         if (isCubeMap) {
-            pipelineConfig.vertexShader = loadShader(VERTEX_SHADER_CUBEMAP);
             pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER_CUBEMAP);
         } else {
-            pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
+            pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER);
         }
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 

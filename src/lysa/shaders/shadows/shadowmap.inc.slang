@@ -22,3 +22,40 @@ struct Global {
 
 [[vk::binding(0, 4)]] SamplerState samplers[20] : register(s0, space4);
 
+
+struct VertexInput {
+    float4 position : POSITION; // position + uv.x
+    float4 normal : NORMAL; // normal + uv.y
+#ifdef __SPIRV__
+    uint instanceId : SV_StartInstanceLocation;
+    #define instanceIndex input.instanceId
+#endif
+}
+
+#ifndef __SPIRV__
+cbuffer IndirectRootConstant : register(b0, space4) {
+    uint instanceIndex;
+};
+#endif
+
+struct VertexOutput {
+    float4 position : SV_POSITION;
+    float2 uv : TEXCOORD;
+    float4 worldPos : TEXCOORD1;
+    nointerpolation uint materialIndex : TEXCOORD2;
+}
+
+// Apply texture UV transforms
+float2 uvTransform(const TextureInfo texture, const float2 UV) {
+    return mul(float3x3(texture.transform), float3(UV, 1)).xy;
+}
+
+float4 fetchColor(VertexOutput input, Material mat) {
+    float4 color = mat.albedoColor;
+    if (mat.diffuseTexture.index != -1) {
+        color = textures[mat.diffuseTexture.index].Sample(
+            samplers[mat.diffuseTexture.samplerIndex],
+            uvTransform(mat.diffuseTexture, input.uv));
+    }
+    return color;
+}

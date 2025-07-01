@@ -55,7 +55,7 @@ export namespace lysa {
 
     private:
         const std::wstring VERTEX_SHADER{L"shadowmap.vert"};
-        const std::wstring VERTEX_SHADER_CUBEMAP{L"shadowmap_cubemap.vert"};
+        const std::wstring FRAGMENT_SHADER{L"shadowmap.frag"};
         const std::wstring FRAGMENT_SHADER_CUBEMAP{L"shadowmap_cubemap.frag"};
 
         static constexpr uint32 SET_RESOURCES{0};
@@ -96,6 +96,7 @@ export namespace lysa {
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
             {"POSITION", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, position)},
+            {"NORMAL", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(VertexData, normal)},
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
