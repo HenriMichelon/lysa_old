@@ -95,7 +95,7 @@ namespace lysa {
                 data.frustumCullingPipeline.at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
-                    inverse(data.viewMatrix),
+                    data.viewMatrix,
                     projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
@@ -114,45 +114,43 @@ namespace lysa {
                 break;
             }
             case Light::LIGHT_OMNI: {
-                const auto& omniLight = reinterpret_pointer_cast<OmniLight>(light);
                 const auto lightPosition= light->getPositionGlobal();
-                const auto near = omniLight->getNearClipDistance();
-                const auto far = omniLight->getRange();
-                {
-                    const auto target = lightPosition + AXIS_RIGHT;
-                    const auto up = float3{0.0, 1.0, 0.0};
-                    subpassData[0].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                {
-                    const auto target = lightPosition + AXIS_LEFT;
-                    const auto up = float3{0.0, 1.0, 0.0};
-                    subpassData[1].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                {
-                    const auto target = lightPosition + AXIS_UP;
-                    const auto up = float3{0.0, 0.0, 1.0};
-                    subpassData[2].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                {
-                    const auto target = lightPosition + AXIS_DOWN;
-                    const auto up = float3{0.0, 0.0, -1.0};
-                    subpassData[3].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                {
-                    const auto target = lightPosition + AXIS_BACK;
-                    const auto up = float3{0.0, 1.0, 0.0};
-                    subpassData[4].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                {
-                    const auto target = lightPosition + AXIS_FRONT;
-                    const auto up = float3{0.0, 1.0, 0.0};
-                    subpassData[5].viewMatrix = lookAt(lightPosition, target, up);
-                }
-                projection = perspective(radians(90.0f), aspectRatio, near, far);
-                for (auto& data : subpassData) {
-                    data.globalUniform.lightSpace = mul(data.viewMatrix, projection);
-                    data.globalUniform.lightPosition = float4(lightPosition, far);
-                    data.globalUniformBuffer->write(&data.globalUniform);
+                if (any(lastLightPosition != lightPosition)) {
+                    const auto& omniLight = reinterpret_pointer_cast<OmniLight>(light);
+                    const auto near = omniLight->getNearClipDistance();
+                    const auto far = omniLight->getRange();
+                    subpassData[0].inverseViewMatrix = lookAt(
+                        lightPosition,
+                        lightPosition + AXIS_RIGHT,
+                        {0.0, 1.0, 0.0});
+                    subpassData[1].inverseViewMatrix = lookAt(
+                        lightPosition,
+                        lightPosition + AXIS_LEFT,
+                        {0.0, 1.0, 0.0});
+                    subpassData[2].inverseViewMatrix = lookAt(
+                        lightPosition,
+                        lightPosition + AXIS_UP,
+                        {0.0, 0.0, 1.0});
+                    subpassData[3].inverseViewMatrix = lookAt(
+                        lightPosition,
+                        lightPosition + AXIS_DOWN,
+                        {0.0, 0.0, -1.0});
+                    subpassData[4].inverseViewMatrix = lookAt(
+                        lightPosition,
+                        lightPosition + AXIS_BACK,
+                        {0.0, 1.0, 0.0});
+                    subpassData[5].inverseViewMatrix = lookAt(
+                        lightPosition,
+                            lightPosition + AXIS_FRONT,
+                            {0.0, 1.0, 0.0});
+                    projection = perspective(radians(90.0f), aspectRatio, near, far);
+                    for (auto& data : subpassData) {
+                        data.viewMatrix = inverse(data.inverseViewMatrix);
+                        data.globalUniform.lightSpace = mul(data.inverseViewMatrix, projection);
+                        data.globalUniform.lightPosition = float4(lightPosition, far);
+                        data.globalUniformBuffer->write(&data.globalUniform);
+                    }
+                    lastLightPosition = lightPosition;
                 }
                 break;
             }
@@ -166,8 +164,8 @@ namespace lysa {
                     aspectRatio,
                     spotLight->getNearClipDistance(),
                     spotLight->getRange());
-                subpassData[0].viewMatrix = lookAt(lightPosition, target, AXIS_UP);
-                subpassData[0].globalUniform.lightSpace = mul(subpassData[0].viewMatrix, projection);
+                subpassData[0].inverseViewMatrix = lookAt(lightPosition, target, AXIS_UP);
+                subpassData[0].globalUniform.lightSpace = mul(subpassData[0].inverseViewMatrix, projection);
                 subpassData[0].globalUniformBuffer->write(&subpassData[0].globalUniform);
                 break;
             }

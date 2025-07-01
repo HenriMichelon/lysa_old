@@ -77,6 +77,7 @@ export namespace lysa {
 
         struct SubpassData {
             float4x4 viewMatrix;
+            float4x4 inverseViewMatrix;
             GlobalUniform globalUniform;
             std::shared_ptr<vireo::RenderTarget> shadowMap;
             std::shared_ptr<vireo::Buffer> globalUniformBuffer;
@@ -89,6 +90,7 @@ export namespace lysa {
         const bool isCubeMap;
         float4x4 projection;
         uint32 subpassesCount;
+        float3 lastLightPosition{-10000.0f};
         std::vector<SubpassData> subpassData;
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes {
