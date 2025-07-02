@@ -102,9 +102,6 @@ export namespace lysa {
         uint32             framesInFlight{2};
         //! Enable the forward depth pre pass
         // bool               forwardDepthPrepass{false};
-        uint32             directionalLightShadowMapSize{1024};
-        uint32             spotLightShadowMapSize{512};
-        uint32             omniLightShadowMapSize{1024};
     };
 
     /**

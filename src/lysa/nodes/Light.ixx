@@ -76,10 +76,21 @@ export namespace lysa {
          */
         auto getLightType() const { return lightType; }
 
+        auto getShadowMapSize() const { return shadowMapSize; }
+
+        void setShadowMapSize(const int32 shadowMapSize) { this->shadowMapSize = shadowMapSize; }
+
+        auto getShadowTransparencyScissors() const { return shadowTransparencyScissors; }
+
+        auto setShadowTransparencyScissors(const float scissors) { this->shadowTransparencyScissors = scissors; }
+
+        auto getShadowTransparencyColorScissors() const { return shadowTransparencyColorScissors; }
+
+        auto setShadowTransparencyColorScissors(const float scissors) { this->shadowTransparencyColorScissors = scissors; }
+
         void setProperty(const std::string &property, const std::string &value) override;
 
         virtual LightData getLightData() const;
-
 
     protected:
         Light(const std::wstring &nodeName = TypeNames[LIGHT], Type type = LIGHT);
@@ -90,6 +101,9 @@ export namespace lysa {
         const LightType lightType{LIGHT_UNKNOWN};
         float4 colorAndIntensity{1.0f, 1.0f, 1.0f, 1.0f};
         bool castShadows{false};
+        uint32 shadowMapSize{512};
+        float shadowTransparencyScissors{0.25};
+        float shadowTransparencyColorScissors{0.75};
     };
 
 }

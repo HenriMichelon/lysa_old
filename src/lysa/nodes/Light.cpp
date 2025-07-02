@@ -37,6 +37,8 @@ namespace lysa {
             setColorAndIntensity(to_float4(value));
         } else if (property == "cast_shadows") {
             setCastShadows(value == "true");
+        } else if (property == "shadowmap_size") {
+            setShadowMapSize(std::stoi(value));
         }
     }
 

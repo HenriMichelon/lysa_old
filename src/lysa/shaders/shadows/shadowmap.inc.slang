@@ -9,6 +9,8 @@
 struct Global {
     float4x4 lightSpace;
     float4   lightPosition;  // XYZ: Position, W: far plane
+    float    transparencyScissor;
+    float    transparencyColorScissor;
 }
 
 [[vk::binding(0, 0)]] StructuredBuffer<Material> materials : register(t0, space0);

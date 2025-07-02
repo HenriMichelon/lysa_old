@@ -78,6 +78,8 @@ export namespace lysa {
         struct GlobalUniform {
             float4x4 lightSpace;
             float4   lightPosition; // XYZ: Position, W: far plane
+            float    transparencyScissor;
+            float    transparencyColorScissor;
         };
 
         struct SubpassData {

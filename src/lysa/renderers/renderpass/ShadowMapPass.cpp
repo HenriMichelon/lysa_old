@@ -51,7 +51,7 @@ namespace lysa {
         }
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
-        const auto size = isCubeMap ? config.omniLightShadowMapSize : config.spotLightShadowMapSize;
+        const auto size = light->getShadowMapSize();
         viewport.width = static_cast<float>(size);
         viewport.height = viewport.width;
         scissors.width = size;
@@ -154,6 +154,8 @@ namespace lysa {
                         data.viewMatrix = inverse(data.inverseViewMatrix);
                         data.globalUniform.lightSpace = mul(data.inverseViewMatrix, projection);
                         data.globalUniform.lightPosition = float4(lightPosition, far);
+                        data.globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
+                        data.globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
                         data.globalUniformBuffer->write(&data.globalUniform);
                     }
                     lastLightPosition = lightPosition;
@@ -172,6 +174,8 @@ namespace lysa {
                     spotLight->getRange());
                 subpassData[0].inverseViewMatrix = lookAt(lightPosition, target, AXIS_UP);
                 subpassData[0].globalUniform.lightSpace = mul(subpassData[0].inverseViewMatrix, projection);
+                subpassData[0].globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
+                subpassData[0].globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
                 subpassData[0].globalUniformBuffer->write(&subpassData[0].globalUniform);
                 break;
             }
