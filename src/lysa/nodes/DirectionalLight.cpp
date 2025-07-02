@@ -12,8 +12,9 @@ namespace lysa {
 
     DirectionalLight::DirectionalLight(const float4& color,
                                        const std::wstring &nodeName):
-        Light{color, nodeName, DIRECTIONAL_LIGHT}
-    { }
+        Light{color, nodeName, DIRECTIONAL_LIGHT} {
+        shadowMapSize = 1024;
+    }
 
     void DirectionalLight::setShadowMapCascadesCount(const uint32 cascadesCount) {
         shadowMapCascadesCount =
@@ -31,6 +32,7 @@ namespace lysa {
     LightData DirectionalLight::getLightData() const {
         auto data = Light::getLightData();
         data.direction = float4{getFrontVector(), 0.0f};
+        data.cascadesCount = shadowMapCascadesCount;
         return data;
     }
 

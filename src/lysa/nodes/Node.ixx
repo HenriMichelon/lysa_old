@@ -317,6 +317,8 @@ export namespace lysa {
          */
         bool haveChild(const std:: shared_ptr<Node>& child, bool recursive) const;
 
+        void lookAt(const float3& target);
+
         /**
         * Returns the child node by is name. Not recursive
         */

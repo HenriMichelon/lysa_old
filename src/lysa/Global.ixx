@@ -19,11 +19,17 @@ export import lysa.types;
 
 export namespace lysa {
 
+    float3 eulerAngles(quaternion q);
+
     float radians(const float angle) { return radians(float1{angle}); }
 
     float4x4 lookAt(const float3& eye, const float3& center, const float3& up);
 
     float4x4 perspective(float fov, float aspect, float near, float far);
+
+    float4x4 orthographic(float left, float right,
+                        float top, float  bottom,
+                        float znear, float zfar);
 
     float getCurrentTimeMilliseconds();
 
@@ -39,8 +45,6 @@ export namespace lysa {
     * Split a string
     */
     std::vector<std::string_view> split(std::string_view str,  char delimiter);
-
-    float3 eulerAngles(quaternion q);
 
     /**
      * Helper to log a memory address in hexadecimal

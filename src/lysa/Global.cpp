@@ -41,6 +41,32 @@ namespace lysa {
             0.0f,     0.0f,  (2.0f * zfar * znear) / zRange,  0.0f};
     }
 
+    float4x4 orthographic(const float left, const float right,
+                      const float top, const float  bottom,
+                      const float znear, const float zfar) {
+        return float4x4{
+            2.0f / (right - left),
+            0.0f,
+            0.0f,
+            0.0f,
+
+            0.0f,
+            2.0f / (top - bottom),
+            0.0f,
+            0.0f,
+
+            0.0f,
+            0.0f,
+            1.0f / (znear - zfar),
+            0.0f,
+
+            -(right + left) / (right - left),
+            -(top + bottom) / (top - bottom),
+            znear / (znear - zfar),
+            1.0f
+        };
+    }
+
     float3 eulerAngles(quaternion q) {
         q = normalize(q);
 

@@ -37,6 +37,10 @@ export namespace lysa {
 
         void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
+        void setCurrentCamera(const std::shared_ptr<Camera>& camera) {
+            currentCamera = camera;
+        }
+
         void update(uint32 frameIndex) override;
 
         void render(
@@ -55,6 +59,10 @@ export namespace lysa {
 
         const auto& getLightSpace(const uint32 index) const {
             return subpassData[index].globalUniform.lightSpace;
+        }
+
+        auto getCascadeSplitDepth(const uint32 index) const {
+            return subpassData[index].globalUniform.splitDepth;
         }
 
     private:
@@ -80,11 +88,12 @@ export namespace lysa {
             float4   lightPosition; // XYZ: Position, W: far plane
             float    transparencyScissor;
             float    transparencyColorScissor;
+            float    splitDepth;
         };
 
         struct SubpassData {
-            float4x4 viewMatrix;
             float4x4 inverseViewMatrix;
+            float4x4 projection;
             GlobalUniform globalUniform;
             std::shared_ptr<vireo::RenderTarget> shadowMap;
             std::shared_ptr<vireo::RenderTarget> transparencyColorMap;
@@ -96,8 +105,10 @@ export namespace lysa {
         };
 
         const bool isCubeMap;
-        float4x4 projection;
+        const bool isCascaded;
         uint32 subpassesCount;
+        uint32 cascadesCount{1};
+        std::shared_ptr<Camera> currentCamera;
         float3 lastLightPosition{-10000.0f};
         std::vector<SubpassData> subpassData;
 

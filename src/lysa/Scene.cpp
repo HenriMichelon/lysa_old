@@ -188,11 +188,12 @@ namespace lysa {
                         lightsArray[lightIndex].mapIndex = shadowMapIndex[light];
                         switch (light->getLightType()) {
                             case Light::LIGHT_DIRECTIONAL: {
-                                // lightsArray[lightIndex].cascadesCount = shadowMapRenderer->getCascadesCount(currentFrame);
-                                // for (int cascadeIndex = 0; cascadeIndex < lightsArray[lightIndex].cascadesCount ; cascadeIndex++) {
-                                    // lightsArray[lightIndex].lightSpace[cascadeIndex] = shadowMapRenderer->getLightSpace(cascadeIndex, currentFrame);
-                                    // lightsArray[lightIndex].cascadeSplitDepth[cascadeIndex] = shadowMapRenderer->getCascadeSplitDepth(cascadeIndex, currentFrame);
-                                // }
+                                for (int cascadeIndex = 0; cascadeIndex < lightsArray[lightIndex].cascadesCount ; cascadeIndex++) {
+                                    lightsArray[lightIndex].lightSpace[cascadeIndex] =
+                                        shadowMapRenderer->getLightSpace(cascadeIndex);
+                                    lightsArray[lightIndex].cascadeSplitDepth[cascadeIndex] =
+                                        shadowMapRenderer->getCascadeSplitDepth(cascadeIndex);
+                                }
                                 break;
                             }
                             case Light::LIGHT_SPOT: {
@@ -200,11 +201,6 @@ namespace lysa {
                                 break;
                             }
                             case Light::LIGHT_OMNI: {
-                                // lightsArray[lightIndex].farPlane = shadowMapRenderer->getFarPlane();
-                                // for (int faceIndex = 0; faceIndex < 6; faceIndex++) {
-                                    // lightsArray[lightIndex].lightSpace[faceIndex] =
-                                            // shadowMapRenderer->getLightSpace(faceIndex, currentFrame);
-                                // }
                                 break;
                             }
                             default:;
@@ -371,17 +367,23 @@ namespace lysa {
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers,
         const std::map<pipeline_id, std::shared_ptr<FrustumCulling>>& frustumCullingPipelines) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            if (pipelineData->drawCommandsCount == 0 ||
-                frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
+            // if (pipelineData->drawCommandsCount == 0 ||
+                // frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
             commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirectCount(
-                culledDrawCommandsBuffers.at(pipelineId),
-                0,
-                culledDrawCommandsCountBuffers.at(pipelineId),
+            commandList.drawIndexedIndirect(
+                pipelineData->drawCommandsBuffer,
                 0,
                 pipelineData->drawCommandsCount,
                 sizeof(DrawCommand),
                 sizeof(uint32));
+            // commandList.drawIndexedIndirectCount(
+            //     culledDrawCommandsBuffers.at(pipelineId),
+            //     0,
+            //     culledDrawCommandsCountBuffers.at(pipelineId),
+            //     0,
+            //     pipelineData->drawCommandsCount,
+            //     sizeof(DrawCommand),
+            //     sizeof(uint32));
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
@@ -457,6 +459,9 @@ namespace lysa {
         } else {
             currentCamera = camera;
             currentCamera->setActive(true);
+        }
+        for (auto& renderer : std::views::values(shadowMapRenderers)) {
+            std::reinterpret_pointer_cast<ShadowMapPass>(renderer)->setCurrentCamera(currentCamera);
         }
     }
 
@@ -596,6 +601,7 @@ namespace lysa {
                     light,
                     meshInstancesDataArray);
                 shadowMapRenderers[light] = shadowMapRenderer;
+                shadowMapRenderer->setCurrentCamera(currentCamera);
                 const auto& blankImage = Application::getResources().getBlankImage();
                 for (uint32 index = 0; index < shadowMaps.size(); index += 6) {
                     if (shadowMaps[index] == blankImage) {

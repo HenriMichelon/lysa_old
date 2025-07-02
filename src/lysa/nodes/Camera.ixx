@@ -105,4 +105,4 @@ export namespace lysa {
         void setActive(bool isActive);
     };
 
-} // namespace z0
+}

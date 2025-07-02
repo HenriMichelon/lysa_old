@@ -22,7 +22,7 @@ namespace lysa {
             if (perspectiveProjection) {
                 setPerspectiveProjection(fov, nearDistance, farDistance);
             } else {
-                setOrthographicProjection(0.0f, 1.0f, 0.0f, 1.0f, nearDistance, farDistance);
+                setOrthographicProjection(left, right, top, bottom, nearDistance, farDistance);
             }
             setUpdated();
         }
@@ -41,8 +41,6 @@ namespace lysa {
         farDistance = distance;
         if (perspectiveProjection) {
             setPerspectiveProjection(fov, nearDistance, farDistance);
-        } else {
-            setOrthographicProjection(left, right, top, bottom, nearDistance, farDistance);
         }
     }
 
@@ -65,13 +63,7 @@ namespace lysa {
         nearDistance           = near;
         farDistance            = far;
         perspectiveProjection  = false;
-        projectionMatrix       = float4x4::identity();
-        projectionMatrix[0][0] = 2.f / (right - left);
-        projectionMatrix[1][1] = 2.f / (bottom - top);
-        projectionMatrix[2][2] = 1.f / (far - near);
-        projectionMatrix[3][0] = -(right + left) / (right - left);
-        projectionMatrix[3][1] = -(bottom + top) / (bottom - top);
-        projectionMatrix[3][2] = -near / (far - near);
+        projectionMatrix       = orthographic(left, right, top, bottom, near, far);
         setUpdated();
     }
 

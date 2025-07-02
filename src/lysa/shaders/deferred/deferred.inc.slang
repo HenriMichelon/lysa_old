@@ -19,15 +19,18 @@ struct QuadOutput {
 float4 getColor(QuadOutput input) {
     float4 positionValue = positionBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     float3 worldPos = positionValue.rgb;
-    float metallic = positionValue.a;
+    float viewposZ = positionValue.a;
     float4 normalValue = normalBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     float3 normal = normalValue.rgb;
     float roughness = normalValue.a;
-    float3 albedo = albedoBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
-    float3 emissiveColor = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).rgb;
+    float4 albedoValue = albedoBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 albedo = albedoValue.rgb;
+    float metallic = albedoValue.a;
+    float4 emissiveColorValue = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
+    float3 emissiveColor = emissiveColorValue.rgb;
     float3 viewDirection = normalize(scene.cameraPosition - worldPos);
-//     return float4(albedo, 1.0);
+    //return float4(viewposZ, 0.0, 0.0, 1.0);
     return float4(
-        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, metallic, roughness, emissiveColor),
+        calcLight(viewDirection, worldPos, albedo, normal, scene.ambientLight, metallic, roughness, emissiveColor, viewposZ),
         1.0);
 }

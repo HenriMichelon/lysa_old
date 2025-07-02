@@ -60,10 +60,10 @@ namespace lysa {
         }
         if (w == 0 || h == 0 || config.mode != WindowMode::WINDOWED) {
             if (config.mode == WindowMode::WINDOWED_FULLSCREEN || config.mode == WindowMode::FULLSCREEN) {
-                exStyle = WS_EX_APPWINDOW;
                 style = WS_POPUP;
+                exStyle = WS_EX_APPWINDOW;
             } else {
-                style =  WS_MAXIMIZE;
+                style |=  WS_MAXIMIZE;
             }
             auto monitorRect = RECT{};
             const auto hPrimary = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);

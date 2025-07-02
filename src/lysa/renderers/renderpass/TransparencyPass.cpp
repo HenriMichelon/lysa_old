@@ -25,7 +25,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            Scene::pipelineDescriptorLayout},
+            Scene::pipelineDescriptorLayout,
+            Scene::sceneDescriptorLayoutOptional1},
             Scene::instanceIndexConstantDesc, name);
         oitPipelineConfig.vertexShader = loadShader(VERTEX_SHADER_OIT);
         oitPipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER_OIT);
@@ -104,7 +105,7 @@ namespace lysa {
             vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(oitRenderingConfig);
-        scene.drawTransparentModels(commandList, false, oitPipelines);
+        scene.drawTransparentModels(commandList, true, oitPipelines);
         commandList.endRendering();
         commandList.barrier(
             {frame.accumBuffer, frame.revealageBuffer},

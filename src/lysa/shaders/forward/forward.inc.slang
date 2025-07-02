@@ -12,6 +12,7 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
     float roughness = fetchRoughness(input, mat);
     float3 emissiveColor = fetchEmissiveColor(input, mat);
 //     return float4(normal, 1.0);
+    //return float4(input.viewPos.z, 0.0, 0.0, 1.0);
     return float4(
         calcLight(
             input.viewDirection,
@@ -21,6 +22,7 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
             scene.ambientLight,
             metallic,
             roughness,
-            emissiveColor),
+            emissiveColor,
+            input.viewPos.z),
         color.a);
 }

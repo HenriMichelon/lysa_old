@@ -25,13 +25,14 @@ cbuffer IndirectRootConstant : register(b0, space4) {
 
 struct VertexOutput {
     float4 position      : SV_POSITION;
-    float3 worldPos      : TEXCOORD0;
-    float3 normal        : TEXCOORD1;
-    float2 uv            : TEXCOORD2;
-    float3 viewDirection : TEXCOORD3;
-    nointerpolation uint materialIndex            : TEXCOORD4;
-    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD5;
-    float3x3 TBN         : TEXCOORD6;
+    float3 worldPos      : POSITION;
+    float3 normal        : NORMAL;
+    float2 uv            : TEXCOORD0;
+    float3 viewDirection : TEXCOORD1;
+    float4 viewPos       : TEXCOORD2;
+    nointerpolation uint materialIndex            : TEXCOORD3;
+    nointerpolation uint meshSurfaceMaterialIndex : TEXCOORD4;
+    float3x3 TBN         : TEXCOORD5;
 };
 
 struct Scene {

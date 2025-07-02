@@ -27,7 +27,8 @@ namespace lysa {
         light{light},
         meshInstancesDataArray{meshInstancesDataArray},
         sceneConfig{sceneConfig},
-        isCubeMap{light->getLightType() == Light::LIGHT_OMNI} {
+        isCubeMap{light->getLightType() == Light::LIGHT_OMNI},
+        isCascaded{light->getLightType() == Light::LIGHT_DIRECTIONAL} {
         const auto& vireo = Application::getVireo();
 
         descriptorLayout = vireo.createDescriptorLayout();
@@ -57,7 +58,12 @@ namespace lysa {
         scissors.width = size;
         scissors.height = size;
 
-        subpassesCount = isCubeMap ? 6 : 1;
+        if (isCascaded) {
+            cascadesCount = reinterpret_pointer_cast<DirectionalLight>(light)->getShadowMapCascadesCount();
+            subpassesCount = cascadesCount;
+        } else {
+            subpassesCount = isCubeMap ? 6 : 1;
+        }
         subpassData.resize(subpassesCount);
         for (auto& data : subpassData) {
             data.globalUniformBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
@@ -101,8 +107,8 @@ namespace lysa {
                 data.frustumCullingPipelines.at(pipelineId)->dispatch(
                     commandList,
                     pipelineData->drawCommandsCount,
-                    data.viewMatrix,
-                    projection,
+                    data.inverseViewMatrix,
+                    data.projection,
                     *pipelineData->instancesArray.getBuffer(),
                     *pipelineData->drawCommandsBuffer,
                     *data.culledDrawCommandsBuffers.at(pipelineId),
@@ -116,7 +122,119 @@ namespace lysa {
         static constexpr auto aspectRatio{1};
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
-                throw Exception{"Directional light not supported"};
+                auto cascadeSplits = std::vector<float>(cascadesCount);
+                const auto& directionalLight = reinterpret_pointer_cast<DirectionalLight>(light);
+                const auto lightDirection = directionalLight->getFrontVector();
+                const auto nearClip  = currentCamera->getNearDistance();
+                const auto farClip   = currentCamera->getFarDistance();
+                const auto clipRange = farClip - nearClip;
+                const auto minZ = nearClip;
+                const auto maxZ = nearClip + clipRange;
+                const auto range = maxZ - minZ;
+                const auto ratio = maxZ / minZ;
+
+                // Calculate split depths based on view camera frustum
+                // Based on the method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
+                for (auto i = 0; i < cascadesCount; i++) {
+                    float p          = (i + 1) / static_cast<float>(cascadesCount);
+                    float log        = minZ * std::pow(ratio, p);
+                    float uniform    = minZ + range * p;
+                    float d          = cascadeSplitLambda * (log - uniform) + uniform;
+                    cascadeSplits[i] = (d - nearClip) / clipRange;
+                }
+
+                // Calculate orthographic projection matrix for each cascade
+                float lastSplitDist = 0.0;
+                const auto invCam = inverse(mul(inverse(currentCamera->getTransformGlobal()), currentCamera->getProjection()));
+                for (auto cascadeIndex = 0; cascadeIndex < cascadesCount; cascadeIndex++) {
+                    const auto splitDist = cascadeSplits[cascadeIndex];
+
+                    // Camera frustum corners in NDC space
+                    float3 frustumCorners[] = {
+                        float3(-1.0f, 1.0f, -1.0f),
+                        float3(1.0f, 1.0f, -1.0f),
+                        float3(1.0f, -1.0f, -1.0f),
+                        float3(-1.0f, -1.0f, -1.0f),
+
+                        float3(-1.0f, 1.0f, 1.0f),
+                        float3(1.0f, 1.0f, 1.0f),
+                        float3(1.0f, -1.0f, 1.0f),
+                        float3(-1.0f, -1.0f, 1.0f),
+                    };
+
+                    // Camera frustum corners into world space
+                    for (auto j = 0; j < 8; j++) {
+                        const auto invCorner = mul(float4(frustumCorners[j], 1.0f), invCam);
+                        frustumCorners[j]   = invCorner.xyz / invCorner.w;
+                    }
+
+                    // Adjust the coordinates of near and far planes for this specific cascade
+                    for (auto j = 0; j < 4; j++) {
+                        const auto dist = frustumCorners[j + 4] - frustumCorners[j];
+                        frustumCorners[j + 4] = frustumCorners[j] + (dist * splitDist);
+                        frustumCorners[j]     = frustumCorners[j] + (dist * lastSplitDist);
+                    }
+
+                    // Frustum center for this cascade split, in world space
+                    auto frustumCenter = FLOAT3ZERO;
+                    for (auto j = 0; j < 8; j++) {
+                        frustumCenter += frustumCorners[j];
+                    }
+                    frustumCenter /= 8.0f;
+
+                    // Radius of the cascade split
+                    auto radius = 0.0f;
+                    for (auto j = 0; j < 8; j++) {
+                        const float distance = length(frustumCorners[j] - frustumCenter);
+                        radius = std::max(radius, distance);
+                    }
+                    radius = std::ceil(radius * 16.0f) / 16.0f;
+
+                    // Snap the frustum center to the nearest texel grid
+                    const auto shadowMapResolution = static_cast<float>(subpassData[cascadeIndex].shadowMap->getImage()->getWidth());
+                    const float worldUnitsPerTexel = (2.0f * radius) / shadowMapResolution;
+                    frustumCenter.x = std::floor(frustumCenter.x / worldUnitsPerTexel) * worldUnitsPerTexel;
+                    frustumCenter.y = std::floor(frustumCenter.y / worldUnitsPerTexel) * worldUnitsPerTexel;
+                    frustumCenter.z = std::floor(frustumCenter.z / worldUnitsPerTexel) * worldUnitsPerTexel;
+
+                    // Split the bounding box
+                    const auto maxExtents = float3(radius);
+                    const auto minExtents = -maxExtents;
+                    const float depth = maxExtents.z - minExtents.z;
+
+                    // View & projection matrices
+                    const auto eye = frustumCenter - lightDirection * -minExtents.z ;
+                    const auto viewMatrix = lookAt(eye, frustumCenter, AXIS_UP);
+                    auto lightProjection = orthographic(
+                        minExtents.x, maxExtents.x,
+                        maxExtents.y, minExtents.y,
+                        -depth, depth);
+
+                    // https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering
+                    // Create the rounding matrix by projecting the world-space origin and determining
+                    // the fractional offset in texel space
+                    // const auto shadowMatrix = mul(viewMatrix, lightProjection);
+                    // const float4 shadowOrigin =
+                    //     mul(float4(0, 0, 0, 1), shadowMatrix) * (shadowMapResolution * 0.5f);
+                    // const auto roundedOrigin = round(shadowOrigin);
+                    // auto roundOffset = roundedOrigin - shadowOrigin;
+                    // roundOffset = roundOffset * 2.0f / shadowMapResolution;
+                    // roundOffset.z = 0.0f;
+                    // roundOffset.w = 0.0f;
+                    // lightProjection[3][0] += roundOffset.x;
+                    // lightProjection[3][1] += roundOffset.y;
+                    // lightProjection[3][2] += roundOffset.z;
+                    // lightProjection[3] += roundOffset;
+                    lastSplitDist = cascadeSplits[cascadeIndex];
+
+                    subpassData[cascadeIndex].inverseViewMatrix = inverse(viewMatrix);
+                    subpassData[cascadeIndex].projection = lightProjection;
+                    subpassData[cascadeIndex].globalUniform.lightSpace = mul(viewMatrix, lightProjection);
+                    subpassData[cascadeIndex].globalUniform.splitDepth = (nearClip + splitDist * clipRange);
+                    subpassData[cascadeIndex].globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
+                    subpassData[cascadeIndex].globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
+                    subpassData[cascadeIndex].globalUniformBuffer->write(&subpassData[cascadeIndex].globalUniform);
+                }
                 break;
             }
             case Light::LIGHT_OMNI: {
@@ -125,38 +243,39 @@ namespace lysa {
                     const auto& omniLight = reinterpret_pointer_cast<OmniLight>(light);
                     const auto near = omniLight->getNearClipDistance();
                     const auto far = omniLight->getRange();
-                    subpassData[0].inverseViewMatrix = lookAt(
+                    float4x4 viewMatrix[6];
+                    viewMatrix[0] = lookAt(
                         lightPosition,
                         lightPosition + AXIS_RIGHT,
                         {0.0, 1.0, 0.0});
-                    subpassData[1].inverseViewMatrix = lookAt(
+                    viewMatrix[1] = lookAt(
                         lightPosition,
                         lightPosition + AXIS_LEFT,
                         {0.0, 1.0, 0.0});
-                    subpassData[2].inverseViewMatrix = lookAt(
+                    viewMatrix[2] = lookAt(
                         lightPosition,
                         lightPosition + AXIS_UP,
                         {0.0, 0.0, 1.0});
-                    subpassData[3].inverseViewMatrix = lookAt(
+                    viewMatrix[3] = lookAt(
                         lightPosition,
                         lightPosition + AXIS_DOWN,
                         {0.0, 0.0, -1.0});
-                    subpassData[4].inverseViewMatrix = lookAt(
+                    viewMatrix[4] = lookAt(
                         lightPosition,
                         lightPosition + AXIS_BACK,
                         {0.0, 1.0, 0.0});
-                    subpassData[5].inverseViewMatrix = lookAt(
+                    viewMatrix[5] = lookAt(
                         lightPosition,
                             lightPosition + AXIS_FRONT,
                             {0.0, 1.0, 0.0});
-                    projection = perspective(radians(90.0f), aspectRatio, near, far);
-                    for (auto& data : subpassData) {
-                        data.viewMatrix = inverse(data.inverseViewMatrix);
-                        data.globalUniform.lightSpace = mul(data.inverseViewMatrix, projection);
-                        data.globalUniform.lightPosition = float4(lightPosition, far);
-                        data.globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
-                        data.globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
-                        data.globalUniformBuffer->write(&data.globalUniform);
+                    for (int i = 0; i < 6; i++) {
+                        subpassData[i].projection = perspective(radians(90.0f), aspectRatio, near, far);
+                        subpassData[i].inverseViewMatrix = inverse(viewMatrix[i]);
+                        subpassData[i].globalUniform.lightSpace = mul(viewMatrix[i], subpassData[i].projection);
+                        subpassData[i].globalUniform.lightPosition = float4(lightPosition, far);
+                        subpassData[i].globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
+                        subpassData[i].globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
+                        subpassData[i].globalUniformBuffer->write(&subpassData[i].globalUniform);
                     }
                     lastLightPosition = lightPosition;
                 }
@@ -167,13 +286,13 @@ namespace lysa {
                 const auto lightPosition= light->getPositionGlobal();
                 const auto lightDirection = spotLight->getFrontVector();
                 const auto target = lightPosition + lightDirection;
-                projection = perspective(
+                subpassData[0].projection = perspective(
                     spotLight->getFov(),
                     aspectRatio,
                     spotLight->getNearClipDistance(),
                     spotLight->getRange());
-                subpassData[0].inverseViewMatrix = lookAt(lightPosition, target, AXIS_UP);
-                subpassData[0].globalUniform.lightSpace = mul(subpassData[0].inverseViewMatrix, projection);
+                const auto viewMatrix = lookAt(lightPosition, target, AXIS_UP);
+                subpassData[0].globalUniform.lightSpace = mul(viewMatrix,  subpassData[0].projection);
                 subpassData[0].globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
                 subpassData[0].globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
                 subpassData[0].globalUniformBuffer->write(&subpassData[0].globalUniform);
@@ -202,13 +321,13 @@ namespace lysa {
                   vireo::ResourceState::SHADER_READ);
             }
 
-            auto count{0};
-            for (const auto& frustumCulling : std::views::values(data.frustumCullingPipelines)) {
-                count += frustumCulling->getDrawCommandsCount();
-            }
-            if (count == 0) {
-                continue;
-            }
+            // auto count{0};
+            // for (const auto& frustumCulling : std::views::values(data.frustumCullingPipelines)) {
+            //     count += frustumCulling->getDrawCommandsCount();
+            // }
+            // if (count == 0) {
+            //     continue;
+            // }
 
             commandList.barrier(
                 data.shadowMap,

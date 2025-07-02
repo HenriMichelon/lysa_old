@@ -308,6 +308,16 @@ namespace lysa {
         return quaternion{float3x3{globalTransform}};
     }
 
+    void Node::lookAt(const float3& target) {
+        const auto newGlobalTransform = inverse(lysa::lookAt(getPositionGlobal(), target, getUpVector()));
+        if (parent) {
+            localTransform = mul(newGlobalTransform, inverse(parent->globalTransform));
+        } else {
+            localTransform = newGlobalTransform;
+        }
+        updateGlobalTransform();
+    }
+
     float3 Node::toGlobal(const float3& local) const {
         return mul(float4(local, 1.0f), globalTransform).xyz;
     }

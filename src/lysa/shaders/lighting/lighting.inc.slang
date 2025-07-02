@@ -56,17 +56,15 @@ float3 Radiance(
 }
 
 float3 calcDirectionalLight(
-    Light light,
-    float3 albedo,
-    float3 normal,
-    float metallic,
-    float roughness,
-    float3 viewDirection,
-    float3 F0,
+    const Light light,
+    const float3 albedo,
+    const float3 normal,
+    const float metallic,
+    const float roughness,
+    const float3 viewDirection,
+    const float3 F0,
     const float cosLo) {
-    return
-        light.color.rgb *
-        light.color.w *
+    return light.color.rgb * light.color.w *
         Radiance(albedo, normal, viewDirection,  metallic, roughness,  -light.direction.xyz, F0, cosLo);
 }
 
@@ -105,7 +103,8 @@ float3 calcLight(
     float4 ambientColor,
     float metallic,
     float roughness,
-    float3 emissiveColor) {
+    float3 emissiveColor,
+    float viewPosZ) {
     float3 ambient = ambientColor.rgb * ambientColor.w * color;
     float3 diffuse = float3(0.0f);
     // Angle between surface normal and outgoing light direction.
@@ -118,6 +117,42 @@ float3 calcLight(
         float3 factor = float3(1.0, 1.0, 1.0);
         switch (light.type) {
             case LIGHT_DIRECTIONAL: {
+                if (light.mapIndex != -1) {
+                    // We have a cascaded shadow map,
+                    // get cascade index maps for the current fragment's view Z position
+                    int cascadeIndex = 0;
+                    for (int index = 0; index < light.cascadesCount; index++) {
+                        if (-viewPosZ > light.cascadeSplitDepth[index]) {
+                            cascadeIndex = index + 1;
+                        }
+                    }
+                    // Get the shadow factor for the cascade
+                    factor = shadowFactor(light, cascadeIndex, worldPos);
+                    // If no shadow try the next cascades (for objets behind the light position in the cascade)
+                    /*if ((factor.x >= 0.1) && (cascadeIndex < light.cascadesCount)) {
+                        float3 nextFactor = shadowFactor(light, cascadeIndex +1, worldPos);
+                        if (nextFactor.x < 0.1) factor = nextFactor;
+                    }
+                    if ((factor.x >= 0.1) && ((cascadeIndex+1) < light.cascadesCount)) {
+                        float3 nextFactor = shadowFactor(light, cascadeIndex +2, worldPos);
+                        if (nextFactor.x < 0.1) factor = nextFactor;
+                    }*/
+                    // Display the cascade splits for debug
+                    /*switch (cascadeIndex) {
+                        case 0 :
+                            color.rgb *= float3(1.0f, 0.25f, 0.25f);
+                            break;
+                        case 1 :
+                            color.rgb *= float3(0.25f, 1.0f, 0.25f);
+                            break;
+                        case 2 :
+                            color.rgb *= float3(0.25f, 0.25f, 1.0f);
+                            break;
+                        case 3 :
+                            color.rgb *= float3(1.0f, 1.0f, 0.25f);
+                            break;
+                    }*/
+                }
                 diffuse += factor * calcDirectionalLight(
                     light, color.rgb, normal, metallic, roughness,
                     viewDirection, F0, cosLo);

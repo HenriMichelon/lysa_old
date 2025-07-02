@@ -93,6 +93,8 @@ export namespace lysa {
         virtual LightData getLightData() const;
 
     protected:
+        uint32 shadowMapSize{512};
+
         Light(const std::wstring &nodeName = TypeNames[LIGHT], Type type = LIGHT);
 
         Light(const float4& color, const std::wstring &nodeName = TypeNames[LIGHT], Type type = LIGHT);
@@ -101,7 +103,6 @@ export namespace lysa {
         const LightType lightType{LIGHT_UNKNOWN};
         float4 colorAndIntensity{1.0f, 1.0f, 1.0f, 1.0f};
         bool castShadows{false};
-        uint32 shadowMapSize{512};
         float shadowTransparencyScissors{0.25};
         float shadowTransparencyColorScissors{0.75};
     };
