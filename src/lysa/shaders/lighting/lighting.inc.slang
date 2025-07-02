@@ -129,14 +129,14 @@ float3 calcLight(
                     // Get the shadow factor for the cascade
                     factor = shadowFactor(light, cascadeIndex, worldPos);
                     // If no shadow try the next cascades (for objets behind the light position in the cascade)
-                    /*if ((factor.x >= 0.1) && (cascadeIndex < light.cascadesCount)) {
+                    if ((factor.x >= 0.1) && (cascadeIndex < light.cascadesCount)) {
                         float3 nextFactor = shadowFactor(light, cascadeIndex +1, worldPos);
                         if (nextFactor.x < 0.1) factor = nextFactor;
                     }
                     if ((factor.x >= 0.1) && ((cascadeIndex+1) < light.cascadesCount)) {
                         float3 nextFactor = shadowFactor(light, cascadeIndex +2, worldPos);
                         if (nextFactor.x < 0.1) factor = nextFactor;
-                    }*/
+                    }
                     // Display the cascade splits for debug
                     /*switch (cascadeIndex) {
                         case 0 :

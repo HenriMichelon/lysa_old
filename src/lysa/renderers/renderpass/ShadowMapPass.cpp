@@ -165,7 +165,7 @@ namespace lysa {
                     // Camera frustum corners into world space
                     for (auto j = 0; j < 8; j++) {
                         const auto invCorner = mul(float4(frustumCorners[j], 1.0f), invCam);
-                        frustumCorners[j]   = invCorner.xyz / invCorner.w;
+                        frustumCorners[j]= (invCorner / invCorner.w).xyz;
                     }
 
                     // Adjust the coordinates of near and far planes for this specific cascade
@@ -213,18 +213,15 @@ namespace lysa {
                     // https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering
                     // Create the rounding matrix by projecting the world-space origin and determining
                     // the fractional offset in texel space
-                    // const auto shadowMatrix = mul(viewMatrix, lightProjection);
-                    // const float4 shadowOrigin =
-                    //     mul(float4(0, 0, 0, 1), shadowMatrix) * (shadowMapResolution * 0.5f);
-                    // const auto roundedOrigin = round(shadowOrigin);
-                    // auto roundOffset = roundedOrigin - shadowOrigin;
-                    // roundOffset = roundOffset * 2.0f / shadowMapResolution;
-                    // roundOffset.z = 0.0f;
-                    // roundOffset.w = 0.0f;
-                    // lightProjection[3][0] += roundOffset.x;
-                    // lightProjection[3][1] += roundOffset.y;
-                    // lightProjection[3][2] += roundOffset.z;
-                    // lightProjection[3] += roundOffset;
+                    const auto shadowMatrix = mul(viewMatrix, lightProjection);
+                    const float4 shadowOrigin =
+                        mul(float4(0, 0, 0, 1), shadowMatrix) * (shadowMapResolution * 0.5f);
+                    const auto roundedOrigin = round(shadowOrigin);
+                    auto roundOffset = roundedOrigin - shadowOrigin;
+                    roundOffset = roundOffset * 2.0f / shadowMapResolution;
+                    roundOffset.z = 0.0f;
+                    roundOffset.w = 0.0f;
+                    lightProjection[3] += roundOffset;
                     lastSplitDist = cascadeSplits[cascadeIndex];
 
                     subpassData[cascadeIndex].inverseViewMatrix = inverse(viewMatrix);

@@ -21,12 +21,12 @@ float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     if (outOfView) {
        return 1.0;
     }
-    const float closestDepth = shadowMaps[light.mapIndex]
+    const float closestDepth = shadowMaps[light.mapIndex + cascadeIndex]
         .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy).r;
     const float currentDepth = projCoords.z;
 
     uint width, height;
-    shadowMaps[light.mapIndex].GetDimensions(width, height);
+    shadowMaps[light.mapIndex + cascadeIndex].GetDimensions(width, height);
     const float2 texelSize = 1.0 / float2(width, height);
     const float bias = 0.0005;
     float shadow = 0.0;
@@ -35,13 +35,13 @@ float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     for(int x = -1; x <= 1; ++x)  {
         [unroll]
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = shadowMaps[light.mapIndex]
+            float pcfDepth = shadowMaps[light.mapIndex + cascadeIndex]
                 .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
         }
     }
     float3 factor = float3(shadow /= 9.0);
-    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex]
+    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + cascadeIndex]
         .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy);
     if (transparencyColor.a != 1.0) {
         return lerp(transparencyColor.rgb, float3(1.0), factor);
