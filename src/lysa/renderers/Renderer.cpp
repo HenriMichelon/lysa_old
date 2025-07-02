@@ -7,6 +7,7 @@
 module lysa.renderers.renderer;
 
 import lysa.application;
+import lysa.log;
 
 namespace lysa {
     Renderer::Renderer(

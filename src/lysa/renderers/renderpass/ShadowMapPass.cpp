@@ -205,10 +205,15 @@ namespace lysa {
                     // View & projection matrices
                     const auto eye = frustumCenter - lightDirection * -minExtents.z ;
                     const auto viewMatrix = lookAt(eye, frustumCenter, AXIS_UP);
+                    // const auto viewMatrix = lookAt(float3{10}, float3{0}, AXIS_UP);
                     auto lightProjection = orthographic(
                         minExtents.x, maxExtents.x,
                         maxExtents.y, minExtents.y,
                         -depth, depth);
+                    // auto lightProjection = orthographic(
+                        // -100, 100,
+                        // 100, -100,
+                        // -100, 100);
 
                     // https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering
                     // Create the rounding matrix by projecting the world-space origin and determining

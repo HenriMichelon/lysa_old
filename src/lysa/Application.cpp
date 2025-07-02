@@ -85,10 +85,6 @@ namespace lysa {
             resources.getSamplers().update();
         }
 
-        for (const auto& window : windows) {
-            window->update();
-        }
-
         // Physics events & others deferred calls
         if (!deferredCalls.empty()) {
             std::ranges::for_each(deferredCalls, [](const std::function<void()>& call) {
@@ -122,6 +118,7 @@ namespace lysa {
         }
 
         for (const auto& window : windows) {
+            window->update();
             window->drawFrame();
         }
     }

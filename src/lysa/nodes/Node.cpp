@@ -276,6 +276,7 @@ namespace lysa {
     }
 
     void Node::rotateY(const float angle) {
+        // INFO("rotate Y ", angle, " ", lysa::to_string(getName()));
         localTransform = mul(float4x4::rotation_y(angle), localTransform);
         updateGlobalTransform();
     }

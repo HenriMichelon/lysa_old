@@ -23,7 +23,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            Scene::pipelineDescriptorLayout},
+            Scene::pipelineDescriptorLayout,
+            Scene::sceneDescriptorLayoutOptional1},
             Scene::instanceIndexConstantDesc, name);
         pipelineConfig.vertexInputLayout = Application::getVireo().createVertexLayout(sizeof(VertexData), VertexData::vertexAttributes);
 
