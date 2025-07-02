@@ -78,19 +78,27 @@ SampledCube sampleCube(const float3 v) {
 	return SampledCube(faceIndex, uv * ma + 0.5);
 }
 
+static const float3 sampleOffsetDirections[20] = float3[] (
+    float3( 1,  1,  1), float3( 1, -1,  1), float3(-1, -1,  1), float3(-1,  1,  1),
+    float3( 1,  1, -1), float3( 1, -1, -1), float3(-1, -1, -1), float3(-1,  1, -1),
+    float3( 1,  1,  0), float3( 1, -1,  0), float3(-1, -1,  0), float3(-1,  1,  0),
+    float3( 1,  0,  1), float3(-1,  0,  1), float3( 1,  0, -1), float3(-1,  0, -1),
+    float3( 0,  1,  1), float3( 0, -1,  1), float3( 0, -1, -1), float3( 0,  1, -1)
+);
+
 float3 shadowFactorCubemap(Light light, float3 worldPos) {
     const float3 fragToLight = worldPos - light.position.xyz;
     const float currentDepth = length(fragToLight);
     const float3 dir = normalize(fragToLight);
     const float bias = 0.15;
-
-    const int samples = 20;
+    const int samples = 10;
     const float sampleRadius = 0.03; // PCF cone radius
     float shadow = 0.0;
-    SampledCube sc = sampleCube(dir);
 
     [unroll]
-    for (int i = 0; i < samples; ++i) {
+    for (int i = 0; i < samples; i++)     {
+        float3 offsetDir = normalize(dir + sampleOffsetDirections[i] * sampleRadius);
+        SampledCube sc = sampleCube(offsetDir);
         float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]
             .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
         sampledDepth *= light.range;
@@ -98,8 +106,9 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
     }
 
     float3 factor = float3(shadow /= samples);
-    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex]
-        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv);
+     SampledCube sc = sampleCube(dir);
+     const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + sc.faceIndex]
+            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv);
     if (transparencyColor.a != 1.0) {
         return lerp(transparencyColor.rgb, float3(1.0), factor);
     }
