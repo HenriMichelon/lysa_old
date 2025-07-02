@@ -91,7 +91,6 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         scene.drawShaderMaterialModels(
             commandList,
-            true,
             pipelines);
         commandList.endRendering();
         commandList.barrier(

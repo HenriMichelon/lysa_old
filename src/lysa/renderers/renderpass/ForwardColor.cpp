@@ -78,12 +78,10 @@ namespace lysa {
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
-        commandList,
-        true,
+            commandList,
             pipelines);
         scene.drawTransparentModels(
-        commandList,
-        true,
+            commandList,
             pipelines);
         commandList.endRendering();
         commandList.barrier(

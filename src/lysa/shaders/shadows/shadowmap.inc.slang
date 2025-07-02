@@ -35,7 +35,7 @@ struct VertexInput {
 }
 
 #ifndef __SPIRV__
-cbuffer IndirectRootConstant : register(b0, space4) {
+cbuffer IndirectRootConstant : register(b0, space5) {
     uint instanceIndex;
 };
 #endif

@@ -117,14 +117,14 @@ namespace lysa {
         }
     }
 
-    void ShadowMapPass::update(const uint32 frameIndex) {
+    void ShadowMapPass::update(const uint32) {
         if (!light->isVisible() || !light->getCastShadows()) { return; }
         static constexpr auto aspectRatio{1};
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
                 auto cascadeSplits = std::vector<float>(cascadesCount);
                 const auto& directionalLight = reinterpret_pointer_cast<DirectionalLight>(light);
-                const auto lightDirection = directionalLight->getFrontVector();
+                const auto& lightDirection = directionalLight->getFrontVector();
                 const auto nearClip  = currentCamera->getNearDistance();
                 const auto farClip   = currentCamera->getFarDistance();
                 const auto clipRange = farClip - nearClip;
@@ -279,9 +279,9 @@ namespace lysa {
                 break;
             }
             case Light::LIGHT_SPOT: {
-                const auto spotLight= reinterpret_pointer_cast<SpotLight>(light);
-                const auto lightPosition= light->getPositionGlobal();
-                const auto lightDirection = spotLight->getFrontVector();
+                const auto& spotLight= reinterpret_pointer_cast<SpotLight>(light);
+                const auto& lightPosition= light->getPositionGlobal();
+                const auto& lightDirection = spotLight->getFrontVector();
                 const auto target = lightPosition + lightDirection;
                 subpassData[0].projection = perspective(
                     spotLight->getFov(),
@@ -318,13 +318,13 @@ namespace lysa {
                   vireo::ResourceState::SHADER_READ);
             }
 
-            // auto count{0};
-            // for (const auto& frustumCulling : std::views::values(data.frustumCullingPipelines)) {
-            //     count += frustumCulling->getDrawCommandsCount();
-            // }
-            // if (count == 0) {
-            //     continue;
-            // }
+            auto count{0};
+            for (const auto& frustumCulling : std::views::values(data.frustumCullingPipelines)) {
+                count += frustumCulling->getDrawCommandsCount();
+            }
+            if (count == 0) {
+                continue;
+            }
 
             commandList.barrier(
                 data.shadowMap,

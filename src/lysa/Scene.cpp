@@ -333,26 +333,23 @@ namespace lysa {
 
     void Scene::drawOpaquesModels(
         vireo::CommandList& commandList,
-        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (opaquePipelinesData.empty()) { return; }
-        drawModels(commandList, useOptional1DescriptorSet, pipelines, opaquePipelinesData);
+        drawModels(commandList, pipelines, opaquePipelinesData);
     }
 
     void Scene::drawTransparentModels(
         vireo::CommandList& commandList,
-        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (transparentPipelinesData.empty()) { return; }
-        drawModels(commandList, useOptional1DescriptorSet, pipelines, transparentPipelinesData);
+        drawModels(commandList, pipelines, transparentPipelinesData);
     }
 
     void Scene::drawShaderMaterialModels(
         vireo::CommandList& commandList,
-        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines) const {
         if (shaderMaterialPipelinesData.empty()) { return; }
-        drawModels(commandList, useOptional1DescriptorSet, pipelines, shaderMaterialPipelinesData);
+        drawModels(commandList, pipelines, shaderMaterialPipelinesData);
     }
 
     void Scene::setInitialState(const vireo::CommandList& commandList) const {
@@ -415,7 +412,6 @@ namespace lysa {
 
     void Scene::drawModels(
         vireo::CommandList& commandList,
-        const bool useOptional1DescriptorSet,
         const std::unordered_map<uint32, std::shared_ptr<vireo::GraphicPipeline>>& pipelines,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) const {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
@@ -423,7 +419,6 @@ namespace lysa {
                 pipelineData->frustumCullingPipeline.getDrawCommandsCount() == 0) { continue; }
             const auto& pipeline = pipelines.at(pipelineId);
             commandList.bindPipeline(pipeline);
-            if (useOptional1DescriptorSet) {
                 commandList.bindDescriptors({
                     Application::getResources().getDescriptorSet(),
                     Application::getResources().getSamplers().getDescriptorSet(),
@@ -432,14 +427,6 @@ namespace lysa {
                     descriptorSetOpt1,
                 });
 
-            } else {
-                commandList.bindDescriptors({
-                    Application::getResources().getDescriptorSet(),
-                    Application::getResources().getSamplers().getDescriptorSet(),
-                    descriptorSet,
-                    pipelineData->descriptorSet
-                });
-            }
             commandList.drawIndexedIndirectCount(
                 pipelineData->culledDrawCommandsBuffer,
                 0,

@@ -84,11 +84,9 @@ namespace lysa {
         commandList.setStencilReference(1);
         scene.drawOpaquesModels(
           commandList,
-          false,
           pipelines);
         scene.drawTransparentModels(
           commandList,
-          false,
           pipelines);
         commandList.endRendering();
         commandList.barrier(

@@ -94,7 +94,6 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
     const float diskRadius   = (1.0 + (viewDistance / light.range)) / 25.0;
     const float bias = 0.15;
     const int samples = 20;
-    //const float diskRadius = 0.03; // PCF cone radius
     float shadow = 0.0;
 
     [unroll]

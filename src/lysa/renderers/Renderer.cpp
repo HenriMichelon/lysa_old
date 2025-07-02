@@ -56,9 +56,6 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
-        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
-        }
         scene.setInitialState(commandList);
         depthPrePass.render(commandList, scene, frame.depthAttachment);
     }
@@ -72,6 +69,9 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
+        }
         scene.setInitialState(commandList);
         colorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
         shaderMaterialPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);

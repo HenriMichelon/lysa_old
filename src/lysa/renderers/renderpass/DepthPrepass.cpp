@@ -25,7 +25,8 @@ namespace lysa {
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
             Scene::sceneDescriptorLayout,
-            Scene::pipelineDescriptorLayout},
+            Scene::pipelineDescriptorLayout,
+            Scene::sceneDescriptorLayoutOptional1},
             Scene::instanceIndexConstantDesc, name);
         renderingConfig.stencilTestEnable = pipelineConfig.stencilTestEnable;
     }
@@ -61,7 +62,6 @@ namespace lysa {
         }
         scene.drawOpaquesModels(
           commandList,
-          false,
           pipelines);
         commandList.endRendering();
         commandList.barrier(
