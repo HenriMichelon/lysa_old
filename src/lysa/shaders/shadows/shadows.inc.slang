@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-static const float SHADOW_FACTOR = 0.1;
+static const float SHADOW_FACTOR = 0.05;
 
 [[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
 [[vk::binding(0, 4)]] Texture2D shadowTransparencyColorMaps[] : register(t0, space4);
@@ -90,14 +90,16 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
     const float3 fragToLight = worldPos - light.position.xyz;
     const float currentDepth = length(fragToLight);
     const float3 dir = normalize(fragToLight);
+    const float viewDistance = length(scene.cameraPosition - worldPos);
+    const float diskRadius   = (1.0 + (viewDistance / light.range)) / 25.0;
     const float bias = 0.15;
-    const int samples = 10;
-    const float sampleRadius = 0.03; // PCF cone radius
+    const int samples = 20;
+    //const float diskRadius = 0.03; // PCF cone radius
     float shadow = 0.0;
 
     [unroll]
     for (int i = 0; i < samples; i++)     {
-        float3 offsetDir = normalize(dir + sampleOffsetDirections[i] * sampleRadius);
+        float3 offsetDir = normalize(fragToLight + sampleOffsetDirections[i] * diskRadius);
         SampledCube sc = sampleCube(offsetDir);
         float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]
             .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
@@ -106,8 +108,8 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
     }
 
     float3 factor = float3(shadow /= samples);
-     SampledCube sc = sampleCube(dir);
-     const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + sc.faceIndex]
+    SampledCube sc = sampleCube(dir);
+    const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + sc.faceIndex]
             .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv);
     if (transparencyColor.a != 1.0) {
         return lerp(transparencyColor.rgb, float3(1.0), factor);

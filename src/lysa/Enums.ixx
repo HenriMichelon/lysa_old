@@ -20,9 +20,9 @@ export namespace lysa {
         //! A maximized Window with a border and a title that can be minimized
         WINDOWED_MAXIMIZED = 1,
         //! A maximized Window without a border and without a title
-        // WINDOWED_FULLSCREEN = 2,
+        WINDOWED_FULLSCREEN = 2,
         //! A full-screen Window. The screen resolution will be changed
-        // FULLSCREEN = 3,
+        FULLSCREEN = 3,
     };
 
     /**

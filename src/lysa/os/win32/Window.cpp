@@ -45,11 +45,26 @@ namespace lysa {
         int y = config.y;
         int w = config.width;
         int h = config.height;
-        DWORD style{0};
+        DWORD style{WS_OVERLAPPEDWINDOW};
         DWORD exStyle{0};
-        if (w == 0 || h == 0 || config.mode == WindowMode::WINDOWED_MAXIMIZED) {
-            exStyle = WS_EX_APPWINDOW;
-            style = WS_POPUP | WS_MAXIMIZE;
+        if (config.mode == WindowMode::FULLSCREEN) {
+            DEVMODE dmScreenSettings = {};
+            dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+            dmScreenSettings.dmPelsWidth = w;
+            dmScreenSettings.dmPelsHeight = h;
+            dmScreenSettings.dmBitsPerPel = 32;
+            dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+            if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
+                throw Exception( "Display mode change to FULLSCREEN failed");
+            }
+        }
+        if (w == 0 || h == 0 || config.mode != WindowMode::WINDOWED) {
+            if (config.mode == WindowMode::WINDOWED_FULLSCREEN || config.mode == WindowMode::FULLSCREEN) {
+                exStyle = WS_EX_APPWINDOW;
+                style = WS_POPUP;
+            } else {
+                style =  WS_MAXIMIZE;
+            }
             auto monitorRect = RECT{};
             const auto hPrimary = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
             auto monitorInfo = MONITORINFOEX{};
@@ -65,9 +80,8 @@ namespace lysa {
             h = monitorRect.bottom - monitorRect.top;
             x = monitorRect.left;
             y = monitorRect.top;
-        } else {
-            style = WS_OVERLAPPEDWINDOW;
-            exStyle = 0;
+        }
+        if (config.mode == WindowMode::WINDOWED || config.mode == WindowMode::WINDOWED_MAXIMIZED) {
             auto windowRect = RECT{0, 0, static_cast<LONG>(w), static_cast<LONG>(h)};
             AdjustWindowRect(&windowRect, style, FALSE);
             x = config.x == -1 ?

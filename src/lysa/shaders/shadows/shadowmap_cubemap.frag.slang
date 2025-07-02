@@ -10,8 +10,8 @@ FragmentOutput fragmentMain(VertexOutput input) {
     Material mat = materials[input.materialIndex];
     float4 color = fetchColor(input, mat);
     FragmentOutput output;
-    if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
-        if (color.a < 0.1) {
+    if (mat.transparency != Transparency.DISABLED && color.a < 0.2) {
+        if (color.a < 0.05) {
             discard;
         }
         output.transparencyColor = color;

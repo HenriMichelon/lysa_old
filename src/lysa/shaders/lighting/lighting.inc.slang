@@ -128,10 +128,6 @@ float3 calcLight(
                     if (light.mapIndex != -1) {
                        factor = shadowFactorCubemap(light, worldPos);
                     }
-//                     const float3 dirToLight = normalize(light.position.xyz - worldPos);
-//                     float3 Lh = normalize(dirToLight + viewDirection);
-//                      float cosLi = max(0.0, dot(normal, dirToLight));
-//                     return float3(cosLi.xxx * 0.5 + 0.5);
                     diffuse += factor * calcPointLight(
                         light, color.rgb, normal, metallic, roughness,
                         viewDirection, worldPos, F0, cosLo);
