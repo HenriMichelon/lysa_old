@@ -59,25 +59,30 @@ namespace lysa {
 
         if (isCascaded) {
             subpassesCount = reinterpret_pointer_cast<DirectionalLight>(light)->getShadowMapCascadesCount();
-            if (subpassesCount < 3 || subpassesCount > 4) {
+            if (subpassesCount < 2 || subpassesCount > 4) {
                 throw Exception("Incorrect shadow map cascades count");
             }
         } else {
             subpassesCount = isCubeMap ? 6 : 1;
         }
         subpassData.resize(subpassesCount);
-        for (auto& data : subpassData) {
+        for (int i = 0; i < subpassesCount; i++) {
+            auto& data = subpassData[i];
             data.globalUniformBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform));
             data.globalUniformBuffer->map();
             data.descriptorSet = vireo.createDescriptorSet(descriptorLayout);
             data.descriptorSet->update(BINDING_GLOBAL, data.globalUniformBuffer);
+            int size = light->getShadowMapSize();
+            if (isCascaded) {
+                size = std::max(512, size >> i);
+            }
             data.shadowMap = vireo.createRenderTarget(
                 pipelineConfig.depthStencilImageFormat,
-                light->getShadowMapSize(), light->getShadowMapSize(),
+                size, size,
                 vireo::RenderTargetType::DEPTH);
             data.transparencyColorMap = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[0],
-                light->getShadowMapSize(), light->getShadowMapSize(),
+                size, size,
                 vireo::RenderTargetType::COLOR);
         }
     }
@@ -192,7 +197,7 @@ namespace lysa {
                     radius = std::ceil(radius * 16.0f) / 16.0f;
 
                     // Snap the frustum center to the nearest texel grid
-                    const auto shadowMapResolution = static_cast<float>(light->getShadowMapSize());
+                    const auto shadowMapResolution = static_cast<float>(subpassData[cascadeIndex].shadowMap->getImage()->getWidth());
                     const float worldUnitsPerTexel = (2.0f * radius) / shadowMapResolution;
                     frustumCenter.x = std::floor(frustumCenter.x / worldUnitsPerTexel) * worldUnitsPerTexel;
                     frustumCenter.y = std::floor(frustumCenter.y / worldUnitsPerTexel) * worldUnitsPerTexel;

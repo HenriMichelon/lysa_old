@@ -128,7 +128,7 @@ float3 calcLight(
                     }
                     factor = shadowFactor(light, cascadeIndex, worldPos);
                     // Transitioning between cascades
-                    if (factor.x >= 0.2 && cascadeIndex > 0 && cascadeIndex < light.cascadesCount) {
+                    if (factor.x >= 0.2 && (cascadeIndex > 0) && cascadeIndex < light.cascadesCount) {
                         float maxDepth = light.cascadeSplitDepth[cascadeIndex];
                         float fade = smoothstep(maxDepth - 0.5, maxDepth, -viewPosZ);
                         factor = lerp(shadowFactor(light, cascadeIndex-1, worldPos), factor, fade);

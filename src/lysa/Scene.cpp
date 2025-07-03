@@ -366,7 +366,7 @@ namespace lysa {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
                 frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
-            // commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            commandList.bindDescriptor(pipelineData->descriptorSet, set);
             // commandList.drawIndexedIndirect(
                 // pipelineData->drawCommandsBuffer,
                 // 0,
