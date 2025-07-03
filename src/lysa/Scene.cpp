@@ -364,23 +364,23 @@ namespace lysa {
         const std::map<pipeline_id, std::shared_ptr<vireo::Buffer>>& culledDrawCommandsCountBuffers,
         const std::map<pipeline_id, std::shared_ptr<FrustumCulling>>& frustumCullingPipelines) const {
         for (const auto& [pipelineId, pipelineData] : opaquePipelinesData) {
-            // if (pipelineData->drawCommandsCount == 0 ||
-                // frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
-            commandList.bindDescriptor(pipelineData->descriptorSet, set);
-            commandList.drawIndexedIndirect(
-                pipelineData->drawCommandsBuffer,
-                0,
-                pipelineData->drawCommandsCount,
-                sizeof(DrawCommand),
-                sizeof(uint32));
-            // commandList.drawIndexedIndirectCount(
-                // culledDrawCommandsBuffers.at(pipelineId),
-                // 0,
-                // culledDrawCommandsCountBuffers.at(pipelineId),
+            if (pipelineData->drawCommandsCount == 0 ||
+                frustumCullingPipelines.at(pipelineId)->getDrawCommandsCount() == 0) { continue; }
+            // commandList.bindDescriptor(pipelineData->descriptorSet, set);
+            // commandList.drawIndexedIndirect(
+                // pipelineData->drawCommandsBuffer,
                 // 0,
                 // pipelineData->drawCommandsCount,
                 // sizeof(DrawCommand),
                 // sizeof(uint32));
+            commandList.drawIndexedIndirectCount(
+                culledDrawCommandsBuffers.at(pipelineId),
+                0,
+                culledDrawCommandsCountBuffers.at(pipelineId),
+                0,
+                pipelineData->drawCommandsCount,
+                sizeof(DrawCommand),
+                sizeof(uint32));
         }
         for (const auto& [pipelineId, pipelineData] : shaderMaterialPipelinesData) {
             if (pipelineData->drawCommandsCount == 0 ||
