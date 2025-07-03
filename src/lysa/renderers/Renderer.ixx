@@ -46,19 +46,22 @@ export namespace lysa {
 
         void updatePipelines(const Scene& scene);
 
-        void update(const Scene& scene) const;
-
         virtual void update(uint32 frameIndex);
+
+        void compute(
+            vireo::CommandList& commandList,
+            Scene& scene,
+            uint32 frameIndex) const;
+
+        void preRender(
+            vireo::CommandList& commandList,
+            const Scene& scene,
+            uint32 frameIndex);
 
         void render(
             vireo::CommandList& commandList,
             const Scene& scene,
             bool clearAttachment,
-            uint32 frameIndex);
-
-        void prerender(
-            vireo::CommandList& commandList,
-            Scene& scene,
             uint32 frameIndex);
 
         void postprocess(

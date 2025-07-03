@@ -34,9 +34,11 @@ namespace lysa {
         for (auto& frame : framesData) {
             frame.inFlightFence = vireo.createFence(true, L"Present Fence");
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
+            frame.computeCommandList = frame.commandAllocator->createCommandList();
+            frame.preRenderCommandList = frame.commandAllocator->createCommandList();
             frame.renderCommandList = frame.commandAllocator->createCommandList();
-            frame.prerenderCommandList = frame.commandAllocator->createCommandList();
-            frame.prerenderSemaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
+            frame.computeSemaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
+            frame.preRenderSemaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
         }
         if (config.renderingConfig.rendererType == RendererType::FORWARD) {
             renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
@@ -83,7 +85,6 @@ namespace lysa {
             viewport->update(frameIndex);
             const auto& scene = viewport->getScene(frameIndex);
             if (scene->isMaterialsUpdated()) {
-                renderer->update(*scene);
                 renderer->updatePipelines(*scene);
             }
         }
@@ -113,18 +114,30 @@ namespace lysa {
         const auto& mainViewport = viewports.front();
         frame.commandAllocator->reset();
 
-        frame.prerenderCommandList->begin();
+        frame.computeCommandList->begin();
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            renderer->prerender(*frame.prerenderCommandList, scene, frameIndex);
-            viewport->updateDebug(*frame.prerenderCommandList, frameIndex);
+            renderer->compute(*frame.computeCommandList, scene, frameIndex);
         }
-        frame.prerenderCommandList->end();
-
+        frame.computeCommandList->end();
         Application::getGraphicQueue()->submit(
+            vireo::WaitStage::COMPUTE_SHADER,
+            frame.computeSemaphore,
+            {frame.computeCommandList});
+
+        frame.preRenderCommandList->begin();
+        for (const auto& viewport : viewports) {
+            auto& scene = *viewport->getScene(frameIndex);
+            renderer->preRender(*frame.preRenderCommandList, scene, frameIndex);
+            viewport->updateDebug(*frame.preRenderCommandList, frameIndex);
+        }
+        frame.preRenderCommandList->end();
+        Application::getGraphicQueue()->submit(
+            frame.computeSemaphore,
+            vireo::WaitStage::VERTEX_INPUT,
             vireo::WaitStage::ALL_COMMANDS,
-            frame.prerenderSemaphore,
-            {frame.prerenderCommandList});
+            frame.preRenderSemaphore,
+            {frame.preRenderCommandList});
 
         auto& commandList = frame.renderCommandList;
         commandList->begin();
@@ -156,7 +169,7 @@ namespace lysa {
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
         Application::getGraphicQueue()->submit(
-            frame.prerenderSemaphore,
+            frame.preRenderSemaphore,
             vireo::WaitStage::VERTEX_INPUT,
             frame.inFlightFence,
             swapChain,

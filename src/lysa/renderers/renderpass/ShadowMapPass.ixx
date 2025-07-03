@@ -107,7 +107,6 @@ export namespace lysa {
         const bool isCubeMap;
         const bool isCascaded;
         uint32 subpassesCount;
-        uint32 cascadesCount{1};
         std::shared_ptr<Camera> currentCamera;
         float3 lastLightPosition{-10000.0f};
         std::vector<SubpassData> subpassData;

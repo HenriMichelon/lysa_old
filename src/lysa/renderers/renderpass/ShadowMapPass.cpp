@@ -52,15 +52,13 @@ namespace lysa {
         }
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
-        const auto size = light->getShadowMapSize();
-        viewport.width = static_cast<float>(size);
+        viewport.width = static_cast<float>(light->getShadowMapSize());
         viewport.height = viewport.width;
-        scissors.width = size;
-        scissors.height = size;
+        scissors.width = light->getShadowMapSize();
+        scissors.height = scissors.width;
 
         if (isCascaded) {
-            cascadesCount = reinterpret_pointer_cast<DirectionalLight>(light)->getShadowMapCascadesCount();
-            subpassesCount = cascadesCount;
+            subpassesCount = reinterpret_pointer_cast<DirectionalLight>(light)->getShadowMapCascadesCount();
         } else {
             subpassesCount = isCubeMap ? 6 : 1;
         }
@@ -72,11 +70,11 @@ namespace lysa {
             data.descriptorSet->update(BINDING_GLOBAL, data.globalUniformBuffer);
             data.shadowMap = vireo.createRenderTarget(
                 pipelineConfig.depthStencilImageFormat,
-                size, size,
+                light->getShadowMapSize(), light->getShadowMapSize(),
                 vireo::RenderTargetType::DEPTH);
             data.transparencyColorMap = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[0],
-                size, size,
+                light->getShadowMapSize(), light->getShadowMapSize(),
                 vireo::RenderTargetType::COLOR);
         }
     }
@@ -122,7 +120,7 @@ namespace lysa {
         static constexpr auto aspectRatio{1};
         switch (light->getLightType()) {
             case Light::LIGHT_DIRECTIONAL: {
-                auto cascadeSplits = std::vector<float>(cascadesCount);
+                auto cascadeSplits = std::vector<float>(subpassesCount);
                 const auto& directionalLight = reinterpret_pointer_cast<DirectionalLight>(light);
                 const auto& lightDirection = directionalLight->getFrontVector();
                 const auto nearClip  = currentCamera->getNearDistance();
@@ -135,8 +133,8 @@ namespace lysa {
 
                 // Calculate split depths based on view camera frustum
                 // Based on the method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-                for (auto i = 0; i < cascadesCount; i++) {
-                    float p          = (i + 1) / static_cast<float>(cascadesCount);
+                for (auto i = 0; i < subpassesCount; i++) {
+                    float p          = (i + 1) / static_cast<float>(subpassesCount);
                     float log        = minZ * std::pow(ratio, p);
                     float uniform    = minZ + range * p;
                     float d          = cascadeSplitLambda * (log - uniform) + uniform;
@@ -146,7 +144,7 @@ namespace lysa {
                 // Calculate orthographic projection matrix for each cascade
                 float lastSplitDist = 0.0;
                 const auto invCam = inverse(mul(inverse(currentCamera->getTransformGlobal()), currentCamera->getProjection()));
-                for (auto cascadeIndex = 0; cascadeIndex < cascadesCount; cascadeIndex++) {
+                for (auto cascadeIndex = 0; cascadeIndex < subpassesCount; cascadeIndex++) {
                     const auto splitDist = cascadeSplits[cascadeIndex];
 
                     // Camera frustum corners in NDC space
@@ -191,7 +189,7 @@ namespace lysa {
                     radius = std::ceil(radius * 16.0f) / 16.0f;
 
                     // Snap the frustum center to the nearest texel grid
-                    const auto shadowMapResolution = static_cast<float>(subpassData[cascadeIndex].shadowMap->getImage()->getWidth());
+                    const auto shadowMapResolution = static_cast<float>(light->getShadowMapSize());
                     const float worldUnitsPerTexel = (2.0f * radius) / shadowMapResolution;
                     frustumCenter.x = std::floor(frustumCenter.x / worldUnitsPerTexel) * worldUnitsPerTexel;
                     frustumCenter.y = std::floor(frustumCenter.y / worldUnitsPerTexel) * worldUnitsPerTexel;
@@ -201,6 +199,8 @@ namespace lysa {
                     const auto maxExtents = float3(radius);
                     const auto minExtents = -maxExtents;
                     const float depth = maxExtents.z - minExtents.z;
+
+                    // INFO(to_string(frustumCenter));
 
                     // View & projection matrices
                     const auto eye = frustumCenter - lightDirection * -minExtents.z ;

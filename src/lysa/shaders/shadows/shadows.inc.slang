@@ -28,7 +28,7 @@ float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
     uint width, height;
     shadowMaps[light.mapIndex + cascadeIndex].GetDimensions(width, height);
     const float2 texelSize = 1.0 / float2(width, height);
-    const float bias = 0.0005;
+    const float bias = 0.005;
     float shadow = 0.0;
 
     [unroll]

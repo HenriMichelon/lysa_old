@@ -23,12 +23,6 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
     }
 
-    void Renderer::update(const Scene& scene) const {
-        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            shadowMapRenderer->update(0);
-        }
-    }
-
     void Renderer::update(const uint32 frameIndex) {
         depthPrePass.update(frameIndex);
         for (const auto& postProcessingPass : postProcessingPasses) {
@@ -47,18 +41,30 @@ namespace lysa {
         updatePipelines(pipelineIds);
     }
 
-    void Renderer::prerender(
+    void Renderer::compute(
            vireo::CommandList& commandList,
            Scene& scene,
-           const uint32 frameIndex) {
+           const uint32 frameIndex) const {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            shadowMapRenderer->update(frameIndex);
+        }
         scene.update(commandList);
         scene.compute(commandList);
-        const auto& frame = framesData[frameIndex];
+    }
+
+    void Renderer::preRender(
+       vireo::CommandList& commandList,
+       const Scene& scene,
+       const uint32 frameIndex) {
+        auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
+        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
+            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
+        }
         scene.setInitialState(commandList);
-        depthPrePass.render(commandList, scene, frame.depthAttachment);
+        depthPrePass.render(commandList, scene, framesData[frameIndex].depthAttachment);
     }
 
     void Renderer::render(
@@ -70,9 +76,6 @@ namespace lysa {
         const auto& frame = framesData[frameIndex];
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());
-        for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
-            static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->render(commandList, scene);
-        }
         scene.setInitialState(commandList);
         colorPass(commandList, scene, frame.colorAttachment, frame.depthAttachment, clearAttachment, frameIndex);
         shaderMaterialPass.render(commandList, scene, frame.colorAttachment, frame.depthAttachment, false, frameIndex);

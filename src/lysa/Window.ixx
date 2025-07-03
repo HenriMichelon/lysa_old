@@ -95,9 +95,11 @@ export namespace lysa {
             // frames rendering & presenting synchronization
             std::shared_ptr<vireo::Fence> inFlightFence;
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
+            std::shared_ptr<vireo::CommandList> computeCommandList;
+            std::shared_ptr<vireo::CommandList> preRenderCommandList;
             std::shared_ptr<vireo::CommandList> renderCommandList;
-            std::shared_ptr<vireo::CommandList> prerenderCommandList;
-            std::shared_ptr<vireo::Semaphore> prerenderSemaphore;
+            std::shared_ptr<vireo::Semaphore> computeSemaphore;
+            std::shared_ptr<vireo::Semaphore> preRenderSemaphore;
         };
 
         WindowConfiguration&  config;
