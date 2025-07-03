@@ -42,9 +42,9 @@ namespace lysa {
     }
 
     void Renderer::compute(
-           vireo::CommandList& commandList,
-           Scene& scene,
-           const uint32 frameIndex) const {
+       vireo::CommandList& commandList,
+       Scene& scene,
+       const uint32 frameIndex) const {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
             shadowMapRenderer->update(frameIndex);
@@ -54,9 +54,9 @@ namespace lysa {
     }
 
     void Renderer::preRender(
-       vireo::CommandList& commandList,
-       const Scene& scene,
-       const uint32 frameIndex) {
+        vireo::CommandList& commandList,
+        const Scene& scene,
+        const uint32 frameIndex) {
         auto resourcesLock = std::lock_guard{Application::getResources().getMutex()};
         commandList.bindVertexBuffer(Application::getResources().getVertexArray().getBuffer());
         commandList.bindIndexBuffer(Application::getResources().getIndexArray().getBuffer());

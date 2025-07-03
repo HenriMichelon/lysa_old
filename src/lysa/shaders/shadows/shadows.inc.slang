@@ -16,13 +16,13 @@ float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
        return 1.0;
     }
     projCoords.xy = projCoords.xy * 0.5 + 0.5;
-    projCoords.y = 1.0 - projCoords.y;
     const bool outOfView = (projCoords.x < 0.01 || projCoords.x > 0.99 || projCoords.y < 0.01|| projCoords.y > 0.99);
     if (outOfView) {
        return 1.0;
     }
+    projCoords.y = 1.0 - projCoords.y;
     const float closestDepth = shadowMaps[light.mapIndex + cascadeIndex]
-        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy).r;
+        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR_NOANI], projCoords.xy).r;
     const float currentDepth = projCoords.z;
 
     uint width, height;
@@ -36,13 +36,13 @@ float3 shadowFactor(Light light, int cascadeIndex, float3 worldPos) {
         [unroll]
         for(int y = -1; y <= 1; ++y) {
             float pcfDepth = shadowMaps[light.mapIndex + cascadeIndex]
-                .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy + float2(x, y) * texelSize.xy).r;
+                .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR_NOANI], projCoords.xy + float2(x, y) * texelSize.xy).r;
             shadow += (currentDepth - bias) > pcfDepth ? SHADOW_FACTOR : 1.0;
         }
     }
     float3 factor = float3(shadow /= 9.0);
     const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + cascadeIndex]
-        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], projCoords.xy);
+        .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR_NOANI], projCoords.xy);
     if (transparencyColor.a != 1.0) {
         return lerp(transparencyColor.rgb, float3(1.0), factor);
     }
@@ -101,7 +101,7 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
         float3 offsetDir = normalize(fragToLight + sampleOffsetDirections[i] * diskRadius);
         SampledCube sc = sampleCube(offsetDir);
         float sampledDepth = shadowMaps[light.mapIndex + sc.faceIndex]
-            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv).r;
+            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR_NOANI], sc.uv).r;
         sampledDepth *= light.range;
         shadow += (currentDepth - bias) > sampledDepth ? SHADOW_FACTOR : 1.0;
     }
@@ -109,7 +109,7 @@ float3 shadowFactorCubemap(Light light, float3 worldPos) {
     float3 factor = float3(shadow /= samples);
     SampledCube sc = sampleCube(dir);
     const float4 transparencyColor = shadowTransparencyColorMaps[light.mapIndex + sc.faceIndex]
-            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], sc.uv);
+            .Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR_NOANI], sc.uv);
     if (transparencyColor.a != 1.0) {
         return lerp(transparencyColor.rgb, float3(1.0), factor);
     }

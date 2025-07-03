@@ -59,6 +59,9 @@ namespace lysa {
 
         if (isCascaded) {
             subpassesCount = reinterpret_pointer_cast<DirectionalLight>(light)->getShadowMapCascadesCount();
+            if (subpassesCount < 3 || subpassesCount > 4) {
+                throw Exception("Incorrect shadow map cascades count");
+            }
         } else {
             subpassesCount = isCubeMap ? 6 : 1;
         }
@@ -137,7 +140,7 @@ namespace lysa {
                     float p          = (i + 1) / static_cast<float>(subpassesCount);
                     float log        = minZ * std::pow(ratio, p);
                     float uniform    = minZ + range * p;
-                    float d          = cascadeSplitLambda * (log - uniform) + uniform;
+                    float d          = directionalLight->getCascadeSplitLambda() * (log - uniform) + uniform;
                     cascadeSplits[i] = (d - nearClip) / clipRange;
                 }
 
@@ -200,20 +203,13 @@ namespace lysa {
                     const auto minExtents = -maxExtents;
                     const float depth = maxExtents.z - minExtents.z;
 
-                    // INFO(to_string(frustumCenter));
-
                     // View & projection matrices
                     const auto eye = frustumCenter - lightDirection * -minExtents.z ;
                     const auto viewMatrix = lookAt(eye, frustumCenter, AXIS_UP);
-                    // const auto viewMatrix = lookAt(float3{10}, float3{0}, AXIS_UP);
                     auto lightProjection = orthographic(
                         minExtents.x, maxExtents.x,
                         maxExtents.y, minExtents.y,
                         -depth, depth);
-                    // auto lightProjection = orthographic(
-                        // -100, 100,
-                        // 100, -100,
-                        // -100, 100);
 
                     // https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering
                     // Create the rounding matrix by projecting the world-space origin and determining
@@ -227,7 +223,6 @@ namespace lysa {
                     roundOffset.z = 0.0f;
                     roundOffset.w = 0.0f;
                     lightProjection[3] += roundOffset;
-                    lastSplitDist = cascadeSplits[cascadeIndex];
 
                     subpassData[cascadeIndex].inverseViewMatrix = inverse(viewMatrix);
                     subpassData[cascadeIndex].projection = lightProjection;
@@ -236,6 +231,7 @@ namespace lysa {
                     subpassData[cascadeIndex].globalUniform.transparencyScissor = light->getShadowTransparencyScissors();
                     subpassData[cascadeIndex].globalUniform.transparencyColorScissor = light->getShadowTransparencyColorScissors();
                     subpassData[cascadeIndex].globalUniformBuffer->write(&subpassData[cascadeIndex].globalUniform);
+                    lastSplitDist = cascadeSplits[cascadeIndex];
                 }
                 break;
             }

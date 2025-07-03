@@ -30,6 +30,13 @@ namespace lysa {
             vireo::Filter::LINEAR,
             vireo::AddressMode::CLAMP_TO_EDGE,
             vireo::AddressMode::CLAMP_TO_EDGE);
+        addSampler(
+            vireo::Filter::LINEAR,
+            vireo::Filter::LINEAR,
+            vireo::AddressMode::CLAMP_TO_EDGE,
+            vireo::AddressMode::CLAMP_TO_EDGE,
+            0.0f, vireo::Sampler::LOD_CLAMP_NONE,
+            false);
         // Used by 90% of materials for textures
         addSampler(
             vireo::Filter::LINEAR,

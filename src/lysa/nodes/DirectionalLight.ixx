@@ -39,6 +39,14 @@ export namespace lysa {
          */
         auto getShadowMapCascadesCount() const { return shadowMapCascadesCount; }
 
+        auto getCascadeSplitLambda() const { return cascadeSplitLambda; }
+
+        /**
+         * Lambda constant for split depth calculation:
+         * the closer to 1.0 the smaller the firsts splits
+         */
+        void setCascadeSplitLambda(const float cascadeSplitLambda) { this->cascadeSplitLambda = cascadeSplitLambda; }
+
         LightData getLightData() const override;
 
         void setProperty(const std::string &property, const std::string &value) override;
@@ -48,6 +56,7 @@ export namespace lysa {
 
     private:
         uint32 shadowMapCascadesCount{3};
+        float cascadeSplitLambda{.98f};
     };
 
 }

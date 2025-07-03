@@ -77,12 +77,6 @@ export namespace lysa {
         static constexpr uint32 SET_SAMPLERS{4};
         static constexpr vireo::DescriptorIndex BINDING_GLOBAL{0};
 
-        static constexpr uint32 CASCADED_SHADOWMAP_MAX_LAYERS = 4;
-
-        // Lambda constant for split depth calculation :
-        // the closer to 1.0 the smaller the firsts splits
-        static constexpr auto cascadeSplitLambda = 0.95f;
-
         struct GlobalUniform {
             float4x4 lightSpace;
             float4   lightPosition; // XYZ: Position, W: far plane

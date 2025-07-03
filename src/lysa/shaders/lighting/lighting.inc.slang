@@ -112,8 +112,8 @@ float3 calcLight(
     // Fresnel reflectance at normal incidence (for metals use albedo color).
     float3 F0 = lerp(Fdielectric, color.rgb, metallic);
     // Calculate the diffuse light from the scene's lights
-    for (uint i = 0; i < scene.lightsCount; i++) {
-        Light light = lights.light[i];
+    for (uint lightIndex = 0; lightIndex < scene.lightsCount; lightIndex++) {
+        Light light = lights.light[lightIndex];
         float3 factor = float3(1.0, 1.0, 1.0);
         switch (light.type) {
             case LIGHT_DIRECTIONAL: {
@@ -126,17 +126,18 @@ float3 calcLight(
                             cascadeIndex = index + 1;
                         }
                     }
-                    // Get the shadow factor for the cascade
                     factor = shadowFactor(light, cascadeIndex, worldPos);
-                    // If no shadow try the next cascades (for objets behind the light position in the cascade)
-                    if ((factor.x >= 0.1) && (cascadeIndex < light.cascadesCount)) {
+                    // Transitioning between cascades
+                    if (factor.x >= 0.2 && cascadeIndex > 0 && cascadeIndex < light.cascadesCount) {
+                        float maxDepth = light.cascadeSplitDepth[cascadeIndex];
+                        float fade = smoothstep(maxDepth - 0.5, maxDepth, -viewPosZ);
+                        factor = lerp(shadowFactor(light, cascadeIndex-1, worldPos), factor, fade);
+                    }
+                     if ((factor.x >= 0.2) && (cascadeIndex < light.cascadesCount)) {
                         float3 nextFactor = shadowFactor(light, cascadeIndex +1, worldPos);
-                        if (nextFactor.x < 0.1) factor = nextFactor;
+                        if (nextFactor.x < 0.2f) factor = nextFactor;
                     }
-                    if ((factor.x >= 0.1) && ((cascadeIndex+1) < light.cascadesCount)) {
-                        float3 nextFactor = shadowFactor(light, cascadeIndex +2, worldPos);
-                        if (nextFactor.x < 0.1) factor = nextFactor;
-                    }
+                    // Get the shadow factor for the cascade
                     // Display the cascade splits for debug
                     /*switch (cascadeIndex) {
                         case 0 :
