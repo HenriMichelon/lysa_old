@@ -29,20 +29,29 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex);
 
+        void resize(const vireo::Extent& extent) override;
+
     private:
         const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc = { { } },
+            .colorBlendDesc = { {}, {} },
             .depthTestEnable = true,
+            .depthWriteEnable = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{ }},
+            .colorRenderTargets = {{}, { .clear = true }},
             .depthTestEnable = pipelineConfig.depthTestEnable,
         };
 
+        struct FrameData {
+            std::shared_ptr<vireo::RenderTarget> brightnessBuffer;
+        };
+
+        int buffersResized{0};
+        std::vector<FrameData> framesData;
         std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
 
     };

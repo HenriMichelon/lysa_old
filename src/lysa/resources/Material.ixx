@@ -29,9 +29,9 @@ export namespace lysa {
         float  alphaScissor{0.1f};
         float  normalScale{1.0f};
 
-        float  metallicFactor{-1.0f}; // -1.0f -> non PBR material
+        float  metallicFactor{0.0f};
         float  roughnessFactor{1.0f};
-        float3 emissiveFactor{0.0f};
+        float4 emissiveFactor{0.0f, 0.0f, 0.0f, 1.0f}; // factor + strength
 
         TextureInfoData diffuseTexture{};
         TextureInfoData normalTexture{};
@@ -200,22 +200,32 @@ export namespace lysa {
         void setRoughnessTexture(const TextureInfo &texture);
 
         /**
-         * Returns the emmisive colors image texture
+         * Returns the emissive colors image texture
          */
         const auto& getEmissiveTexture() const { return emissiveTexture; }
 
         /**
-         * Return the emmisive colors factor
+         * Return the emissive colors factor
          */
         float3 getEmissiveFactor() const { return emissiveFactor; }
 
         /**
-         * Sets the emmisive colors factore
+         * Sets the emissive colors factor
          */
         void setEmissiveFactor(const float3& emissive);
 
         /**
-         * Sets the emmisive colors image texture. Used as a linear RGB texture by the default shader.
+         * Return the emissive colors strength
+         */
+        float getEmissiveStrength() const { return emissiveStrength; }
+
+        /**
+         * Sets the emissive colors strength
+         */
+        void setEmissiveStrength(float strength);
+
+        /**
+         * Sets the emissive colors image texture. Used as a linear RGB texture by the default shader.
          */
         void setEmissiveTexture(const TextureInfo& texture);
 
@@ -243,6 +253,7 @@ export namespace lysa {
         float        roughnessFactor{1.0f};
         TextureInfo  roughnessTexture{};
         float3       emissiveFactor{0.0f};
+        float        emissiveStrength{1.0f};
         TextureInfo  emissiveTexture;
         TextureInfo  normalTexture{};
         float        normalScale{1.0f};

@@ -112,10 +112,10 @@ float fetchRoughness(VertexOutput input, Material mat) {
 }
 
 float3 fetchEmissiveColor(VertexOutput input, Material mat) {
-    float3 emissiveColor = mat.emissiveFactor;
+    float3 emissiveColor = mat.emissiveFactor.rgb;
     if (mat.emissiveTexture.index != -1) {
-        emissiveColor *= toLinear(textures[mat.emissiveTexture.index].Sample(
-           samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv))).rgb;
+        emissiveColor *= textures[mat.emissiveTexture.index].Sample(
+           samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv)).rgb * mat.emissiveFactor.a;
     }
     return emissiveColor;
 }

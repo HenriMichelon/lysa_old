@@ -35,7 +35,7 @@ namespace lysa {
             .normalScale = normalScale,
             .metallicFactor = metallicFactor,
             .roughnessFactor = roughnessFactor,
-            .emissiveFactor = emissiveFactor,
+            .emissiveFactor = float4{emissiveFactor, emissiveStrength}
         };
         if (diffuseTexture.texture) {
             data.diffuseTexture = {
@@ -113,6 +113,11 @@ namespace lysa {
 
     void StandardMaterial::setMetallicFactor(const float metallic) {
         this->metallicFactor = metallic;
+        upload();
+    }
+
+    void StandardMaterial::setEmissiveStrength(const float strength) {
+        this->emissiveStrength = strength;
         upload();
     }
 

@@ -6,11 +6,23 @@
 */
 #include "forward.inc.slang"
 
-float4 fragmentMain(VertexOutput input) : SV_TARGET {
+struct FragmentOutput {
+    float4 color : SV_TARGET0;
+    float4 brightness : SV_TARGET1;
+};
+
+FragmentOutput fragmentMain(VertexOutput input)  {
     Material mat = materials[input.materialIndex];
     float4 color = fetchColor(input, mat);
     if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
        discard;
     }
-    return getColor(input, mat, color);
+    FragmentOutput output;
+    output.color = getColor(input, mat, color);
+    float brightness = dot(output.color.rgb, float3(0.2126, 0.7152, 0.0722));
+    if (brightness > 1.0)
+        output.brightness = float4(output.color.rgb, 1.0);
+    else
+        output.brightness = float4(0.0, 0.0, 0.0, 1.0);
+    return output;
 }

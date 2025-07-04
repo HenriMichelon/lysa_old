@@ -49,8 +49,7 @@ struct Material {
     float _pad1;
     float _pad2;
 
-    float3 emissiveFactor;
-    float _pad3;
+    float4 emissiveFactor;  // factor + strength
 
     TextureInfo diffuseTexture;
     TextureInfo normalTexture;

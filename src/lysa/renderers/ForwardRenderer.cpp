@@ -39,5 +39,6 @@ namespace lysa {
 
     void ForwardRenderer::resize(const vireo::Extent& extent) {
         Renderer::resize(extent);
+        forwardColorPass.resize(extent);
     }
 }
