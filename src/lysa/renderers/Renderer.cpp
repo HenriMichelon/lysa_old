@@ -93,6 +93,10 @@ namespace lysa {
                 frame.colorAttachment,
                 vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::SHADER_READ);
+            commandList.barrier(
+               frame.depthAttachment,
+               vireo::ResourceState::UNDEFINED,
+               vireo::ResourceState::SHADER_READ);
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(
                     frameIndex,
@@ -103,6 +107,10 @@ namespace lysa {
                     commandList,
                     postProcessingPass != postProcessingPasses.back());
             });
+            commandList.barrier(
+               frame.depthAttachment,
+               vireo::ResourceState::SHADER_READ,
+               vireo::ResourceState::UNDEFINED);
             commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::SHADER_READ,
