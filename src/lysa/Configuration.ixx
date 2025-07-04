@@ -88,8 +88,10 @@ export namespace lysa {
 
     struct RenderingConfiguration {
         RendererType       rendererType{RendererType::DEFERRED};
-        //! Swap chain image format
-        vireo::ImageFormat renderingFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
+        //! Main color rendering pass frame buffer format
+        vireo::ImageFormat colorRenderingFormat{vireo::ImageFormat::R16G16B16A16_UNORM};
+        //! Postprocessing & swap chain image format
+        vireo::ImageFormat swapChainFormat{vireo::ImageFormat::R8G8B8A8_UNORM};
         //! Depth and stencil buffer format
         vireo::ImageFormat depthStencilFormat{vireo::ImageFormat::D32_SFLOAT_S8_UINT};
         //! MSAA samples count

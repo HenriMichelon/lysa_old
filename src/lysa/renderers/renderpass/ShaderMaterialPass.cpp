@@ -16,7 +16,7 @@ namespace lysa {
     ShaderMaterialPass::ShaderMaterialPass(
         const RenderingConfiguration& config):
         Renderpass{config, L"ShaderMaterialPass"} {
-        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
+        pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({

@@ -50,7 +50,10 @@ export namespace lysa {
 
         void waitIdle() const;
 
-        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0) const;
+        void addPostprocessing(
+            const std::wstring& fragShaderName,
+            bool useRenderingColorAttachmentFormat = true,
+            void* data = nullptr, uint32 dataSize = 0) const;
 
         void removePostprocessing(const std::wstring& fragShaderName) const;
 

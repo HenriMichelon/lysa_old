@@ -38,7 +38,7 @@ namespace lysa {
         pipelineConfig.depthTestEnable = depthTestEnable;
         pipelineConfig.depthWriteEnable = depthTestEnable;
         pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
-        pipelineConfig.colorRenderFormats.push_back(renderingConfiguration.renderingFormat);
+        pipelineConfig.colorRenderFormats.push_back(renderingConfiguration.swapChainFormat);
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();

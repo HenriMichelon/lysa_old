@@ -34,7 +34,7 @@ export namespace lysa {
 
         virtual void resize(const vireo::Extent& extent);
 
-        std::shared_ptr<vireo::Image> getColorImage(uint32 frameIndex) const;
+        std::shared_ptr<vireo::RenderTarget> getColorAttachment(uint32 frameIndex) const;
 
         auto getColorRenderTarget(const uint32 frameIndex) const {
             return framesData[frameIndex].colorAttachment;
@@ -70,7 +70,11 @@ export namespace lysa {
             const vireo::Rect&scissor,
             uint32 frameIndex);
 
-        void addPostprocessing(const std::wstring& fragShaderName, void* data = nullptr, uint32 dataSize = 0);
+        void addPostprocessing(
+            const std::wstring& fragShaderName,
+            bool useRenderingColorAttachmentFormat,
+            void* data = nullptr,
+            uint32 dataSize = 0);
 
         void removePostprocessing(const std::wstring& fragShaderName);
 

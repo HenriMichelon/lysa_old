@@ -118,9 +118,9 @@ namespace lysa {
         }
     }
 
-    std::shared_ptr<vireo::Image> Renderer::getColorImage(const uint32 frameIndex) const {
+    std::shared_ptr<vireo::RenderTarget> Renderer::getColorAttachment(const uint32 frameIndex) const {
         if (postProcessingPasses.empty()) {
-            return framesData[frameIndex].colorAttachment->getImage();
+            return framesData[frameIndex].colorAttachment;
         }
         return postProcessingPasses.back()->getColorAttachment(frameIndex);
     }
@@ -129,7 +129,7 @@ namespace lysa {
         currentExtent = extent;
         for (auto& frame : framesData) {
             frame.colorAttachment = Application::getVireo().createRenderTarget(
-                config.renderingFormat,
+                config.colorRenderingFormat,
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
                 {config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f},
@@ -151,10 +151,15 @@ namespace lysa {
         }
     }
 
-    void Renderer::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) {
+    void Renderer::addPostprocessing(
+        const std::wstring& fragShaderName,
+        const bool useRenderingColorAttachmentFormat,
+        void* data,
+        const uint32 dataSize) {
         const auto postProcessingPass = std::make_shared<PostProcessing>(
             config,
             fragShaderName,
+            useRenderingColorAttachmentFormat,
             data,
             dataSize,
             fragShaderName);

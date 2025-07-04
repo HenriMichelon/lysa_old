@@ -28,7 +28,7 @@ namespace lysa {
         descriptorLayout->add(BINDING_EMISSIVE_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayout->build();
 
-        pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
+        pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.backStencilOpState = pipelineConfig.frontStencilOpState;
         pipelineConfig.resources = vireo.createPipelineResources({

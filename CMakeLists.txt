@@ -82,25 +82,25 @@ set(HLSLPP_SRC_DIR ${DEPENDS_SRC_DIR}/${HLSLPP_TARGET})
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
-#        "${SHADERS_SRC_DIR}/default.vert.slang"
-#        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
-#        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
-#        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
-#        "${SHADERS_SRC_DIR}/quad.vert.slang"
-#        "${SHADERS_SRC_DIR}/vector.slang"
-#        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
+        "${SHADERS_SRC_DIR}/default.vert.slang"
+        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
+        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
+        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
+        "${SHADERS_SRC_DIR}/quad.vert.slang"
+        "${SHADERS_SRC_DIR}/vector.slang"
+        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
         "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
         "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
         "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
 )
-add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES} )
+add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES})
 
 #######################################################
 # xxHash library

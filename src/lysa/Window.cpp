@@ -23,7 +23,7 @@ namespace lysa {
         config{config},
         windowHandle{createWindow()},
         swapChain{Application::getVireo().createSwapChain(
-            config.renderingConfig.renderingFormat,
+            config.renderingConfig.swapChainFormat,
             Application::getGraphicQueue(),
             windowHandle,
             config.renderingConfig.presentMode,
@@ -148,23 +148,27 @@ namespace lysa {
                 scene,
                 viewport == mainViewport,
                 frameIndex);
-            viewport->drawDebug(
-                *commandList,
-                scene,
-                renderer->getColorRenderTarget(frameIndex),
-                renderer->getDepthRenderTarget(frameIndex),
-                frameIndex);
         }
         renderer->postprocess(
             *commandList,
             mainViewport->getViewport(),
             mainViewport->getScissors(),
             swapChain->getCurrentFrameIndex());
+        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
 
-        const auto colorAttachment = renderer->getColorImage(frameIndex);
+        for (const auto& viewport : viewports) {
+            auto& scene = *viewport->getScene(frameIndex);
+            viewport->drawDebug(
+                *commandList,
+                scene,
+                colorAttachment,
+                renderer->getDepthRenderTarget(frameIndex),
+                frameIndex);
+        }
+
         commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
-        commandList->copy(colorAttachment, swapChain);
+        commandList->copy(colorAttachment->getImage(), swapChain);
         commandList->barrier(swapChain, vireo::ResourceState::COPY_DST, vireo::ResourceState::PRESENT);
         commandList->barrier(colorAttachment, vireo::ResourceState::COPY_SRC,vireo::ResourceState::UNDEFINED);
         commandList->end();
@@ -196,9 +200,12 @@ namespace lysa {
         swapChain->waitIdle();
     }
 
-    void Window::addPostprocessing(const std::wstring& fragShaderName, void* data, const uint32 dataSize) const {
+    void Window::addPostprocessing(
+        const std::wstring& fragShaderName,
+        const bool useRenderingColorAttachmentFormat,
+        void* data, const uint32 dataSize) const {
         waitIdle();
-        renderer->addPostprocessing(fragShaderName, data, dataSize);
+        renderer->addPostprocessing(fragShaderName, useRenderingColorAttachmentFormat, data, dataSize);
     }
 
     void Window::removePostprocessing(const std::wstring& fragShaderName) const {

@@ -37,7 +37,7 @@ namespace lysa {
         compositeDescriptorLayout->add(BINDING_REVEALAGE_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
         compositeDescriptorLayout->build();
 
-        compositePipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
+        compositePipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
         compositePipelineConfig.resources = vireo.createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),

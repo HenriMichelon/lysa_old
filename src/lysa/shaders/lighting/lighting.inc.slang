@@ -182,6 +182,5 @@ float3 calcLight(
             }
         }
     }
-    diffuse = clamp(diffuse, 0.0, 1.0);
     return float3(diffuse + ambient + emissiveColor);
 }
