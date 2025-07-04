@@ -20,9 +20,10 @@ namespace lysa {
         Renderpass{config, name},
         fragShaderName{fragShaderName},
         data{data},
-        descriptorLayout{Application::getVireo().createDescriptorLayout(name)} {
+        descriptorLayout{Application::getVireo().createDescriptorLayout(name)},
+        descriptorLayoutBuffers{Application::getVireo().createDescriptorLayout(name)}{
+
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
-        descriptorLayout->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
         if (data) {
             descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
             dataUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
@@ -32,11 +33,16 @@ namespace lysa {
         }
         descriptorLayout->build();
 
+        descriptorLayoutBuffers->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayoutBuffers->add(BINDING_DEPTH_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayoutBuffers->build();
+
         const auto& vireo = Application::getVireo();
         pipelineConfig.colorRenderFormats.push_back(config.renderingFormat);
         pipelineConfig.resources = vireo.createPipelineResources({
             descriptorLayout,
-            Application::getResources().getSamplers().getDescriptorLayout()},
+            Application::getResources().getSamplers().getDescriptorLayout(),
+            descriptorLayoutBuffers},
             {},
             name);
         pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
@@ -52,6 +58,7 @@ namespace lysa {
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);
             }
+            frame.descriptorSetBuffers = vireo.createDescriptorSet(descriptorLayoutBuffers, name);
         }
     }
 
@@ -66,11 +73,13 @@ namespace lysa {
         const vireo::Viewport& viewport,
         const vireo::Rect& scissor,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         vireo::CommandList& commandList,
         const bool) {
         auto& frame = framesData[frameIndex];
 
-        frame.descriptorSet->update(BINDING_INPUT, colorAttachment->getImage());
+        frame.descriptorSetBuffers->update(BINDING_INPUT, colorAttachment->getImage());
+        frame.descriptorSetBuffers->update(BINDING_DEPTH_BUFFER, depthAttachment->getImage());
         renderingConfig.colorRenderTargets[0].renderTarget = frame.colorAttachment;
         commandList.barrier(
             frame.colorAttachment,
@@ -82,7 +91,8 @@ namespace lysa {
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors({
             frame.descriptorSet,
-            Application::getResources().getSamplers().getDescriptorSet()});
+            Application::getResources().getSamplers().getDescriptorSet(),
+            frame.descriptorSetBuffers});
         commandList.draw(3);
         commandList.endRendering();
         commandList.barrier(

@@ -16,5 +16,7 @@ struct Params {
     float time;
 };
 
-[[vk::binding(0, 0)]] ConstantBuffer<Params> params : register(b0);
-[[vk::binding(1, 0)]] Texture2D inputImage          : register(t1);
+[[vk::binding(0, 0)]] ConstantBuffer<Params> params : register(b0, space0);
+
+[[vk::binding(0, 2)]] Texture2D inputImage  : register(t0, space2);
+[[vk::binding(1, 2)]] Texture2D depthBuffer : register(t1, space2);

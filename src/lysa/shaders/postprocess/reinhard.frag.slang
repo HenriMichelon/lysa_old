@@ -12,5 +12,6 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     float4 color = inputImage.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     float depth = depthBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).r;
     color.rgb = applyExposure(color.rgb, depth, data.exposure);
+    color.rgb = toneMapReinhard(color.rgb);
     return gammaCorrection(color, data.gamma);
 }

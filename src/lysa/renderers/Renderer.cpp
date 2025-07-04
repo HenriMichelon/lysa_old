@@ -99,6 +99,7 @@ namespace lysa {
                     viewport,
                     scissor,
                     frame.colorAttachment,
+                    frame.depthAttachment,
                     commandList,
                     postProcessingPass != postProcessingPasses.back());
             });

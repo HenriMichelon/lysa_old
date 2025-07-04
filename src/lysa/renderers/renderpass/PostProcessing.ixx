@@ -30,6 +30,7 @@ export namespace lysa {
            const vireo::Viewport&viewport,
            const vireo::Rect&scissor,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
            vireo::CommandList& commandList,
            bool recordLastBarrier);
 
@@ -45,9 +46,10 @@ export namespace lysa {
         const std::wstring VERTEX_SHADER{L"quad.vert"};
 
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
-        static constexpr vireo::DescriptorIndex BINDING_INPUT{1};
-        static constexpr vireo::DescriptorIndex BINDING_DATA{2};
-        static constexpr vireo::DescriptorIndex BINDING_SAMPLERS{0};
+        static constexpr vireo::DescriptorIndex BINDING_DATA{1};
+
+        static constexpr vireo::DescriptorIndex BINDING_INPUT{0};
+        static constexpr vireo::DescriptorIndex BINDING_DEPTH_BUFFER{1};
 
         struct PostProcessingParams {
             uint2  imageSize;
@@ -58,6 +60,7 @@ export namespace lysa {
             PostProcessingParams                  params;
             std::shared_ptr<vireo::Buffer>        paramsUniform;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+            std::shared_ptr<vireo::DescriptorSet> descriptorSetBuffers;
             std::shared_ptr<vireo::RenderTarget>  colorAttachment;
         };
 
@@ -74,6 +77,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer>           dataUniform{nullptr};
         std::vector<FrameData>                   framesData;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
+        std::shared_ptr<vireo::DescriptorLayout> descriptorLayoutBuffers;
         std::shared_ptr<vireo::GraphicPipeline>  pipeline;
 
     };
