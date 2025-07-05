@@ -90,6 +90,7 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/vector.slang"
         "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
         "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
         "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
         "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
         "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"

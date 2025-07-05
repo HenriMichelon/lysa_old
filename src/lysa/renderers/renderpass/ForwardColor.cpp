@@ -17,7 +17,7 @@ namespace lysa {
         const RenderingConfiguration& config):
         Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Color
-        if ( config.bloomEnabled) {
+        if (config.bloomEnabled) {
             pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Brightness
             pipelineConfig.colorBlendDesc.push_back({});
             renderingConfig.colorRenderTargets.push_back({ .clear = true });

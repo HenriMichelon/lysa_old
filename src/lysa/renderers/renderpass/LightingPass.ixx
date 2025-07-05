@@ -28,9 +28,16 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex);
 
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
+
+        auto getBrightnessBuffer(const uint32 frameIndex) const {
+            return framesData[frameIndex].brightnessBuffer;
+        }
+
     private:
         const std::wstring VERTEX_SHADER{L"quad.vert"};
         const std::wstring FRAGMENT_SHADER{L"glighting.frag"};
+        const std::wstring FRAGMENT_SHADER_BLOOM{L"glighting_bloom.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{0};
         static constexpr vireo::DescriptorIndex BINDING_NORMAL_BUFFER{1};
@@ -39,6 +46,7 @@ export namespace lysa {
 
         struct FrameData {
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
+            std::shared_ptr<vireo::RenderTarget> brightnessBuffer;
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
