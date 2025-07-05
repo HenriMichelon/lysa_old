@@ -27,7 +27,7 @@ export namespace lysa {
             const std::unordered_map<pipeline_id,
             std::vector<std::shared_ptr<Material>>>& pipelineIds) override;
 
-        void resize(const vireo::Extent& extent) override;
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
     protected:
         void colorPass(

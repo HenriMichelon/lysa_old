@@ -32,7 +32,7 @@ export namespace lysa {
             bool withStencil,
             const std::wstring& name);
 
-        virtual void resize(const vireo::Extent& extent);
+        virtual void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList);
 
         std::shared_ptr<vireo::RenderTarget> getColorAttachment(uint32 frameIndex) const;
 

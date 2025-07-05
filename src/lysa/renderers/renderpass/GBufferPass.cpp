@@ -51,18 +51,6 @@ namespace lysa {
         const bool,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (buffersResized) {
-            commandList.barrier(
-                {
-                    frame.positionBuffer,
-                    frame.normalBuffer,
-                    frame.albedoBuffer,
-                    frame.emissiveBuffer
-                },
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::SHADER_READ);
-            buffersResized--;
-        }
 
         renderingConfig.colorRenderTargets[BUFFER_POSITION].renderTarget = frame.positionBuffer;
         renderingConfig.colorRenderTargets[BUFFER_NORMAL].renderTarget = frame.normalBuffer;
@@ -100,7 +88,7 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED);
     }
 
-    void GBufferPass::resize(const vireo::Extent& extent) {
+    void GBufferPass::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         const auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
             frame.positionBuffer = vireo.createRenderTarget(
@@ -135,7 +123,15 @@ namespace lysa {
                 1,
                 vireo::MSAA::NONE,
                 L"Emissive");
+            commandList->barrier(
+                {
+                    frame.positionBuffer,
+                    frame.normalBuffer,
+                    frame.albedoBuffer,
+                    frame.emissiveBuffer
+                },
+                vireo::ResourceState::UNDEFINED,
+                vireo::ResourceState::SHADER_READ);
         }
-        buffersResized = config.framesInFlight;
     }
 }

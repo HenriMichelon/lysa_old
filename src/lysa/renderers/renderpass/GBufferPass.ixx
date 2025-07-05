@@ -30,7 +30,7 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex);
 
-        void resize(const vireo::Extent& extent) override;
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
         auto getPositionBuffer(const uint32 frameIndex) const {
             return framesData[frameIndex].positionBuffer;
@@ -102,7 +102,6 @@ export namespace lysa {
             .stencilTestEnable  = pipelineConfig.stencilTestEnable,
         };
 
-        int buffersResized{0};
         std::vector<FrameData> framesData;
         std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
     };

@@ -29,7 +29,7 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex);
 
-        void resize(const vireo::Extent& extent) override;
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
     private:
         const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
@@ -50,7 +50,6 @@ export namespace lysa {
             std::shared_ptr<vireo::RenderTarget> brightnessBuffer;
         };
 
-        int buffersResized{0};
         std::vector<FrameData> framesData;
         std::unordered_map<pipeline_id, std::shared_ptr<vireo::GraphicPipeline>> pipelines;
 

@@ -34,9 +34,9 @@ namespace lysa {
         lightingPass.render(commandList, scene, colorAttachment, depthAttachment, true, frameIndex);
     }
 
-    void DeferredRenderer::resize(const vireo::Extent& extent) {
-        Renderer::resize(extent);
-        gBufferPass.resize(extent);
+    void DeferredRenderer::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
+        Renderer::resize(extent, commandList);
+        gBufferPass.resize(extent, commandList);
     }
 
 }

@@ -75,8 +75,7 @@ namespace lysa {
         const vireo::Rect& scissor,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
-        vireo::CommandList& commandList,
-        const bool) {
+        vireo::CommandList& commandList) {
         auto& frame = framesData[frameIndex];
 
         frame.descriptorSetBuffers->update(BINDING_INPUT, colorAttachment->getImage());
@@ -99,13 +98,13 @@ namespace lysa {
         commandList.barrier(
             frame.colorAttachment,
             vireo::ResourceState::RENDER_TARGET_COLOR,
-            vireo::ResourceState::UNDEFINED);
+            vireo::ResourceState::SHADER_READ);
     }
 
-    void PostProcessing::resize(const vireo::Extent& extent) {
+    void PostProcessing::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         for (auto& frame : framesData) {
             frame.colorAttachment = Application::getVireo().createRenderTarget(
-                config.swapChainFormat,
+                pipelineConfig.colorRenderFormats[0],
                 extent.width, extent.height,
                 vireo::RenderTargetType::COLOR,
     {},

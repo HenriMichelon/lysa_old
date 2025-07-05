@@ -18,7 +18,6 @@ namespace lysa {
         Renderpass{config, L"ShaderMaterialPass"} {
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
-        pipelineConfig.depthWriteEnable = true; //!config.forwardDepthPrepass;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout(),
@@ -51,11 +50,7 @@ namespace lysa {
                         fragShaderName = shaderMaterial->getFragFileName();
                     }
                 }
-                const bool transparent = false; //material->getTransparency() != Transparency::DISABLED;
-                pipelineConfig.colorBlendDesc[0].blendEnable = transparent;
                 pipelineConfig.cullMode = material->getCullMode();
-                pipelineConfig.depthWriteEnable = true;
-                // pipelineConfig.depthBiasEnable = !transparent;
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
                 pipelines[pipelineId] = Application::getVireo().createGraphicPipeline(pipelineConfig, name);
@@ -74,16 +69,6 @@ namespace lysa {
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
-        const auto depthStage =
-            config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
-            config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
-            vireo::ResourceState::RENDER_TARGET_DEPTH;
-
-        commandList.barrier(
-            depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            depthStage);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::UNDEFINED,
@@ -96,10 +81,6 @@ namespace lysa {
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::RENDER_TARGET_COLOR,
-            vireo::ResourceState::UNDEFINED);
-        commandList.barrier(
-            depthAttachment,
-            depthStage,
             vireo::ResourceState::UNDEFINED);
     }
 }

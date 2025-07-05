@@ -22,7 +22,7 @@ export namespace lysa {
         void updatePipelines(
            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
-        void resize(const vireo::Extent& extent) override;
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
         void render(
             vireo::CommandList& commandList,
@@ -113,7 +113,6 @@ export namespace lysa {
             .depthTestEnable = compositePipelineConfig.depthTestEnable,
         };
 
-        int buffersResized{0};
         std::vector<FrameData> framesData;
         std::shared_ptr<vireo::Pipeline> compositePipeline;
         std::shared_ptr<vireo::DescriptorLayout> compositeDescriptorLayout;

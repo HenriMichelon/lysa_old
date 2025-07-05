@@ -89,32 +89,44 @@ namespace lysa {
         uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
         if (!postProcessingPasses.empty()) {
+            const auto depthStage =
+               config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
+               config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
+               vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+               vireo::ResourceState::RENDER_TARGET_DEPTH;
             commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::UNDEFINED,
                 vireo::ResourceState::SHADER_READ);
             commandList.barrier(
                frame.depthAttachment,
-               vireo::ResourceState::UNDEFINED,
+               depthStage,
                vireo::ResourceState::SHADER_READ);
+            auto colorAttachment = frame.colorAttachment;
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(
                     frameIndex,
                     viewport,
                     scissor,
-                    frame.colorAttachment,
+                    colorAttachment,
                     frame.depthAttachment,
-                    commandList,
-                    postProcessingPass != postProcessingPasses.back());
+                    commandList);
+                colorAttachment = postProcessingPass->getColorAttachment(frameIndex);
             });
             commandList.barrier(
                frame.depthAttachment,
                vireo::ResourceState::SHADER_READ,
-               vireo::ResourceState::UNDEFINED);
+               depthStage);
             commandList.barrier(
                 frame.colorAttachment,
                 vireo::ResourceState::SHADER_READ,
                 vireo::ResourceState::UNDEFINED);
+            std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
+                commandList.barrier(
+                    postProcessingPass->getColorAttachment(frameIndex),
+                    vireo::ResourceState::SHADER_READ,
+                    vireo::ResourceState::UNDEFINED);
+            });
         }
     }
 
@@ -125,7 +137,7 @@ namespace lysa {
         return postProcessingPasses.back()->getColorAttachment(frameIndex);
     }
 
-    void Renderer::resize(const vireo::Extent& extent) {
+    void Renderer::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         currentExtent = extent;
         for (auto& frame : framesData) {
             frame.colorAttachment = Application::getVireo().createRenderTarget(
@@ -144,10 +156,23 @@ namespace lysa {
                 1,
                 config.msaa,
                 name + L" DepthStencil");
+            // commandList->barrier(
+            //     frame.colorAttachment,
+            //     vireo::ResourceState::UNDEFINED,
+            //     vireo::ResourceState::RENDER_TARGET_COLOR);
+            const auto depthStage =
+               config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
+               config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
+               vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
+               vireo::ResourceState::RENDER_TARGET_DEPTH;
+            commandList->barrier(
+                frame.depthAttachment,
+                vireo::ResourceState::UNDEFINED,
+                depthStage);
         }
-        transparencyPass.resize(extent);
+        transparencyPass.resize(extent, commandList);
         for (const auto& postProcessingPass : postProcessingPasses) {
-            postProcessingPass->resize(extent);
+            postProcessingPass->resize(extent, commandList);
         }
     }
 
@@ -163,7 +188,7 @@ namespace lysa {
             data,
             dataSize,
             fragShaderName);
-        postProcessingPass->resize(currentExtent);
+        postProcessingPass->resize(currentExtent, nullptr);
         postProcessingPasses.push_back(postProcessingPass);
     }
 

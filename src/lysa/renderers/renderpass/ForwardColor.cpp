@@ -60,36 +60,19 @@ namespace lysa {
         const bool clearAttachment,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (buffersResized) {
-            commandList.barrier(
-                frame.brightnessBuffer,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::SHADER_READ);
-            buffersResized--;
-        }
 
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.colorRenderTargets[1].renderTarget = frame.brightnessBuffer;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
-        const auto depthStage =
-            config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
-            config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
-            vireo::ResourceState::RENDER_TARGET_DEPTH;
-
-        commandList.barrier(
-            depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            depthStage);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::UNDEFINED,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.barrier(
             frame.brightnessBuffer,
-            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.beginRendering(renderingConfig);
         scene.drawOpaquesModels(
@@ -102,18 +85,14 @@ namespace lysa {
         commandList.barrier(
             frame.brightnessBuffer,
             vireo::ResourceState::RENDER_TARGET_COLOR,
-            vireo::ResourceState::UNDEFINED);
+            vireo::ResourceState::SHADER_READ);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::UNDEFINED);
-        commandList.barrier(
-            depthAttachment,
-            depthStage,
-            vireo::ResourceState::UNDEFINED);
     }
 
-    void ForwardColor::resize(const vireo::Extent& extent) {
+    void ForwardColor::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         const auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
             frame.brightnessBuffer = vireo.createRenderTarget(
@@ -124,7 +103,10 @@ namespace lysa {
                 1,
                 vireo::MSAA::NONE,
                 L"Brightness");
+            commandList->barrier(
+                frame.brightnessBuffer,
+                vireo::ResourceState::UNDEFINED,
+                vireo::ResourceState::SHADER_READ);
         }
-        buffersResized = config.framesInFlight;
     }
 }

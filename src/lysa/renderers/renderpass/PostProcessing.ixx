@@ -32,10 +32,9 @@ export namespace lysa {
            const vireo::Rect&scissor,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
-           vireo::CommandList& commandList,
-           bool recordLastBarrier);
+           vireo::CommandList& commandList);
 
-        void resize(const vireo::Extent& extent) override;
+        void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
         virtual std::shared_ptr<vireo::RenderTarget> getColorAttachment(const uint32 frameIndex) {
             return framesData[frameIndex].colorAttachment;

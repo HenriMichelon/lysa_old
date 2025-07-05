@@ -18,7 +18,7 @@ export namespace lysa {
             const RenderingConfiguration& config,
             const std::wstring& name);
 
-        virtual void resize(const vireo::Extent& extent) { }
+        virtual void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) { }
 
         virtual void update(uint32 frameIndex) { }
 

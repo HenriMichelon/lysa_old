@@ -75,31 +75,11 @@ namespace lysa {
         const bool,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (buffersResized) {
-            commandList.barrier(
-                {
-                    frame.accumBuffer,
-                    frame.revealageBuffer,
-                },
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::SHADER_READ);
-            buffersResized--;
-        }
 
         oitRenderingConfig.colorRenderTargets[BINDING_ACCUM_BUFFER].renderTarget = frame.accumBuffer;
         oitRenderingConfig.colorRenderTargets[BINDING_REVEALAGE_BUFFER].renderTarget = frame.revealageBuffer;
         oitRenderingConfig.depthStencilRenderTarget = depthAttachment;
 
-        const auto depthStage =
-         config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
-         config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
-         vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
-         vireo::ResourceState::RENDER_TARGET_DEPTH;
-
-        commandList.barrier(
-                depthAttachment,
-                vireo::ResourceState::UNDEFINED,
-                depthStage);
         commandList.barrier(
             {frame.accumBuffer, frame.revealageBuffer},
             vireo::ResourceState::SHADER_READ,
@@ -111,10 +91,6 @@ namespace lysa {
             {frame.accumBuffer, frame.revealageBuffer},
             vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::SHADER_READ);
-        commandList.barrier(
-            depthAttachment,
-            depthStage,
-            vireo::ResourceState::UNDEFINED);
 
         frame.compositeDescriptorSet->update(BINDING_ACCUM_BUFFER, frame.accumBuffer->getImage());
         frame.compositeDescriptorSet->update(BINDING_REVEALAGE_BUFFER, frame.revealageBuffer->getImage());
@@ -140,7 +116,7 @@ namespace lysa {
             vireo::ResourceState::UNDEFINED);
     }
 
-    void TransparencyPass::resize(const vireo::Extent& extent) {
+    void TransparencyPass::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         const auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
             frame.accumBuffer = vireo.createRenderTarget(
@@ -153,8 +129,14 @@ namespace lysa {
                 extent.width,extent.height,
                 vireo::RenderTargetType::COLOR,
                 oitRenderingConfig.colorRenderTargets[BINDING_REVEALAGE_BUFFER].clearValue);
+            commandList->barrier(
+              {
+                  frame.accumBuffer,
+                  frame.revealageBuffer,
+                },
+              vireo::ResourceState::UNDEFINED,
+              vireo::ResourceState::SHADER_READ);
         }
-        buffersResized = config.framesInFlight;
     }
 
 }

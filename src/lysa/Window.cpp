@@ -45,7 +45,15 @@ namespace lysa {
         } else {
             renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferrer Renderer");
         }
-        renderer->resize(swapChain->getExtent());
+        {
+            const auto& frame = framesData[0];
+            frame.commandAllocator->reset();
+            frame.preRenderCommandList->begin();
+            renderer->resize(swapChain->getExtent(), frame.preRenderCommandList);
+            frame.preRenderCommandList->end();
+            Application::getGraphicQueue()->submit({frame.preRenderCommandList});
+            Application::getGraphicQueue()->waitIdle();
+        }
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
         viewport->setRootNode(rootNode);
@@ -189,10 +197,16 @@ namespace lysa {
         onResize();
         const auto newExtent = swapChain->getExtent();
         if (oldExtent.width != newExtent.width || oldExtent.height != newExtent.height) {
+            const auto& frame = framesData[0];
+            frame.commandAllocator->reset();
+            frame.preRenderCommandList->begin();
             for (const auto& viewport : viewports) {
                 viewport->resize(swapChain->getExtent());
             }
-            renderer->resize(newExtent);
+            renderer->resize(newExtent, frame.preRenderCommandList);
+            frame.preRenderCommandList->end();
+            Application::getGraphicQueue()->submit({frame.preRenderCommandList});
+            Application::getGraphicQueue()->waitIdle();
         }
     }
 
