@@ -31,6 +31,10 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
+        auto getBrightnessBuffer(const uint32 frameIndex) const {
+            return framesData[frameIndex].brightnessBuffer;
+        }
+
     private:
         const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
