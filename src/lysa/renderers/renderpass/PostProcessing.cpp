@@ -36,6 +36,7 @@ namespace lysa {
 
         descriptorLayoutBuffers->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayoutBuffers->add(BINDING_DEPTH_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayoutBuffers->add(BINDING_BLOOM_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayoutBuffers->build();
 
         const auto& vireo = Application::getVireo();
@@ -54,6 +55,7 @@ namespace lysa {
         for (auto& frame : framesData) {
             frame.paramsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
             frame.paramsUniform->map();
+            frame.params.applyBloom = config.bloomEnabled ? 1u : 0u;
             frame.descriptorSet = vireo.createDescriptorSet(descriptorLayout, name);
             frame.descriptorSet->update(BINDING_PARAMS, frame.paramsUniform);
             if (data) {
@@ -65,7 +67,7 @@ namespace lysa {
 
     void PostProcessing::update(const uint32 frameIndex) {
         auto& frame = framesData[frameIndex];
-        frame.params.time = getCurrentTimeMilliseconds();
+        frame.params.time = 123.45; //getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
     }
 
@@ -75,11 +77,13 @@ namespace lysa {
         const vireo::Rect& scissor,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& bloomColorAttachment,
         vireo::CommandList& commandList) {
         auto& frame = framesData[frameIndex];
 
         frame.descriptorSetBuffers->update(BINDING_INPUT, colorAttachment->getImage());
-        frame.descriptorSetBuffers->update(BINDING_DEPTH_BUFFER, depthAttachment->getImage());
+        if (depthAttachment) { frame.descriptorSetBuffers->update(BINDING_DEPTH_BUFFER, depthAttachment->getImage()); }
+        if (bloomColorAttachment) { frame.descriptorSetBuffers->update(BINDING_BLOOM_BUFFER, bloomColorAttachment->getImage()); }
         renderingConfig.colorRenderTargets[0].renderTarget = frame.colorAttachment;
         commandList.barrier(
             frame.colorAttachment,

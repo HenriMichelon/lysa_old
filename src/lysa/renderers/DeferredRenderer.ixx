@@ -29,6 +29,10 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 
+        std::shared_ptr<vireo::RenderTarget> getBloomColorAttachment(const uint32 frameIndex) const override {
+            return nullptr;
+        }
+
     protected:
         void colorPass(
             vireo::CommandList& commandList,

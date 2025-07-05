@@ -7,7 +7,7 @@
 #include "common.inc.slang"
 
 struct DataBlur {
-    int kernelSize;
+    uint  kernelSize;
     float strength;
 };
 

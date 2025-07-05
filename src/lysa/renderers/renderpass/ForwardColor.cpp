@@ -17,7 +17,11 @@ namespace lysa {
         const RenderingConfiguration& config):
         Renderpass{config, L"Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Color
-        pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Brightness
+        if ( config.bloomEnabled) {
+            pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Brightness
+            pipelineConfig.colorBlendDesc.push_back({});
+            renderingConfig.colorRenderTargets.push_back({ .clear = true });
+        }
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
             Resources::descriptorLayout,
@@ -43,7 +47,7 @@ namespace lysa {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
                 std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
-                std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
+                std::wstring fragShaderName = config.bloomEnabled ? DEFAULT_FRAGMENT_BLOOM_SHADER : DEFAULT_FRAGMENT_SHADER;
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
@@ -63,7 +67,9 @@ namespace lysa {
 
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
-        renderingConfig.colorRenderTargets[1].renderTarget = frame.brightnessBuffer;
+        if (config.bloomEnabled) {
+            renderingConfig.colorRenderTargets[1].renderTarget = frame.brightnessBuffer;
+        }
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
         commandList.barrier(
@@ -95,14 +101,22 @@ namespace lysa {
     void ForwardColor::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         const auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
-            frame.brightnessBuffer = vireo.createRenderTarget(
-                pipelineConfig.colorRenderFormats[1],
-                extent.width,extent.height,
-                vireo::RenderTargetType::COLOR,
-                renderingConfig.colorRenderTargets[1].clearValue,
-                1,
-                vireo::MSAA::NONE,
-                L"Brightness");
+            if (config.bloomEnabled) {
+                frame.brightnessBuffer = vireo.createRenderTarget(
+                    pipelineConfig.colorRenderFormats[1],
+                    extent.width,extent.height,
+                    vireo::RenderTargetType::COLOR,
+                    renderingConfig.colorRenderTargets[1].clearValue,
+                    1,
+                    vireo::MSAA::NONE,
+                    L"Brightness");
+            } else {
+                frame.brightnessBuffer = vireo.createRenderTarget(
+                    pipelineConfig.colorRenderFormats[0],
+                    1, 1,
+                    vireo::RenderTargetType::COLOR,
+                    renderingConfig.colorRenderTargets[0].clearValue);
+            }
             commandList->barrier(
                 frame.brightnessBuffer,
                 vireo::ResourceState::UNDEFINED,

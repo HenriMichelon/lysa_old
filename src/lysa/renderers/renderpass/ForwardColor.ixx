@@ -38,15 +38,16 @@ export namespace lysa {
     private:
         const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
         const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
+        const std::wstring DEFAULT_FRAGMENT_BLOOM_SHADER{L"forward_bloom.frag"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc = { {}, {} },
+            .colorBlendDesc = { {}},
             .depthTestEnable = true,
             .depthWriteEnable = true,
         };
 
         vireo::RenderingConfiguration renderingConfig {
-            .colorRenderTargets = {{}, { .clear = true }},
+            .colorRenderTargets = {{} },
             .depthTestEnable = pipelineConfig.depthTestEnable,
         };
 

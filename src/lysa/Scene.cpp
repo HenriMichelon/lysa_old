@@ -136,7 +136,8 @@ namespace lysa {
             .projection = currentCamera->getProjection(),
             .view = inverse(currentCamera->getTransformGlobal()),
             .viewInverse = currentCamera->getTransformGlobal(),
-            .lightsCount = static_cast<uint32>(lights.size())
+            .lightsCount = static_cast<uint32>(lights.size()),
+            .bloomEnabled = renderingConfig.bloomEnabled ? 1u : 0u,
         };
         if (currentEnvironment) {
             sceneUniform.ambientLight = currentEnvironment->getAmbientColorAndIntensity();

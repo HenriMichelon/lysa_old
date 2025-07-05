@@ -28,6 +28,10 @@ export namespace lysa {
             const std::unordered_map<pipeline_id,
             std::vector<std::shared_ptr<Material>>>& pipelineIds) override;
 
+        std::shared_ptr<vireo::RenderTarget> getBloomColorAttachment(const uint32 frameIndex) const override {
+            return forwardColorPass.getBrightnessBuffer(frameIndex);
+        }
+
     protected:
         void update(uint32 frameIndex) override;
 

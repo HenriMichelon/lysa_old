@@ -17,9 +17,19 @@ namespace lysa {
         config{config},
         name{name},
         withStencil{withStencil},
+        bloomBlurData{ config.bloomSize, config.bloomStrength },
         depthPrePass{config, withStencil},
         shaderMaterialPass{config},
         transparencyPass{config} {
+        if (config.bloomEnabled) {
+            bloomBlurPass = std::make_unique<PostProcessing>(
+                config,
+                L"blur",
+                true,
+                &bloomBlurData,
+                sizeof(bloomBlurData),
+                L"Bloom blur");
+        }
         framesData.resize(config.framesInFlight);
     }
 
@@ -28,6 +38,7 @@ namespace lysa {
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->update(frameIndex);
         }
+        if (config.bloomEnabled) { bloomBlurPass->update(frameIndex); }
     }
 
     void Renderer::updatePipelines(const Scene& scene) {
@@ -88,16 +99,30 @@ namespace lysa {
         const vireo::Rect&scissor,
         uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
+        commandList.barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::UNDEFINED,
+            vireo::ResourceState::SHADER_READ);
+        std::shared_ptr<vireo::RenderTarget> bloomColorAttachment;
+        if (config.bloomEnabled) {
+            bloomBlurPass->render(
+                frameIndex,
+                viewport,
+                scissor,
+                getBloomColorAttachment(frameIndex),
+                nullptr,
+                nullptr,
+                commandList);
+            bloomColorAttachment = bloomBlurPass->getColorAttachment(frameIndex);
+        } else {
+            bloomColorAttachment = getBloomColorAttachment(frameIndex);
+        }
         if (!postProcessingPasses.empty()) {
             const auto depthStage =
                config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
                config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
                vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
                vireo::ResourceState::RENDER_TARGET_DEPTH;
-            commandList.barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::UNDEFINED,
-                vireo::ResourceState::SHADER_READ);
             commandList.barrier(
                frame.depthAttachment,
                depthStage,
@@ -110,6 +135,7 @@ namespace lysa {
                     scissor,
                     colorAttachment,
                     frame.depthAttachment,
+                    bloomColorAttachment,
                     commandList);
                 colorAttachment = postProcessingPass->getColorAttachment(frameIndex);
             });
@@ -117,10 +143,6 @@ namespace lysa {
                frame.depthAttachment,
                vireo::ResourceState::SHADER_READ,
                depthStage);
-            commandList.barrier(
-                frame.colorAttachment,
-                vireo::ResourceState::SHADER_READ,
-                vireo::ResourceState::UNDEFINED);
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 commandList.barrier(
                     postProcessingPass->getColorAttachment(frameIndex),
@@ -128,6 +150,10 @@ namespace lysa {
                     vireo::ResourceState::UNDEFINED);
             });
         }
+        commandList.barrier(
+            frame.colorAttachment,
+            vireo::ResourceState::SHADER_READ,
+            vireo::ResourceState::UNDEFINED);
     }
 
     std::shared_ptr<vireo::RenderTarget> Renderer::getColorAttachment(const uint32 frameIndex) const {
@@ -156,10 +182,6 @@ namespace lysa {
                 1,
                 config.msaa,
                 name + L" DepthStencil");
-            // commandList->barrier(
-            //     frame.colorAttachment,
-            //     vireo::ResourceState::UNDEFINED,
-            //     vireo::ResourceState::RENDER_TARGET_COLOR);
             const auto depthStage =
                config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
                config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
@@ -171,6 +193,7 @@ namespace lysa {
                 depthStage);
         }
         transparencyPass.resize(extent, commandList);
+        if (config.bloomEnabled) { bloomBlurPass->resize(extent, commandList); }
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->resize(extent, commandList);
         }

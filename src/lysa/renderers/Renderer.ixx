@@ -44,6 +44,8 @@ export namespace lysa {
             return framesData[frameIndex].depthAttachment;
         }
 
+        virtual std::shared_ptr<vireo::RenderTarget> getBloomColorAttachment(uint32 frameIndex) const = 0;
+
         void updatePipelines(const Scene& scene);
 
         virtual void update(uint32 frameIndex);
@@ -99,12 +101,18 @@ export namespace lysa {
             uint32 frameIndex) = 0;
 
     private:
+        struct {
+            uint32 kernelSize;
+            float  strength;
+        } bloomBlurData;
+
         vireo::Extent          currentExtent{};
         std::vector<FrameData> framesData;
         DepthPrepass           depthPrePass;
         ShaderMaterialPass     shaderMaterialPass;
         TransparencyPass       transparencyPass;
 
+        std::unique_ptr<PostProcessing> bloomBlurPass;
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };
 }

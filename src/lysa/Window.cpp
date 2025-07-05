@@ -219,7 +219,10 @@ namespace lysa {
         const bool useRenderingColorAttachmentFormat,
         void* data, const uint32 dataSize) const {
         waitIdle();
-        renderer->addPostprocessing(fragShaderName, useRenderingColorAttachmentFormat, data, dataSize);
+        renderer->addPostprocessing(
+            fragShaderName,
+            useRenderingColorAttachmentFormat,
+            data, dataSize);
     }
 
     void Window::removePostprocessing(const std::wstring& fragShaderName) const {

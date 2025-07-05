@@ -102,8 +102,12 @@ export namespace lysa {
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
-        //! Enable the forward depth pre pass
-        // bool               forwardDepthPrepass{false};
+        //! Enable the bloom post-processing effect
+        bool               bloomEnabled{true};
+        //! Bloom effect blur kernel size
+        uint32             bloomSize{5};
+        //! Bloom effect blur strength
+        float              bloomStrength{0.6f};
     };
 
     /**

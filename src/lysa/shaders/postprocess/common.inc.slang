@@ -36,7 +36,6 @@ float4 gammaCorrection(float4 color, float gamma) {
     return float4(linearToSrgb(color.rgb, gamma), color.a);
 }
 
-
 float luminance(float3 v) {
     return dot(v, float3(0.2126f, 0.7152f, 0.0722f));
 }
@@ -59,12 +58,12 @@ float3 toneMapACES(float3 x) {
 }
 
 float4 gaussianBlur(Texture2D image, float2 texCoord, int kernelSize, float strength, uint2 imageSize) {
-    if (kernelSize > 7) { kernelSize = 7; }
+    if (kernelSize > 9) { kernelSize = 9; }
     float2 texelSize = (1.0 / float2(imageSize)) * strength;
     int halfKernel = kernelSize / 2;
 
     // Compute Gaussian weights
-    float weights[7*7]; // Maximum size
+    float weights[9*9]; // Maximum size
     float sum = 0.0;
     for (int i = 0; i < kernelSize; i++) {
         for (int j = 0; j < kernelSize; j++) {

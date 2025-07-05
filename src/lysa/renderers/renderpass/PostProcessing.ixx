@@ -31,7 +31,8 @@ export namespace lysa {
            const vireo::Viewport&viewport,
            const vireo::Rect&scissor,
            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
-            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+           const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+           const std::shared_ptr<vireo::RenderTarget>& bloomColorAttachment,
            vireo::CommandList& commandList);
 
         void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
@@ -50,10 +51,12 @@ export namespace lysa {
 
         static constexpr vireo::DescriptorIndex BINDING_INPUT{0};
         static constexpr vireo::DescriptorIndex BINDING_DEPTH_BUFFER{1};
+        static constexpr vireo::DescriptorIndex BINDING_BLOOM_BUFFER{2};
 
         struct PostProcessingParams {
-            uint2  imageSize;
+            uint32 applyBloom;
             float  time;
+            uint2  imageSize;
         };
 
         struct FrameData {

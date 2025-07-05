@@ -29,6 +29,7 @@ export namespace lysa {
         float4x4    viewInverse;
         float4      ambientLight{1.0f, 1.0f, 1.0f, 1.0f}; // RGB + strength
         uint32      lightsCount{0};
+        uint32      bloomEnabled{0};
     };
 
     struct alignas(8) InstanceData {
