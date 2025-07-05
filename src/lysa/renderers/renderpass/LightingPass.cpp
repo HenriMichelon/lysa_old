@@ -73,10 +73,6 @@ namespace lysa {
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
         commandList.barrier(
-             depthAttachment,
-             vireo::ResourceState::UNDEFINED,
-             vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL);
-        commandList.barrier(
              colorAttachment,
              vireo::ResourceState::UNDEFINED,
              vireo::ResourceState::RENDER_TARGET_COLOR);
@@ -92,10 +88,6 @@ namespace lysa {
         commandList.setStencilReference(1);
         commandList.draw(3);
         commandList.endRendering();
-        commandList.barrier(
-           depthAttachment,
-           vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL,
-           vireo::ResourceState::UNDEFINED);
         commandList.barrier(
            colorAttachment,
            vireo::ResourceState::RENDER_TARGET_COLOR,

@@ -62,10 +62,6 @@ namespace lysa {
             return colorRenderTarget.renderTarget;
         });
         commandList.barrier(
-            depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL);
-        commandList.barrier(
            {renderTargets.begin(), renderTargets.end()},
            vireo::ResourceState::SHADER_READ,
            vireo::ResourceState::RENDER_TARGET_COLOR);
@@ -82,10 +78,6 @@ namespace lysa {
             {renderTargets.begin(), renderTargets.end()},
             vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::SHADER_READ);
-        commandList.barrier(
-            depthAttachment,
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL,
-            vireo::ResourceState::UNDEFINED);
     }
 
     void GBufferPass::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
