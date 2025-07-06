@@ -89,17 +89,18 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/quad.vert.slang"
 #        "${SHADERS_SRC_DIR}/vector.slang"
 #        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
 #        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
 #        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
 #        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
@@ -253,6 +254,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.cpp
 
         ${OS_SRC}
@@ -339,6 +341,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
 
         ${OS_MODULES}

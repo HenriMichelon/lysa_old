@@ -14,6 +14,7 @@ import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.renderpass.gbuffer_pass;
 import lysa.renderers.renderpass.lighting_pass;
+import lysa.renderers.renderpass.ssao_pass;
 
 export namespace lysa {
 
@@ -45,5 +46,6 @@ export namespace lysa {
     private:
         GBufferPass gBufferPass;
         LightingPass lightingPass;
+        SSAOPass ssaoPass;
     };
 }
