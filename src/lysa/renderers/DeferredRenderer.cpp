@@ -14,7 +14,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, true, name},
-        ssaoBlurData{3, 1.2f},
+        ssaoBlurData{.kernelSize = config.ssaoBlurKernelSize},
         gBufferPass{config},
         lightingPass{config, gBufferPass} {
         if (config.ssaoEnabled) {
@@ -48,7 +48,7 @@ namespace lysa {
         const uint32 frameIndex) {
         gBufferPass.render(commandList, scene, colorAttachment, depthAttachment, false, frameIndex);
         if (config.ssaoEnabled) {
-            ssaoPass->render(commandList, scene, frameIndex);
+            ssaoPass->render(commandList, scene, depthAttachment, frameIndex);
             ssaoBlurPass->render(
                    frameIndex,
                    scene.getViewport(),
@@ -66,13 +66,19 @@ namespace lysa {
             config.ssaoEnabled ? ssaoBlurPass->getColorAttachment(frameIndex) : nullptr,
             true,
             frameIndex);
+        if (config.ssaoEnabled) {
+            commandList.barrier(
+                ssaoBlurPass->getColorAttachment(frameIndex),
+                vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::UNDEFINED);
+        }
     }
 
     void DeferredRenderer::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         Renderer::resize(extent, commandList);
         gBufferPass.resize(extent, commandList);
         if (config.ssaoEnabled) {
-            updateBlurData(ssaoBlurData, extent, 3);
+            updateBlurData(ssaoBlurData, extent, 1.2);
             ssaoPass->resize(extent, commandList);
             ssaoBlurPass->resize(extent, commandList);
         }

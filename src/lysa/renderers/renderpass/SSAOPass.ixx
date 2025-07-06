@@ -24,6 +24,7 @@ export namespace lysa {
         void render(
             vireo::CommandList& commandList,
             const Scene& scene,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             uint32 frameIndex);
 
         void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;

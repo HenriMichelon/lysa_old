@@ -30,7 +30,7 @@ float4 getColor(QuadOutput input) {
     float4 emissiveColorValue = emissiveBuffer.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv);
     float3 emissiveColor = emissiveColorValue.rgb;
     float3 viewDirection = normalize(scene.cameraPosition - worldPos);
-    float ambientOcclusion = scene.ssaoEnabled ? aoMap.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).r : 1.0;
+    float ambientOcclusion = scene.ssaoEnabled == 1 ? aoMap.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], input.uv).r : 1.0;
     //return float4(viewposZ, 0.0, 0.0, 1.0);
     return float4(
         calcLight(

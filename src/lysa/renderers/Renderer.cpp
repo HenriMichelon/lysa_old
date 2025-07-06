@@ -20,7 +20,7 @@ namespace lysa {
         depthPrePass{config, withStencil},
         shaderMaterialPass{config},
         transparencyPass{config},
-        bloomBlurData{config.bloomSize, config.bloomStrength} {
+        bloomBlurData{.kernelSize = config.bloomBlurKernelSize} {
         if (config.bloomEnabled) {
             bloomBlurPass = std::make_unique<PostProcessing>(
                 config,
@@ -200,7 +200,7 @@ namespace lysa {
         }
         transparencyPass.resize(extent, commandList);
         if (config.bloomEnabled) {
-            updateBlurData(bloomBlurData, extent, config.bloomStrength);
+            updateBlurData(bloomBlurData, extent, config.bloomBlurStrength);
             bloomBlurPass->resize(extent, commandList);
         }
         for (const auto& postProcessingPass : postProcessingPasses) {

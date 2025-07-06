@@ -105,11 +105,13 @@ export namespace lysa {
         //! Enable the bloom post-processing effect
         bool               bloomEnabled{true};
         //! Bloom effect blur kernel size
-        uint32             bloomSize{5};
+        uint32             bloomBlurKernelSize{5};
         //! Bloom effect blur strength
-        float              bloomStrength{1.2f};
+        float              bloomBlurStrength{1.2f};
         //! Enable SSAO in the deferred renderer
         bool               ssaoEnabled{true};
+        //! SSAO blur kernel size
+        uint32             ssaoBlurKernelSize{5};
         //! SSAO sampling count
         uint32             ssaoSampleCount{16};
         //! SSAO sampling radius

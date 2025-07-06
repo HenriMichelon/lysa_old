@@ -51,6 +51,7 @@ namespace lysa {
     void SSAOPass::render(
         vireo::CommandList& commandList,
         const Scene& scene,
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
 
@@ -58,6 +59,7 @@ namespace lysa {
         frame.descriptorSet->update(BINDING_NORMAL_BUFFER, gBufferPass.getNormalBuffer(frameIndex)->getImage());
 
         renderingConfig.colorRenderTargets[0].renderTarget = frame.ssaoColorBuffer;
+        renderingConfig.depthStencilRenderTarget = depthAttachment;
         commandList.barrier(
            frame.ssaoColorBuffer,
            vireo::ResourceState::SHADER_READ,
