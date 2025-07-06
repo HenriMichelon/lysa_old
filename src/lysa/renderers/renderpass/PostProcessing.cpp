@@ -64,7 +64,9 @@ namespace lysa {
         auto& frame = framesData[frameIndex];
         frame.params.time = 123.45; //getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
-        dataUniform->write(data);
+        if (data) {
+            dataUniform->write(data);
+        }
     }
 
     void PostProcessing::render(

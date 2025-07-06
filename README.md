@@ -9,7 +9,7 @@ A 3D Game Engine.
 - Physics engine with [Jolt Physics 5](https://github.com/jrouwe/JoltPhysics) and [NVIDIA PhysX 5](https://github.com/NVIDIA-Omniverse/PhysX) support
 - Node-based system (heavily inspired by [Godot](https://godotengine.org/))
 - Selectable forward and deferred renderers
-- Bundled PBR, Bloom, SSAO, ACES tone-mapping and other shaders
+- Bundled PBR, Bloom, SSAO, ACES tone-mapping, FXAA and other shaders
 - Written in and for modern C++
 - [Slang shader language](https://shader-slang.org/) support for CMake
 - Math library with Slang-like syntax
