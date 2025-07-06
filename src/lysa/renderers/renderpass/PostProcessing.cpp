@@ -14,7 +14,7 @@ namespace lysa {
     PostProcessing::PostProcessing(
         const RenderingConfiguration& config,
         const std::wstring& fragShaderName,
-        const bool useRenderingColorAttachmentFormat,
+        const vireo::ImageFormat outputFormat,
         void* data,
         const uint32 dataSize,
         const std::wstring& name):
@@ -37,7 +37,7 @@ namespace lysa {
         descriptorLayout->build();
 
         const auto& vireo = Application::getVireo();
-        pipelineConfig.colorRenderFormats.push_back(useRenderingColorAttachmentFormat ? config.colorRenderingFormat : config.swapChainFormat);
+        pipelineConfig.colorRenderFormats.push_back(outputFormat); //useRenderingColorAttachmentFormat ? config.colorRenderingFormat : config.swapChainFormat);
         pipelineConfig.resources = vireo.createPipelineResources({
             descriptorLayout,
             Application::getResources().getSamplers().getDescriptorLayout()},

@@ -52,7 +52,7 @@ export namespace lysa {
 
         void addPostprocessing(
             const std::wstring& fragShaderName,
-            bool useRenderingColorAttachmentFormat = true,
+            vireo::ImageFormat outputFormat,
             void* data = nullptr, uint32 dataSize = 0) const;
 
         void removePostprocessing(const std::wstring& fragShaderName) const;

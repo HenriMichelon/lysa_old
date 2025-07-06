@@ -4,7 +4,7 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
-static const float SHADOW_FACTOR = 0.05;
+static const float SHADOW_FACTOR = 0.0;
 
 [[vk::binding(3, 2)]] Texture2D shadowMaps[] : register(t3, space2);
 [[vk::binding(0, 4)]] Texture2D shadowTransparencyColorMaps[] : register(t0, space4);

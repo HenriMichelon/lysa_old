@@ -19,7 +19,7 @@ export namespace lysa {
         PostProcessing(
             const RenderingConfiguration& config,
             const std::wstring& fragShaderName,
-            bool useRenderingColorAttachmentFormat,
+            vireo::ImageFormat outputFormat,
             void* data,
             uint32 dataSize,
             const std::wstring& name);

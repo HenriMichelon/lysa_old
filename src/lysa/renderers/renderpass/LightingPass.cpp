@@ -26,6 +26,7 @@ namespace lysa {
         descriptorLayout->add(BINDING_NORMAL_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayout->add(BINDING_ALBEDO_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayout->add(BINDING_EMISSIVE_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
+        descriptorLayout->add(BINDING_AO_MAP, vireo::DescriptorType::SAMPLED_IMAGE);
         descriptorLayout->build();
 
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
@@ -64,6 +65,7 @@ namespace lysa {
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& aoMap,
         const bool clearAttachment,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
@@ -72,6 +74,7 @@ namespace lysa {
         frame.descriptorSet->update(BINDING_NORMAL_BUFFER, gBufferPass.getNormalBuffer(frameIndex)->getImage());
         frame.descriptorSet->update(BINDING_ALBEDO_BUFFER, gBufferPass.getAlbedoBuffer(frameIndex)->getImage());
         frame.descriptorSet->update(BINDING_EMISSIVE_BUFFER, gBufferPass.getEmissiveBuffer(frameIndex)->getImage());
+        frame.descriptorSet->update(BINDING_AO_MAP, aoMap->getImage());
 
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;

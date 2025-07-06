@@ -216,12 +216,12 @@ namespace lysa {
 
     void Window::addPostprocessing(
         const std::wstring& fragShaderName,
-        const bool useRenderingColorAttachmentFormat,
+        const vireo::ImageFormat outputFormat,
         void* data, const uint32 dataSize) const {
         waitIdle();
         renderer->addPostprocessing(
             fragShaderName,
-            useRenderingColorAttachmentFormat,
+            outputFormat,
             data, dataSize);
     }
 

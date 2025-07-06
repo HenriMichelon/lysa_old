@@ -15,6 +15,7 @@ import lysa.renderers.renderer;
 import lysa.renderers.renderpass.gbuffer_pass;
 import lysa.renderers.renderpass.lighting_pass;
 import lysa.renderers.renderpass.ssao_pass;
+import lysa.renderers.renderpass.post_processing;
 
 export namespace lysa {
 
@@ -23,6 +24,8 @@ export namespace lysa {
         DeferredRenderer(
             const RenderingConfiguration& config,
             const std::wstring& name);
+
+        void update(uint32 frameIndex) override;
 
         void updatePipelines(
             const std::unordered_map<pipeline_id,
@@ -46,6 +49,7 @@ export namespace lysa {
     private:
         GBufferPass gBufferPass;
         LightingPass lightingPass;
-        SSAOPass ssaoPass;
+        std::unique_ptr<SSAOPass> ssaoPass;
+        std::unique_ptr<PostProcessing> ssaoBlurPass;
     };
 }

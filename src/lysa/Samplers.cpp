@@ -37,10 +37,14 @@ namespace lysa {
             vireo::AddressMode::CLAMP_TO_EDGE,
             0.0f, vireo::Sampler::LOD_CLAMP_NONE,
             false);
-        // Used by 90% of materials for textures
         addSampler(
             vireo::Filter::LINEAR,
             vireo::Filter::LINEAR,
+            vireo::AddressMode::REPEAT,
+            vireo::AddressMode::REPEAT);
+        addSampler(
+            vireo::Filter::NEAREST,
+            vireo::Filter::NEAREST,
             vireo::AddressMode::REPEAT,
             vireo::AddressMode::REPEAT);
         for (int i = samplerCount; i < samplers.size(); i++) {

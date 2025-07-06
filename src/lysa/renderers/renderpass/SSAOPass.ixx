@@ -32,6 +32,10 @@ export namespace lysa {
             return framesData[frameIndex].ssaoColorBuffer;
         }
 
+        auto getSSAOBufferFormat() const {
+            return pipelineConfig.colorRenderFormats[0];
+        }
+
     private:
         const std::wstring VERTEX_SHADER{L"quad.vert"};
         const std::wstring FRAGMENT_SHADER{L"ssao.frag"};
@@ -57,7 +61,7 @@ export namespace lysa {
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorRenderFormats = { vireo::ImageFormat::R8G8B8A8_UNORM },
+            .colorRenderFormats = { vireo::ImageFormat::R8_UNORM },
             .colorBlendDesc = {{}},
             .stencilTestEnable = true,
             .frontStencilOpState = {

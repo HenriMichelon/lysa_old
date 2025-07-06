@@ -17,7 +17,7 @@ namespace lysa {
         config{config},
         name{name},
         withStencil{withStencil},
-        bloomBlurData{config.bloomSize, config.bloomStrength},
+        blurData{config.bloomSize, config.bloomStrength},
         depthPrePass{config, withStencil},
         shaderMaterialPass{config},
         transparencyPass{config} {
@@ -25,9 +25,9 @@ namespace lysa {
             bloomBlurPass = std::make_unique<PostProcessing>(
                 config,
                 L"bloom_blur",
-                true,
-                &bloomBlurData,
-                sizeof(bloomBlurData),
+                config.colorRenderingFormat,
+                &blurData,
+                sizeof(blurData),
                 L"Bloom blur");
         }
         framesData.resize(config.framesInFlight);
@@ -201,22 +201,22 @@ namespace lysa {
         transparencyPass.resize(extent, commandList);
         if (config.bloomEnabled) {
             // Pre-compute Gaussian weights
-            if (bloomBlurData.kernelSize > 9) { bloomBlurData.kernelSize = 9; }
-            bloomBlurData.texelSize = (1.0 / float2(extent.width, extent.height)) * config.bloomStrength;
-            const int halfKernel = bloomBlurData.kernelSize / 2;
+            if (blurData.kernelSize > 9) { blurData.kernelSize = 9; }
+            blurData.texelSize = (1.0 / float2(extent.width, extent.height)) * config.bloomStrength;
+            const int halfKernel = blurData.kernelSize / 2;
             float sum = 0.0;
-            for (int i = 0; i < bloomBlurData.kernelSize; i++) {
-                for (int j = 0; j < bloomBlurData.kernelSize; j++) {
-                    const int index = i * bloomBlurData.kernelSize + j;
-                    const float x = static_cast<float>(i - halfKernel) * bloomBlurData.texelSize.x;
-                    const float y = static_cast<float>(j - halfKernel) * bloomBlurData.texelSize.y;
-                    bloomBlurData.weights[index].x = std::exp(-(x * x + y * y) / 2.0);
-                    sum += bloomBlurData.weights[index].x;
+            for (int i = 0; i < blurData.kernelSize; i++) {
+                for (int j = 0; j < blurData.kernelSize; j++) {
+                    const int index = i * blurData.kernelSize + j;
+                    const float x = static_cast<float>(i - halfKernel) * blurData.texelSize.x;
+                    const float y = static_cast<float>(j - halfKernel) * blurData.texelSize.y;
+                    blurData.weights[index].x = std::exp(-(x * x + y * y) / 2.0);
+                    sum += blurData.weights[index].x;
                 }
             }
             // Normalize weights
-            for (int i = 0; i < bloomBlurData.kernelSize * bloomBlurData.kernelSize; i++) {
-                bloomBlurData.weights[i].x /= sum;
+            for (int i = 0; i < blurData.kernelSize * blurData.kernelSize; i++) {
+                blurData.weights[i].x /= sum;
             }
             bloomBlurPass->resize(extent, commandList);
         }
@@ -227,13 +227,13 @@ namespace lysa {
 
     void Renderer::addPostprocessing(
         const std::wstring& fragShaderName,
-        const bool useRenderingColorAttachmentFormat,
+        const vireo::ImageFormat outputFormat,
         void* data,
         const uint32 dataSize) {
         const auto postProcessingPass = std::make_shared<PostProcessing>(
             config,
             fragShaderName,
-            useRenderingColorAttachmentFormat,
+            outputFormat,
             data,
             dataSize,
             fragShaderName);

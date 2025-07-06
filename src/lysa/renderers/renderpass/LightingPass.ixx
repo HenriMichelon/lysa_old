@@ -25,6 +25,7 @@ export namespace lysa {
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& aoMap,
             bool clearAttachment,
             uint32 frameIndex);
 
@@ -43,6 +44,7 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_NORMAL_BUFFER{1};
         static constexpr vireo::DescriptorIndex BINDING_ALBEDO_BUFFER{2};
         static constexpr vireo::DescriptorIndex BINDING_EMISSIVE_BUFFER{3};
+        static constexpr vireo::DescriptorIndex BINDING_AO_MAP{4};
 
         struct FrameData {
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;

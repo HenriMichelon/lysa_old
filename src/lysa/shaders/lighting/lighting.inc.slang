@@ -101,11 +101,12 @@ float3 calcLight(
     float3 color,
     float3 normal,
     float4 ambientColor,
+    float ambientOcclusion,
     float metallic,
     float roughness,
     float3 emissiveColor,
     float viewPosZ) {
-    float3 ambient = ambientColor.rgb * ambientColor.w * color;
+    float3 ambient = ambientColor.rgb * ambientColor.w * color * ambientOcclusion;
     float3 diffuse = float3(0.0f);
     // Angle between surface normal and outgoing light direction.
     float cosLo = max(0.0, dot(normal, viewDirection));

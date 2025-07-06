@@ -20,6 +20,7 @@ float4 getColor(VertexOutput input, Material mat, float4 color) {
             color.rgb,
             normal,
             scene.ambientLight,
+            1.0,
             metallic,
             roughness,
             emissiveColor,

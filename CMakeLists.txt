@@ -98,6 +98,7 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"

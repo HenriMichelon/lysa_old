@@ -74,7 +74,7 @@ export namespace lysa {
 
         void addPostprocessing(
             const std::wstring& fragShaderName,
-            bool useRenderingColorAttachmentFormat,
+            vireo::ImageFormat outputFormat,
             void* data = nullptr,
             uint32 dataSize = 0);
 
@@ -85,6 +85,12 @@ export namespace lysa {
         Renderer& operator=(Renderer&) = delete;
 
     protected:
+        struct {
+            uint32 kernelSize;
+            float4 weights[9*9]; // float4 for correct alignment
+            float2 texelSize;
+        } blurData;
+
         const RenderingConfiguration& config;
         const std::wstring name;
         const bool withStencil;
@@ -101,12 +107,6 @@ export namespace lysa {
             uint32 frameIndex) = 0;
 
     private:
-        struct {
-            uint32 kernelSize;
-            float4 weights[9*9]; // float4 for correct alignment
-            float2 texelSize;
-        } bloomBlurData;
-
         vireo::Extent          currentExtent{};
         std::vector<FrameData> framesData;
         DepthPrepass           depthPrePass;
