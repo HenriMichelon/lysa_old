@@ -111,7 +111,7 @@ export namespace lysa {
         //! Enable SSAO in the deferred renderer
         bool               ssaoEnabled{true};
         //! SSAO blur kernel size
-        uint32             ssaoBlurKernelSize{5};
+        uint32             ssaoBlurKernelSize{3};
         //! SSAO sampling count
         uint32             ssaoSampleCount{16};
         //! SSAO sampling radius
@@ -119,7 +119,7 @@ export namespace lysa {
         //! SSAO self-shadowing bias
         float              ssaoBias{0.025f};
         //! SSAO strength
-        float              ssaoStrength{1.2f};
+        float              ssaoStrength{2.0f};
     };
 
     /**

@@ -103,8 +103,8 @@ export namespace lysa {
         const LightType lightType{LIGHT_UNKNOWN};
         float4 colorAndIntensity{1.0f, 1.0f, 1.0f, 1.0f};
         bool castShadows{false};
-        float shadowTransparencyScissors{0.25};
-        float shadowTransparencyColorScissors{0.75};
+        float shadowTransparencyScissors{0.5f};
+        float shadowTransparencyColorScissors{0.75f};
     };
 
 }
