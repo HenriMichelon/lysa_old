@@ -14,6 +14,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::wstring& name) :
         Renderer{config, true, name},
+        ssaoBlurData{3, 1.2f},
         gBufferPass{config},
         lightingPass{config, gBufferPass} {
         if (config.ssaoEnabled) {
@@ -22,8 +23,8 @@ namespace lysa {
                   config,
                   L"ssao_blur",
                   ssaoPass->getSSAOBufferFormat(),
-                  &blurData,
-                  sizeof(blurData),
+                  &ssaoBlurData,
+                  sizeof(ssaoBlurData),
                   L"SSAO Blur");
         }
     }
@@ -71,6 +72,7 @@ namespace lysa {
         Renderer::resize(extent, commandList);
         gBufferPass.resize(extent, commandList);
         if (config.ssaoEnabled) {
+            updateBlurData(ssaoBlurData, extent, 3);
             ssaoPass->resize(extent, commandList);
             ssaoBlurPass->resize(extent, commandList);
         }

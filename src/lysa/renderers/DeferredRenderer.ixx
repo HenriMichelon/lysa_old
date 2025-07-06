@@ -47,6 +47,7 @@ export namespace lysa {
             uint32 frameIndex) override;
 
     private:
+        BlurData ssaoBlurData;
         GBufferPass gBufferPass;
         LightingPass lightingPass;
         std::unique_ptr<SSAOPass> ssaoPass;

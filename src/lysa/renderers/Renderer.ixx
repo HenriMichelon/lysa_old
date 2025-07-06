@@ -85,11 +85,11 @@ export namespace lysa {
         Renderer& operator=(Renderer&) = delete;
 
     protected:
-        struct {
+        struct BlurData {
             uint32 kernelSize;
             float4 weights[9*9]; // float4 for correct alignment
             float2 texelSize;
-        } blurData;
+        };
 
         const RenderingConfiguration& config;
         const std::wstring name;
@@ -106,6 +106,8 @@ export namespace lysa {
             bool clearAttachment,
             uint32 frameIndex) = 0;
 
+        void updateBlurData(BlurData& blurData, const vireo::Extent& extent, float strength) const;
+
     private:
         vireo::Extent          currentExtent{};
         std::vector<FrameData> framesData;
@@ -113,6 +115,7 @@ export namespace lysa {
         ShaderMaterialPass     shaderMaterialPass;
         TransparencyPass       transparencyPass;
 
+        BlurData bloomBlurData;
         std::unique_ptr<PostProcessing> bloomBlurPass;
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };
