@@ -103,7 +103,8 @@ export namespace lysa {
     private:
         struct {
             uint32 kernelSize;
-            float  strength;
+            float4 weights[9*9]; // float4 for correct alignment
+            float2 texelSize;
         } bloomBlurData;
 
         vireo::Extent          currentExtent{};

@@ -17,14 +17,14 @@ namespace lysa {
         config{config},
         name{name},
         withStencil{withStencil},
-        bloomBlurData{ config.bloomSize, config.bloomStrength },
+        bloomBlurData{config.bloomSize, config.bloomStrength},
         depthPrePass{config, withStencil},
         shaderMaterialPass{config},
         transparencyPass{config} {
         if (config.bloomEnabled) {
             bloomBlurPass = std::make_unique<PostProcessing>(
                 config,
-                L"blur",
+                L"bloom_blur",
                 true,
                 &bloomBlurData,
                 sizeof(bloomBlurData),
@@ -154,6 +154,12 @@ namespace lysa {
             frame.colorAttachment,
             vireo::ResourceState::SHADER_READ,
             vireo::ResourceState::UNDEFINED);
+        if (config.bloomEnabled) {
+            commandList.barrier(
+                bloomColorAttachment,
+                vireo::ResourceState::SHADER_READ,
+                vireo::ResourceState::UNDEFINED);
+        }
     }
 
     std::shared_ptr<vireo::RenderTarget> Renderer::getColorAttachment(const uint32 frameIndex) const {
@@ -193,7 +199,27 @@ namespace lysa {
                 depthStage);
         }
         transparencyPass.resize(extent, commandList);
-        if (config.bloomEnabled) { bloomBlurPass->resize(extent, commandList); }
+        if (config.bloomEnabled) {
+            // Pre-compute Gaussian weights
+            if (bloomBlurData.kernelSize > 9) { bloomBlurData.kernelSize = 9; }
+            bloomBlurData.texelSize = (1.0 / float2(extent.width, extent.height)) * config.bloomStrength;
+            const int halfKernel = bloomBlurData.kernelSize / 2;
+            float sum = 0.0;
+            for (int i = 0; i < bloomBlurData.kernelSize; i++) {
+                for (int j = 0; j < bloomBlurData.kernelSize; j++) {
+                    const int index = i * bloomBlurData.kernelSize + j;
+                    const float x = static_cast<float>(i - halfKernel) * bloomBlurData.texelSize.x;
+                    const float y = static_cast<float>(j - halfKernel) * bloomBlurData.texelSize.y;
+                    bloomBlurData.weights[index].x = std::exp(-(x * x + y * y) / 2.0);
+                    sum += bloomBlurData.weights[index].x;
+                }
+            }
+            // Normalize weights
+            for (int i = 0; i < bloomBlurData.kernelSize * bloomBlurData.kernelSize; i++) {
+                bloomBlurData.weights[i].x /= sum;
+            }
+            bloomBlurPass->resize(extent, commandList);
+        }
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->resize(extent, commandList);
         }

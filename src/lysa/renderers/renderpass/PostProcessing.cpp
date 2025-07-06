@@ -21,30 +21,26 @@ namespace lysa {
         Renderpass{config, name},
         fragShaderName{fragShaderName},
         data{data},
-        descriptorLayout{Application::getVireo().createDescriptorLayout(name)},
-        descriptorLayoutBuffers{Application::getVireo().createDescriptorLayout(name)}{
+        descriptorLayout{Application::getVireo().createDescriptorLayout(name)} {
+        textures.resize(TEXTURES_COUNT);
+        for (int i = 0; i < TEXTURES_COUNT; i++) {
+            textures[i] = Application::getResources().getBlankImage();
+        }
 
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         if (data) {
             descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
             dataUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
             dataUniform->map();
-            dataUniform->write(data, dataSize);
-            dataUniform->unmap();
         }
+        descriptorLayout->add(BINDING_TEXTURES, vireo::DescriptorType::SAMPLED_IMAGE, TEXTURES_COUNT);
         descriptorLayout->build();
-
-        descriptorLayoutBuffers->add(BINDING_INPUT, vireo::DescriptorType::SAMPLED_IMAGE);
-        descriptorLayoutBuffers->add(BINDING_DEPTH_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
-        descriptorLayoutBuffers->add(BINDING_BLOOM_BUFFER, vireo::DescriptorType::SAMPLED_IMAGE);
-        descriptorLayoutBuffers->build();
 
         const auto& vireo = Application::getVireo();
         pipelineConfig.colorRenderFormats.push_back(useRenderingColorAttachmentFormat ? config.colorRenderingFormat : config.swapChainFormat);
         pipelineConfig.resources = vireo.createPipelineResources({
             descriptorLayout,
-            Application::getResources().getSamplers().getDescriptorLayout(),
-            descriptorLayoutBuffers},
+            Application::getResources().getSamplers().getDescriptorLayout()},
             {},
             name);
         pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
@@ -61,7 +57,6 @@ namespace lysa {
             if (data) {
                 frame.descriptorSet->update(BINDING_DATA, dataUniform);
             }
-            frame.descriptorSetBuffers = vireo.createDescriptorSet(descriptorLayoutBuffers, name);
         }
     }
 
@@ -69,6 +64,7 @@ namespace lysa {
         auto& frame = framesData[frameIndex];
         frame.params.time = 123.45; //getCurrentTimeMilliseconds();
         frame.paramsUniform->write(&frame.params, sizeof(frame.params));
+        dataUniform->write(data);
     }
 
     void PostProcessing::render(
@@ -81,9 +77,11 @@ namespace lysa {
         vireo::CommandList& commandList) {
         auto& frame = framesData[frameIndex];
 
-        frame.descriptorSetBuffers->update(BINDING_INPUT, colorAttachment->getImage());
-        if (depthAttachment) { frame.descriptorSetBuffers->update(BINDING_DEPTH_BUFFER, depthAttachment->getImage()); }
-        if (bloomColorAttachment) { frame.descriptorSetBuffers->update(BINDING_BLOOM_BUFFER, bloomColorAttachment->getImage()); }
+        textures[INPUT_BUFFER] = colorAttachment->getImage();
+        if (depthAttachment) { textures[DEPTH_BUFFER] = depthAttachment->getImage(); }
+        if (bloomColorAttachment) { textures[BLOOM_BUFFER] = bloomColorAttachment->getImage(); }
+        frame.descriptorSet->update(BINDING_TEXTURES, textures);
+
         renderingConfig.colorRenderTargets[0].renderTarget = frame.colorAttachment;
         commandList.barrier(
             frame.colorAttachment,
@@ -95,8 +93,7 @@ namespace lysa {
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptors({
             frame.descriptorSet,
-            Application::getResources().getSamplers().getDescriptorSet(),
-            frame.descriptorSetBuffers});
+            Application::getResources().getSamplers().getDescriptorSet()});
         commandList.draw(3);
         commandList.endRendering();
         commandList.barrier(

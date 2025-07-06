@@ -56,39 +56,3 @@ float3 toneMapACES(float3 x) {
     float e = 0.14f;
     return saturate((x*(a*x+b))/(x*(c*x+d)+e));
 }
-
-float4 gaussianBlur(Texture2D image, float2 texCoord, int kernelSize, float strength, uint2 imageSize) {
-    if (kernelSize > 9) { kernelSize = 9; }
-    float2 texelSize = (1.0 / float2(imageSize)) * strength;
-    int halfKernel = kernelSize / 2;
-
-    // Compute Gaussian weights
-    float weights[9*9]; // Maximum size
-    float sum = 0.0;
-    for (int i = 0; i < kernelSize; i++) {
-        for (int j = 0; j < kernelSize; j++) {
-            int index = i * kernelSize + j;
-            float x = float(i - halfKernel) * texelSize.x;
-            float y = float(j - halfKernel) * texelSize.y;
-            weights[index] = exp(-(x * x + y * y) / 2.0);
-            sum += weights[index];
-        }
-    }
-
-    // Normalize weights
-    for (int i = 0; i < kernelSize * kernelSize; i++) {
-        weights[i] /= sum;
-    }
-
-    // Apply the convolution
-    float4 color = float4(0.0);
-    for (int i = -halfKernel; i <= halfKernel; i++) {
-        for (int j = -halfKernel; j <= halfKernel; j++) {
-            float2 offset = float2(float(i), float(j)) * texelSize;
-            int index = (i + halfKernel) * kernelSize + (j + halfKernel);
-            color += image.Sample(samplers[SAMPLER_NEAREST_NEAREST_BORDER_LINEAR], texCoord + offset) * weights[index];
-        }
-    }
-
-    return color;
-}

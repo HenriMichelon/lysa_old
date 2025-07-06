@@ -107,7 +107,7 @@ export namespace lysa {
         //! Bloom effect blur kernel size
         uint32             bloomSize{5};
         //! Bloom effect blur strength
-        float              bloomStrength{0.6f};
+        float              bloomStrength{1.2f};
     };
 
     /**

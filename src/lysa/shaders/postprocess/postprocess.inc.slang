@@ -18,8 +18,9 @@ struct Params {
     uint2  imageSize;
 };
 
-[[vk::binding(0, 0)]] ConstantBuffer<Params> params : register(b0, space0);
+static const int INPUT_BUFFER  = 0;
+static const int DEPTH_BUFFER = 1;
+static const int BLOOM_BUFFER = 2;
 
-[[vk::binding(0, 2)]] Texture2D inputImage  : register(t0, space2);
-[[vk::binding(1, 2)]] Texture2D depthBuffer : register(t1, space2);
-[[vk::binding(2, 2)]] Texture2D bloomBuffer : register(t2, space2);
+[[vk::binding(0, 0)]] ConstantBuffer<Params> params : register(b0, space0);
+[[vk::binding(2, 0)]] Texture2D textures[] : register(t2, space0);

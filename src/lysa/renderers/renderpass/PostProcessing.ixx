@@ -48,10 +48,12 @@ export namespace lysa {
 
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
         static constexpr vireo::DescriptorIndex BINDING_DATA{1};
+        static constexpr vireo::DescriptorIndex BINDING_TEXTURES{2};
 
-        static constexpr vireo::DescriptorIndex BINDING_INPUT{0};
-        static constexpr vireo::DescriptorIndex BINDING_DEPTH_BUFFER{1};
-        static constexpr vireo::DescriptorIndex BINDING_BLOOM_BUFFER{2};
+        static constexpr int INPUT_BUFFER{0};
+        static constexpr int DEPTH_BUFFER{1};
+        static constexpr int BLOOM_BUFFER{2};
+        static constexpr int TEXTURES_COUNT{BLOOM_BUFFER+1};
 
         struct PostProcessingParams {
             uint32 applyBloom;
@@ -63,7 +65,6 @@ export namespace lysa {
             PostProcessingParams                  params;
             std::shared_ptr<vireo::Buffer>        paramsUniform;
             std::shared_ptr<vireo::DescriptorSet> descriptorSet;
-            std::shared_ptr<vireo::DescriptorSet> descriptorSetBuffers;
             std::shared_ptr<vireo::RenderTarget>  colorAttachment;
         };
 
@@ -75,13 +76,13 @@ export namespace lysa {
             .colorRenderTargets = {{}}
         };
 
-        const std::wstring                       fragShaderName;
-        void*                                    data{nullptr};
-        std::shared_ptr<vireo::Buffer>           dataUniform{nullptr};
-        std::vector<FrameData>                   framesData;
+        const std::wstring fragShaderName;
+        void* data{nullptr};
+        std::shared_ptr<vireo::Buffer> dataUniform{nullptr};
+        std::vector<FrameData> framesData;
+        std::vector<std::shared_ptr<vireo::Image>> textures;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-        std::shared_ptr<vireo::DescriptorLayout> descriptorLayoutBuffers;
-        std::shared_ptr<vireo::GraphicPipeline>  pipeline;
+        std::shared_ptr<vireo::GraphicPipeline> pipeline;
 
     };
 }
