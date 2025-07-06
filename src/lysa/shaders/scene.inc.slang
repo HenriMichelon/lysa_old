@@ -43,6 +43,7 @@ struct Scene {
     float4   ambientLight;
     uint     lightsCount;
     uint     bloomEnabled;
+    uint     ssaoEnabled;
 }
 
 struct Lights {

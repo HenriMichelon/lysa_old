@@ -51,6 +51,7 @@ namespace lysa {
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
             frame.descriptorSet = vireo.createDescriptorSet(descriptorLayout);
+            frame.descriptorSet->update(BINDING_AO_MAP, Application::getResources().getBlankImage());
         }
 
         renderingConfig.colorRenderTargets[0].clearValue = {
@@ -74,7 +75,9 @@ namespace lysa {
         frame.descriptorSet->update(BINDING_NORMAL_BUFFER, gBufferPass.getNormalBuffer(frameIndex)->getImage());
         frame.descriptorSet->update(BINDING_ALBEDO_BUFFER, gBufferPass.getAlbedoBuffer(frameIndex)->getImage());
         frame.descriptorSet->update(BINDING_EMISSIVE_BUFFER, gBufferPass.getEmissiveBuffer(frameIndex)->getImage());
-        frame.descriptorSet->update(BINDING_AO_MAP, aoMap->getImage());
+        if (config.ssaoEnabled && aoMap != nullptr) {
+            frame.descriptorSet->update(BINDING_AO_MAP, aoMap->getImage());
+        }
 
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.colorRenderTargets[0].clear = clearAttachment;

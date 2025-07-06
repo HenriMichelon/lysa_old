@@ -108,6 +108,14 @@ export namespace lysa {
         uint32             bloomSize{5};
         //! Bloom effect blur strength
         float              bloomStrength{1.2f};
+        //! Enable SSAO in the deferred renderer
+        bool               ssaoEnabled{true};
+        //! SSAO sampling radius
+        float              ssaoRadius{0.5f};
+        //! SSAO self-shadowing bias
+        float              ssaoBias{0.025f};
+        //! SSAO strength
+        float              ssaoStrength{1.2f};
     };
 
     /**

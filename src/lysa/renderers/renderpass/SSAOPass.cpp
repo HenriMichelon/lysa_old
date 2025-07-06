@@ -18,7 +18,8 @@ namespace lysa {
         const RenderingConfiguration& config,
         const GBufferPass& gBufferPass):
         Renderpass{config, L"SSAO"},
-        gBufferPass{gBufferPass} {
+        gBufferPass{gBufferPass},
+        params{ .radius = config.ssaoRadius, .bias = config.ssaoBias, .power = config.ssaoStrength }{
         const auto& vireo = Application::getVireo();
 
         descriptorLayout = vireo.createDescriptorLayout();

@@ -48,10 +48,10 @@ export namespace lysa {
         struct Params {
             float2 screenSize;
             float2 noiseScale;
-            float radius{0.5f};
-            float bias{0.025f};
-            float power{1.2f};
-            uint sampleCount{64};
+            float  radius;
+            float  bias;
+            float  power;
+            uint   sampleCount{64};
             float4 samples[64];
         };
 

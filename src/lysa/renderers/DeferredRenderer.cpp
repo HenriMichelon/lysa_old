@@ -16,19 +16,21 @@ namespace lysa {
         Renderer{config, true, name},
         gBufferPass{config},
         lightingPass{config, gBufferPass} {
-        ssaoPass = std::make_unique<SSAOPass>(config, gBufferPass);
-        ssaoBlurPass = std::make_unique<PostProcessing>(
-              config,
-              L"ssao_blur",
-              ssaoPass->getSSAOBufferFormat(),
-              &blurData,
-              sizeof(blurData),
-              L"SSAO Blur");
+        if (config.ssaoEnabled) {
+            ssaoPass = std::make_unique<SSAOPass>(config, gBufferPass);
+            ssaoBlurPass = std::make_unique<PostProcessing>(
+                  config,
+                  L"ssao_blur",
+                  ssaoPass->getSSAOBufferFormat(),
+                  &blurData,
+                  sizeof(blurData),
+                  L"SSAO Blur");
+        }
     }
 
     void DeferredRenderer::update(const uint32 frameIndex) {
         Renderer::update(frameIndex);
-        ssaoBlurPass->update(frameIndex);
+        if (config.ssaoEnabled) { ssaoBlurPass->update(frameIndex); }
     }
 
     void DeferredRenderer::updatePipelines(
@@ -44,21 +46,23 @@ namespace lysa {
         const bool,
         const uint32 frameIndex) {
         gBufferPass.render(commandList, scene, colorAttachment, depthAttachment, false, frameIndex);
-        ssaoPass->render(commandList, scene, frameIndex);
-        ssaoBlurPass->render(
-               frameIndex,
-               scene.getViewport(),
-               scene.getScissors(),
-                ssaoPass->getSSAOColorBuffer(frameIndex),
-               nullptr,
-               nullptr,
-               commandList);
+        if (config.ssaoEnabled) {
+            ssaoPass->render(commandList, scene, frameIndex);
+            ssaoBlurPass->render(
+                   frameIndex,
+                   scene.getViewport(),
+                   scene.getScissors(),
+                    ssaoPass->getSSAOColorBuffer(frameIndex),
+                   nullptr,
+                   nullptr,
+                   commandList);
+        }
         lightingPass.render(
             commandList,
             scene,
             colorAttachment,
             depthAttachment,
-            ssaoBlurPass->getColorAttachment(frameIndex),
+            config.ssaoEnabled ? ssaoBlurPass->getColorAttachment(frameIndex) : nullptr,
             true,
             frameIndex);
     }
@@ -66,8 +70,10 @@ namespace lysa {
     void DeferredRenderer::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
         Renderer::resize(extent, commandList);
         gBufferPass.resize(extent, commandList);
-        ssaoPass->resize(extent, commandList);
-        ssaoBlurPass->resize(extent, commandList);
+        if (config.ssaoEnabled) {
+            ssaoPass->resize(extent, commandList);
+            ssaoBlurPass->resize(extent, commandList);
+        }
         lightingPass.resize(extent, commandList);
     }
 
