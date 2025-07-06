@@ -110,6 +110,8 @@ export namespace lysa {
         float              bloomStrength{1.2f};
         //! Enable SSAO in the deferred renderer
         bool               ssaoEnabled{true};
+        //! SSAO sampling count
+        uint32             ssaoSampleCount{16};
         //! SSAO sampling radius
         float              ssaoRadius{0.5f};
         //! SSAO self-shadowing bias
