@@ -109,6 +109,16 @@ export namespace lysa {
         void updateBlurData(BlurData& blurData, const vireo::Extent& extent, float strength) const;
 
     private:
+        struct {
+            float gamma;
+            float exposure;
+        } gammaCorrectionData;
+         struct {
+            float spanMax{8.0f};
+            float reduceMul{1.0f / 8.0f};
+            float reduceMin{1.0f / 128.0f};
+        } fxaaData;
+
         vireo::Extent          currentExtent{};
         std::vector<FrameData> framesData;
         DepthPrepass           depthPrePass;

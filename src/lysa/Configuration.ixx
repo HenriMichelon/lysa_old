@@ -102,6 +102,17 @@ export namespace lysa {
         float3             clearColor{DEFAULT_CLEAR_COLOR};
         //! Number of simultaneous frames during rendering
         uint32             framesInFlight{2};
+        //! Gamma correction factor when using *_UNORM, *_SNORM or *_SFLOAT format
+        float              gamma{2.4f};
+        //! Exposure correction factor
+        float              exposure{1.0f};
+        //! Type of tone mapping shader when using HDR rendering formats R16G16B16A16_UNORM, R16G16B16A16_SFLOAT or R32G32B32A32_SFLOAT
+        ToneMappingType    toneMappingType{ToneMappingType::ACES};
+        //! Type of antialiasing post-processing shader
+        AntiAliasingType   antiAliasingType{AntiAliasingType::FXAA};
+        float              fxaaSpanMax{8.0f};
+        float              fxaaReduceMul{1.0f / 8.0f};
+        float              fxaaReduceMin{1.0f / 128.0f};
         //! Enable the bloom post-processing effect
         bool               bloomEnabled{true};
         //! Bloom effect blur kernel size

@@ -640,4 +640,16 @@ export namespace lysa {
         FORWARD  = 0,
         DEFERRED = 1,
     };
+
+    enum class ToneMappingType : uint8 {
+        NONE     = 0,
+        REINHARD = 1,
+        ACES     = 2,
+    };
+
+    enum class AntiAliasingType : uint8 {
+        NONE     = 0,
+        FXAA     = 1,
+    };
+
 }

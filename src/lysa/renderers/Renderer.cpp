@@ -17,10 +17,12 @@ namespace lysa {
         config{config},
         name{name},
         withStencil{withStencil},
+        gammaCorrectionData{ .gamma = config.gamma, .exposure = config.exposure },
+        fxaaData{ .spanMax = config.fxaaSpanMax, .reduceMul = config.fxaaReduceMul, .reduceMin = config.fxaaReduceMin },
         depthPrePass{config, withStencil},
         shaderMaterialPass{config},
         transparencyPass{config},
-        bloomBlurData{.kernelSize = config.bloomBlurKernelSize} {
+        bloomBlurData{ .kernelSize = config.bloomBlurKernelSize } {
         if (config.bloomEnabled) {
             bloomBlurPass = std::make_unique<PostProcessing>(
                 config,
@@ -29,6 +31,40 @@ namespace lysa {
                 &bloomBlurData,
                 sizeof(bloomBlurData),
                 L"Bloom blur");
+        }
+        const auto needToneMapping =
+            config.colorRenderingFormat == vireo::ImageFormat::R16G16B16A16_UNORM ||
+            config.colorRenderingFormat == vireo::ImageFormat::R32G32B32A32_SFLOAT ||
+            config.colorRenderingFormat == vireo::ImageFormat::R16G16B16A16_SFLOAT;
+        const auto needGammaCorrection =
+            config.colorRenderingFormat == vireo::ImageFormat::R8G8B8A8_UNORM ||
+            config.colorRenderingFormat == vireo::ImageFormat::R8G8B8A8_SNORM;
+        if (needToneMapping) {
+            addPostprocessing(
+                config.toneMappingType == ToneMappingType::REINHARD ? L"reinhard" :
+                config.toneMappingType == ToneMappingType::ACES ? L"aces" :
+                L"gamma_correction",
+                config.swapChainFormat,
+                &gammaCorrectionData,
+                sizeof(gammaCorrectionData));
+        } else if (needGammaCorrection) {
+            addPostprocessing(
+                L"gamma_correction",
+                config.swapChainFormat,
+                &gammaCorrectionData,
+                sizeof(gammaCorrectionData));
+        }
+        switch (config.antiAliasingType) {
+            case AntiAliasingType::FXAA:
+                addPostprocessing(
+                    L"fxaa",
+                    config.swapChainFormat,
+                    &fxaaData,
+                    sizeof(fxaaData));
+                break;
+            case AntiAliasingType::NONE:
+            default:
+                break;
         }
         framesData.resize(config.framesInFlight);
     }
