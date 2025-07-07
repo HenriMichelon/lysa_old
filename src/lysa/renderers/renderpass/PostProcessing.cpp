@@ -105,6 +105,7 @@ namespace lysa {
     }
 
     void PostProcessing::resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) {
+        if (extent.width == 0 || extent.height == 0) { return; }
         for (auto& frame : framesData) {
             frame.colorAttachment = Application::getVireo().createRenderTarget(
                 pipelineConfig.colorRenderFormats[0],

@@ -79,11 +79,13 @@ namespace lysa {
             data.shadowMap = vireo.createRenderTarget(
                 pipelineConfig.depthStencilImageFormat,
                 size, size,
-                vireo::RenderTargetType::DEPTH);
+                vireo::RenderTargetType::DEPTH,
+                renderingConfig.depthStencilClearValue);
             data.transparencyColorMap = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[0],
                 size, size,
-                vireo::RenderTargetType::COLOR);
+                vireo::RenderTargetType::COLOR,
+                renderingConfig.colorRenderTargets[0].clearValue);
         }
     }
 
