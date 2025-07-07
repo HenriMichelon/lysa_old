@@ -32,6 +32,7 @@ export import lysa.viewport;
 export import lysa.virtual_fs;
 export import lysa.window;
 
+export import lysa.nodes.animation_player;
 export import lysa.nodes.camera;
 export import lysa.nodes.character;
 export import lysa.nodes.collision_area;

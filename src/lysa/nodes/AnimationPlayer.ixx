@@ -79,7 +79,7 @@ export namespace lysa {
 
         /**
          *
-         * Seeks the animation to the seconds point in time (in seconds).
+         * Seeks the animation to the point in time (in seconds).
          */
         void seek(float duration);
 
@@ -126,7 +126,7 @@ export namespace lysa {
         bool starting{false};
         bool reverse{false};
         float3 initialPosition{0.0f};
-        float3 initialRotation{0.0f};
+        quaternion initialRotation{quaternion::identity()};
         float3 initialScale{1.0f};
         std::chrono::time_point<std::chrono::steady_clock> startTime;
         Node* target{nullptr};
@@ -136,7 +136,7 @@ export namespace lysa {
         std::vector<float> lastTracksState;
         std::map<std::wstring, std::shared_ptr<AnimationLibrary>> libraries;
 
-        void apply(const Animation::TrackKeyValue&);
+        void apply(const Animation::TrackKeyValue&) const;
     };
 
 }

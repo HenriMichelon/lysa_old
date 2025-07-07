@@ -10,6 +10,7 @@ import vireo;
 import lysa.application;
 import lysa.virtual_fs;
 import lysa.log;
+import lysa.types;
 import lysa.nodes.animation_player;
 import lysa.nodes.mesh_instance;
 import lysa.resources.animation;
@@ -50,7 +51,7 @@ namespace lysa {
         // Read the images & mips levels headers
         auto imageHeaders = std::vector<ImageHeader>(header.imagesCount);
         auto levelHeaders = std::vector<std::vector<MipLevelInfo>>(header.imagesCount);
-        uint64_t totalImageSize{0};
+        uint64 totalImageSize{0};
         for (auto imageIndex = 0; imageIndex < header.imagesCount; ++imageIndex) {
             stream.read(reinterpret_cast<std::istream::char_type *>(&imageHeaders[imageIndex]), sizeof(ImageHeader));
             // print(imageHeaders[imageIndex]);

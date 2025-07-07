@@ -17,6 +17,8 @@ export namespace lysa {
      */
     class Animation : public Resource {
     public:
+        using Value = std::variant<float3, quaternion>;
+
         /**
          * An animation track
          */
@@ -26,7 +28,7 @@ export namespace lysa {
             bool                    enabled{true};
             float                   duration{0.0f};
             std::vector<float>      keyTime;
-            std::vector<float3>     keyValue;
+            std::vector<Value>      keyValue;
         };
 
         /**
@@ -40,7 +42,7 @@ export namespace lysa {
             //! animation type
             AnimationType  type;
             //! interpolated value
-            float3         value;
+            Value          value;
         };
 
         /**

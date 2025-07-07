@@ -22,13 +22,13 @@ namespace lysa {
         }
     }
 
-    void AnimationPlayer::apply(const Animation::TrackKeyValue& value) {
+    void AnimationPlayer::apply(const Animation::TrackKeyValue& value) const {
         switch (value.type) {
         case AnimationType::TRANSLATION:
-            target->setPosition(value.value + initialPosition);
+            target->setPosition(std::get<float3>(value.value) + initialPosition);
             break;
         case AnimationType::ROTATION:
-            // target->setRotation(value.value + initialRotation); TODO
+            target->setRotation(std::get<quaternion>(value.value) + initialRotation);
             break;
         case AnimationType::SCALE:
             // target->setScale(value.value + initialScale); TODO

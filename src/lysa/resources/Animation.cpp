@@ -6,6 +6,8 @@
 */
 module lysa.resources.animation;
 
+import lysa.log;
+
 namespace lysa {
 
     Animation::TrackKeyValue Animation::getInterpolatedValue(const uint32 trackIndex,
@@ -58,7 +60,15 @@ namespace lysa {
         const auto& previousValue = track.keyValue[previousIndex];
         if (track.interpolation == AnimationInterpolation::LINEAR) {
             const auto nextValue = overflow ? track.keyValue[0] : track.keyValue[nextIndex];
-            value.value = lerp(previousValue, nextValue, interpolationValue);
+            switch (track.type) {
+            case AnimationType::TRANSLATION:
+            case AnimationType::SCALE:
+                value.value = lerp(std::get<float3>(previousValue), std::get<float3>(nextValue), interpolationValue);
+                break;
+            case AnimationType::ROTATION:
+                value.value = lerp(std::get<quaternion>(previousValue), std::get<quaternion>(nextValue), interpolationValue);
+                break;
+            }
         } else {
             // STEP
             value.value = previousValue;
