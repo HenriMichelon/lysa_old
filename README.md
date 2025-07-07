@@ -4,15 +4,15 @@ A 3D Game Engine.
 
 ## Some Features
 
-- GPU-driven rendering
-- [Vulkan 1.3](https://www.vulkan.org/) & DirectX 12 support
-- Physics engine with [Jolt Physics 5](https://github.com/jrouwe/JoltPhysics) and [NVIDIA PhysX 5](https://github.com/NVIDIA-Omniverse/PhysX) support
-- Node-based system (heavily inspired by [Godot](https://godotengine.org/))
-- Selectable forward and deferred renderers
-- Bundled PBR, Bloom, SSAO, ACES tone-mapping, FXAA and other shaders
-- Written in and for modern C++
-- [Slang shader language](https://shader-slang.org/) support for CMake
-- Math library with Slang-like syntax
+- GPU-driven rendering.
+- [Vulkan 1.3](https://www.vulkan.org/) & DirectX 12 support.
+- Physics engine with [Jolt Physics 5](https://github.com/jrouwe/JoltPhysics) and [NVIDIA PhysX 5](https://github.com/NVIDIA-Omniverse/PhysX) support.
+- Node-based scene tree with a classical OOP approach.
+- Selectable forward and deferred renderers.
+- Support for PBR, Bloom, SSAO, HDR tone-mapping (Reinhard and ACES), SMAA, FXAA.
+- Written in and for modern C++.
+- Math library with Slang-like syntax.
+- [Slang shader language](https://shader-slang.org/) support for CMake.
 
 ## Third party dependencies used
 
