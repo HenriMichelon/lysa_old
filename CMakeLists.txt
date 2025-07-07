@@ -91,7 +91,7 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
 #        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
 #        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
 #        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
@@ -99,7 +99,10 @@ set(SHADERS_SOURCE_FILES
 #        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_edge_detect.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_blend_weight.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_neighborhood_blend.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
 #        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
@@ -256,6 +259,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.cpp
+        ${ENGINE_SRC_DIR}/renderers/renderpass/SMAAPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.cpp
 
@@ -343,6 +347,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/Renderpass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShaderMaterialPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/ShadowMapPass.ixx
+        ${ENGINE_SRC_DIR}/renderers/renderpass/SMAAPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
 

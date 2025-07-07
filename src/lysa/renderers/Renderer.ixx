@@ -17,6 +17,7 @@ import lysa.renderers.renderpass.post_processing;
 import lysa.renderers.renderpass.depth_prepass;
 import lysa.renderers.renderpass.shader_material_pass;
 import lysa.renderers.renderpass.shadow_map_pass;
+import lysa.renderers.renderpass.smaa_pass;
 import lysa.renderers.renderpass.transparency_pass;
 
 export namespace lysa {
@@ -113,6 +114,7 @@ export namespace lysa {
             float gamma;
             float exposure;
         } gammaCorrectionData;
+
          struct {
             float spanMax{8.0f};
             float reduceMul{1.0f / 8.0f};
@@ -126,6 +128,7 @@ export namespace lysa {
         TransparencyPass       transparencyPass;
 
         BlurData bloomBlurData;
+        std::unique_ptr<SMAAPass> smaaPass;
         std::unique_ptr<PostProcessing> bloomBlurPass;
         std::vector<std::shared_ptr<PostProcessing>> postProcessingPasses;
     };

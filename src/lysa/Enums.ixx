@@ -650,6 +650,7 @@ export namespace lysa {
     enum class AntiAliasingType : uint8 {
         NONE     = 0,
         FXAA     = 1,
+        SMAA     = 2,
     };
 
 }

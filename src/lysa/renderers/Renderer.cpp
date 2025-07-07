@@ -62,7 +62,9 @@ namespace lysa {
                     &fxaaData,
                     sizeof(fxaaData));
                 break;
-            case AntiAliasingType::NONE:
+            case AntiAliasingType::SMAA:
+                smaaPass = std::make_unique<SMAAPass>(config);
+                break;
             default:
                 break;
         }
@@ -153,6 +155,7 @@ namespace lysa {
         } else {
             bloomColorAttachment = getBloomColorAttachment(frameIndex);
         }
+        auto colorAttachment = frame.colorAttachment;
         if (!postProcessingPasses.empty()) {
             const auto depthStage =
                config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
@@ -163,7 +166,6 @@ namespace lysa {
                frame.depthAttachment,
                depthStage,
                vireo::ResourceState::SHADER_READ);
-            auto colorAttachment = frame.colorAttachment;
             std::ranges::for_each(postProcessingPasses, [&](const auto& postProcessingPass) {
                 postProcessingPass->render(
                     frameIndex,
@@ -186,6 +188,16 @@ namespace lysa {
                     vireo::ResourceState::UNDEFINED);
             });
         }
+        if (smaaPass) {
+            smaaPass->render(
+                commandList,
+                colorAttachment,
+                frameIndex);
+            commandList.barrier(
+                smaaPass->getColorAttachment(frameIndex),
+               vireo::ResourceState::SHADER_READ,
+               vireo::ResourceState::UNDEFINED);
+        }
         commandList.barrier(
             frame.colorAttachment,
             vireo::ResourceState::SHADER_READ,
@@ -199,6 +211,9 @@ namespace lysa {
     }
 
     std::shared_ptr<vireo::RenderTarget> Renderer::getColorAttachment(const uint32 frameIndex) const {
+        if (smaaPass) {
+            return smaaPass->getColorAttachment(frameIndex);
+        }
         if (postProcessingPasses.empty()) {
             return framesData[frameIndex].colorAttachment;
         }
@@ -235,9 +250,12 @@ namespace lysa {
                 depthStage);
         }
         transparencyPass.resize(extent, commandList);
-        if (config.bloomEnabled) {
+        if (bloomBlurPass) {
             updateBlurData(bloomBlurData, extent, config.bloomBlurStrength);
             bloomBlurPass->resize(extent, commandList);
+        }
+        if (smaaPass) {
+            smaaPass->resize(extent, commandList);
         }
         for (const auto& postProcessingPass : postProcessingPasses) {
             postProcessingPass->resize(extent, commandList);

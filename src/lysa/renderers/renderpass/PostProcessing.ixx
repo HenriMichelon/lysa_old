@@ -16,6 +16,23 @@ import lysa.renderers.renderpass;
 export namespace lysa {
     class PostProcessing : public Renderpass {
     public:
+        struct PostProcessingParams {
+            uint32 applyBloom;
+            float  time;
+            uint2  imageSize;
+        };
+
+        inline static const std::wstring VERTEX_SHADER{L"quad.vert"};
+
+        static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
+        static constexpr vireo::DescriptorIndex BINDING_DATA{1};
+        static constexpr vireo::DescriptorIndex BINDING_TEXTURES{2};
+
+        static constexpr int INPUT_BUFFER{0};
+        static constexpr int DEPTH_BUFFER{1};
+        static constexpr int BLOOM_BUFFER{2};
+        static constexpr int TEXTURES_COUNT{BLOOM_BUFFER+1};
+
         PostProcessing(
             const RenderingConfiguration& config,
             const std::wstring& fragShaderName,
@@ -44,23 +61,6 @@ export namespace lysa {
         const auto& getFragShaderName() const { return fragShaderName; }
 
     protected:
-        const std::wstring VERTEX_SHADER{L"quad.vert"};
-
-        static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
-        static constexpr vireo::DescriptorIndex BINDING_DATA{1};
-        static constexpr vireo::DescriptorIndex BINDING_TEXTURES{2};
-
-        static constexpr int INPUT_BUFFER{0};
-        static constexpr int DEPTH_BUFFER{1};
-        static constexpr int BLOOM_BUFFER{2};
-        static constexpr int TEXTURES_COUNT{BLOOM_BUFFER+1};
-
-        struct PostProcessingParams {
-            uint32 applyBloom;
-            float  time;
-            uint2  imageSize;
-        };
-
         struct FrameData {
             PostProcessingParams                  params;
             std::shared_ptr<vireo::Buffer>        paramsUniform;
@@ -83,6 +83,5 @@ export namespace lysa {
         std::vector<std::shared_ptr<vireo::Image>> textures;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
         std::shared_ptr<vireo::GraphicPipeline> pipeline;
-
     };
 }
