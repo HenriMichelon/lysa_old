@@ -13,7 +13,7 @@ struct FragmentOutput {
 
 FragmentOutput fragmentMain(VertexOutput input) {
      Material mat = materials[input.materialIndex];
-    float4 color = fetchColor(input, mat);
+    float4 color = fetchColor(input.u, mat);
     if (color.a >= 0.99) {
         discard;
     }

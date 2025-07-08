@@ -15,14 +15,14 @@ struct FragmentOutput {
 
 FragmentOutput fragmentMain(VertexOutput input) : SV_TARGET {
     Material mat = materials[input.materialIndex];
-    float4 color = fetchColor(input, mat);
+    float4 color = fetchColor(input.uv, mat);
     if (mat.transparency != Transparency.DISABLED && color.a < 0.99) {
        discard;
     }
-    float3 normal = fetchNormal(input, mat);
-    float metallic = fetchMetallic(input, mat);
-    float roughness = fetchRoughness(input, mat);
-    float3 emissiveColor = fetchEmissiveColor(input, mat);
+    float3 normal = fetchNormal(input.uv, input.TBN, input.normal, mat);
+    float metallic = fetchMetallic(input.uv, mat);
+    float roughness = fetchRoughness(input.uv, mat);
+    float3 emissiveColor = fetchEmissiveColor(input.uv, mat);
 
     FragmentOutput output;
     output.position = float4(input.worldPos, input.viewPos.z);

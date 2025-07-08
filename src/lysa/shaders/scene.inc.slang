@@ -72,52 +72,49 @@ float4 toLinear(float4 sRGB) {
 [[vk::binding(1, 2)]] StructuredBuffer<MeshInstance> meshInstances : register(t1, space2);
 [[vk::binding(2, 2)]] ConstantBuffer<Lights> lights : register(b2, space2);
 
-float4 fetchColor(VertexOutput input, Material mat) {
+float4 fetchColor(float2 uv, Material mat) {
     float4 color = mat.albedoColor;
     if (mat.diffuseTexture.index != -1) {
         color = textures[mat.diffuseTexture.index].Sample(
             samplers[mat.diffuseTexture.samplerIndex],
-            uvTransform(mat.diffuseTexture, input.uv));
+            uvTransform(mat.diffuseTexture, uv));
     }
     return color;
 }
 
-float3 fetchNormal(VertexOutput input, Material mat) {
-    float3 normal;
+float3 fetchNormal(float2 uv, float3x3 TBN, float3 normal, Material mat) {
     if (mat.normalTexture.index != -1) {
         normal = textures[mat.normalTexture.index].Sample(
                      samplers[mat.normalTexture.samplerIndex],
-                     uvTransform(mat.normalTexture, input.uv)).rgb;
+                     uvTransform(mat.normalTexture, uv)).rgb;
         normal = normalize((normal * 2.0 - 1.0) * float3(mat.normalScale, mat.normalScale, 1.0f));
-        normal = normalize(mul(normal, input.TBN));
-    } else
-    {
-        normal = input.normal;
+        normal = normalize(mul(normal, TBN));
     }
     return normal;
 }
 
-float fetchMetallic(VertexOutput input, Material mat) {
+float fetchMetallic(float2 uv, Material mat) {
     return mat.metallicTexture.index == -1 ?
            mat.metallicFactor :
            mat.metallicFactor *
                textures[mat.metallicTexture.index].Sample(samplers[mat.metallicTexture.samplerIndex],
-               uvTransform(mat.metallicTexture, input.uv)).b;
+               uvTransform(mat.metallicTexture, uv)).b;
 }
 
-float fetchRoughness(VertexOutput input, Material mat) {
+float fetchRoughness(float2 uv, Material mat) {
     return mat.roughnessTexture.index == -1 ?
            mat.roughnessFactor :
            mat.roughnessFactor *
                textures[mat.roughnessTexture.index].Sample(samplers[mat.roughnessTexture.samplerIndex],
-               uvTransform(mat.roughnessTexture, input.uv)).g;
+               uvTransform(mat.roughnessTexture,
+               uv)).g;
 }
 
-float3 fetchEmissiveColor(VertexOutput input, Material mat) {
+float3 fetchEmissiveColor(float2 uv, Material mat) {
     float3 emissiveColor = mat.emissiveFactor.rgb;
     if (mat.emissiveTexture.index != -1) {
         emissiveColor *= textures[mat.emissiveTexture.index].Sample(
-           samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, input.uv)).rgb * mat.emissiveFactor.a;
+           samplers[mat.emissiveTexture.samplerIndex], uvTransform(mat.emissiveTexture, uv)).rgb * mat.emissiveFactor.a;
     }
     return emissiveColor;
 }
