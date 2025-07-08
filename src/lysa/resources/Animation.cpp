@@ -63,10 +63,13 @@ namespace lysa {
             switch (track.type) {
             case AnimationType::TRANSLATION:
             case AnimationType::SCALE:
-                value.value = lerp(std::get<float3>(previousValue), std::get<float3>(nextValue), interpolationValue);
+                value.value.xyz = lerp(previousValue.xyz, nextValue.xyz, interpolationValue);
                 break;
-            case AnimationType::ROTATION:
-                value.value = lerp(std::get<quaternion>(previousValue), std::get<quaternion>(nextValue), interpolationValue);
+            case AnimationType::ROTATION:{
+                    const auto prev = quaternion{previousValue};
+                    const auto next = quaternion{nextValue};
+                    value.value = lerp(prev, next, interpolationValue).xyzw;
+                }
                 break;
             }
         } else {

@@ -25,10 +25,10 @@ namespace lysa {
     void AnimationPlayer::apply(const Animation::TrackKeyValue& value) const {
         switch (value.type) {
         case AnimationType::TRANSLATION:
-            target->setPosition(std::get<float3>(value.value) + initialPosition);
+            target->setPosition(value.value.xyz + initialPosition);
             break;
         case AnimationType::ROTATION:
-            target->setRotation(std::get<quaternion>(value.value) + initialRotation);
+            target->setRotation(quaternion{value.value} + initialRotation);
             break;
         case AnimationType::SCALE:
             // target->setScale(value.value + initialScale); TODO

@@ -17,7 +17,7 @@ export namespace lysa {
      */
     class Animation : public Resource {
     public:
-        using Value = std::variant<float3, quaternion>;
+        using Value = float4;
 
         /**
          * An animation track
