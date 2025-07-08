@@ -163,10 +163,6 @@ namespace lysa {
         updatePipelinesData(commandList, shaderMaterialPipelinesData);
         updatePipelinesData(commandList, transparentPipelinesData);
 
-        if (Application::getResources().isUpdated()) {
-            Application::getResources().flush(commandList);
-        }
-
         if (!lights.empty()) {
             if (lights.size() > lightsBufferCount) {
                 if (lightsBufferCount >= Light::MAX_LIGHTS) {
@@ -234,8 +230,7 @@ namespace lysa {
             const auto& mesh = meshInstance->getMesh();
             assert([&]{return !mesh->getMaterials().empty(); }, "Models without materials are not supported");
             if (!mesh->isUploaded()) {
-                mesh->upload();
-                Application::getResources().setUpdated();
+                throw Exception("Mesh instance is not in VRAM");
             }
 
             meshInstancesDataMemoryBlocks[meshInstance] = meshInstancesDataArray.alloc(1);
