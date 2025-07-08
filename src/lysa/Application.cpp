@@ -45,6 +45,9 @@ namespace lysa {
 
     Application::~Application() {
         graphicQueue->waitIdle();
+        for(auto&t : threadedCalls) {
+            t.join();
+        }
         windows.clear();
         Scene::destroyDescriptorLayouts();
         resources.cleanup();
@@ -92,6 +95,18 @@ namespace lysa {
             });
             auto lock = std::lock_guard(deferredCallsMutex);
             deferredCalls.clear();
+        }
+
+        // Clean up the async calls
+        if (!threadedCalls.empty()) {
+            auto lock = std::lock_guard(threadedCallsMutex);
+            for (auto it = threadedCalls.begin(); it != threadedCalls.end();) {
+                if (it->joinable()) {
+                    ++it;
+                } else {
+                    it = threadedCalls.erase(it);
+                }
+            }
         }
 
         const double newTime = std::chrono::duration_cast<std::chrono::duration<double>>(

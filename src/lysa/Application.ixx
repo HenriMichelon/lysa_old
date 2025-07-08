@@ -82,6 +82,16 @@ export namespace lysa {
             instance->deferredCalls.push_back(lambda);
         }
 
+        /**
+         * Starts a new thread that need access the GPU/VRAM.<br>
+         * Use this instead of starting a thread manually because the rendering system needs
+         * to wait for all the threads completion before releasing resources.
+         */
+        template <typename Lambda>
+        static auto callAsync(Lambda lambda) {
+            instance->threadedCalls.push_back(std::jthread(lambda));
+        }
+
         virtual ~Application();
 
     private:
@@ -96,6 +106,8 @@ export namespace lysa {
         std::shared_ptr<Log> log;
         std::list<std::function<void()>> deferredCalls;
         std::mutex deferredCallsMutex;
+        std::list<std::jthread> threadedCalls;
+        std::mutex threadedCallsMutex;
         std::unique_ptr<PhysicsEngine> physicsEngine;
 
         // Fixed delta time for the physics
