@@ -161,29 +161,26 @@ namespace lysa {
             }
         }
 
-        const auto commandAllocator = Application::getVireo().createCommandAllocator(vireo::CommandType::GRAPHIC);
-        const auto commandList = commandAllocator->createCommandList();
-        commandList->begin();
-        auto& vireo = Application::getVireo();
-
-        // Upload all images into VRAM using one big staging buffer
-        std::shared_ptr<vireo::Buffer> textureStagingBuffer;
 
         // Read, upload and create the Image and Texture objets (Vireo specific)
         if (header.imagesCount > 0) {
-           textureStagingBuffer = vireo.createBuffer(
+            const auto command = Application::getTransferQueue().beginOneTimeCommand();
+            // Upload all images into VRAM using one big staging buffer
+            std::shared_ptr<vireo::Buffer> textureStagingBuffer;
+            textureStagingBuffer = Application::getTransferQueue().createOneTimeBuffer(
+               command,
                vireo::BufferType::IMAGE_UPLOAD,
                totalImageSize,
-               1,
-               L"textureStagingBuffer");
+               1);
             textureStagingBuffer->map();
             loadImagesAndTextures(
                 *textureStagingBuffer,
-                *commandList,
+                *command.commandList,
                 stream,
                 imageHeaders,
                 levelHeaders,
                 textureHeaders);
+            Application::getTransferQueue().endOneTimeCommand(command);
         }
 
         // Create the Material objects
@@ -302,8 +299,8 @@ namespace lysa {
             mesh->buildAABB();
             mesh->upload();
             meshes[meshIndex] = mesh;
+            Application::getResources().flush();
         }
-        Application::getResources().flush(*commandList);
 
         // Create the Node objects
         std::vector<std::shared_ptr<Node>> nodes{(header.nodesCount)};
@@ -348,10 +345,6 @@ namespace lysa {
                 rootNode.addChild(node);
             }
         }
-
-        commandList->end();
-        Application::getGraphicQueue()->submit({commandList});
-        Application::getGraphicQueue()->waitIdle();
     }
 
     void AssetsPack::loadImagesAndTextures(

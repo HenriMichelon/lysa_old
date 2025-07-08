@@ -45,7 +45,7 @@ export namespace lysa {
 
         const auto& getDescriptorSet() const { return descriptorSet; }
 
-        void flush(const vireo::CommandList& commandList);
+        void flush();
 
         void restart();
 

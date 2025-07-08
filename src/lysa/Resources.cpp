@@ -143,13 +143,15 @@ namespace lysa {
         descriptorSet.reset();
     }
 
-    void Resources::flush(const vireo::CommandList& commandList) {
+    void Resources::flush() {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
-        indexArray.flush(commandList);
-        vertexArray.flush(commandList);
-        materialArray.flush(commandList);
-        meshSurfaceArray.flush(commandList);
+        const auto command = Application::getTransferQueue().beginOneTimeCommand();
+        indexArray.flush(*command.commandList);
+        vertexArray.flush(*command.commandList);
+        materialArray.flush(*command.commandList);
+        meshSurfaceArray.flush(*command.commandList);
         updated = false;
+        Application::getTransferQueue().endOneTimeCommand(command);
     }
 
     void Resources::stb_write_func(void *context, void *data, const int size) {

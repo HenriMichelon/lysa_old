@@ -32,6 +32,7 @@ namespace lysa {
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
         computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
         resources{*vireo, config.resourcesConfig, *graphicQueue},
+        transferQueue{vireo, vireo::CommandType::GRAPHIC, graphicQueue},
         physicsEngine{PhysicsEngine::create(config.physicsConfig)} {
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
@@ -44,6 +45,7 @@ namespace lysa {
     }
 
     Application::~Application() {
+        transferQueue.stop();
         graphicQueue->waitIdle();
         for(auto&t : threadedCalls) {
             t.join();
@@ -133,6 +135,7 @@ namespace lysa {
         }
 
         for (const auto& window : windows) {
+            const auto lock = std::lock_guard(transferQueue.getSubmitMutex());
             window->update();
             window->drawFrame();
         }

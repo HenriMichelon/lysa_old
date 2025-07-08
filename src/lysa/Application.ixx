@@ -12,6 +12,7 @@ import lysa.configuration;
 import lysa.global;
 import lysa.log;
 import lysa.resources;
+import lysa.transfer_queue;
 import lysa.window;
 import lysa.physics.engine;
 
@@ -71,6 +72,11 @@ export namespace lysa {
             return *instance->physicsEngine;
         }
 
+        static auto& getTransferQueue() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->transferQueue;
+        }
+
         /**
         * Add a lambda expression in the deferred calls queue.<br>
         * They will be called before the next frame, after the scene pre-drawing updates
@@ -101,6 +107,7 @@ export namespace lysa {
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         std::shared_ptr<vireo::SubmitQueue> computeQueue;
         Resources resources;
+        TransferQueue transferQueue;
         std::list<std::shared_ptr<Window>> windows;
         bool quit{false};
         std::shared_ptr<Log> log;
