@@ -72,9 +72,9 @@ export namespace lysa {
             return *instance->physicsEngine;
         }
 
-        static auto& getTransferQueue() {
+        static auto& getSubmitQueue() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
-            return instance->transferQueue;
+            return instance->submitQueue;
         }
 
         /**
@@ -106,8 +106,9 @@ export namespace lysa {
         std::shared_ptr<vireo::Vireo> vireo;
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         std::shared_ptr<vireo::SubmitQueue> computeQueue;
+        std::shared_ptr<vireo::SubmitQueue> copyQueue;
         Resources resources;
-        TransferQueue transferQueue;
+        SubmitQueue submitQueue;
         std::list<std::shared_ptr<Window>> windows;
         bool quit{false};
         std::shared_ptr<Log> log;

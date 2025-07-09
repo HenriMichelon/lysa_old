@@ -164,24 +164,39 @@ namespace lysa {
 
         // Read, upload and create the Image and Texture objets (Vireo specific)
         if (header.imagesCount > 0) {
-            const auto command = Application::getTransferQueue().beginOneTimeCommand();
+            const auto command = Application::getSubmitQueue().beginOneTimeTransferCommand();
             // Upload all images into VRAM using one big staging buffer
             std::shared_ptr<vireo::Buffer> textureStagingBuffer;
-            textureStagingBuffer = Application::getTransferQueue().createOneTimeBuffer(
+            textureStagingBuffer = Application::getSubmitQueue().createOneTimeBuffer(
                command,
                vireo::BufferType::IMAGE_UPLOAD,
                totalImageSize,
                1);
             textureStagingBuffer->map();
-            loadImagesAndTextures(
+            const auto images = loadImagesAndTextures(
                 *textureStagingBuffer,
                 *command.commandList,
                 stream,
                 imageHeaders,
                 levelHeaders,
                 textureHeaders);
-            Application::getTransferQueue().endOneTimeCommand(command);
+            Application::getSubmitQueue().endOneTimeCommand(command);
+            const auto barriersCommand = Application::getSubmitQueue().beginOneTimeGraphicCommand();
+            for (auto textureIndex = 0; textureIndex < header.texturesCount; ++textureIndex) {
+                const auto& texture = textureHeaders[textureIndex];
+                if (texture.imageIndex != -1) {
+                    const auto& imageHeader = imageHeaders[texture.imageIndex];
+                    barriersCommand.commandList->barrier(
+                        images[textureIndex],
+                        vireo::ResourceState::COPY_DST,
+                        vireo::ResourceState::SHADER_READ,
+                        0,
+                        imageHeader.mipLevels);
+                }
+            }
+            Application::getSubmitQueue().endOneTimeCommand(barriersCommand);
         }
+
 
         // Create the Material objects
         std::vector<std::shared_ptr<Material>> materials{header.materialsCount};
@@ -347,7 +362,7 @@ namespace lysa {
         }
     }
 
-    void AssetsPack::loadImagesAndTextures(
+    std::vector<std::shared_ptr<vireo::Image>> AssetsPack::loadImagesAndTextures(
         const vireo::Buffer& stagingBuffer,
         const vireo::CommandList& commandList,
         std::ifstream &stream,
@@ -355,6 +370,7 @@ namespace lysa {
         const std::vector<std::vector<MipLevelInfo>>&levelHeaders,
         const std::vector<TextureHeader>& textureHeaders) {
         const auto& vireo = Application::getVireo();
+        std::vector<std::shared_ptr<vireo::Image>> images(header.texturesCount);
 
         // Create images upload buffer
         static constexpr size_t BLOCK_SIZE = 64 * 1024;
@@ -368,7 +384,6 @@ namespace lysa {
         // std::printf("%llu bytes read\n", transferOffset);
 
         // Create all images from this upload buffer
-        std::vector<std::shared_ptr<vireo::Image>> images;
         for (auto textureIndex = 0; textureIndex < header.texturesCount; ++textureIndex) {
             const auto& texture = textureHeaders[textureIndex];
             if (texture.imageIndex != -1) {
@@ -397,12 +412,13 @@ namespace lysa {
                     stagingBuffer,
                     *image,
                     sourceOffsets);
-                commandList.barrier(
-                    image,
-                    vireo::ResourceState::COPY_DST,
-                    vireo::ResourceState::SHADER_READ,
-                    0,
-                    imageHeader.mipLevels);
+                images[textureIndex] = image;
+                // commandList.barrier(
+                    // image,
+                    // vireo::ResourceState::COPY_DST,
+                    // vireo::ResourceState::SHADER_READ,
+                    // 0,
+                    // imageHeader.mipLevels);
                 auto samplerIndex = Application::getResources().getSamplers().addSampler(
                     static_cast<vireo::Filter>(texture.minFilter),
                     static_cast<vireo::Filter>(texture.magFilter),
@@ -411,6 +427,7 @@ namespace lysa {
                 textures.push_back(std::make_shared<ImageTexture>(std::make_shared<Image>(image, name), samplerIndex));
             }
         }
+        return images;
     }
 
     void AssetsPack::print(const Header& header) {

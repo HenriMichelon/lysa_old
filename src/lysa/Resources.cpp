@@ -144,13 +144,13 @@ namespace lysa {
 
     void Resources::flush() {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
-        const auto command = Application::getTransferQueue().beginOneTimeCommand();
+        const auto command = Application::getSubmitQueue().beginOneTimeTransferCommand();
         indexArray.flush(*command.commandList);
         vertexArray.flush(*command.commandList);
         materialArray.flush(*command.commandList);
         meshSurfaceArray.flush(*command.commandList);
         updated = false;
-        Application::getTransferQueue().endOneTimeCommand(command);
+        Application::getSubmitQueue().endOneTimeCommand(command);
     }
 
     void Resources::stb_write_func(void *context, void *data, const int size) {

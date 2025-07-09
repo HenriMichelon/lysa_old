@@ -276,7 +276,7 @@ export namespace lysa {
 
         void loadScene(Node& rootNode, std::ifstream& stream);
 
-        void loadImagesAndTextures(
+        std::vector<std::shared_ptr<vireo::Image>> loadImagesAndTextures(
             const vireo::Buffer& stagingBuffer,
             const vireo::CommandList& commandList,
             std::ifstream& stream,

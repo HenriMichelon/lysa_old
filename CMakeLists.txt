@@ -209,7 +209,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Samplers.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
-        ${ENGINE_SRC_DIR}/TransferQueue.cpp
+        ${ENGINE_SRC_DIR}/SubmitQueue.cpp
         ${ENGINE_SRC_DIR}/Viewport.cpp
         ${ENGINE_SRC_DIR}/VirtualFS.cpp
         ${ENGINE_SRC_DIR}/Window.cpp
@@ -291,7 +291,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Samplers.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
-        ${ENGINE_SRC_DIR}/TransferQueue.ixx
+        ${ENGINE_SRC_DIR}/SubmitQueue.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
         ${ENGINE_SRC_DIR}/Tween.ixx
         ${ENGINE_SRC_DIR}/TypeRegistry.ixx

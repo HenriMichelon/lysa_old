@@ -12,22 +12,27 @@ import lysa.types;
 
 export namespace lysa {
 
-    class TransferQueue {
+    class SubmitQueue {
     public:
 
         struct OneTimeCommand {
+            vireo::CommandType commandType;
             const std::string location;
             std::shared_ptr<vireo::CommandAllocator> commandAllocator;
             std::shared_ptr<vireo::CommandList> commandList;
         };
 
-        TransferQueue(const std::shared_ptr<vireo::Vireo>& vireo, vireo::CommandType queueType, const std::shared_ptr<vireo::SubmitQueue>& transferQueue);
+        SubmitQueue(
+            const std::shared_ptr<vireo::Vireo>& vireo,
+            const std::shared_ptr<vireo::SubmitQueue>& transferQueue,
+            const std::shared_ptr<vireo::SubmitQueue>& graphicQueue);
 
         void stop();
 
         auto& getSubmitMutex() { return submitMutex; }
 
-        OneTimeCommand beginOneTimeCommand(const std::source_location& location = std::source_location::current());
+        OneTimeCommand beginOneTimeTransferCommand(const std::source_location& location = std::source_location::current());
+        OneTimeCommand beginOneTimeGraphicCommand(const std::source_location& location = std::source_location::current());
 
         void endOneTimeCommand(const OneTimeCommand& oneTimeCommand, bool immediate = false);
 
@@ -39,9 +44,9 @@ export namespace lysa {
 
     private:
         std::thread::id mainThreadId;
-        vireo::CommandType queueType;
-        // Queue to submit commands to the GPU
+        // Queues to submit commands to the GPU
         std::shared_ptr<vireo::SubmitQueue> transferQueue;
+        std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         // Stop the queue thread
         bool quit{false};
         // Submission queue
@@ -57,7 +62,8 @@ export namespace lysa {
 
         // Temporary one-time command buffers, associated buffers and command pools
         // One command pool per command buffer
-        std::list<OneTimeCommand> oneTimeCommands;
+        std::list<OneTimeCommand> oneTimeTransferCommands;
+        std::list<OneTimeCommand> oneTimeGraphicCommands;
         std::mutex oneTimeMutex;
         std::mutex oneTimeBuffersMutex;
         std::map<std::shared_ptr<vireo::CommandList>, std::list<std::shared_ptr<vireo::Buffer>>> oneTimeBuffers;
@@ -67,8 +73,8 @@ export namespace lysa {
         void submit(const OneTimeCommand& command);
 
     public:
-        TransferQueue(const TransferQueue &) = delete;
-        TransferQueue &operator=(const TransferQueue &) = delete;
+        SubmitQueue(const SubmitQueue &) = delete;
+        SubmitQueue &operator=(const SubmitQueue &) = delete;
     };
 
 
