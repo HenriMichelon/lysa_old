@@ -66,7 +66,11 @@ export namespace lysa {
 
         void write(const MemoryBlock& destination, const void* source) override;
 
+        void preBarrier(const vireo::CommandList& commandList) const;
+
         void flush(const vireo::CommandList& commandList);
+
+        void postBarrier(const vireo::CommandList& commandList) const;
 
         void cleanup() override;
 

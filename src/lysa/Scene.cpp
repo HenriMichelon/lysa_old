@@ -123,7 +123,9 @@ namespace lysa {
         if (!drawCommandsStagingBufferRecycleBin.empty()) {
             drawCommandsStagingBufferRecycleBin.clear();
         }
+        meshInstancesDataArray.preBarrier(commandList);
         meshInstancesDataArray.flush(commandList);
+        meshInstancesDataArray.postBarrier(commandList);
 
         if (shadowMapsUpdated) {
             descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
@@ -155,7 +157,9 @@ namespace lysa {
         }
 
         if (meshInstancesDataUpdated) {
+            meshInstancesDataArray.preBarrier(commandList);
             meshInstancesDataArray.flush(commandList);
+            meshInstancesDataArray.postBarrier(commandList);
             meshInstancesDataUpdated = false;
         }
 
@@ -549,7 +553,9 @@ namespace lysa {
         const vireo::CommandList& commandList,
         std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin) {
         if (instancesUpdated) {
+            instancesArray.preBarrier(commandList);
             instancesArray.flush(commandList);
+            instancesArray.postBarrier(commandList);
             if (drawCommandsStagingBufferCount < drawCommandsCount) {
                 if (drawCommandsStagingBuffer) {
                     drawCommandsStagingBufferRecycleBin.insert(drawCommandsStagingBuffer);

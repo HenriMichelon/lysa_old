@@ -54,7 +54,7 @@ namespace lysa {
 
     SubmitQueue::OneTimeCommand SubmitQueue::beginOneTimeGraphicCommand(const std::source_location& location) {
         auto lock = std::lock_guard(oneTimeMutex);
-        if (oneTimeTransferCommands.empty()) {
+        if (oneTimeGraphicCommands.empty()) {
             const auto commandAllocator = Application::getVireo().createCommandAllocator(
                 vireo::CommandType::GRAPHIC);
             const auto commandList = commandAllocator->createCommandList();
