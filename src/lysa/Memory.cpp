@@ -42,7 +42,7 @@ namespace lysa {
         for (MemoryBlock& bloc : freeBlocs) {
             if (bloc.size >= size) {
                 const MemoryBlock result{
-                    static_cast<uint32>(bloc.offset / instanceSize),
+                    (bloc.offset / instanceSize),
                     bloc.offset,
                     size};
                 if (bloc.size == size) {
@@ -104,11 +104,8 @@ namespace lysa {
                *buffer,
                vireo::ResourceState::COPY_DST,
                vireo::ResourceState::SHADER_READ);
+            stagingBufferCurrentOffset = 0;
         }
-    }
-
-    void DeviceMemoryArray::restart() {
-        stagingBufferCurrentOffset = 0;
     }
 
     void DeviceMemoryArray::cleanup() {

@@ -85,10 +85,7 @@ namespace lysa {
     }
 
     void Application::drawFrame() {
-        resources.restart();
-        if (resources.getSamplers().ipUpdated()) {
-            resources.getSamplers().update();
-        }
+        resources.update();
 
         // Physics events & others deferred calls
         if (!deferredCalls.empty()) {

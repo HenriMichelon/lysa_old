@@ -123,7 +123,7 @@ namespace lysa {
         if (!drawCommandsStagingBufferRecycleBin.empty()) {
             drawCommandsStagingBufferRecycleBin.clear();
         }
-        meshInstancesDataArray.restart();
+        meshInstancesDataArray.flush(commandList);
 
         if (shadowMapsUpdated) {
             descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);

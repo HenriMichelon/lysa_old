@@ -117,16 +117,15 @@ namespace lysa {
         throw Exception("Out of memory for textures");
     }
 
-    void Resources::restart() {
+    void Resources::update() {
         auto lock = std::lock_guard(mutex);
-        vertexArray.restart();
-        indexArray.restart();
-        materialArray.restart();
-        meshSurfaceArray.restart();
         if (textureUpdated) {
             Application::getGraphicQueue()->waitIdle();
             descriptorSet->update(BINDING_TEXTURE, textures);
             textureUpdated = false;
+        }
+        if (samplers.ipUpdated()) {
+            samplers.update();
         }
     }
 

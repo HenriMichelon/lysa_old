@@ -299,8 +299,8 @@ namespace lysa {
             mesh->buildAABB();
             mesh->upload();
             meshes[meshIndex] = mesh;
-            Application::getResources().flush();
         }
+        Application::getResources().flush();
 
         // Create the Node objects
         std::vector<std::shared_ptr<Node>> nodes{(header.nodesCount)};

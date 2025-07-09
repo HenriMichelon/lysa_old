@@ -47,7 +47,7 @@ export namespace lysa {
 
         void flush();
 
-        void restart();
+        void update();
 
         void cleanup();
 
