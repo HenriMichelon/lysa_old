@@ -23,7 +23,7 @@ namespace lysa {
     }
 
     void TransferQueue::submit(const OneTimeCommand& command) {
-        INFO("queue on time command submit", command.location);
+        // INFO("queue on time command submit", command.location);
         const auto lock = std::lock_guard(getSubmitMutex());
         transferQueue->submit(submitFence, { command.commandList });
         // wait the commands to be completed before destroying the command buffer
@@ -42,7 +42,7 @@ namespace lysa {
         const vireo::BufferType type,
         const size_t instanceSize,
         const uint32 instanceCount) {
-        INFO("TransferQueue::createOneTimeBuffer ", oneTimeCommand.location);
+        // INFO("TransferQueue::createOneTimeBuffer ", oneTimeCommand.location);
         auto lock = std::lock_guard(oneTimeBuffersMutex);
         oneTimeBuffers[oneTimeCommand.commandList].emplace_back(Application::getVireo().createBuffer(type, instanceSize, instanceCount));
         return oneTimeBuffers[oneTimeCommand.commandList].back();
