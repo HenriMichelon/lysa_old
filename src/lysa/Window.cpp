@@ -205,7 +205,6 @@ namespace lysa {
             }
             renderer->resize(newExtent, frame.preRenderCommandList);
             frame.preRenderCommandList->end();
-            const auto lock = std::lock_guard(Application::getSubmitQueue().getSubmitMutex());
             Application::getGraphicQueue()->submit({frame.preRenderCommandList});
             Application::getGraphicQueue()->waitIdle();
         }

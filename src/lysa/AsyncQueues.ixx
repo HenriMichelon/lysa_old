@@ -12,7 +12,7 @@ import lysa.types;
 
 export namespace lysa {
 
-    class SubmitQueue {
+    class AsyncQueues {
     public:
 
         struct OneTimeCommand {
@@ -22,14 +22,11 @@ export namespace lysa {
             std::shared_ptr<vireo::CommandList> commandList;
         };
 
-        SubmitQueue(
+        AsyncQueues(
             const std::shared_ptr<vireo::Vireo>& vireo,
-            const std::shared_ptr<vireo::SubmitQueue>& transferQueue,
             const std::shared_ptr<vireo::SubmitQueue>& graphicQueue);
 
         void stop();
-
-        auto& getSubmitMutex() { return submitMutex; }
 
         OneTimeCommand beginOneTimeTransferCommand(const std::source_location& location = std::source_location::current());
         OneTimeCommand beginOneTimeGraphicCommand(const std::source_location& location = std::source_location::current());
@@ -43,7 +40,6 @@ export namespace lysa {
             uint32 instanceCount);
 
     private:
-        std::thread::id mainThreadId;
         // Queues to submit commands to the GPU
         std::shared_ptr<vireo::SubmitQueue> transferQueue;
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
@@ -52,7 +48,6 @@ export namespace lysa {
         // Submission queue
         std::list<OneTimeCommand> commands;
         // To synchronize between the main thread & submit thread
-        std::mutex submitMutex;
         std::shared_ptr<vireo::Fence> submitFence;
 
         // The submission thread & locks
@@ -73,8 +68,8 @@ export namespace lysa {
         void submit(const OneTimeCommand& command);
 
     public:
-        SubmitQueue(const SubmitQueue &) = delete;
-        SubmitQueue &operator=(const SubmitQueue &) = delete;
+        AsyncQueues(const AsyncQueues &) = delete;
+        AsyncQueues &operator=(const AsyncQueues &) = delete;
     };
 
 

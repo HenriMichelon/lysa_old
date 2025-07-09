@@ -11,25 +11,23 @@ import lysa.log;
 
 namespace lysa {
 
-    SubmitQueue::SubmitQueue(
+    AsyncQueues::AsyncQueues(
         const std::shared_ptr<vireo::Vireo>& vireo,
-        const std::shared_ptr<vireo::SubmitQueue>& transferQueue,
         const std::shared_ptr<vireo::SubmitQueue>& graphicQueue) :
-        mainThreadId{std::this_thread::get_id()},
-        transferQueue{transferQueue},
+        transferQueue{vireo->createSubmitQueue(vireo::CommandType::TRANSFER, L"Async transfer queue")},
         graphicQueue{graphicQueue},
-        queueThread{&SubmitQueue::run, this} {
+        queueThread{&AsyncQueues::run, this} {
         submitFence =vireo->createFence();
     }
 
-    void SubmitQueue::submit(const OneTimeCommand& command) {
+    void AsyncQueues::submit(const OneTimeCommand& command) {
         // INFO("queue on time command submit", command.location);
-        const auto lock = std::lock_guard(getSubmitMutex());
         if (command.commandType == vireo::CommandType::TRANSFER) {
             transferQueue->submit(submitFence, { command.commandList });
         } else {
             graphicQueue->submit(submitFence, { command.commandList });
         }
+        INFO("AsyncQueues ID ", std::this_thread::get_id());
         // wait the commands to be completed before destroying the command buffer
         submitFence->wait();
         submitFence->reset();
@@ -41,7 +39,7 @@ namespace lysa {
         }
     }
 
-    std::shared_ptr<vireo::Buffer> SubmitQueue::createOneTimeBuffer(
+    std::shared_ptr<vireo::Buffer> AsyncQueues::createOneTimeBuffer(
         const OneTimeCommand& oneTimeCommand,
         const vireo::BufferType type,
         const size_t instanceSize,
@@ -52,7 +50,7 @@ namespace lysa {
         return oneTimeBuffers[oneTimeCommand.commandList].back();
     }
 
-    SubmitQueue::OneTimeCommand SubmitQueue::beginOneTimeGraphicCommand(const std::source_location& location) {
+    AsyncQueues::OneTimeCommand AsyncQueues::beginOneTimeGraphicCommand(const std::source_location& location) {
         auto lock = std::lock_guard(oneTimeMutex);
         if (oneTimeGraphicCommands.empty()) {
             const auto commandAllocator = Application::getVireo().createCommandAllocator(
@@ -70,7 +68,7 @@ namespace lysa {
         return command;
     }
 
-    SubmitQueue::OneTimeCommand SubmitQueue::beginOneTimeTransferCommand(const std::source_location& location) {
+    AsyncQueues::OneTimeCommand AsyncQueues::beginOneTimeTransferCommand(const std::source_location& location) {
         auto lock = std::lock_guard(oneTimeMutex);
         if (oneTimeTransferCommands.empty()) {
             const auto commandAllocator = Application::getVireo().createCommandAllocator(
@@ -88,7 +86,7 @@ namespace lysa {
         return command;
     }
 
-    void SubmitQueue::endOneTimeCommand(const OneTimeCommand& oneTimeCommand, const bool immediate) {
+    void AsyncQueues::endOneTimeCommand(const OneTimeCommand& oneTimeCommand, const bool immediate) {
         oneTimeCommand.commandList->end();
         if (immediate) {
             auto lock = std::lock_guard{queueMutex};
@@ -100,7 +98,8 @@ namespace lysa {
         }
     }
 
-    void SubmitQueue::run() {
+    void AsyncQueues::run() {
+        //INFO("AsyncQueues ID ", std::this_thread::get_id());
         while (!quit) {
             auto lock = std::unique_lock{queueMutex};
             queueCv.wait(lock, [this] {
@@ -113,7 +112,7 @@ namespace lysa {
         }
     }
 
-    void SubmitQueue::stop() {
+    void AsyncQueues::stop() {
         quit = true;
         queueCv.notify_one();
         queueThread.join();

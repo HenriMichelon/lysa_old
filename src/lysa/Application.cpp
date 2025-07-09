@@ -31,10 +31,10 @@ namespace lysa {
         vireo{vireo::Vireo::create(config.backend)},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
         computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
-        copyQueue{vireo->createSubmitQueue(vireo::CommandType::TRANSFER, L"Main transfer Queue")},
         resources{*vireo, config.resourcesConfig, *graphicQueue},
-        submitQueue{vireo, copyQueue, graphicQueue},
+        asyncQueue{vireo, graphicQueue},
         physicsEngine{PhysicsEngine::create(config.physicsConfig)} {
+
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
         instance = this;
         if constexpr (isLoggingEnabled()) {
@@ -46,7 +46,7 @@ namespace lysa {
     }
 
     Application::~Application() {
-        submitQueue.stop();
+        asyncQueue.stop();
         graphicQueue->waitIdle();
         for(auto&t : threadedCalls) {
             t.join();
@@ -62,6 +62,7 @@ namespace lysa {
     }
 
     void Application::run() {
+        // INFO("Main thread ID ", std::this_thread::get_id());
         Input::initInput();
         onReady();
         mainLoop();
@@ -133,7 +134,6 @@ namespace lysa {
         }
 
         for (const auto& window : windows) {
-            const auto lock = std::lock_guard(submitQueue.getSubmitMutex());
             window->update();
             window->drawFrame();
         }
