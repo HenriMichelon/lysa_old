@@ -145,12 +145,6 @@ namespace lysa {
     void Resources::flush() {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
         auto& asyncQueue = Application::getAsyncQueue();
-        const auto preBarriersCommand = asyncQueue.beginCommand(vireo::CommandType::GRAPHIC);
-        indexArray.preBarrier(*preBarriersCommand.commandList);
-        vertexArray.preBarrier(*preBarriersCommand.commandList);
-        materialArray.preBarrier(*preBarriersCommand.commandList);
-        meshSurfaceArray.preBarrier(*preBarriersCommand.commandList);
-        asyncQueue.endCommand(preBarriersCommand);
         const auto command = asyncQueue.beginCommand(vireo::CommandType::TRANSFER);
         indexArray.flush(*command.commandList);
         vertexArray.flush(*command.commandList);
@@ -158,12 +152,6 @@ namespace lysa {
         meshSurfaceArray.flush(*command.commandList);
         updated = false;
         asyncQueue.endCommand(command);
-        const auto barriersCommand = asyncQueue.beginCommand(vireo::CommandType::GRAPHIC);
-        indexArray.postBarrier(*barriersCommand.commandList);
-        vertexArray.postBarrier(*barriersCommand.commandList);
-        materialArray.postBarrier(*barriersCommand.commandList);
-        meshSurfaceArray.postBarrier(*barriersCommand.commandList);
-        asyncQueue.endCommand(barriersCommand);
     }
 
     void Resources::stb_write_func(void *context, void *data, const int size) {

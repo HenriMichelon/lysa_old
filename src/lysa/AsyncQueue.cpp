@@ -17,21 +17,52 @@ namespace lysa {
         const std::shared_ptr<vireo::SubmitQueue>& graphicQueue) :
         vireo{vireo},
         transferQueue{transferQueue},
-        graphicQueue{graphicQueue} {
+        graphicQueue{graphicQueue}{
+        if (vireo->getDevice()->haveDedicatedTransferQueue()) {
+            queueThread = std::make_unique<std::thread>(&AsyncQueue::run, this);
+        }
         submitFence = vireo->createFence(true);
+    }
+
+    void AsyncQueue::run() {
+        while (!quit) {
+            auto lock = std::unique_lock{queueMutex};
+            queueCv.wait(lock, [this] {
+                return quit || !commandsQueue.empty();
+            });
+            auto lockCommands = std::lock_guard(commandsMutex);
+            if (!commandsQueue.empty()) {
+                auto command = commandsQueue.front();
+                if (command.commandType == vireo::CommandType::TRANSFER) {
+                    // INFO("transfer command submit ", commandsQueue.size());
+                    commandsQueue.pop_front();
+                    submit(command);
+                }
+            }
+        }
     }
 
     void AsyncQueue::submitCommands() {
         if (!commandsQueue.empty()) {
             auto lockCommands = std::lock_guard(commandsMutex);
-            // INFO("command submit ", commandsQueue.size());
-            // for (auto& command : commandsQueue) {
-            //     submit(command);
-            // }
-            // commandsQueue.clear();
-            const auto command = commandsQueue.front();
-            commandsQueue.pop_front();
-            submit(command);
+            if (vireo->getDevice()->haveDedicatedTransferQueue()) {
+                auto it = commandsQueue.begin();
+                while (it != commandsQueue.end()) {
+                    auto& command = *it;
+                    if (command.commandType == vireo::CommandType::GRAPHIC) {
+                        // INFO("graphic command submit ", commandsQueue.size());
+                        submit(command);
+                        it = commandsQueue.erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+            } else {
+                for (auto& command : commandsQueue) {
+                    submit(command);
+                }
+                commandsQueue.clear();
+            }
         }
     }
 
@@ -86,10 +117,18 @@ namespace lysa {
         } else {
             auto lock = std::lock_guard{commandsMutex};
             commandsQueue.push_back(command);
+            if (command.commandType == vireo::CommandType::TRANSFER && queueThread) {
+                queueCv.notify_one();
+            }
         }
     }
 
     void AsyncQueue::cleanup() {
+        quit = true;
+        if (queueThread) {
+            queueCv.notify_one();
+            queueThread->join();
+        }
         submitFence.reset();
         for (auto& command : commandsQueue) {
             command.commandList.reset();

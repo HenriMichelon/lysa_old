@@ -95,13 +95,6 @@ namespace lysa {
         stagingBufferCurrentOffset += destination.size;
     }
 
-    void DeviceMemoryArray::preBarrier(const vireo::CommandList& commandList) const {
-        commandList.barrier(
-           *buffer,
-           vireo::ResourceState::SHADER_READ,
-           vireo::ResourceState::COPY_DST);
-    }
-
     void DeviceMemoryArray::flush(const vireo::CommandList& commandList) {
         auto lock = std::lock_guard{mutex};
         if (!pendingWrites.empty()) {

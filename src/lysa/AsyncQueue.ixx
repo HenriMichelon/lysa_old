@@ -44,6 +44,12 @@ export namespace lysa {
     private:
         const std::shared_ptr<vireo::Vireo> vireo;
 
+        // The submission thread & locks
+        std::unique_ptr<std::thread> queueThread;
+        std::mutex queueMutex;
+        std::condition_variable queueCv;
+        bool quit{false};
+
         std::mutex commandsMutex;
         std::unordered_map<vireo::CommandType, std::list<Command>> freeCommands;
         std::list<Command> commandsQueue;
@@ -57,6 +63,8 @@ export namespace lysa {
         std::shared_ptr<vireo::Fence> submitFence;
 
         void submit(const Command& command);
+
+        void run();
 
     public:
         AsyncQueue(const AsyncQueue &) = delete;

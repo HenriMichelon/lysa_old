@@ -136,10 +136,11 @@ namespace lysa {
             }
         }
 
-        asyncQueue.submitCommands();
-
         for (const auto& window : windows) {
             window->update();
+        }
+        asyncQueue.submitCommands();
+        for (const auto& window : windows) {
             window->drawFrame();
         }
     }
