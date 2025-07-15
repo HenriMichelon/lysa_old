@@ -144,25 +144,26 @@ namespace lysa {
 
     void Resources::flush() {
         auto lock = std::unique_lock(mutex, std::try_to_lock);
-        const auto preBarriersCommand = Application::getAsyncQueue().beginOneTimeGraphicCommand();
+        auto& asyncQueue = Application::getAsyncQueue();
+        const auto preBarriersCommand = asyncQueue.beginCommand(vireo::CommandType::GRAPHIC);
         indexArray.preBarrier(*preBarriersCommand.commandList);
         vertexArray.preBarrier(*preBarriersCommand.commandList);
         materialArray.preBarrier(*preBarriersCommand.commandList);
         meshSurfaceArray.preBarrier(*preBarriersCommand.commandList);
-        Application::getAsyncQueue().endOneTimeCommand(preBarriersCommand);
-        const auto command = Application::getAsyncQueue().beginOneTimeTransferCommand();
+        asyncQueue.endCommand(preBarriersCommand);
+        const auto command = asyncQueue.beginCommand(vireo::CommandType::TRANSFER);
         indexArray.flush(*command.commandList);
         vertexArray.flush(*command.commandList);
         materialArray.flush(*command.commandList);
         meshSurfaceArray.flush(*command.commandList);
         updated = false;
-        Application::getAsyncQueue().endOneTimeCommand(command);
-        const auto barriersCommand = Application::getAsyncQueue().beginOneTimeGraphicCommand();
+        asyncQueue.endCommand(command);
+        const auto barriersCommand = asyncQueue.beginCommand(vireo::CommandType::GRAPHIC);
         indexArray.postBarrier(*barriersCommand.commandList);
         vertexArray.postBarrier(*barriersCommand.commandList);
         materialArray.postBarrier(*barriersCommand.commandList);
         meshSurfaceArray.postBarrier(*barriersCommand.commandList);
-        Application::getAsyncQueue().endOneTimeCommand(barriersCommand);
+        asyncQueue.endCommand(barriersCommand);
     }
 
     void Resources::stb_write_func(void *context, void *data, const int size) {

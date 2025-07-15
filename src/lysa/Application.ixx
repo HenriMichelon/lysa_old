@@ -106,8 +106,9 @@ export namespace lysa {
         std::shared_ptr<vireo::Vireo> vireo;
         std::shared_ptr<vireo::SubmitQueue> graphicQueue;
         std::shared_ptr<vireo::SubmitQueue> computeQueue;
+        std::shared_ptr<vireo::SubmitQueue> transferQueue;
         Resources resources;
-        AsyncQueues asyncQueue;
+        AsyncQueue asyncQueue;
         std::list<std::shared_ptr<Window>> windows;
         bool quit{false};
         std::shared_ptr<Log> log;

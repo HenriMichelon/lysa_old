@@ -198,6 +198,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/AABB.cpp
         ${ENGINE_SRC_DIR}/Application.cpp
         ${ENGINE_SRC_DIR}/AssetsPack.cpp
+        ${ENGINE_SRC_DIR}/AsyncQueue.cpp
         ${ENGINE_SRC_DIR}/Frustum.cpp
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Log.cpp
@@ -209,7 +210,6 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Scene.cpp
         ${ENGINE_SRC_DIR}/Samplers.cpp
         ${ENGINE_SRC_DIR}/Signal.cpp
-        ${ENGINE_SRC_DIR}/AsyncQueues.cpp
         ${ENGINE_SRC_DIR}/Viewport.cpp
         ${ENGINE_SRC_DIR}/VirtualFS.cpp
         ${ENGINE_SRC_DIR}/Window.cpp
@@ -275,6 +275,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/AABB.ixx
         ${ENGINE_SRC_DIR}/Application.ixx
         ${ENGINE_SRC_DIR}/AssetsPack.ixx
+        ${ENGINE_SRC_DIR}/AsyncQueue.ixx
         ${ENGINE_SRC_DIR}/Configuration.ixx
         ${ENGINE_SRC_DIR}/Constants.ixx
         ${ENGINE_SRC_DIR}/Enums.ixx
@@ -291,7 +292,6 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Scene.ixx
         ${ENGINE_SRC_DIR}/Samplers.ixx
         ${ENGINE_SRC_DIR}/Signal.ixx
-        ${ENGINE_SRC_DIR}/AsyncQueues.ixx
         ${ENGINE_SRC_DIR}/Types.ixx
         ${ENGINE_SRC_DIR}/Tween.ixx
         ${ENGINE_SRC_DIR}/TypeRegistry.ixx

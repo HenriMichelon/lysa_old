@@ -164,10 +164,11 @@ namespace lysa {
 
         // Read, upload and create the Image and Texture objets (Vireo specific)
         if (header.imagesCount > 0) {
-            const auto command = Application::getAsyncQueue().beginOneTimeTransferCommand();
+            auto& asyncQueue = Application::getAsyncQueue();
+            const auto command = asyncQueue.beginCommand(vireo::CommandType::TRANSFER);
             // Upload all images into VRAM using one big staging buffer
             std::shared_ptr<vireo::Buffer> textureStagingBuffer;
-            textureStagingBuffer = Application::getAsyncQueue().createOneTimeBuffer(
+            textureStagingBuffer = asyncQueue.createBuffer(
                command,
                vireo::BufferType::IMAGE_UPLOAD,
                totalImageSize,
@@ -180,8 +181,8 @@ namespace lysa {
                 imageHeaders,
                 levelHeaders,
                 textureHeaders);
-            Application::getAsyncQueue().endOneTimeCommand(command);
-            const auto barriersCommand = Application::getAsyncQueue().beginOneTimeGraphicCommand();
+            asyncQueue.endCommand(command);
+            const auto barriersCommand = asyncQueue.beginCommand(vireo::CommandType::GRAPHIC);
             for (auto textureIndex = 0; textureIndex < header.texturesCount; ++textureIndex) {
                 const auto& texture = textureHeaders[textureIndex];
                 if (texture.imageIndex != -1) {
@@ -194,9 +195,8 @@ namespace lysa {
                         imageHeader.mipLevels);
                 }
             }
-            Application::getAsyncQueue().endOneTimeCommand(barriersCommand);
+            asyncQueue.endCommand(barriersCommand);
         }
-
 
         // Create the Material objects
         std::vector<std::shared_ptr<Material>> materials{header.materialsCount};

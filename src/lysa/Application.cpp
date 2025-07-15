@@ -31,8 +31,9 @@ namespace lysa {
         vireo{vireo::Vireo::create(config.backend)},
         graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
         computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
+        transferQueue{vireo->createSubmitQueue(vireo::CommandType::TRANSFER, L"Main transfer Queue")},
         resources{*vireo, config.resourcesConfig, *graphicQueue},
-        asyncQueue{vireo, graphicQueue},
+        asyncQueue{vireo, transferQueue, graphicQueue},
         physicsEngine{PhysicsEngine::create(config.physicsConfig)} {
 
         assert([&]{ return instance == nullptr;}, "Global Application instance already defined");
@@ -46,8 +47,10 @@ namespace lysa {
     }
 
     Application::~Application() {
-        asyncQueue.stop();
         graphicQueue->waitIdle();
+        transferQueue->waitIdle();
+        computeQueue->waitIdle();
+        asyncQueue.cleanup();
         for(auto&t : threadedCalls) {
             t.join();
         }
@@ -132,6 +135,8 @@ namespace lysa {
                 window->process(static_cast<float>(accumulator / FIXED_DELTA_TIME));
             }
         }
+
+        asyncQueue.submitCommands();
 
         for (const auto& window : windows) {
             window->update();
