@@ -613,9 +613,9 @@ export namespace lysa {
 
         virtual void detachFromViewport();
 
-        virtual void pause() { }
+        virtual void pause();
 
-        virtual void resume() { }
+        virtual void resume();
 
     private:
         static unique_id currentId;
@@ -625,6 +625,7 @@ export namespace lysa {
         Viewport*        viewport{nullptr};
         Node*            parent{nullptr};
         bool             visible{true};
+        bool             isReady{false};
         ProcessMode      processMode{ProcessMode::INHERIT};
 
         std::list<std::shared_ptr<Tween>> tweens;

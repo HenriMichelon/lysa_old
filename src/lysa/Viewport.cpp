@@ -239,19 +239,10 @@ namespace lysa {
 
     void Viewport::setPaused(const bool isPaused) {
         paused = isPaused;
-        pause(rootNode);
-    }
-
-    void Viewport::pause(const std::shared_ptr<Node>& node) {
-        assert([&]{ return node != nullptr; }, "Invalid node");
-        if (paused && (!node->isProcessed())) {
-            node->pause();
-        }
-        if ((!paused && (node->isProcessed()))) {
-            node->resume();
-        }
-        for (auto &child : node->getChildren()) {
-            pause(child);
+        if (paused) {
+            rootNode->pause();
+        } else {
+            rootNode->resume();
         }
     }
 

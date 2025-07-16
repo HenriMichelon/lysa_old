@@ -168,8 +168,6 @@ export namespace lysa {
 
         bool input(const std::shared_ptr<Node> &node, InputEvent &inputEvent);
 
-        void pause(const std::shared_ptr<Node> &node);
-
         void attachToWindow(Window& window);
 
         void update(uint32 frameIndex);
