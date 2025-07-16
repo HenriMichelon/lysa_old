@@ -36,7 +36,7 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
-                INFO("GBufferPass updatePipelines ", std::to_string(material->getName()));
+                //INFO("GBufferPass updatePipelines ", std::to_string(material->getName()));
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
                 pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER);

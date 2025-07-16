@@ -55,7 +55,7 @@ namespace lysa {
             config.maxModelsPerScene,
             config.maxModelsPerScene,
             vireo::BufferType::DEVICE_STORAGE,
-            L"Models Data"},
+            L"meshInstances Data"},
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
@@ -585,6 +585,7 @@ namespace lysa {
                     renderingConfig,
                     light,
                     meshInstancesDataArray);
+                // INFO("enableLightShadowCasting for ", std::to_string(light->getName()));
                 materialsUpdated = true; // force update pipelines
                 shadowMapRenderers[light] = shadowMapRenderer;
                 shadowMapRenderer->setCurrentCamera(currentCamera);

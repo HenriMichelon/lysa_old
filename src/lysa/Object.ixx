@@ -61,7 +61,7 @@ export namespace lysa {
 
         void decrementUpdates() { pendingUpdates -= 1; }
 
-        void setUpdated() { pendingUpdates = maxUpdates; }
+        void setUpdated();
 
         void setMaxUpdates(const uint32 maxUpdates) { this->maxUpdates = maxUpdates; }
 

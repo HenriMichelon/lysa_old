@@ -89,6 +89,24 @@ namespace lysa {
         return angles; // radians
     }
 
+    bool almostEqual(const float a, const float b, const float epsilon) {
+        return std::fabs(a - b) < epsilon;
+    }
+
+    bool almostEqual(const float4& a, const float4& b, const float epsilon) {
+        return almostEqual(a.x, b.x, epsilon) &&
+               almostEqual(a.x, b.y, epsilon) &&
+               almostEqual(a.y, b.z, epsilon) &&
+               almostEqual(a.z, b.w, epsilon);
+    }
+
+    bool almostEqual(const quaternion& a, const quaternion& b, const float epsilon) {
+        return almostEqual(a.x, b.x, epsilon) &&
+               almostEqual(a.x, b.y, epsilon) &&
+               almostEqual(a.y, b.z, epsilon) &&
+               almostEqual(a.z, b.w, epsilon);
+    }
+
     float getCurrentTimeMilliseconds() {
         using namespace std::chrono;
         return static_cast<float>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());

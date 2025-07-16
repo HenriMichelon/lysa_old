@@ -143,6 +143,7 @@ namespace lysa {
     }
 
     void Resources::flush() {
+        // INFO("Resources::flush");
         auto lock = std::unique_lock(mutex, std::try_to_lock);
         auto& asyncQueue = Application::getAsyncQueue();
         const auto command = asyncQueue.beginCommand(vireo::CommandType::TRANSFER);

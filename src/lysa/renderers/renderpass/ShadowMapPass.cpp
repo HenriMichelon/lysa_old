@@ -94,6 +94,7 @@ namespace lysa {
         for (const auto& pipelineId: std::views::keys(pipelineIds)) {
             for (auto& data : subpassData) {
                 if (!data.frustumCullingPipelines.contains(pipelineId)) {
+                    // INFO("ShadowMapPass::updatePipelines for light ", std::to_string(light->getName()));
                     data.frustumCullingPipelines[pipelineId] = std::make_shared<FrustumCulling>(false, meshInstancesDataArray);
                     data.culledDrawCommandsCountBuffers[pipelineId] = vireo.createBuffer(
                       vireo::BufferType::READWRITE_STORAGE,

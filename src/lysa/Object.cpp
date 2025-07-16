@@ -24,4 +24,8 @@ namespace lysa {
         }
     }
 
+    void Updatable::setUpdated() {
+        pendingUpdates = maxUpdates;
+    }
+
 }

@@ -12,6 +12,7 @@ module lysa.nodes.collision_object;
 
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.viewport;
 import lysa.physics.jolt.engine;
 
@@ -115,14 +116,8 @@ namespace lysa {
         JPH::Vec3 position;
         JPH::Quat rotation;
         bodyInterface->GetPositionAndRotation(bodyId, position, rotation);
-        const auto pos = float3{position.GetX(), position.GetY(), position.GetZ()};
-        if (any(pos != getPositionGlobal())) {
-            setPositionGlobal(pos);
-        }
-        const auto rot = quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()};
-        if (any(rot != getRotationGlobal())) {
-            setRotationGlobal(rot);
-        }
+        setPositionGlobal(float3{position.GetX(), position.GetY(), position.GetZ()});
+        setRotationGlobal(quaternion{rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW()});
         updating = false;
     }
 

@@ -40,6 +40,9 @@ export namespace lysa {
 
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
+
+        void process(float alpha) override;
+
     };
 
 }

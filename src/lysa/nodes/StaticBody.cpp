@@ -16,4 +16,8 @@ namespace lysa {
         return dup;
     }
 
+    void StaticBody::process(const float alpha) {
+        Node::process(alpha); // static bodies aren't affected by physics
+    }
+
 }
