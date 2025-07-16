@@ -121,6 +121,8 @@ export namespace lysa {
 
         auto isMaterialsUpdated() const { return materialsUpdated; }
 
+        void resetMaterialsUpdated() { materialsUpdated = false; }
+
         auto getDescriptorSet() const { return descriptorSet; }
 
         auto getDescriptorSetOptional1() const { return descriptorSetOpt1; }

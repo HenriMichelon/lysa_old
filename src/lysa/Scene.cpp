@@ -585,6 +585,7 @@ namespace lysa {
                     renderingConfig,
                     light,
                     meshInstancesDataArray);
+                materialsUpdated = true; // force update pipelines
                 shadowMapRenderers[light] = shadowMapRenderer;
                 shadowMapRenderer->setCurrentCamera(currentCamera);
                 const auto& blankImage = Application::getResources().getBlankImage();

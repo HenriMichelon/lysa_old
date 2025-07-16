@@ -24,6 +24,7 @@ namespace lysa {
 
     void ForwardRenderer::updatePipelines(
         const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
+        Renderer::updatePipelines(pipelineIds);
         forwardColorPass.updatePipelines(pipelineIds);
     }
 

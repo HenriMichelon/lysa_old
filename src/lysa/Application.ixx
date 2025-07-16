@@ -12,6 +12,7 @@ import lysa.configuration;
 import lysa.global;
 import lysa.log;
 import lysa.resources;
+import lysa.resources.material;
 import lysa.transfer_queue;
 import lysa.window;
 import lysa.physics.engine;
@@ -31,6 +32,8 @@ export namespace lysa {
         void addWindow(const std::shared_ptr<Window>& window);
 
         void removeWindow(Window* window);
+
+        void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const;
 
         void run();
 

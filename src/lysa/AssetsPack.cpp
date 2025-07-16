@@ -199,6 +199,7 @@ namespace lysa {
         }
 
         // Create the Material objects
+        std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>> pipelineIds;
         std::vector<std::shared_ptr<Material>> materials{header.materialsCount};
         std::map<unique_id, int> materialsTexCoords;
         for (auto materialIndex = 0; materialIndex < header.materialsCount; ++materialIndex) {
@@ -229,6 +230,7 @@ namespace lysa {
             material->setNormalScale(header.normalScale > 0.0f ? header.normalScale : 1.0f);
             materials.at(materialIndex) = material;
             material->setBypassUpload(false);
+            pipelineIds[material->getPipelineId()].push_back(material);
         }
 
         // Create the Mesh, Surface & Vertex objects
@@ -360,6 +362,9 @@ namespace lysa {
                 rootNode.addChild(node);
             }
         }
+
+        // Update renderers pipelines
+        Application::getInstance().updatePipelines(pipelineIds);
     }
 
     std::vector<std::shared_ptr<vireo::Image>> AssetsPack::loadImagesAndTextures(

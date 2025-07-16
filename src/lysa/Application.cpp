@@ -89,6 +89,12 @@ namespace lysa {
         });
     }
 
+    void Application::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const {
+        for (const auto& window : windows) {
+            window->updatePipelines(pipelineIds);
+        }
+    }
+
     void Application::drawFrame() {
         resources.update();
 

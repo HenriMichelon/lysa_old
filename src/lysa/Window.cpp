@@ -86,6 +86,10 @@ namespace lysa {
         }
     }
 
+    void Window::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const {
+        renderer->updatePipelines(pipelineIds);
+    }
+
     void Window::update() const {
         if (stopped) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
@@ -94,6 +98,7 @@ namespace lysa {
             const auto& scene = viewport->getScene(frameIndex);
             if (scene->isMaterialsUpdated()) {
                 renderer->updatePipelines(*scene);
+                scene->resetMaterialsUpdated();
             }
         }
         renderer->update(frameIndex);

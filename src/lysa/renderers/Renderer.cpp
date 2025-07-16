@@ -84,10 +84,13 @@ namespace lysa {
         for (const auto& shadowMapRenderer : scene.getShadowMapRenderers()) {
             static_pointer_cast<ShadowMapPass>(shadowMapRenderer)->updatePipelines(pipelineIds);
         }
+        updatePipelines(pipelineIds);
+    }
+
+    void Renderer::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) {
         depthPrePass.updatePipelines(pipelineIds);
         shaderMaterialPass.updatePipelines(pipelineIds);
         transparencyPass.updatePipelines(pipelineIds);
-        updatePipelines(pipelineIds);
     }
 
     void Renderer::compute(

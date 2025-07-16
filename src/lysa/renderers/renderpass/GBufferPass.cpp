@@ -7,6 +7,7 @@
 module lysa.renderers.renderpass.gbuffer_pass;
 
 import lysa.application;
+import lysa.log;
 import lysa.resources;
 import lysa.virtual_fs;
 import lysa.resources.mesh;
@@ -35,6 +36,7 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
+                INFO("GBufferPass updatePipelines ", std::to_string(material->getName()));
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
                 pipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER);

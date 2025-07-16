@@ -17,6 +17,7 @@ import lysa.input_event;
 import lysa.memory;
 import lysa.viewport;
 import lysa.nodes.node;
+import lysa.resources.material;
 import lysa.renderers.renderer;
 
 export namespace lysa {
@@ -87,6 +88,8 @@ export namespace lysa {
         void setMousePosition(const float2& position) const;
 
         const auto& getConfiguration() const { return config; }
+
+        void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const;
 
         virtual ~Window();
         Window(Window&) = delete;

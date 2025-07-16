@@ -49,6 +49,8 @@ export namespace lysa {
 
         void updatePipelines(const Scene& scene);
 
+        virtual void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
+
         virtual void update(uint32 frameIndex);
 
         void compute(
@@ -95,9 +97,6 @@ export namespace lysa {
         const RenderingConfiguration& config;
         const std::wstring name;
         const bool withStencil;
-
-        virtual void updatePipelines(
-            const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) = 0;
 
         virtual void colorPass(
             vireo::CommandList& commandList,
