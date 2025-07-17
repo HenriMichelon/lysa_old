@@ -4,6 +4,11 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#ifdef PHYSIC_ENGINE_JOLT
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#endif
 export module lysa.nodes.collision_area;
 
 import lysa.viewport;
@@ -45,8 +50,12 @@ export namespace lysa {
     protected:
         std::shared_ptr<Node> duplicateInstance() const override;
 
-        void attachToViewport(Viewport* viewport) override;
+        virtual void createBody();
 
+        void attachToViewport(Viewport* viewport) override;
+#ifdef PHYSIC_ENGINE_JOLT
+        JPH::Shape* joltShape{nullptr};
+#endif
 #ifdef PHYSIC_ENGINE_PHYSX
         void createShape() override;
 #endif

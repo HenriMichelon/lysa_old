@@ -18,6 +18,9 @@ namespace lysa {
             releaseResources();
         }
         this->shape = shape;
+    }
+
+    void CollisionArea::createBody(const std::shared_ptr<Shape> &shape) {
         const auto position = getPositionGlobal();
         const auto quat = getRotationGlobal();
         const physx::PxTransform transform{

@@ -19,11 +19,11 @@ namespace lysa {
 
     void PhysicsBody::attachToViewport(Viewport* viewport) {
         CollisionObject::attachToViewport(viewport);
-        createBody(shape);
+        createBody();
     }
 
     void PhysicsBody::recreateBody() {
-        createBody(dynamic_pointer_cast<Shape>(shape->duplicate()));
+        createBody();
     }
 
     void PhysicsBody::setProperty(const std::string &property, const std::string &value) {

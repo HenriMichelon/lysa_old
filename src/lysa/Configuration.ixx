@@ -81,7 +81,7 @@ export namespace lysa {
 
     struct SceneConfiguration {
         //! Number of nodes updates per frame for asynchronous scene updates
-        uint32 maxAsyncNodesUpdatedPerFrame{20};
+        uint32 maxAsyncNodesUpdatedPerFrame{100};
         uint32 maxModelsPerScene{10000};
         uint32 maxMeshSurfacePerPipeline{100000};
     };

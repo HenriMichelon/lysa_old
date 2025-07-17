@@ -40,12 +40,14 @@ namespace lysa {
     }
 
     void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
-        releaseResources();
+        if (this->shape) {
+            releaseResources();
+        }
         this->shape = shape;
         joltShape = shape->getShapeSettings()->Create().Get();
     }
 
-    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
+    void PhysicsBody::createBody() {
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
         const JPH::BodyCreationSettings settings{
@@ -55,13 +57,7 @@ namespace lysa {
             motionType,
             collisionLayer,
         };
-        // const auto start = std::chrono::high_resolution_clock::now();
         const auto body = bodyInterface->CreateBody(settings);
-        // auto end = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<double, std::milli> duration = end - start;
-        // if (duration.count() > 10.) {
-            // std::printf("CreateBody %f\n", duration.count());
-        // }
         setBodyId(body->GetID());
         const auto scale = getScale();
         if (any(scale != float3{1.0f, 1.0f, 1.0f})) {

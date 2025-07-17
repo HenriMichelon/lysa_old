@@ -35,15 +35,14 @@ namespace lysa {
         actorType{actorType} {
     }
 
-    void preCreateBody(const std::shared_ptr<Shape> &shape) {
-        this->shape = shape;
-    }
-
-    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
+    void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
         if (this->shape) {
             releaseResources();
         }
         this->shape = shape;
+    }
+
+    void PhysicsBody::createBody() {
         const auto& physx = physX.getPhysics();
         const auto debug = getViewport()->getConfiguration().debugConfig.enabled;
         const auto &position = getPositionGlobal();

@@ -99,7 +99,7 @@ export namespace lysa {
 
         std::shared_ptr<Node> duplicateInstance() const override;
 
-        void createBody(const std::shared_ptr<Shape> &shape) override;
+        void createBody() override;
 
         void enterScene() override;
 

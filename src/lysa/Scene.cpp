@@ -115,13 +115,21 @@ namespace lysa {
         const vireo::CommandList& commandList,
         const std::unordered_map<uint32, std::unique_ptr<PipelineData>>& pipelinesData) {
         for (const auto& [pipelineId, pipelineData] : pipelinesData) {
-            pipelineData->updateData(commandList, drawCommandsStagingBufferRecycleBin);
+            pipelineData->updateData(commandList, drawCommandsStagingBufferRecycleBin, meshInstancesDataMemoryBlocks);
         }
     }
 
     void Scene::update(const vireo::CommandList& commandList) {
         if (!drawCommandsStagingBufferRecycleBin.empty()) {
             drawCommandsStagingBufferRecycleBin.clear();
+        }
+        if (!removedMeshInstances.empty()) {
+            for (const auto& meshInstance : removedMeshInstances) {
+                meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
+                meshInstancesDataMemoryBlocks.erase(meshInstance);
+            }
+            meshInstancesDataUpdated = true;
+            removedMeshInstances.clear();
         }
 
         if (shadowMapsUpdated) {
@@ -310,17 +318,16 @@ namespace lysa {
             }
             for (const auto& pipelineId : std::views::keys(pipelineIds)) {
                 if (shaderMaterialPipelinesData.contains(pipelineId)) {
-                    shaderMaterialPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                    shaderMaterialPipelinesData[pipelineId]->removeNode(meshInstance);
                 }
                 if (transparentPipelinesData.contains(pipelineId)) {
-                    transparentPipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                    transparentPipelinesData[pipelineId]->removeNode(meshInstance);
                 }
                 if (opaquePipelinesData.contains(pipelineId)) {
-                    opaquePipelinesData[pipelineId]->removeNode(meshInstance, meshInstancesDataMemoryBlocks);
+                    opaquePipelinesData[pipelineId]->removeNode(meshInstance);
                 }
             }
-            meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
-            meshInstancesDataMemoryBlocks.erase(meshInstance);
+            removedMeshInstances.push_back(meshInstance);
             break;
         }
         case Node::DIRECTIONAL_LIGHT:
@@ -536,24 +543,28 @@ namespace lysa {
     }
 
     void Scene::PipelineData::removeNode(
-        const std::shared_ptr<MeshInstance>& meshInstance,
-        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks) {
+        const std::shared_ptr<MeshInstance>& meshInstance) {
         if (instancesMemoryBlocks.contains(meshInstance)) {
             instancesArray.free(instancesMemoryBlocks.at(meshInstance));
             instancesMemoryBlocks.erase(meshInstance);
             drawCommandsCount = 0;
+            instancesRemoved = true;
+        }
+    }
+
+    void Scene::PipelineData::updateData(
+        const vireo::CommandList& commandList,
+        std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin,
+        const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks) {
+        if (instancesRemoved) {
             for (const auto& instance : std::views::keys(instancesMemoryBlocks)) {
                 addInstance(
                     instance,
                     instancesMemoryBlocks.at(instance),
                     meshInstancesDataMemoryBlocks.at(instance));
             }
+            instancesRemoved = false;
         }
-    }
-
-    void Scene::PipelineData::updateData(
-        const vireo::CommandList& commandList,
-        std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin) {
         if (instancesUpdated) {
             instancesArray.flush(commandList);
             instancesArray.postBarrier(commandList);

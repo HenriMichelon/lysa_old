@@ -140,6 +140,7 @@ export namespace lysa {
             FrustumCulling frustumCullingPipeline;
 
             bool instancesUpdated{false};
+            bool instancesRemoved{false};
             DeviceMemoryArray instancesArray;
             std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> instancesMemoryBlocks;
 
@@ -162,8 +163,7 @@ export namespace lysa {
                 const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
 
             void removeNode(
-                const std::shared_ptr<MeshInstance>& meshInstance,
-                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
+                const std::shared_ptr<MeshInstance>& meshInstance);
 
             void addInstance(
                 const std::shared_ptr<MeshInstance>& meshInstance,
@@ -172,7 +172,8 @@ export namespace lysa {
 
             void updateData(
                 const vireo::CommandList& commandList,
-                std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin);
+                std::unordered_set<std::shared_ptr<vireo::Buffer>>& drawCommandsStagingBufferRecycleBin,
+                const std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock>& meshInstancesDataMemoryBlocks);
         };
 
     private:
@@ -194,6 +195,7 @@ export namespace lysa {
 
         DeviceMemoryArray meshInstancesDataArray;
         std::unordered_map<std::shared_ptr<MeshInstance>, MemoryBlock> meshInstancesDataMemoryBlocks{};
+        std::list<std::shared_ptr<MeshInstance>> removedMeshInstances{};
         bool meshInstancesDataUpdated{false};
 
         std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>> pipelineIds;

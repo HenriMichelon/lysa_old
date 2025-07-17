@@ -36,7 +36,7 @@ export namespace lysa {
     protected:
         void setShape(const std::shared_ptr<Shape> &shape);
 
-        virtual void createBody(const std::shared_ptr<Shape> &shape);
+        virtual void createBody();
 
         void attachToViewport(Viewport* viewport) override;
 

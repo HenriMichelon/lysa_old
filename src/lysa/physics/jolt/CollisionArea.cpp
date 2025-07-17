@@ -19,10 +19,14 @@ namespace lysa {
             releaseResources();
         }
         this->shape = shape;
+        joltShape = shape->getShapeSettings()->Create().Get();
+    }
+
+    void CollisionArea::createBody() {
         const auto position = getPositionGlobal();
         const auto quat = getRotationGlobal();
         JPH::BodyCreationSettings settings{
-                shape->getShapeSettings(),
+                joltShape,
                 JPH::RVec3{position.x, position.y, position.z},
                 JPH::Quat{quat.x, quat.y, quat.z, quat.w},
                 JPH::EMotionType::Dynamic,

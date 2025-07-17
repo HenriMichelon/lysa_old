@@ -192,7 +192,7 @@ namespace lysa {
         child->updateGlobalTransform();
         if (viewport) {
             viewport->addNode(child, async, true);
-            child->ready();
+            if (!child->isReady) { child->ready(); }
         }
         child->visible = visible && child->visible;
         return true;

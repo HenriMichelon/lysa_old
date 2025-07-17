@@ -19,6 +19,7 @@ namespace lysa {
                                  const uint32 layer,
                                  const std::wstring& name):
         CollisionObject{shape, layer, name, COLLISION_AREA} {
+        setShape(shape);
     }
 
     CollisionArea::CollisionArea(const std::wstring &name):
@@ -27,7 +28,7 @@ namespace lysa {
 
     void CollisionArea::attachToViewport(Viewport* viewport) {
         CollisionObject::attachToViewport(viewport);
-        setShape(shape);
+        createBody();
     }
 
     std::shared_ptr<Node> CollisionArea::duplicateInstance() const {
@@ -43,14 +44,14 @@ namespace lysa {
             if (parts.size() > 0) {
                 if (parts.at(0) == "BoxShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for ", lysa::to_string(getName())); }
-                    shape = make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName());
+                    setShape(make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "SphereShape") {
                     if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for ", lysa::to_string(getName())); }
-                    shape = make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName());
+                    setShape(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
-                    shape = std::make_shared<MeshShape>(getSharedPtr());
+                    setShape(std::make_shared<MeshShape>(getSharedPtr()));
                 } else if (parts.at(0) == "AABBShape") {
-                    shape = std::make_shared<AABBShape>(getSharedPtr());
+                    setShape(std::make_shared<AABBShape>(getSharedPtr()));
                 } else if (parts.at(0) == "StaticCompoundShape") {
                     std::vector<SubShape> subShapes;
                     for (const auto &meshInstance : findAllChildren<MeshInstance>()) {
@@ -60,7 +61,7 @@ namespace lysa {
                             meshInstance->getRotationGlobal()
                         });
                     }
-                    shape = std::make_shared<StaticCompoundShape>(subShapes);
+                    setShape(std::make_shared<StaticCompoundShape>(subShapes));
                 } else {
                     throw Exception("CollisionArea : missing or invalid shape for ", lysa::to_string(getName()));
                 }
