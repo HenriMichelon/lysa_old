@@ -123,22 +123,6 @@ target_include_directories(xxhash PUBLIC
 compile_options(xxhash)
 
 #######################################################
-# HLSL++ math library
-add_library(${HLSLPP_TARGET})
-target_sources(${HLSLPP_TARGET}
-        PUBLIC
-        FILE_SET CXX_MODULES
-        FILES
-        ${HLSLPP_SRC_DIR}/module/hlsl++.ixx
-)
-compile_options(${HLSLPP_TARGET})
-target_include_directories(${HLSLPP_TARGET} PUBLIC ${HLSLPP_SRC_DIR}/include)
-target_link_libraries(${HLSLPP_TARGET} std-cxx-modules)
-target_precompile_headers(${HLSLPP_TARGET} PRIVATE
-    <intrin.h>
-)
-
-#######################################################
 if(WIN32)
     set(OS_SRC
             ${ENGINE_SRC_DIR}/os/win32/Application.cpp
@@ -203,6 +187,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/Global.cpp
         ${ENGINE_SRC_DIR}/Log.cpp
         ${ENGINE_SRC_DIR}/Input.cpp
+        ${ENGINE_SRC_DIR}/Math.cpp
         ${ENGINE_SRC_DIR}/Memory.cpp
         ${ENGINE_SRC_DIR}/Loader.cpp
         ${ENGINE_SRC_DIR}/Object.cpp
@@ -286,6 +271,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Loader.ixx
         ${ENGINE_SRC_DIR}/Log.ixx
         ${ENGINE_SRC_DIR}/Lysa.ixx
+        ${ENGINE_SRC_DIR}/Math.ixx
         ${ENGINE_SRC_DIR}/Memory.ixx
         ${ENGINE_SRC_DIR}/Object.ixx
         ${ENGINE_SRC_DIR}/Resources.ixx
@@ -358,8 +344,13 @@ target_sources(${LYSA_TARGET}
 )
 
 compile_options(${LYSA_TARGET})
-target_include_directories(${LYSA_TARGET} PUBLIC ${INCLUDE_DIR} ${DEPENDS_SRC_DIR}/stb ${xxhash_SOURCE_DIR} ${DEPENDS_SRC_DIR}/json)
-target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules ${HLSLPP_TARGET} xxhash)
+target_include_directories(${LYSA_TARGET} PUBLIC
+        ${INCLUDE_DIR}
+        ${HLSLPP_SRC_DIR}/include
+        ${DEPENDS_SRC_DIR}/stb
+        ${xxhash_SOURCE_DIR}
+        ${DEPENDS_SRC_DIR}/json)
+target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET} std-cxx-modules xxhash)
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
     "<intrin.h>"
