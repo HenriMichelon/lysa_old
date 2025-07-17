@@ -69,6 +69,9 @@ namespace lysa {
 
     void Window::close() {
         stopped = true;
+        for (const auto& viewport : viewports) {
+            viewport->close();
+        }
         Application::getInstance().removeWindow(this);
     }
 

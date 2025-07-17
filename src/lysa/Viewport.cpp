@@ -169,6 +169,12 @@ namespace lysa {
         lockDeferredUpdates = false;
     }
 
+    void Viewport::close() {
+        if (rootNode) {
+            removeNode(rootNode, false);
+        }
+    }
+
     void Viewport::processDeferredUpdates(const uint32 frameIndex) {
         auto lock = std::lock_guard(frameDataMutex);
         auto &data = framesData[frameIndex];

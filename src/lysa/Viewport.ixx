@@ -182,6 +182,8 @@ export namespace lysa {
 
         void resize(const vireo::Extent &extent);
 
+        void close();
+
     };
 
 }
