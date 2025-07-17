@@ -306,7 +306,7 @@ namespace lysa {
     }
 
     void Node::setRotationGlobal(const quaternion& quat) {
-        if (any(quat != getRotationGlobal())) {
+        if (!almostEquals(quat, getRotationGlobal())) {
             if (!parent) {
                 setRotation(quat);
                 return;

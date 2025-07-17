@@ -98,7 +98,6 @@ namespace lysa {
     void DeviceMemoryArray::flush(const vireo::CommandList& commandList) {
         auto lock = std::lock_guard{mutex};
         if (!pendingWrites.empty()) {
-            // INFO("DeviceMemoryArray::flush ", std::to_string(name));
             commandList.copy(stagingBuffer, buffer, pendingWrites);
             pendingWrites.clear();
             stagingBufferCurrentOffset = 0;

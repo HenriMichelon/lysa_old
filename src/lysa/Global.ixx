@@ -23,8 +23,15 @@ export namespace lysa {
 
     float radians(const float angle) { return radians(float1{angle}); }
 
-    bool almostEquals(const float f1, const float f2) {
+    inline bool almostEquals(const float f1, const float f2) {
         return (std::fabs(f1 - f2) <=  0.0001 * std::fmax(std::fabs(f1), std::fabs(f2)));
+    }
+
+    bool almostEquals(const quaternion& f1, const quaternion& f2) {
+        return almostEquals(f1.x, f2.x) &&
+            almostEquals(f1.y, f2.y) &&
+            almostEquals(f1.z, f2.z) &&
+            almostEquals(f1.w, f2.w);
     }
 
     float4x4 lookAt(const float3& eye, const float3& center, const float3& up);
