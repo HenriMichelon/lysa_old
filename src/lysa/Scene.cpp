@@ -159,9 +159,15 @@ namespace lysa {
             meshInstancesDataUpdated = false;
         }
 
+        // const auto start = std::chrono::high_resolution_clock::now();
         updatePipelinesData(commandList, opaquePipelinesData);
         updatePipelinesData(commandList, shaderMaterialPipelinesData);
         updatePipelinesData(commandList, transparentPipelinesData);
+        // const auto end = std::chrono::high_resolution_clock::now();
+        // const std::chrono::duration<double, std::milli> duration = end - start;
+        // if (duration.count() > 0.01) {
+            // std::cout << "updatePipelinesData " << duration.count() << " ms\n";
+        // }
 
         if (!lights.empty()) {
             if (lights.size() > lightsBufferCount) {

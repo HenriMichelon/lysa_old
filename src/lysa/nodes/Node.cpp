@@ -34,7 +34,6 @@ namespace lysa {
     void Node::ready() {
         assert([&]{return viewport != nullptr; }, "Invalid viewport");
         assert([&]{return!isReady; }, "ready() already called");
-        // INFO("ready ", lysa::to_string(name), " ", isProcessed() ? "ok" : "paused");
         for (const auto& child : children) {
             child->ready();
         }

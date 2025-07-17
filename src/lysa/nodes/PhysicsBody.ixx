@@ -34,12 +34,15 @@ export namespace lysa {
         ~PhysicsBody() override = default;
 
     protected:
+        void setShape(const std::shared_ptr<Shape> &shape);
+
         virtual void createBody(const std::shared_ptr<Shape> &shape);
 
         void attachToViewport(Viewport* viewport) override;
 
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::EMotionType motionType;
+        JPH::Shape* joltShape{nullptr};
         PhysicsBody(const std::shared_ptr<Shape> &shape,
                     collision_layer layer,
                     JPH::EActivation activationMode,

@@ -35,6 +35,10 @@ namespace lysa {
         actorType{actorType} {
     }
 
+    void preCreateBody(const std::shared_ptr<Shape> &shape) {
+        this->shape = shape;
+    }
+
     void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
         if (this->shape) {
             releaseResources();

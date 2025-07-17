@@ -26,6 +26,7 @@ namespace lysa {
         CollisionObject{shape, layer, name, type},
         motionType{motionType} {
         this->activationMode = activationMode;
+        setShape(shape);
     }
 
     PhysicsBody::PhysicsBody(const collision_layer layer,
@@ -38,19 +39,29 @@ namespace lysa {
         this->activationMode = activationMode;
     }
 
-    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
+    void PhysicsBody::setShape(const std::shared_ptr<Shape> &shape) {
         releaseResources();
+        this->shape = shape;
+        joltShape = shape->getShapeSettings()->Create().Get();
+    }
+
+    void PhysicsBody::createBody(const std::shared_ptr<Shape> &shape) {
         const auto &position = getPositionGlobal();
         const auto &quat = normalize(getRotationGlobal());
-        this->shape = shape;
         const JPH::BodyCreationSettings settings{
-                shape->getShapeSettings(),
-                JPH::RVec3{position.x, position.y, position.z},
-                JPH::Quat{quat.x, quat.y, quat.z, quat.w},
-                motionType,
-                collisionLayer,
+            joltShape,
+            JPH::RVec3{position.x, position.y, position.z},
+            JPH::Quat{quat.x, quat.y, quat.z, quat.w},
+            motionType,
+            collisionLayer,
         };
+        // const auto start = std::chrono::high_resolution_clock::now();
         const auto body = bodyInterface->CreateBody(settings);
+        // auto end = std::chrono::high_resolution_clock::now();
+        // std::chrono::duration<double, std::milli> duration = end - start;
+        // if (duration.count() > 10.) {
+            // std::printf("CreateBody %f\n", duration.count());
+        // }
         setBodyId(body->GetID());
         const auto scale = getScale();
         if (any(scale != float3{1.0f, 1.0f, 1.0f})) {

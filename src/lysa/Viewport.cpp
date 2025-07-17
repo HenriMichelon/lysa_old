@@ -124,7 +124,7 @@ namespace lysa {
         lockDeferredUpdates = false;
     }
 
-    void Viewport::addNode(const std::shared_ptr<Node> &node, const bool async, bool attachToViewport) {
+    void Viewport::addNode(const std::shared_ptr<Node> &node, const bool async, const bool attachToViewport) {
         assert([&]{return node != nullptr;}, "Node can't be null");
         lockDeferredUpdates = true;
         {
@@ -137,6 +137,7 @@ namespace lysa {
                 }
             }
         }
+        lockDeferredUpdates = false;
         for (const auto &child : node->getChildren()) {
             addNode(child, async, false);
         }
@@ -144,7 +145,6 @@ namespace lysa {
             node->attachToViewport(this);
             node->enterScene();
         }
-        lockDeferredUpdates = false;
     }
 
     void Viewport::removeNode(const std::shared_ptr<Node> &node, const bool async) {
