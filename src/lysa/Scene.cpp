@@ -123,6 +123,12 @@ namespace lysa {
         if (!drawCommandsStagingBufferRecycleBin.empty()) {
             drawCommandsStagingBufferRecycleBin.clear();
         }
+        if (!removedLights.empty()) {
+            for (const auto& light : removedLights) {
+                lights.remove(light);
+                disableLightShadowCasting(light);
+            }
+        }
         if (!removedMeshInstances.empty()) {
             for (const auto& meshInstance : removedMeshInstances) {
                 meshInstancesDataArray.free(meshInstancesDataMemoryBlocks.at(meshInstance));
@@ -333,8 +339,7 @@ namespace lysa {
         case Node::DIRECTIONAL_LIGHT:
         case Node::OMNI_LIGHT:
         case Node::SPOT_LIGHT:
-            lights.remove(static_pointer_cast<Light>(node));
-            // node->getViewport()->getWindow().disableLightShadowCasting(node);
+            removedLights.push_back(static_pointer_cast<Light>(node));
             break;
         default:
             break;
@@ -623,8 +628,20 @@ namespace lysa {
         }
     }
 
-    void Scene::disableLightShadowCasting(const std::shared_ptr<Node>&node) {
-        throw Exception("not implemented");
+    void Scene::disableLightShadowCasting(const std::shared_ptr<Light>&light) {
+        if (shadowMapRenderers.contains(light)) {
+            // INFO("disableLightShadowCasting for ", std::to_string(light->getName()));
+            const auto& shadowMapRenderer = std::static_pointer_cast<ShadowMapPass>(shadowMapRenderers.at(light));
+            const auto index = shadowMapIndex[light];
+            const auto& blankImage = Application::getResources().getBlankImage();
+            for (int i = 0; i < shadowMapRenderer->getShadowMapCount(); i++) {
+                shadowMaps[index + i] = blankImage;
+                shadowTransparencyColorMaps[index + i] = blankImage;
+            }
+            shadowMapsUpdated = true;
+            shadowMapIndex.erase(light);
+            shadowMapRenderers.erase(light);
+        }
     }
 
 }

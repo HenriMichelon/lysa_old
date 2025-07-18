@@ -191,6 +191,7 @@ export namespace lysa {
         std::vector<std::shared_ptr<vireo::Image>> shadowMaps;
         std::vector<std::shared_ptr<vireo::Image>> shadowTransparencyColorMaps;
         std::map<std::shared_ptr<Light>, uint32> shadowMapIndex;
+        std::list<std::shared_ptr<Light>> removedLights;
         bool shadowMapsUpdated{false};
 
         DeviceMemoryArray meshInstancesDataArray;
@@ -231,7 +232,7 @@ export namespace lysa {
 
         void enableLightShadowCasting(const std::shared_ptr<Node>&node);
 
-        void disableLightShadowCasting(const std::shared_ptr<Node>&node);
+        void disableLightShadowCasting(const std::shared_ptr<Light>&light);
 
     };
 
