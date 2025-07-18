@@ -22,9 +22,7 @@ export namespace lysa {
             bool depthTestEnable,
             const RenderingConfiguration& renderingConfiguration,
             const std::wstring& name,
-            const std::wstring& shadersName = L"vector",
-            const vireo::PushConstantsDesc& pushConstantsDesc = {},
-            const void* pushConstants = nullptr);
+            const std::wstring& shadersName = L"vector");
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
@@ -50,19 +48,19 @@ export namespace lysa {
     protected:
         struct Vertex {
             alignas(16) float3 position;
+            alignas(16) float2 uv;
             alignas(16) float4 color;
+            alignas(16) float2 uvClip{};
+            alignas(16) int textureIndex{-1};
         };
 
+        const RenderingConfiguration& config;
         // Vertex buffer needs to be re-uploaded to GPU
         bool vertexBufferDirty{true};
         // All the vertices for lines
         std::vector<Vertex> linesVertices;
         // All the vertices for triangles
         std::vector<Vertex> triangleVertices;
-
-        const void* pushConstants;
-        const vireo::PushConstantsDesc pushConstantsDesc;
-        const RenderingConfiguration& config;
 
     private:
         const std::wstring name;
@@ -79,7 +77,10 @@ export namespace lysa {
 
         const std::vector<vireo::VertexAttributeDesc> vertexAttributes{
             {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position)},
-            {"COLOR",    vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)}
+            {"TEXCOORD", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uv)},
+            {"COLOR", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)},
+            {"CLIP", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uvClip)},
+            {"TEXTURE", vireo::AttributeFormat::R32_FLOAT, offsetof(Vertex, textureIndex)},
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
@@ -100,7 +101,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> stagingBuffer;
         // Vertex buffer in GPU memory
         std::shared_ptr<vireo::Buffer> vertexBuffer;
-        // Used when we need to postpone the buffers destruction when they are in use by another frame in flight
+        // Used when we need to postpone the buffer destruction when they are in use by another frame in flight
         std::list<std::shared_ptr<vireo::Buffer>> oldBuffers;
 
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;

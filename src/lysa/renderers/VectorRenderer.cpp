@@ -15,12 +15,8 @@ namespace lysa {
         const bool depthTestEnable,
         const RenderingConfiguration& renderingConfiguration,
         const std::wstring& name,
-        const std::wstring& shadersName,
-        const vireo::PushConstantsDesc& pushConstantsDesc,
-        const void* pushConstants) :
+        const std::wstring& shadersName) :
         name{name},
-        pushConstantsDesc{pushConstantsDesc},
-        pushConstants{pushConstants},
         config{renderingConfiguration} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(name);
@@ -48,7 +44,7 @@ namespace lysa {
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
            { descriptorLayout },
-           pushConstantsDesc,
+           {},
            name);
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::LINE_LIST;
         pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name);
@@ -57,15 +53,15 @@ namespace lysa {
     }
 
     void VectorRenderer::drawLine(const float3& from, const float3& to, const float4& color) {
-        linesVertices.push_back( {from, color });
-        linesVertices.push_back( {to, color });
+        linesVertices.push_back( {from, {}, color });
+        linesVertices.push_back( {to, {}, color });
         vertexBufferDirty = true;
     }
 
     void VectorRenderer::drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color) {
-        triangleVertices.push_back( {v1, color });
-        triangleVertices.push_back( {v2, color });
-        triangleVertices.push_back( {v3, color });
+        triangleVertices.push_back( {v1, {}, color });
+        triangleVertices.push_back( {v2, {}, color });
+        triangleVertices.push_back( {v3, {}, color });
         vertexBufferDirty = true;
     }
 
@@ -115,10 +111,12 @@ namespace lysa {
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const uint32 frameIndex) {
         const auto& frame = framesData[frameIndex];
-        if (vertexCount == 0) { return; }
+        if (vertexCount == 0) {
+            return;
+        }
         const auto globalUbo = GlobalUniform {
             .projection = scene.getCurrentCamera()->getProjection(),
-            .view       = inverse(scene.getCurrentCamera()->getTransformGlobal()),
+            .view = inverse(scene.getCurrentCamera()->getTransformGlobal()),
         };
         frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
@@ -140,20 +138,14 @@ namespace lysa {
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.bindVertexBuffer(vertexBuffer);
         commandList.beginRendering(renderingConfig);
-        commandList.bindPipeline(pipelineLines);
-        commandList.bindDescriptors({frame.descriptorSet});
-        if (pushConstants) {
-            commandList.pushConstants(pipelineConfig.resources, pushConstantsDesc, pushConstants);
-        }
         if (!linesVertices.empty()) {
+            commandList.bindPipeline(pipelineLines);
+            commandList.bindDescriptors({frame.descriptorSet});
             commandList.draw(linesVertices.size(), 1, 0, 0);
         }
-        commandList.bindPipeline(pipelineTriangles);
-        commandList.bindDescriptors({frame.descriptorSet});
-        if (pushConstants) {
-            commandList.pushConstants(pipelineConfig.resources, pushConstantsDesc, pushConstants);
-        }
         if (!triangleVertices.empty()) {
+            commandList.bindPipeline(pipelineTriangles);
+            commandList.bindDescriptors({frame.descriptorSet});
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
         }
         commandList.endRendering();

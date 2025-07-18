@@ -89,6 +89,7 @@ set(SHADERS_SOURCE_FILES
         "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
         "${SHADERS_SRC_DIR}/quad.vert.slang"
         "${SHADERS_SRC_DIR}/vector.slang"
+        "${SHADERS_SRC_DIR}/vector_ui.slang"
         "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
         "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
         "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
@@ -237,6 +238,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.cpp
         ${ENGINE_SRC_DIR}/renderers/Renderer.cpp
         ${ENGINE_SRC_DIR}/renderers/VectorRenderer.cpp
+        ${ENGINE_SRC_DIR}/renderers/UIRenderer.cpp
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/ForwardColor.cpp
@@ -326,6 +328,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/DeferredRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/ForwardRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/Renderer.ixx
+        ${ENGINE_SRC_DIR}/renderers/UIRenderer.ixx
         ${ENGINE_SRC_DIR}/renderers/VectorRenderer.ixx
 
         ${ENGINE_SRC_DIR}/renderers/renderpass/DepthPrepass.ixx
@@ -339,6 +342,8 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/SMAAPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
+
+        ${ENGINE_SRC_DIR}/ui/Rect.ixx
 
         ${OS_MODULES}
         ${PHYSICS_MODULES}

@@ -21,20 +21,24 @@ struct VertexOutput {
     nointerpolation int textureIndex : TEXTURE;
 };
 
-struct GlobalUniform {
-    float4x4 projection;
-    float4x4 view;
-}
-
-[[vk::binding(0, 0)]] ConstantBuffer<GlobalUniform> global  : register(b0, space0);
-
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
-    output.position = mul(global.projection, mul(global.view,  float4(input.position, 1.0)));
+    float2 pos = 2 * (input.position.xy - 0.5); // remap to [-1,1]
+    output.position = float4(pos.x, -pos.y, 0, 1);
+    output.uv = input.uv;
     output.color = input.color;
+    output.uvClip = input.uvClip;
+    output.textureIndex = input.textureIndex;
     return output;
 }
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
-    return float4(input.color, 1.0);
+    if (input.textureIndex == -1) {
+        return float4(input.color, 1.0);
+    } else {
+        if ((input.uv.x > input.uvClip.x) || (input.uv.y < input.uvClip.y)) {
+            discard;
+        }
+        return float4(input.color, 1.0);
+    }
 }
