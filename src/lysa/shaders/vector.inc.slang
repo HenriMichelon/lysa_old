@@ -1,0 +1,27 @@
+/*
+* Copyright (c) 2025-present Henri Michelon
+*
+* This software is released under the MIT License.
+* https://opensource.org/licenses/MIT
+*/
+
+struct VertexInput {
+    float3 position : POSITION;
+    float2 uv       : TEXCOORD;
+    float4 color    : COLOR;
+    float2 uvClip   : CLIP;
+    int textureIndex: TEXTURE;
+};
+
+struct VertexOutput {
+    float4 position : SV_POSITION;
+    float2 uv       : TEXCOORD;
+    float4 color    : COLOR;
+    nointerpolation float2 uvClip    : CLIP;
+    nointerpolation int textureIndex : TEXTURE;
+};
+
+struct GlobalUniform {
+    float4x4 projection;
+    float4x4 view;
+}

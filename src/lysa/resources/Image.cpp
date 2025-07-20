@@ -11,6 +11,7 @@ module lysa.resources.image;
 
 import lysa.application;
 import lysa.log;
+import lysa.virtual_fs;
 
 namespace lysa {
 
@@ -18,6 +19,33 @@ namespace lysa {
         Resource{name},
         image{image},
         index{Application::getResources().addTexture(*this)} {
+    }
+
+    std::shared_ptr<Image> Image::load(
+        const std::wstring &filepath,
+        const vireo::ImageFormat imageFormat) {
+        uint32 texWidth, texHeight;
+        uint64 imageSize;
+        auto *pixels = VirtualFS::loadRGBAImage(filepath, texWidth, texHeight, imageSize);
+        if (!pixels) { throw Exception("failed to load texture image ", lysa::to_string(filepath)); }
+
+        const auto& vireo = Application::getVireo();
+        const auto image = vireo.createImage(imageFormat, texWidth, texHeight, 1, 1, filepath);
+
+        const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
+        const auto commandList = commandAllocator->createCommandList();
+        commandList->begin();
+        commandList->barrier(image, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
+        commandList->upload(image, pixels);
+        commandList->barrier(image, vireo::ResourceState::COPY_DST, vireo::ResourceState::SHADER_READ);
+        commandList->end();
+
+        const auto& graphicQueue = Application::getGraphicQueue();
+        graphicQueue->submit({commandList});
+        graphicQueue->waitIdle();
+
+        VirtualFS::destroyImage(pixels);
+        return std::make_shared<Image>(image, filepath);
     }
 
     void Image::save(const std::wstring& filepath) const {

@@ -4,22 +4,10 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+#include "vector.inc.slang"
+#include "samplers.inc.slang"
 
-struct VertexInput {
-    float3 position : POSITION;
-    float2 uv       : TEXCOORD;
-    float4 color    : COLOR;
-    float2 uvClip   : CLIP;
-    int textureIndex: TEXTURE;
-};
-
-struct VertexOutput {
-    float4 position : SV_POSITION;
-    float2 uv       : TEXCOORD;
-    float4 color    : COLOR;
-    nointerpolation float2 uvClip    : CLIP;
-    nointerpolation int textureIndex : TEXTURE;
-};
+[[vk::binding(0, 0)]]  Texture2D textures[] : register(t0, space0);
 
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
@@ -36,9 +24,12 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     if (input.textureIndex == -1) {
         return input.color;
     } else {
-        if ((input.uv.x > input.uvClip.x) || (input.uv.y < input.uvClip.y)) {
+        if ((input.uv.x > input.uvClip.x) || (input.uv.y < (1.0-input.uvClip.y))) {
             discard;
         }
-        return input.color;
+        input.uv.y = 1.0 - input.uv.y;
+        float4 color = textures[input.textureIndex].Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
+        return float4(input.color.rgb + color.rgb, min(color.a, input.color.a));
+        //return float4(input.uv.x, input.uv.y, 0.0, 1.0);
     }
 }

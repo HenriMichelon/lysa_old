@@ -13,6 +13,7 @@ import vireo;
 import lysa.global;
 import lysa.configuration;
 import lysa.scene;
+import lysa.resources.image;
 
 export namespace lysa {
 
@@ -24,7 +25,8 @@ export namespace lysa {
             const std::wstring& name,
             const std::wstring& shadersName = L"vector",
             bool filledTriangles = false,
-            bool enableAlphaBlending = false);
+            bool enableAlphaBlending = false,
+            bool useCamera = true, bool useTextures = false);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
@@ -70,8 +72,17 @@ export namespace lysa {
         // All the vertices for triangles
         std::vector<Vertex> triangleVertices;
 
+        int32 addTexture(const std::shared_ptr<Image> &texture);
+
     private:
+        static constexpr auto MAX_TEXTURES{100};
         const std::wstring name;
+        const bool useCamera;
+        const bool useTextures;
+        std::shared_ptr<vireo::Image> blankImage;
+
+        vireo::DescriptorIndex globalUniformIndex;
+        vireo::DescriptorIndex texturesIndex;
 
         struct GlobalUniform {
             float4x4 projection{1.0f};
@@ -112,9 +123,12 @@ export namespace lysa {
         // Used when we need to postpone the buffer destruction when they are in use by another frame in flight
         std::list<std::shared_ptr<vireo::Buffer>> oldBuffers;
 
+        std::vector<std::shared_ptr<vireo::Image>> textures;
+        // Indices of each image in the descriptor binding
+        std::map<unique_id, int32> texturesIndices{};
+
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;
         std::shared_ptr<vireo::GraphicPipeline>  pipelineTriangles;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
-
     };
 }

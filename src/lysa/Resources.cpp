@@ -47,7 +47,7 @@ namespace lysa {
             vireo::BufferType::DEVICE_STORAGE,
             L"MeshSurface Array"},
         samplers{vireo},
-        textures(MAX_TEXTURES) {
+        textures{MAX_TEXTURES} {
         if (descriptorLayout == nullptr) {
             descriptorLayout = vireo.createDescriptorLayout(L"Resources");
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::DEVICE_STORAGE);

@@ -40,7 +40,25 @@ export namespace lysa {
         auto getIndex() const { return index; }
 
         void save(const std::wstring& filepath) const;
+
         static void save(const std::wstring& filepath, const std::shared_ptr<vireo::Image>& image);
+
+        /**
+        * Load a bitmap from file.<br>
+        * Support JPEG and PNG formats
+        */
+        static std::shared_ptr<Image> load(
+            const std::wstring &filepath,
+            vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
+
+        /**
+         * Load a bitmap from memory.<br>
+         * Support JPEG & PNG formats.
+         */
+        static std::shared_ptr<Image> load(
+            const void* data,
+            uint64 dataSize,
+            vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
 
         ~Image() override = default;
 

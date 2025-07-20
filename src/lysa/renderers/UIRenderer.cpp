@@ -15,7 +15,8 @@ namespace lysa {
             renderingConfiguration,
             L"UI Renderer",
             L"vector_ui",
-            true, true} {
+            true, true,
+        false, true} {
     }
 
     void UIRenderer::drawLine(const float2& start, const float2& end) {
@@ -68,13 +69,18 @@ namespace lysa {
         const auto v3 = float3{pos.x + size.x, pos.y + size.y, 0.0f};
         const auto uvClip = float2{clipWidth / w, clipHeight / h};
 
-        triangleVertices.push_back( {v0, {0.0f, 1.0f}, color, uvClip, -1 });
-        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, -1 });
-        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip });
+        auto textureIndex{-1};
+        if (texture) {
+            textureIndex = addTexture(texture);
+        }
 
-        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, -1 });
-        triangleVertices.push_back( {v3, {1.0f, 0.0f}, color, uvClip, -1 });
-        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip, -1 });
+        triangleVertices.push_back( {v0, {0.0f, 1.0f}, color, uvClip, textureIndex });
+        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, textureIndex });
+        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip, textureIndex });
+
+        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, textureIndex });
+        triangleVertices.push_back( {v3, {1.0f, 0.0f}, color, uvClip, textureIndex });
+        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip, textureIndex });
 
         vertexBufferDirty = true;
     }

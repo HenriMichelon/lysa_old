@@ -6,6 +6,7 @@
 */
 export module lysa.virtual_fs;
 
+import vireo;
 import lysa.global;
 
 export namespace lysa {
@@ -28,6 +29,10 @@ export namespace lysa {
         static std::wstring parentPath(const std::wstring& filepath);
 
         static void loadBinaryData(const std::wstring &filepath, std::vector<char>& out);
+
+        static std::byte* loadRGBAImage(const std::wstring& filepath, uint32& width, uint32& height, uint64& size);
+
+        static void destroyImage(std::byte* image);
 
     private:
         static std::wstring getPath(const std::wstring& filepath);

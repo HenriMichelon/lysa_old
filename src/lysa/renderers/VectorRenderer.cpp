@@ -17,19 +17,44 @@ namespace lysa {
         const std::wstring& name,
         const std::wstring& shadersName,
         const bool filledTriangles,
-        const bool enableAlphaBlending) :
+        const bool enableAlphaBlending,
+        const bool useCamera,
+        const bool useTextures) :
         config{renderingConfiguration},
+        useCamera{useCamera},
+        useTextures{useTextures},
         name{name} {
         const auto& vireo = Application::getVireo();
+
         descriptorLayout = vireo.createDescriptorLayout(name);
-        descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
+        if (useCamera) {
+            globalUniformIndex = 0;
+            texturesIndex = 1;
+            descriptorLayout->add(globalUniformIndex, vireo::DescriptorType::UNIFORM);
+        } else {
+            texturesIndex = 0;
+        }
+        if (useTextures) {
+            textures.resize(MAX_TEXTURES);
+            descriptorLayout->add(texturesIndex, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
+            blankImage = Application::getResources().getBlankImage();
+            for (int i = 0; i < textures.size(); i++) {
+                textures[i] = blankImage;
+            }
+        }
         descriptorLayout->build();
+
         framesData.resize(config.framesInFlight);
         for (auto& frameData : framesData) {
-            frameData.globalUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform), 1, name);
-            frameData.globalUniform->map();
             frameData.descriptorSet = vireo.createDescriptorSet(descriptorLayout, name);
-            frameData.descriptorSet->update(0, frameData.globalUniform);
+            if (useCamera) {
+                frameData.globalUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(GlobalUniform), 1, name);
+                frameData.globalUniform->map();
+                frameData.descriptorSet->update(globalUniformIndex, frameData.globalUniform);
+            }
+            if (useTextures) {
+                frameData.descriptorSet->update(texturesIndex, textures);
+            }
         }
         renderingConfig.depthTestEnable = depthTestEnable;
 
@@ -46,7 +71,7 @@ namespace lysa {
         VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + shadersName + L".frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
-           { descriptorLayout },
+           { descriptorLayout, Application::getResources().getSamplers().getDescriptorLayout() },
            {},
            name);
         pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
@@ -148,12 +173,12 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         if (!linesVertices.empty()) {
             commandList.bindPipeline(pipelineLines);
-            commandList.bindDescriptors({frame.descriptorSet});
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
             commandList.draw(linesVertices.size(), 1, 0, 0);
         }
         if (!triangleVertices.empty()) {
             commandList.bindPipeline(pipelineTriangles);
-            commandList.bindDescriptors({frame.descriptorSet});
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
         }
         commandList.endRendering();
@@ -161,6 +186,23 @@ namespace lysa {
             colorAttachment,
             vireo::ResourceState::RENDER_TARGET_COLOR,
             vireo::ResourceState::UNDEFINED);
+    }
+
+    int32 VectorRenderer::addTexture(const std::shared_ptr<Image> &texture) {
+        if (texturesIndices.contains(texture->getId())) {
+            return texturesIndices.at(texture->getId());
+        }
+        for (int index = 0; index < textures.size(); index++) {
+            if (textures[index] == blankImage) {
+                textures[index] = texture->getImage();
+                texturesIndices[texture->getId()] = index;
+                for (const auto& frameData : framesData) {
+                    frameData.descriptorSet->update(texturesIndex, textures);
+                }
+                return index;
+            }
+        }
+        throw Exception("Maximum images count reached for the vector renderer");
     }
 
 }
