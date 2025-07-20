@@ -13,6 +13,7 @@ module lysa.resources.font;
 import vireo;
 import lysa.application;
 import lysa.global;
+import lysa.log;
 import lysa.virtual_fs;
 import lysa.window;
 
@@ -75,17 +76,6 @@ namespace lysa {
         return cchar;
     }
 
-    uint32 Font::scaleFontSize(const uint32 baseFontSize) const {
-        constexpr int baseWidth = 1920;
-        constexpr int baseHeight = 1080;
-        const auto newHeight = window->getExtent().width;
-        const auto newWidth  = window->getExtent().height;
-        const auto horizontalScalingFactor= static_cast<float>(newWidth) / baseWidth;
-        const auto verticalScalingFactor = static_cast<float>(newHeight) / baseHeight;
-        const auto averageScalingFactor= (horizontalScalingFactor + verticalScalingFactor) / 2.0f;
-        return static_cast<uint32>(std::ceil(static_cast<uint32>(baseFontSize * averageScalingFactor)));
-    }
-
     Font::Font(const Font &font, const uint32 size, Window* window) : Font{font.getFontName(), size, window} {
     }
 
@@ -126,10 +116,12 @@ namespace lysa {
         if (!stbtt_InitFont(&font, fontBuffer->data(), stbtt_GetFontOffsetForIndex(fontBuffer->data(), 0))) {
             throw Exception("Failed to initialize font", lysa::to_string(path));
         }
-        scale = stbtt_ScaleForPixelHeight(&font, static_cast<float>(scaleFontSize(size)));
+        auto targetHeight = size * this->window->getExtent().height / VECTOR_SCREEN_SIZE;
+        scale = stbtt_ScaleForPixelHeight  (&font, targetHeight);
+
         stbtt_GetFontVMetrics(&font, &ascent, &descent, &lineGap);
         height = static_cast<int>(ceilf((ascent - descent) * scale));
-        //DEBUG("Font size : ", size, "->", scaleFontSize(size), "=", height);
+        //INFO("Font size : ", size , "->", targetHeight, "=", height, "(", scale, ")");
         ascent  = static_cast<int>(ascent * scale);
         descent = static_cast<int>(descent * scale);
     }
@@ -138,8 +130,7 @@ namespace lysa {
         int advanceWidth, leftSideBearing;
         stbtt_GetCodepointHMetrics(&font, c, &advanceWidth, &leftSideBearing);
         cachedCharacter.advance  = static_cast<int32>(advanceWidth * scale);
-        cachedCharacter.xBearing = 0; //static_cast<int32>(leftSideBearing * scale);
-
+        cachedCharacter.xBearing = static_cast<int32>(leftSideBearing * scale);
         int width, height;
         const auto srcBitmap = stbtt_GetCodepointBitmap(
             &font,
@@ -149,7 +140,6 @@ namespace lysa {
             nullptr, nullptr);
         cachedCharacter.width = width;
         cachedCharacter.height = this->height;
-        // cachedCharacter.yBearing = cachedCharacter.height;
         cachedCharacter.bitmap = std::make_unique<std::vector<uint32>>(cachedCharacter.width * cachedCharacter.height, 0);
 
         int x1, y1, x2, y2;
@@ -166,7 +156,7 @@ namespace lysa {
                 }
             }
         }
-        // std::string t = std::format("{}.png", c);
+        // const std::string t = std::format("{}.png", c);
         // stbi_write_png(t.c_str(),
         //        width,
         //        height,

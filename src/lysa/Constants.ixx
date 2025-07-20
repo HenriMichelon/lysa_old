@@ -97,5 +97,7 @@ export namespace lysa {
 
     constexpr uint32 MAX_COLLISIONS_LAYERS{100};
 
+    constexpr float VECTOR_SCREEN_SIZE{1000.0f};
+
 
 }

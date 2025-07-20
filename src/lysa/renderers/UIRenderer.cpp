@@ -6,6 +6,8 @@
 */
 module lysa.renderers.ui;
 
+import lysa.constants;
+
 namespace lysa {
 
     UIRenderer::UIRenderer(
@@ -104,7 +106,7 @@ namespace lysa {
     }
 
     void UIRenderer::resize(const vireo::Extent& extent) {
-        vectorExtent = {(extent.width * 1000.0f) / extent.height, 1000.0f};
+        vectorExtent = {(extent.width * VECTOR_SCREEN_SIZE) / extent.height, VECTOR_SCREEN_SIZE};
         vectorRatio = vectorExtent.x / vectorExtent.y;
     }
 }

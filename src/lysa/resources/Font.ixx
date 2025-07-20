@@ -91,8 +91,6 @@ export namespace lysa {
 
         void render(CachedCharacter &, char32_t) const;
 
-        uint32 scaleFontSize(uint32 baseFontSize) const;
-
 #ifdef __STB_INCLUDE_STB_TRUETYPE_H__
         float scale;
         int ascent;
