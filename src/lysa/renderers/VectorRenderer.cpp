@@ -15,9 +15,11 @@ namespace lysa {
         const bool depthTestEnable,
         const RenderingConfiguration& renderingConfiguration,
         const std::wstring& name,
-        const std::wstring& shadersName) :
-        name{name},
-        config{renderingConfiguration} {
+        const std::wstring& shadersName,
+        const bool filledTriangles,
+        const bool enableAlphaBlending) :
+        config{renderingConfiguration},
+        name{name} {
         const auto& vireo = Application::getVireo();
         descriptorLayout = vireo.createDescriptorLayout(name);
         descriptorLayout->add(0, vireo::DescriptorType::UNIFORM);
@@ -30,10 +32,11 @@ namespace lysa {
             frameData.descriptorSet->update(0, frameData.globalUniform);
         }
         renderingConfig.depthTestEnable = depthTestEnable;
+
+        pipelineConfig.colorBlendDesc[0].blendEnable = enableAlphaBlending;
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.depthTestEnable = depthTestEnable;
         pipelineConfig.depthWriteEnable = depthTestEnable;
-        pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
         pipelineConfig.colorRenderFormats.push_back(renderingConfiguration.swapChainFormat);
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
@@ -46,22 +49,26 @@ namespace lysa {
            { descriptorLayout },
            {},
            name);
+        pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::LINE_LIST;
-        pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name);
+        pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name + L" lines");
+        pipelineConfig.polygonMode = filledTriangles ?
+            vireo::PolygonMode::FILL :
+            vireo::PolygonMode::WIREFRAME;
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::TRIANGLE_LIST;
-        pipelineTriangles = vireo.createGraphicPipeline(pipelineConfig, name);
+        pipelineTriangles = vireo.createGraphicPipeline(pipelineConfig, name + L" triangles");
     }
 
     void VectorRenderer::drawLine(const float3& from, const float3& to, const float4& color) {
-        linesVertices.push_back( {from, {}, color });
-        linesVertices.push_back( {to, {}, color });
+        linesVertices.push_back( {from, {}, color, {}, -1 });
+        linesVertices.push_back( {to, {}, color, {}, -1 });
         vertexBufferDirty = true;
     }
 
     void VectorRenderer::drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color) {
-        triangleVertices.push_back( {v1, {}, color });
-        triangleVertices.push_back( {v2, {}, color });
-        triangleVertices.push_back( {v3, {}, color });
+        triangleVertices.push_back( {v1, {}, color, {}, -1 });
+        triangleVertices.push_back( {v2, {}, color, {}, -1 });
+        triangleVertices.push_back( {v3, {}, color, {}, -1 });
         vertexBufferDirty = true;
     }
 
@@ -85,9 +92,9 @@ namespace lysa {
                 oldBuffers.push_back(vertexBuffer);
                 // Allocate new buffers to change size
                 vertexCount = linesVertices.size() + triangleVertices.size();
-                stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, L"Debug vertices staging");
+                stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, name + L" vertices staging");
                 stagingBuffer->map();
-                vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, L"Debug vertices");
+                vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, name + L" vertices");
             }
             if (vertexBufferDirty) {
                 // Push new vertices data to GPU memory
@@ -110,7 +117,6 @@ namespace lysa {
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
         const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const uint32 frameIndex) {
-        const auto& frame = framesData[frameIndex];
         if (vertexCount == 0) {
             return;
         }
@@ -118,20 +124,22 @@ namespace lysa {
             .projection = scene.getCurrentCamera()->getProjection(),
             .view = inverse(scene.getCurrentCamera()->getTransformGlobal()),
         };
-        frame.globalUniform->write(&globalUbo, sizeof(GlobalUniform));
+        framesData[frameIndex].globalUniform->write(&globalUbo, sizeof(GlobalUniform));
+        render(commandList, colorAttachment, depthAttachment, frameIndex);
+    }
+
+    void VectorRenderer::render(
+        vireo::CommandList& commandList,
+        const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+        const uint32 frameIndex) {
+        const auto& frame = framesData[frameIndex];
+        if (vertexCount == 0) {
+            return;
+        }
         renderingConfig.colorRenderTargets[0].renderTarget = colorAttachment;
         renderingConfig.depthStencilRenderTarget = depthAttachment;
 
-        const auto depthStage =
-            config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
-            config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
-            vireo::ResourceState::RENDER_TARGET_DEPTH_STENCIL :
-            vireo::ResourceState::RENDER_TARGET_DEPTH;
-
-        commandList.barrier(
-            depthAttachment,
-            vireo::ResourceState::UNDEFINED,
-            depthStage);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::UNDEFINED,
@@ -149,10 +157,6 @@ namespace lysa {
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
         }
         commandList.endRendering();
-        commandList.barrier(
-            depthAttachment,
-            depthStage,
-            vireo::ResourceState::UNDEFINED);
         commandList.barrier(
             colorAttachment,
             vireo::ResourceState::RENDER_TARGET_COLOR,

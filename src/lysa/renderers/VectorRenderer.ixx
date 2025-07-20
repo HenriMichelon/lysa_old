@@ -22,7 +22,9 @@ export namespace lysa {
             bool depthTestEnable,
             const RenderingConfiguration& renderingConfiguration,
             const std::wstring& name,
-            const std::wstring& shadersName = L"vector");
+            const std::wstring& shadersName = L"vector",
+            bool filledTriangles = false,
+            bool enableAlphaBlending = false);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
@@ -41,6 +43,12 @@ export namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             uint32 frameIndex);
 
+        void render(
+            vireo::CommandList& commandList,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
+            uint32 frameIndex);
+
         virtual ~VectorRenderer() = default;
         VectorRenderer(VectorRenderer&) = delete;
         VectorRenderer& operator=(VectorRenderer&) = delete;
@@ -50,8 +58,8 @@ export namespace lysa {
             alignas(16) float3 position;
             alignas(16) float2 uv;
             alignas(16) float4 color;
-            alignas(16) float2 uvClip{};
-            alignas(16) int textureIndex{-1};
+            alignas(16) float2 uvClip;
+            alignas(16) int textureIndex;
         };
 
         const RenderingConfiguration& config;
@@ -80,11 +88,11 @@ export namespace lysa {
             {"TEXCOORD", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uv)},
             {"COLOR", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)},
             {"CLIP", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uvClip)},
-            {"TEXTURE", vireo::AttributeFormat::R32_FLOAT, offsetof(Vertex, textureIndex)},
+            {"TEXTURE", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, textureIndex)},
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
-            .colorBlendDesc = {{ .blendEnable = false }},
+            .colorBlendDesc = {{ }},
             .cullMode = vireo::CullMode::NONE,
         };
 

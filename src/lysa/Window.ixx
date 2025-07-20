@@ -19,6 +19,7 @@ import lysa.viewport;
 import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.renderers.renderer;
+import lysa.renderers.ui;
 
 export namespace lysa {
     /**
@@ -48,6 +49,8 @@ export namespace lysa {
         auto& getViewports() const { return viewports; }
 
         auto& getRenderer() const { return *renderer; }
+
+        auto& getUIRenderer() { return uiRenderer; }
 
         void waitIdle() const;
 
@@ -114,20 +117,21 @@ export namespace lysa {
         bool stopped{false};
 
         // Per frame data
-        std::vector<FrameData>                 framesData;
-        std::mutex                             frameDataMutex;
+        std::vector<FrameData> framesData;
+        std::mutex frameDataMutex;
         // Swap chain for this surface
-        std::shared_ptr<vireo::SwapChain>      swapChain{nullptr};
+        std::shared_ptr<vireo::SwapChain> swapChain{nullptr};
         // Scene renderer
-        std::unique_ptr<Renderer>              renderer;
+        std::unique_ptr<Renderer> renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
+        UIRenderer uiRenderer;
 
         void* createWindow();
 
         friend class Application;
         friend class Input;
 
-        void update() const;
+        void update();
 
         void drawFrame();
 

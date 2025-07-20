@@ -27,7 +27,8 @@ namespace lysa {
             Application::getGraphicQueue(),
             windowHandle,
             config.renderingConfig.presentMode,
-            config.renderingConfig.framesInFlight)} {
+            config.renderingConfig.framesInFlight)},
+        uiRenderer{config.renderingConfig} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
         auto& vireo = Application::getVireo();
@@ -53,6 +54,7 @@ namespace lysa {
             frame.preRenderCommandList->end();
             Application::getGraphicQueue()->submit({frame.preRenderCommandList});
             Application::getGraphicQueue()->waitIdle();
+            uiRenderer.resize(swapChain->getExtent());
         }
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
@@ -93,7 +95,7 @@ namespace lysa {
         renderer->updatePipelines(pipelineIds);
     }
 
-    void Window::update() const {
+    void Window::update() {
         if (stopped) { return; }
         const auto frameIndex = swapChain->getCurrentFrameIndex();
         for (const auto& viewport : viewports) {
@@ -147,6 +149,7 @@ namespace lysa {
             renderer->preRender(*frame.preRenderCommandList, scene, frameIndex);
             viewport->updateDebug(*frame.preRenderCommandList, frameIndex);
         }
+        uiRenderer.update(*frame.preRenderCommandList, frameIndex);
         frame.preRenderCommandList->end();
         Application::getGraphicQueue()->submit(
             frame.computeSemaphore,
@@ -181,6 +184,11 @@ namespace lysa {
                 renderer->getDepthRenderTarget(frameIndex),
                 frameIndex);
         }
+        uiRenderer.render(
+            *commandList,
+            colorAttachment,
+            renderer->getDepthRenderTarget(frameIndex),
+            frameIndex);
 
         commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
         commandList->barrier(swapChain, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
@@ -216,6 +224,7 @@ namespace lysa {
             Application::getGraphicQueue()->submit({frame.preRenderCommandList});
             Application::getGraphicQueue()->waitIdle();
         }
+        uiRenderer.resize(newExtent);
     }
 
     void Window::waitIdle() const {

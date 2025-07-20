@@ -8,7 +8,7 @@
 struct VertexInput {
     float3 position : POSITION;
     float2 uv       : TEXCOORD;
-    float3 color    : COLOR;
+    float4 color    : COLOR;
     float2 uvClip   : CLIP;
     int textureIndex: TEXTURE;
 };
@@ -16,7 +16,7 @@ struct VertexInput {
 struct VertexOutput {
     float4 position : SV_POSITION;
     float2 uv       : TEXCOORD;
-    float3 color    : COLOR;
+    float4 color    : COLOR;
     nointerpolation float2 uvClip    : CLIP;
     nointerpolation int textureIndex : TEXTURE;
 };
@@ -34,11 +34,11 @@ VertexOutput vertexMain(VertexInput input) {
 
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
     if (input.textureIndex == -1) {
-        return float4(input.color, 1.0);
+        return input.color;
     } else {
         if ((input.uv.x > input.uvClip.x) || (input.uv.y < input.uvClip.y)) {
             discard;
         }
-        return float4(input.color, 1.0);
+        return input.color;
     }
 }
