@@ -63,6 +63,8 @@ export namespace lysa {
 
     std::wstring to_wstring(const std::string& str);
 
+    std::u32string to_utf32(const std::string& utf8);
+
     std::wstring to_lower(const std::wstring& str);
 
     std::string to_lower(const std::string& str);

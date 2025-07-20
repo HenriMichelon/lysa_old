@@ -29,7 +29,7 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
         }
         input.uv.y = 1.0 - input.uv.y;
         float4 color = textures[input.textureIndex].Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
-        return float4(input.color.rgb + color.rgb, min(color.a, input.color.a));
+        return float4(input.color.rgb * color.rgb, min(color.a, input.color.a));
         //return float4(input.uv.x, input.uv.y, 0.0, 1.0);
     }
 }

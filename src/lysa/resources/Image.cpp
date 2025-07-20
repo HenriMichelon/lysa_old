@@ -21,22 +21,19 @@ namespace lysa {
         index{Application::getResources().addTexture(*this)} {
     }
 
-    std::shared_ptr<Image> Image::load(
-        const std::wstring &filepath,
-        const vireo::ImageFormat imageFormat) {
-        uint32 texWidth, texHeight;
-        uint64 imageSize;
-        auto *pixels = VirtualFS::loadRGBAImage(filepath, texWidth, texHeight, imageSize);
-        if (!pixels) { throw Exception("failed to load texture image ", lysa::to_string(filepath)); }
-
+    std::shared_ptr<Image> Image::create(
+        const void* data,
+        const uint32 width, const uint32 height,
+        const vireo::ImageFormat imageFormat,
+        const std::wstring& name) {
         const auto& vireo = Application::getVireo();
-        const auto image = vireo.createImage(imageFormat, texWidth, texHeight, 1, 1, filepath);
+        const auto image = vireo.createImage(imageFormat, width, height, 1, 1, name);
 
         const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = commandAllocator->createCommandList();
         commandList->begin();
         commandList->barrier(image, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
-        commandList->upload(image, pixels);
+        commandList->upload(image, data);
         commandList->barrier(image, vireo::ResourceState::COPY_DST, vireo::ResourceState::SHADER_READ);
         commandList->end();
 
@@ -44,8 +41,19 @@ namespace lysa {
         graphicQueue->submit({commandList});
         graphicQueue->waitIdle();
 
+        return std::make_shared<Image>(image, name);
+    }
+
+    std::shared_ptr<Image> Image::load(
+        const std::wstring &filepath,
+        const vireo::ImageFormat imageFormat) {
+        uint32 texWidth, texHeight;
+        uint64 imageSize;
+        auto *pixels = VirtualFS::loadRGBAImage(filepath, texWidth, texHeight, imageSize);
+        if (!pixels) { throw Exception("failed to load texture image ", lysa::to_string(filepath)); }
+        auto image = create(pixels, texWidth, texHeight, imageFormat, filepath);
         VirtualFS::destroyImage(pixels);
-        return std::make_shared<Image>(image, filepath);
+        return image;
     }
 
     void Image::save(const std::wstring& filepath) const {

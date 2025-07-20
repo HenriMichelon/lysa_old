@@ -55,10 +55,11 @@ export namespace lysa {
          * Load a bitmap from memory.<br>
          * Support JPEG & PNG formats.
          */
-        static std::shared_ptr<Image> load(
+        static std::shared_ptr<Image> create(
             const void* data,
-            uint64 dataSize,
-            vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
+            uint32 width, uint32 height,
+            vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB,
+            const std::wstring& name = L"Image");
 
         ~Image() override = default;
 

@@ -33,6 +33,8 @@ export namespace lysa {
 
         void removeWindow(Window* window);
 
+        auto& getMainWindow() const { return *windows.front(); }
+
         void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const;
 
         void run();

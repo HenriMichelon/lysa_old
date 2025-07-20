@@ -59,6 +59,7 @@ export import lysa.renderers.ui;
 export import lysa.resources.animation;
 export import lysa.resources.animation_library;
 export import lysa.resources.convex_hull_shape;
+export import lysa.resources.font;
 export import lysa.resources.image;
 export import lysa.resources.material;
 export import lysa.resources.mesh;

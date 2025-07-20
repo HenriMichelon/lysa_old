@@ -125,6 +125,7 @@ export namespace lysa {
         std::unique_ptr<Renderer> renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
         UIRenderer uiRenderer;
+        std::shared_ptr<Node> rootNode;
 
         void* createWindow();
 
@@ -145,6 +146,8 @@ export namespace lysa {
         void input(InputEvent &inputEvent) const;
 
         void resize();
+
+        void ready();
 
 #ifdef _WIN32
         struct MonitorEnumData {

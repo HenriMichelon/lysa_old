@@ -48,13 +48,75 @@ namespace lysa {
     }
 
     std::string to_string(const std::wstring& wstr) {
+#ifdef _WIN32
+        if (wstr.empty()) return {};
+        const int size_needed = WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            wstr.data(),
+            static_cast<int>(wstr.size()),
+            nullptr, 0, nullptr, nullptr);
+        std::string result(size_needed, 0);
+        WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            wstr.data(),
+            static_cast<int>(wstr.size()),
+            result.data(), size_needed,
+            nullptr, nullptr);
+        return result;
+#else
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         return conv.to_bytes(wstr);
+#endif
     }
 
     std::wstring to_wstring(const std::string &str) {
+#ifdef _WIN32
+        const int size_needed = MultiByteToWideChar(
+            CP_UTF8,
+            0,
+            str.data(),
+            static_cast<int>(str.size()), nullptr, 0);
+        std::wstring result(size_needed, 0);
+        MultiByteToWideChar(
+            CP_UTF8,
+            0,
+            str.data(),
+            static_cast<int>(str.size()),
+            result.data(), size_needed);
+        return result;
+#else
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
         return conv.from_bytes(str);
+#endif
+    }
+
+    std::u32string to_utf32(const std::string& utf8) {
+        std::u32string result;
+        size_t i = 0;
+        while (i < utf8.size()) {
+            uint32 cp = 0;
+            unsigned char c = utf8[i];
+            if (c <= 0x7F) {
+                cp = c;
+                i += 1;
+            } else if ((c & 0xE0) == 0xC0) {
+                cp = ((c & 0x1F) << 6) | (utf8[i+1] & 0x3F);
+                i += 2;
+            } else if ((c & 0xF0) == 0xE0) {
+                cp = ((c & 0x0F) << 12) | ((utf8[i+1] & 0x3F) << 6) | (utf8[i+2] & 0x3F);
+                i += 3;
+            } else if ((c & 0xF8) == 0xF0) {
+                cp = ((c & 0x07) << 18) | ((utf8[i+1] & 0x3F) << 12) | ((utf8[i+2] & 0x3F) << 6) | (utf8[i+3] & 0x3F);
+                i += 4;
+            } else {
+                ++i;
+                continue;
+            }
+            result.push_back(cp);
+        }
+        return result;
     }
 
     std::vector<std::string_view> split(const std::string_view str, const char delimiter) {

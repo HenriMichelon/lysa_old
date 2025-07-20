@@ -85,6 +85,24 @@ namespace lysa {
         vertexBufferDirty = true;
     }
 
+    void UIRenderer::drawText(
+        const std::string& text,
+        Font& font,
+        const ui::Rect& rect,
+        const float clipWidth,
+        const float clipHeight) {
+        drawText(text, font, rect.x, rect.y, rect.width, rect.height, clipWidth, clipHeight);
+    }
+
+    void UIRenderer::drawText(
+        const std::string& text,
+        Font& font,
+        const float x, const float y,
+        const float w, const float  h,
+        const float clipWidth, const float clipHeight) {
+        drawFilledRect(x, y, w, h, clipWidth, clipHeight, font.renderToImage(text));
+    }
+
     void UIRenderer::resize(const vireo::Extent& extent) {
         vectorExtent = {(extent.width * 1000.0f) / extent.height, 1000.0f};
         vectorRatio = vectorExtent.x / vectorExtent.y;

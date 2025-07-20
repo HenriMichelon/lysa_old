@@ -83,34 +83,34 @@ set(HLSLPP_SRC_DIR ${DEPENDS_SRC_DIR}/${HLSLPP_TARGET})
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
-#        "${SHADERS_SRC_DIR}/default.vert.slang"
-#        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
-#        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
-#        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
-#        "${SHADERS_SRC_DIR}/quad.vert.slang"
+        "${SHADERS_SRC_DIR}/default.vert.slang"
+        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
+        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
+        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
+        "${SHADERS_SRC_DIR}/quad.vert.slang"
         "${SHADERS_SRC_DIR}/vector.slang"
         "${SHADERS_SRC_DIR}/vector_ui.slang"
-#        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
-#        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
-#        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/smaa_edge_detect.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/smaa_blend_weight.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/smaa_neighborhood_blend.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
-#        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
-#        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
+        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
+        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/smaa_edge_detect.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/smaa_blend_weight.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/smaa_neighborhood_blend.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
+        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
+        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES})
 
@@ -225,6 +225,7 @@ add_library(${LYSA_TARGET} STATIC
 
         ${ENGINE_SRC_DIR}/resources/Animation.cpp
         ${ENGINE_SRC_DIR}/resources/ConvexHullShape.cpp
+        ${ENGINE_SRC_DIR}/resources/Font.cpp
         ${ENGINE_SRC_DIR}/resources/Image.cpp
         ${ENGINE_SRC_DIR}/resources/Material.cpp
         ${ENGINE_SRC_DIR}/resources/Mesh.cpp
@@ -315,6 +316,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/resources/Animation.ixx
         ${ENGINE_SRC_DIR}/resources/AnimationLibrary.ixx
         ${ENGINE_SRC_DIR}/resources/ConvexHullShape.ixx
+        ${ENGINE_SRC_DIR}/resources/Font.ixx
         ${ENGINE_SRC_DIR}/resources/Image.ixx
         ${ENGINE_SRC_DIR}/resources/Material.ixx
         ${ENGINE_SRC_DIR}/resources/Mesh.ixx

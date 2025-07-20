@@ -28,7 +28,8 @@ namespace lysa {
             windowHandle,
             config.renderingConfig.presentMode,
             config.renderingConfig.framesInFlight)},
-        uiRenderer{config.renderingConfig} {
+        uiRenderer{config.renderingConfig},
+        rootNode{rootNode} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
         auto& vireo = Application::getVireo();
@@ -46,16 +47,17 @@ namespace lysa {
         } else {
             renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferrer Renderer");
         }
-        {
-            const auto& frame = framesData[0];
-            frame.commandAllocator->reset();
-            frame.preRenderCommandList->begin();
-            renderer->resize(swapChain->getExtent(), frame.preRenderCommandList);
-            frame.preRenderCommandList->end();
-            Application::getGraphicQueue()->submit({frame.preRenderCommandList});
-            Application::getGraphicQueue()->waitIdle();
-            uiRenderer.resize(swapChain->getExtent());
-        }
+        const auto& frame = framesData[0];
+        frame.commandAllocator->reset();
+        frame.preRenderCommandList->begin();
+        renderer->resize(swapChain->getExtent(), frame.preRenderCommandList);
+        frame.preRenderCommandList->end();
+        Application::getGraphicQueue()->submit({frame.preRenderCommandList});
+        Application::getGraphicQueue()->waitIdle();
+        uiRenderer.resize(swapChain->getExtent());
+    }
+
+    void Window::ready() {
         const auto viewport = std::make_shared<Viewport>(config.mainViewportConfig);
         addViewport(viewport);
         viewport->setRootNode(rootNode);
@@ -64,6 +66,7 @@ namespace lysa {
 
     Window::~Window() {
         stopped = true;
+        rootNode.reset();
         swapChain->waitIdle();
         framesData.clear();
         renderer.reset();

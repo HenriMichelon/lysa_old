@@ -120,6 +120,7 @@ namespace lysa {
                 stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, name + L" vertices staging");
                 stagingBuffer->map();
                 vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, name + L" vertices");
+                // commandList.barrier(*vertexBuffer, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
             }
             if (vertexBufferDirty) {
                 // Push new vertices data to GPU memory

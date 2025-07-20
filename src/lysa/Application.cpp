@@ -77,6 +77,7 @@ namespace lysa {
         graphicQueue->waitIdle();
         window->mainWindow = windows.empty();
         windows.push_back(window);
+        window->ready();
     }
 
     void Application::removeWindow(Window* window) {
