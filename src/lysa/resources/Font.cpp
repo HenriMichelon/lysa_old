@@ -102,6 +102,25 @@ namespace lysa {
 
 #ifdef __STB_INCLUDE_STB_TRUETYPE_H__
 
+    float Font::getLineHeight() const {
+        return static_cast<float>(ascent - descent + lineGap);
+    }
+
+    int Font::getMaxHeight(const stbtt_fontinfo* font, const float scale) {
+        static auto letters =
+            "ǾabcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~éèàùôûïÂÄÔÖÛÜç€";
+        int maxHeight = 0;
+        for (int i = 0; letters[i]; ++i) {
+            int x0, y0, x1, y1;
+            stbtt_GetCodepointBitmapBox(font, letters[i], scale, scale, &x0, &y0, &x1, &y1);
+            const auto h = y1 - y0;
+            if (h > maxHeight) {
+                maxHeight = h;
+            }
+        }
+        return maxHeight;
+    }
+
     Font::Font(const std::wstring &path, const uint32 size, Window* window) :
         Resource{path},
         path{path},
@@ -117,9 +136,10 @@ namespace lysa {
             throw Exception("Failed to initialize font", lysa::to_string(path));
         }
         auto targetHeight = size * this->window->getExtent().height / VECTOR_SCREEN_SIZE;
-        scale = stbtt_ScaleForPixelHeight  (&font, targetHeight);
-
+        scale = stbtt_ScaleForMappingEmToPixels (&font, targetHeight);
         stbtt_GetFontVMetrics(&font, &ascent, &descent, &lineGap);
+        height = getMaxHeight(&font, scale);
+        scale = scale * (targetHeight / height);
         height = static_cast<int>(ceilf((ascent - descent) * scale));
         //INFO("Font size : ", size , "->", targetHeight, "=", height, "(", scale, ")");
         ascent  = static_cast<int>(ascent * scale);
@@ -138,13 +158,16 @@ namespace lysa {
             c,
             &width, &height,
             nullptr, nullptr);
+        assert(height <= this->height);
         cachedCharacter.width = width;
-        cachedCharacter.height = this->height;
-        cachedCharacter.bitmap = std::make_unique<std::vector<uint32>>(cachedCharacter.width * cachedCharacter.height, 0);
+        cachedCharacter.height = height;
+        cachedCharacter.bitmap = std::make_unique<std::vector<uint32>>(
+            cachedCharacter.width *
+            cachedCharacter.height, 0);
 
         int x1, y1, x2, y2;
         stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
-        cachedCharacter.yBearing = cachedCharacter.height - (ascent + y1);
+        cachedCharacter.yBearing = -y1;
 
         const auto dstBitmap = cachedCharacter.bitmap->data();
         for (int y = 0; y < height; ++y) {
@@ -153,16 +176,18 @@ namespace lysa {
                 if (gray != 0) {
                     dstBitmap[y * cachedCharacter.width + x] =
                         (gray << 24) | (gray << 16) | (gray << 8) | gray;
+                } else {
+                    dstBitmap[y * cachedCharacter.width + x] = 0xffff;
                 }
             }
         }
-        // const std::string t = std::format("{}.png", c);
+        // const std::string t = std::format("f.png", c);
         // stbi_write_png(t.c_str(),
-        //        width,
-        //        height,
-        //        4,
-        //        dstBitmap,
-        //        width * 4);
+        // width,
+        // height,
+        // 4,
+        // dstBitmap,
+        // width * 4);
         stbtt_FreeBitmap(srcBitmap, nullptr);
     }
 

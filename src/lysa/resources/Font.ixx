@@ -47,11 +47,11 @@ export namespace lysa {
          *  Renders a string into an RGBA bitmap (stored in CPU memory).
          *  Glyphs are white with alpha channel mapped to the glyphs geometry
          *   @param text : text to render
-         *   @param wwidth : width of the resulting bitmap
-         *   @param hheight : height of the resulting bitmap
+         *   @param width : width of the resulting bitmap
+         *   @param height : height of the resulting bitmap
          *   @return 32 bits RGBA bitmap stored in CPU memory
         */
-        std::vector<uint32> renderToBitmap(const std::string &text, float &wwidth, float &hheight);
+        std::vector<uint32> renderToBitmap(const std::string &text, float& width, float& height);
 
         std::shared_ptr<Image> renderToImage(const std::string &text);
 
@@ -64,6 +64,8 @@ export namespace lysa {
          * Returns the font height in pixels (NOT scaled size, but the size given to the Font constructor)
          */
         auto getFontSize() const { return size; }
+
+        float getLineHeight() const;
 
     private:
         // Already rendered characters stored in a cache
@@ -99,6 +101,8 @@ export namespace lysa {
         int height;
         stbtt_fontinfo font;
         std::unique_ptr<std::vector<unsigned char>> fontBuffer;
+
+        static int getMaxHeight(const stbtt_fontinfo* font, float scale);
 #endif
     };
 
