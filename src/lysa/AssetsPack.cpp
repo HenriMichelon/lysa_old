@@ -8,9 +8,10 @@ module lysa.assets_pack;
 
 import vireo;
 import lysa.application;
-import lysa.virtual_fs;
+import lysa.exception;
 import lysa.log;
 import lysa.types;
+import lysa.virtual_fs;
 import lysa.nodes.animation_player;
 import lysa.nodes.mesh_instance;
 import lysa.resources.animation;

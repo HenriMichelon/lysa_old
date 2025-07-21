@@ -9,7 +9,8 @@ module;
 module lysa.loader;
 
 import lysa.assets_pack;
-import lysa.global;
+import lysa.constants;
+import lysa.exception;
 import lysa.log;
 import lysa.type_registry;
 import lysa.virtual_fs;

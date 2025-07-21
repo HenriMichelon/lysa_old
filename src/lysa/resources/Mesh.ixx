@@ -8,8 +8,10 @@ export module lysa.resources.mesh;
 
 import vireo;
 import lysa.aabb;
-import lysa.global;
+import lysa.exception;
+import lysa.math;
 import lysa.memory;
+import lysa.types;
 import lysa.resources.material;
 import lysa.resources.resource;
 

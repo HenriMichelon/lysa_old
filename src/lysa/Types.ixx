@@ -6,7 +6,7 @@
 */
 export module lysa.types;
 
-import std;
+export import std;
 
 export namespace lysa {
 

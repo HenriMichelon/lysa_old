@@ -6,7 +6,10 @@
 */
 export module lysa.input_event;
 
-import lysa.global;
+import lysa.enums;
+import lysa.math;
+import lysa.object;
+import lysa.types;
 
 export namespace lysa {
 

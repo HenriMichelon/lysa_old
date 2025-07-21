@@ -7,7 +7,10 @@
 export module lysa.configuration;
 
 import vireo;
-import lysa.global;
+import lysa.constants;
+import lysa.enums;
+import lysa.math;
+import lysa.types;
 import lysa.physics.configuration;
 
 export namespace lysa {

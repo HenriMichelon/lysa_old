@@ -6,7 +6,8 @@
 */
 module lysa.nodes.animation_player;
 
-import lysa.global;
+import lysa.enums;
+import lysa.exception;
 
 namespace lysa {
 

@@ -7,7 +7,7 @@
 module lysa.frustum;
 
 import lysa.aabb;
-import lysa.global;
+import lysa.types;
 
 namespace lysa {
     

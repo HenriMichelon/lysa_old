@@ -8,9 +8,10 @@ export module lysa.viewport;
 
 import vireo;
 import lysa.configuration;
-import lysa.global;
+import lysa.exception;
 import lysa.input_event;
 import lysa.scene;
+import lysa.types;
 import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.physics.engine;

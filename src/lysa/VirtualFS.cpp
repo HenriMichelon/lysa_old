@@ -11,6 +11,7 @@ module;
 module lysa.virtual_fs;
 
 import lysa.application;
+import lysa.exception;
 
 namespace lysa {
 

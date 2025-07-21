@@ -7,8 +7,10 @@
 export module lysa.nodes.node;
 
 import std;
-import lysa.global;
+import lysa.enums;
 import lysa.input_event;
+import lysa.object;
+import lysa.math;
 import lysa.tween;
 
 export namespace lysa {

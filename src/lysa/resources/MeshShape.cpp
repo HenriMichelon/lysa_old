@@ -6,7 +6,7 @@
 */
 module lysa.resources.mesh_shape;
 
-import lysa.global;
+import lysa.exception;
 import lysa.nodes.mesh_instance;
 
 namespace lysa {

@@ -12,6 +12,8 @@ module lysa.resources.font;
 
 import vireo;
 import lysa.application;
+import lysa.constants;
+import lysa.exception;
 import lysa.global;
 import lysa.log;
 import lysa.virtual_fs;

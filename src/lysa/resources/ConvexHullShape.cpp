@@ -6,9 +6,8 @@
 */
 module lysa.resources.convex_hull_shape;
 
+import lysa.exception;
 import lysa.resources.resource;
-
-import lysa.global;
 
 namespace lysa {
 

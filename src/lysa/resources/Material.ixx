@@ -6,10 +6,12 @@
 */
 export module lysa.resources.material;
 
-import std;
 import vireo;
-import lysa.global;
+import lysa.constants;
+import lysa.enums;
+import lysa.math;
 import lysa.memory;
+import lysa.types;
 import lysa.resources.resource;
 import lysa.resources.texture;
 

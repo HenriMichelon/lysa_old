@@ -6,6 +6,8 @@
 */
 module lysa.nodes.light;
 
+import lysa.global;
+
 namespace lysa {
 
     Light::Light(const std::string &nodeName, const Type type) :

@@ -14,6 +14,10 @@ module;
 #include "mappings.h"
 module lysa.input;
 
+import lysa.constants;
+import lysa.exception;
+import lysa.global;
+
 namespace lysa {
 
     bool        Input::useXInput{false};

@@ -6,8 +6,8 @@
 */
 export module lysa.resources.resource;
 
-import std;
-import lysa.global;
+import lysa.object;
+import lysa.types;
 
 export namespace lysa {
 
@@ -41,7 +41,7 @@ export namespace lysa {
         virtual std::shared_ptr<Resource> duplicate() const;
 
     private:
-        unique_id          id;
+        unique_id id;
         static unique_id   currentId;
         const std::string name;
     };

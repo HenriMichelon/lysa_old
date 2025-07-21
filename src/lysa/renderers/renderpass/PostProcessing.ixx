@@ -6,11 +6,11 @@
 */
 export module lysa.renderers.renderpass.post_processing;
 
-import std;
 import vireo;
-import lysa.global;
 import lysa.configuration;
+import lysa.math;
 import lysa.scene;
+import lysa.types;
 import lysa.renderers.renderpass;
 
 export namespace lysa {

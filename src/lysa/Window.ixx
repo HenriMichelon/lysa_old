@@ -11,10 +11,12 @@ module;
 export module lysa.window;
 
 import vireo;
-import lysa.global;
 import lysa.configuration;
+import lysa.enums;
 import lysa.input_event;
+import lysa.math;
 import lysa.memory;
+import lysa.types;
 import lysa.viewport;
 import lysa.nodes.node;
 import lysa.resources.material;

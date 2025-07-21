@@ -8,11 +8,11 @@ module;
 #include <cstdlib>
 export module lysa.renderers.vector;
 
-import std;
 import vireo;
-import lysa.global;
 import lysa.configuration;
+import lysa.math;
 import lysa.scene;
+import lysa.types;
 import lysa.resources.image;
 
 export namespace lysa {

@@ -6,7 +6,8 @@
 */
 export module lysa.resources.static_compound_shape;
 
-import lysa.global;
+import lysa.math;
+import lysa.types;
 import lysa.resources.shape;
 
 export namespace lysa {

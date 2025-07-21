@@ -10,7 +10,7 @@ module;
 module lysa.log;
 
 import lysa.application;
-import lysa.global;
+import lysa.exception;
 
 namespace lysa {
 

@@ -6,6 +6,8 @@
 */
 module lysa.nodes.node;
 
+import lysa.constants;
+import lysa.exception;
 import lysa.global;
 import lysa.log;
 import lysa.viewport;

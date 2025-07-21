@@ -6,7 +6,7 @@
 module lysa.samplers;
 
 import lysa.application;
-import lysa.global;
+import lysa.exception;
 
 namespace lysa {
 

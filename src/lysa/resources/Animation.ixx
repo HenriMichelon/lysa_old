@@ -6,7 +6,9 @@
 */
 export module lysa.resources.animation;
 
-import lysa.global;
+import lysa.enums;
+import lysa.math;
+import lysa.types;
 import lysa.nodes.node;
 import lysa.resources.resource;
 
@@ -79,7 +81,7 @@ export namespace lysa {
         auto& getTrack(const uint32 index) { return tracks.at(index); }
 
         /**
-         * Returns the interpolated value at the given time (in seconds, from start of the animation) for a track.
+         * Returns the interpolated value at the given time (in seconds, from the start of the animation) for a track.
          */
         TrackKeyValue getInterpolatedValue(uint32 trackIndex, double currentTimeFromStart, bool reverse=false) const;
 

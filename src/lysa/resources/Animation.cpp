@@ -6,6 +6,7 @@
 */
 module lysa.resources.animation;
 
+import lysa.exception;
 import lysa.log;
 
 namespace lysa {

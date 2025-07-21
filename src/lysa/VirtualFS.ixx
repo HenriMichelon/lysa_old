@@ -7,7 +7,7 @@
 export module lysa.virtual_fs;
 
 import vireo;
-import lysa.global;
+import lysa.types;
 
 export namespace lysa {
 

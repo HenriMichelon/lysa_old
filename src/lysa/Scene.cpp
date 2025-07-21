@@ -8,6 +8,7 @@ module lysa.scene;
 
 import vireo;
 import lysa.application;
+import lysa.exception;
 import lysa.log;
 import lysa.viewport;
 import lysa.window;

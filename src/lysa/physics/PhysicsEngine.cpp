@@ -6,7 +6,7 @@
 */
 module lysa.physics.engine;
 
-import lysa.global;
+import lysa.exception;
 #ifdef PHYSIC_ENGINE_JOLT
 import lysa.physics.jolt.engine;
 #endif

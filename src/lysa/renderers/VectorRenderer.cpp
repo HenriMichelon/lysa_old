@@ -7,6 +7,7 @@
 module lysa.renderers.vector;
 
 import lysa.application;
+import lysa.exception;
 import lysa.virtual_fs;
 
 namespace lysa {

@@ -6,6 +6,7 @@
 */
 module lysa.nodes.collision_area;
 
+import lysa.exception;
 import lysa.global;
 import lysa.nodes.mesh_instance;
 import lysa.nodes.node;

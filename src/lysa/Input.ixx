@@ -12,8 +12,10 @@ module;
 #endif
 export module lysa.input;
 
-import lysa.global;
+import lysa.enums;
 import lysa.input_event;
+import lysa.math;
+import lysa.types;
 import lysa.window;
 
 export namespace lysa {

@@ -7,7 +7,8 @@
 module lysa.renderers.renderpass.shadow_map_pass;
 
 import lysa.application;
-import lysa.global;
+import lysa.constants;
+import lysa.exception;
 import lysa.log;
 import lysa.resources;
 import lysa.samplers;

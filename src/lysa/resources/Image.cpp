@@ -10,6 +10,7 @@ module;
 module lysa.resources.image;
 
 import lysa.application;
+import lysa.exception;
 import lysa.log;
 import lysa.virtual_fs;
 

@@ -7,10 +7,10 @@
 export module lysa.resources;
 
 import vireo;
-import lysa.global;
 import lysa.configuration;
 import lysa.memory;
 import lysa.samplers;
+import lysa.types;
 import lysa.resources.image;
 import lysa.resources.mesh;
 

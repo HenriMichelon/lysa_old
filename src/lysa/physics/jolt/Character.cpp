@@ -11,7 +11,7 @@ module;
 module lysa.nodes.character;
 
 import lysa.application;
-import lysa.global;
+import lysa.exception;
 import lysa.log;
 import lysa.viewport;
 import lysa.nodes.node;

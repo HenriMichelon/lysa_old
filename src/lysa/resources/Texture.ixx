@@ -8,7 +8,7 @@ export module lysa.resources.texture;
 
 import std;
 import vireo;
-import lysa.global;
+import lysa.math;
 import lysa.resources.resource;
 import lysa.resources.image;
 

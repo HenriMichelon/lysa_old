@@ -9,6 +9,7 @@ module;
 module lysa.window;
 
 import lysa.application;
+import lysa.exception;
 import lysa.input;
 
 namespace lysa {

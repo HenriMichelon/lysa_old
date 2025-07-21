@@ -6,7 +6,9 @@
 */
 module lysa.resources.resource;
 
+import lysa.constants;
 import lysa.global;
+import lysa.exception;
 
 namespace lysa {
 

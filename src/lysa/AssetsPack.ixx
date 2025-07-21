@@ -7,7 +7,8 @@
 export module lysa.assets_pack;
 
 import vireo;
-import lysa.global;
+import lysa.math;
+import lysa.types;
 import lysa.nodes.node;
 import lysa.resources.texture;
 

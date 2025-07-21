@@ -6,13 +6,14 @@
 */
 module lysa.nodes.physics_body;
 
+import lysa.exception;
 import lysa.global;
 import lysa.log;
 import lysa.nodes.collision_object;
 import lysa.nodes.mesh_instance;
-import lysa.resources.shape;
 import lysa.resources.convex_hull_shape;
 import lysa.resources.mesh_shape;
+import lysa.resources.shape;
 import lysa.resources.static_compound_shape;
 
 namespace lysa {

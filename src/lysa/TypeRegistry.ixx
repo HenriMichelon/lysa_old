@@ -7,8 +7,8 @@
 export module lysa.type_registry;
 
 import std;
+import lysa.exception;
 import lysa.object;
-import lysa.global;
 
 export namespace lysa {
 

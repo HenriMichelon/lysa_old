@@ -9,6 +9,7 @@ module;
 module lysa.resources;
 
 import lysa.application;
+import lysa.exception;
 import lysa.log;
 import lysa.resources.material;
 

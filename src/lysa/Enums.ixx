@@ -6,7 +6,6 @@
 */
 export module lysa.enums;
 
-import std;
 import lysa.types;
 
 export namespace lysa {

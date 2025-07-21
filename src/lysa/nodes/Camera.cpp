@@ -6,7 +6,7 @@
 */
 module lysa.nodes.camera;
 
-import lysa.global;
+import lysa.exception;
 import lysa.viewport;
 
 namespace lysa {

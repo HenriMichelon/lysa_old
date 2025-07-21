@@ -8,7 +8,7 @@ export module lysa.resources.image;
 
 import std;
 import vireo;
-import lysa.global;
+import lysa.math;
 import lysa.resources.resource;
 
 export namespace lysa {

@@ -7,9 +7,10 @@
 export module lysa.scene;
 
 import vireo;
-import lysa.global;
 import lysa.configuration;
+import lysa.math;
 import lysa.memory;
+import lysa.types;
 import lysa.nodes.camera;
 import lysa.nodes.environment;
 import lysa.nodes.light;

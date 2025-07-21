@@ -268,6 +268,7 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/Configuration.ixx
         ${ENGINE_SRC_DIR}/Constants.ixx
         ${ENGINE_SRC_DIR}/Enums.ixx
+        ${ENGINE_SRC_DIR}/Exception.ixx
         ${ENGINE_SRC_DIR}/Input.ixx
         ${ENGINE_SRC_DIR}/InputEvent.ixx
         ${ENGINE_SRC_DIR}/Frustum.ixx

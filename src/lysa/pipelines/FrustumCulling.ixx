@@ -9,7 +9,9 @@ export module lysa.pipelines.frustum_culling;
 import vireo;
 import lysa.frustum;
 import lysa.global;
+import lysa.math;
 import lysa.memory;
+import lysa.types;
 import lysa.nodes.camera;
 
 export namespace lysa {

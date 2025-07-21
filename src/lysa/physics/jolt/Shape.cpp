@@ -13,7 +13,7 @@ module;
 module lysa.resources.shape;
 
 import lysa.application;
-import lysa.global;
+import lysa.exception;
 import lysa.nodes.mesh_instance;
 import lysa.physics.engine;
 

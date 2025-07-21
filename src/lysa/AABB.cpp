@@ -6,7 +6,7 @@
 */
 module lysa.aabb;
 
-import lysa.global;
+import lysa.math;
 
 namespace lysa {
 

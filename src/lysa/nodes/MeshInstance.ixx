@@ -6,8 +6,8 @@
 */
 export module lysa.nodes.mesh_instance;
 
-import lysa.global;
 import lysa.aabb;
+import lysa.math;
 import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.resources.mesh;

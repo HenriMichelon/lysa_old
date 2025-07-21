@@ -12,7 +12,7 @@ module;
 module lysa.physics.jolt.engine;
 
 import lysa.application;
-import lysa.global;
+import lysa.exception;
 import lysa.log;
 import lysa.nodes.collision_object;
 import lysa.nodes.node;

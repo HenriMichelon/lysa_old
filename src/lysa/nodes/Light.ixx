@@ -6,7 +6,8 @@
 */
 export module lysa.nodes.light;
 
-import lysa.global;
+import lysa.math;
+import lysa.types;
 import lysa.nodes.node;
 
 export namespace lysa {
