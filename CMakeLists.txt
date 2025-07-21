@@ -253,6 +253,16 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.cpp
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.cpp
 
+        ${ENGINE_SRC_DIR}/ui/Button.cpp
+        ${ENGINE_SRC_DIR}/ui/CheckWidget.cpp
+        ${ENGINE_SRC_DIR}/ui/Frame.cpp
+        ${ENGINE_SRC_DIR}/ui/Image.cpp
+        ${ENGINE_SRC_DIR}/ui/Line.cpp
+        ${ENGINE_SRC_DIR}/ui/ScrollBar.cpp
+        ${ENGINE_SRC_DIR}/ui/Text.cpp
+        ${ENGINE_SRC_DIR}/ui/ToggleButton.cpp
+        ${ENGINE_SRC_DIR}/ui/ValueSelect.cpp
+
         ${OS_SRC}
         ${PHYSICS_SRC}
         ${DEPENDS_SRC_DIR}/stb/stb.cpp
@@ -346,7 +356,24 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/renderers/renderpass/SSAOPass.ixx
         ${ENGINE_SRC_DIR}/renderers/renderpass/TransparencyPass.ixx
 
+        ${ENGINE_SRC_DIR}/ui/Box.ixx
+        ${ENGINE_SRC_DIR}/ui/Button.ixx
+        ${ENGINE_SRC_DIR}/ui/CheckWidget.ixx
+        ${ENGINE_SRC_DIR}/ui/Event.ixx
+        ${ENGINE_SRC_DIR}/ui/Frame.ixx
+        ${ENGINE_SRC_DIR}/ui/Image.ixx
+        ${ENGINE_SRC_DIR}/ui/Line.ixx
+        ${ENGINE_SRC_DIR}/ui/Panel.ixx
         ${ENGINE_SRC_DIR}/ui/Rect.ixx
+        ${ENGINE_SRC_DIR}/ui/Resource.ixx
+        ${ENGINE_SRC_DIR}/ui/ScrollBar.ixx
+        ${ENGINE_SRC_DIR}/ui/Style.ixx
+        ${ENGINE_SRC_DIR}/ui/Text.ixx
+        ${ENGINE_SRC_DIR}/ui/ToggleButton.ixx
+        ${ENGINE_SRC_DIR}/ui/ValueSelect.ixx
+        ${ENGINE_SRC_DIR}/ui/Widget.ixx
+        ${ENGINE_SRC_DIR}/ui/Window.ixx
+        ${ENGINE_SRC_DIR}/ui/WindowManager.ixx
 
         ${OS_MODULES}
         ${PHYSICS_MODULES}

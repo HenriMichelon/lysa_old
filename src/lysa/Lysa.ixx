@@ -70,5 +70,23 @@ export import lysa.resources.mesh_shape;
 export import lysa.resources.resource;
 export import lysa.resources.shape;
 export import lysa.resources.static_compound_shape;
-export import lysa.resources.texture;
+
+export import lysa.ui.box;
+export import lysa.ui.button;
+export import lysa.ui.check_widget;
+export import lysa.ui.event;
+export import lysa.ui.frame;
+export import lysa.ui.image;
+export import lysa.ui.line;
+export import lysa.ui.panel;
+export import lysa.ui.rect;
+export import lysa.ui.resource;
+export import lysa.ui.scroll_bar;
+export import lysa.ui.style;
+export import lysa.ui.text;
+export import lysa.ui.toggle_button;
+export import lysa.ui.value_select;
+export import lysa.ui.widget;
+export import lysa.ui.window;
+export import lysa.ui.window_manager;
 
