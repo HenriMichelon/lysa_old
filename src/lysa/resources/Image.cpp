@@ -15,7 +15,7 @@ import lysa.virtual_fs;
 
 namespace lysa {
 
-    Image::Image(const std::shared_ptr<vireo::Image>& image, const std::wstring & name):
+    Image::Image(const std::shared_ptr<vireo::Image>& image, const std::string & name):
         Resource{name},
         image{image},
         index{Application::getResources().addTexture(*this)} {
@@ -25,7 +25,7 @@ namespace lysa {
         const void* data,
         const uint32 width, const uint32 height,
         const vireo::ImageFormat imageFormat,
-        const std::wstring& name) {
+        const std::string& name) {
         const auto& vireo = Application::getVireo();
         const auto image = vireo.createImage(imageFormat, width, height, 1, 1, name);
 
@@ -45,22 +45,22 @@ namespace lysa {
     }
 
     std::shared_ptr<Image> Image::load(
-        const std::wstring &filepath,
+        const std::string &filepath,
         const vireo::ImageFormat imageFormat) {
         uint32 texWidth, texHeight;
         uint64 imageSize;
         auto *pixels = VirtualFS::loadRGBAImage(filepath, texWidth, texHeight, imageSize);
-        if (!pixels) { throw Exception("failed to load texture image ", lysa::to_string(filepath)); }
+        if (!pixels) { throw Exception("failed to load texture image ", filepath); }
         auto image = create(pixels, texWidth, texHeight, imageFormat, filepath);
         VirtualFS::destroyImage(pixels);
         return image;
     }
 
-    void Image::save(const std::wstring& filepath) const {
+    void Image::save(const std::string& filepath) const {
         save(filepath, image);
     }
 
-    void Image::save(const std::wstring& filepath, const std::shared_ptr<vireo::Image>& image) {
+    void Image::save(const std::string& filepath, const std::shared_ptr<vireo::Image>& image) {
         const auto& vireo = Application::getVireo();
         const auto&graphicQueue = Application::getGraphicQueue();
         graphicQueue->waitIdle();
@@ -84,15 +84,15 @@ namespace lysa {
         }
         buffer->unmap();
 
-        if (filepath.ends_with(L".hdr")) {
+        if (filepath.ends_with(".hdr")) {
             const auto floatImage = reinterpret_cast<const float*>(imageData.data());
-            stbi_write_hdr(std::to_string(filepath).c_str(),
+            stbi_write_hdr(filepath.c_str(),
                 image->getWidth(),
                 image->getHeight(),
                 1,
                 floatImage);
-        } else if (filepath.ends_with(L".png")) {
-            stbi_write_png(std::to_string(filepath).c_str(),
+        } else if (filepath.ends_with(".png")) {
+            stbi_write_png(filepath.c_str(),
                 image->getWidth(),
                 image->getHeight(),
                 image->getPixelSize(image->getFormat()),

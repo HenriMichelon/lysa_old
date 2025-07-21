@@ -16,7 +16,7 @@ namespace lysa {
     DepthPrepass::DepthPrepass(
         const RenderingConfiguration& config,
         bool withStencil):
-        Renderpass{config, L"Depth pre-pass"} {
+        Renderpass{config, "Depth pre-pass"} {
         const auto& vireo = Application::getVireo();
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.stencilTestEnable = withStencil;

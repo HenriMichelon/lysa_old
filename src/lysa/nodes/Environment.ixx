@@ -23,7 +23,7 @@ export namespace lysa {
          */
         Environment(
             float4 colorAndIntensity = {1.0f, 1.0f, 1.0f, 1.0f},
-            const std::wstring &nodeName = TypeNames[ENVIRONMENT]);
+            const std::string &nodeName = TypeNames[ENVIRONMENT]);
 
         ~Environment() override = default;
 

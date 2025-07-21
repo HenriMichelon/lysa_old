@@ -14,10 +14,10 @@ namespace lysa {
         vireo{vireo},
         samplers(MAX_SAMPLERS),
         samplersInfo(MAX_SAMPLERS) {
-        descriptorLayout = vireo.createSamplerDescriptorLayout(L"Static Samplers");
+        descriptorLayout = vireo.createSamplerDescriptorLayout("Static Samplers");
         descriptorLayout->add(0, vireo::DescriptorType::SAMPLER, MAX_SAMPLERS);
         descriptorLayout->build();
-        descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Static Samplers");
+        descriptorSet = vireo.createDescriptorSet(descriptorLayout, "Static Samplers");
 
         // Used for frame buffers/screen sample
         addSampler(

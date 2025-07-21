@@ -20,7 +20,7 @@ export namespace lysa {
     public:
         ForwardRenderer(
             const RenderingConfiguration& config,
-            const std::wstring& name);
+            const std::string& name);
 
         void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) override;
 

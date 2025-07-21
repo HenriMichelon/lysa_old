@@ -31,7 +31,7 @@ export namespace lysa {
         Renderer(
             const RenderingConfiguration& config,
             bool withStencil,
-            const std::wstring& name);
+            const std::string& name);
 
         virtual void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList);
 
@@ -76,12 +76,12 @@ export namespace lysa {
             uint32 frameIndex);
 
         void addPostprocessing(
-            const std::wstring& fragShaderName,
+            const std::string& fragShaderName,
             vireo::ImageFormat outputFormat,
             void* data = nullptr,
             uint32 dataSize = 0);
 
-        void removePostprocessing(const std::wstring& fragShaderName);
+        void removePostprocessing(const std::string& fragShaderName);
 
         virtual ~Renderer() = default;
         Renderer(Renderer&) = delete;
@@ -95,7 +95,7 @@ export namespace lysa {
         };
 
         const RenderingConfiguration& config;
-        const std::wstring name;
+        const std::string name;
         const bool withStencil;
 
         virtual void colorPass(

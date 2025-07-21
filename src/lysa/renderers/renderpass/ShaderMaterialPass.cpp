@@ -15,7 +15,7 @@ import lysa.renderers.renderer;
 namespace lysa {
     ShaderMaterialPass::ShaderMaterialPass(
         const RenderingConfiguration& config):
-        Renderpass{config, L"ShaderMaterialPass"} {
+        Renderpass{config, "ShaderMaterialPass"} {
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat);
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.resources = Application::getVireo().createPipelineResources({
@@ -39,8 +39,8 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
-                std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
-                std::wstring fragShaderName = DEFAULT_FRAGMENT_SHADER;
+                std::string vertShaderName = DEFAULT_VERTEX_SHADER;
+                std::string fragShaderName = DEFAULT_FRAGMENT_SHADER;
                 if (material->getType() == Material::SHADER) {
                     const auto& shaderMaterial = std::dynamic_pointer_cast<const ShaderMaterial>(material);
                     if (!shaderMaterial->getVertFileName().empty()) {

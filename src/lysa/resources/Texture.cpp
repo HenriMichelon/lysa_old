@@ -10,7 +10,7 @@ import lysa.application;
 
 namespace lysa {
 
-    Texture::Texture(const std::wstring &name):
+    Texture::Texture(const std::string &name):
         Resource{name} {
     }
 

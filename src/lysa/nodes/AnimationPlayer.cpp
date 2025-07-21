@@ -88,14 +88,14 @@ namespace lysa {
     }
 
 
-    void AnimationPlayer::setCurrentLibrary(const std::wstring &name) {
+    void AnimationPlayer::setCurrentLibrary(const std::string &name) {
         if (libraries.contains(name)) {
             currentLibrary = name;
             setCurrentAnimation(libraries[currentLibrary]->getDefault());
         }
     }
 
-    void AnimationPlayer::setCurrentAnimation(const std::wstring &name) {
+    void AnimationPlayer::setCurrentAnimation(const std::string &name) {
         if (libraries[currentLibrary]->has(name)) {
             currentAnimation = name;
             if (currentTracksState.size() != getAnimation()->getTracksCount()) {
@@ -106,7 +106,7 @@ namespace lysa {
         }
     }
 
-    void AnimationPlayer::play(const std::wstring &name) {
+    void AnimationPlayer::play(const std::string &name) {
         if (playing) { return; }
         if (name.empty()) {
             setCurrentAnimation(libraries[currentLibrary]->getDefault());
@@ -117,7 +117,7 @@ namespace lysa {
         reverse = false;
     }
 
-    void AnimationPlayer::playBackwards(const std::wstring &name) {
+    void AnimationPlayer::playBackwards(const std::string &name) {
         if (playing) { return; }
         play(name);
         reverse = true;

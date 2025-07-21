@@ -8,12 +8,12 @@ module lysa.nodes.light;
 
 namespace lysa {
 
-    Light::Light(const std::wstring &nodeName, const Type type) :
+    Light::Light(const std::string &nodeName, const Type type) :
         Node{nodeName, type},
         lightType{type == DIRECTIONAL_LIGHT ? LIGHT_DIRECTIONAL : type == SPOT_LIGHT ? LIGHT_SPOT : LIGHT_OMNI} {
     }
 
-    Light::Light(const float4& color, const std::wstring &nodeName, const Type type):
+    Light::Light(const float4& color, const std::string &nodeName, const Type type):
         Node{nodeName, type},
         colorAndIntensity{color},
         lightType{type == DIRECTIONAL_LIGHT ? LIGHT_DIRECTIONAL : type == SPOT_LIGHT ? LIGHT_SPOT : LIGHT_OMNI} {

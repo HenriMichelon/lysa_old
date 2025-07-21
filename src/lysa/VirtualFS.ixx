@@ -16,26 +16,26 @@ export namespace lysa {
      */
     class VirtualFS {
     public:
-        static constexpr auto APP_URI{L"app://"};
+        static constexpr auto APP_URI{"app://"};
 
-        static bool dirExists(const std::wstring &filepath);
+        static bool dirExists(const std::string &filepath);
 
-        static bool fileExists(const std::wstring &filepath);
+        static bool fileExists(const std::string &filepath);
 
-        static std::ifstream openReadStream(const std::wstring &filepath);
+        static std::ifstream openReadStream(const std::string &filepath);
 
-        static std::ofstream openWriteStream(const std::wstring &filepath);
+        static std::ofstream openWriteStream(const std::string &filepath);
 
-        static std::wstring parentPath(const std::wstring& filepath);
+        static std::string parentPath(const std::string& filepath);
 
-        static void loadBinaryData(const std::wstring &filepath, std::vector<char>& out);
+        static void loadBinaryData(const std::string &filepath, std::vector<char>& out);
 
-        static std::byte* loadRGBAImage(const std::wstring& filepath, uint32& width, uint32& height, uint64& size);
+        static std::byte* loadRGBAImage(const std::string& filepath, uint32& width, uint32& height, uint64& size);
 
         static void destroyImage(std::byte* image);
 
     private:
-        static std::wstring getPath(const std::wstring& filepath);
+        static std::string getPath(const std::string& filepath);
     };
 
 }

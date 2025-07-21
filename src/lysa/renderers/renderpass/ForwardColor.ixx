@@ -36,9 +36,9 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring DEFAULT_VERTEX_SHADER{L"default.vert"};
-        const std::wstring DEFAULT_FRAGMENT_SHADER{L"forward.frag"};
-        const std::wstring DEFAULT_FRAGMENT_BLOOM_SHADER{L"forward_bloom.frag"};
+        const std::string DEFAULT_VERTEX_SHADER{"default.vert"};
+        const std::string DEFAULT_FRAGMENT_SHADER{"forward.frag"};
+        const std::string DEFAULT_FRAGMENT_BLOOM_SHADER{"forward_bloom.frag"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = { {}},

@@ -26,7 +26,7 @@ export namespace lysa {
         void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds);
 
     private:
-        const std::wstring VERTEX_SHADER{L"depth_prepass.vert"};
+        const std::string VERTEX_SHADER{"depth_prepass.vert"};
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .cullMode = vireo::CullMode::BACK,

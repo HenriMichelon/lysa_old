@@ -22,12 +22,12 @@ export namespace lysa {
          */
         explicit RigidBody(const std::shared_ptr<Shape>& shape,
                            collision_layer layer = 0,
-                           const std::wstring& name  = TypeNames[RIGID_BODY]);
+                           const std::string& name  = TypeNames[RIGID_BODY]);
 
         /**
          * Creates a RigidBody without a collision shape,
          */
-        explicit RigidBody(const std::wstring &name = TypeNames[RIGID_BODY]);
+        explicit RigidBody(const std::string &name = TypeNames[RIGID_BODY]);
 
         /**
          * Sets the density of the body

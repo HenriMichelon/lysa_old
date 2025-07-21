@@ -34,17 +34,17 @@ namespace lysa {
             // we must have at least a class name
             if (parts.size() > 0) {
                 if (parts.at(0) == "ConvexHullShape") {
-                    if (parts.size() > 2) { throw Exception("Missing parameter for ConvexHullShape for ", lysa::to_string(getName())); }
+                    if (parts.size() > 2) { throw Exception("Missing parameter for ConvexHullShape for ", getName()); }
                     // get the children who provide the mesh for the shape
-                    const auto mesh = getChild(to_wstring(parts[1].data()));
-                    if (mesh == nullptr) { throw Exception("Child with pat h", parts[1].data(), " not found in", lysa::to_string(getName())); }
-                    if (mesh->getType() != MESH_INSTANCE) { throw Exception("Child with path ", parts[1].data(), " not a MeshInstance in ", lysa::to_string(getName())); }
+                    const auto mesh = getChild(parts[1].data());
+                    if (mesh == nullptr) { throw Exception("Child with pat h", parts[1].data(), " not found in", getName()); }
+                    if (mesh->getType() != MESH_INSTANCE) { throw Exception("Child with path ", parts[1].data(), " not a MeshInstance in ", getName()); }
                     setShape(make_shared<ConvexHullShape>(mesh, nullptr, getName()));
                 } else if (parts.at(0) == "BoxShape") {
-                    if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for ", lysa::to_string(getName())); }
+                    if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for ", getName()); }
                     setShape(make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "SphereShape") {
-                    if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for ", lysa::to_string(getName())); }
+                    if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for ", getName()); }
                     setShape(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
                     setShape(std::make_shared<MeshShape>(getSharedPtr()));
@@ -61,7 +61,7 @@ namespace lysa {
                     }
                     setShape(make_shared<StaticCompoundShape>(subShapes));
                 } else {
-                    throw Exception("PhysicsBody : missing or invalid shape for ", lysa::to_string(getName()));
+                    throw Exception("PhysicsBody : missing or invalid shape for ", getName());
                 }
             }
         }

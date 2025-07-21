@@ -11,7 +11,7 @@ import lysa.viewport;
 
 namespace lysa {
 
-    Camera::Camera(const std::wstring &nodeName):
+    Camera::Camera(const std::string &nodeName):
         Node{nodeName, CAMERA} {
     }
 

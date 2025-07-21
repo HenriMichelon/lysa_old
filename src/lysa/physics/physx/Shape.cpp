@@ -18,7 +18,7 @@ namespace lysa {
     AABBShape::AABBShape(
         const Node &node,
         const PhysicsMaterial* material,
-        const std::wstring &resName ):
+        const std::string &resName ):
         Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
         if (meshInstance) {
@@ -37,7 +37,7 @@ namespace lysa {
     BoxShape::BoxShape(
         const float3& extends,
         PhysicsMaterial* material,
-        const std::wstring &resName):
+        const std::string &resName):
         Shape{material, resName}, extends{extends} {
     }
 
@@ -53,7 +53,7 @@ namespace lysa {
     SphereShape::SphereShape(
         const float radius,
         const PhysicsMaterial* material,
-        const std::wstring &resName):
+        const std::string &resName):
         Shape{material, resName},
         radius{radius} {
     }

@@ -40,7 +40,7 @@ export namespace lysa {
         MemoryArray& operator=(MemoryArray&) = delete;
 
     protected:
-        const std::wstring name;
+        const std::string name;
         const size_t instanceSize;
         std::shared_ptr<vireo::Buffer> buffer;
         std::list<MemoryBlock> freeBlocs;
@@ -51,7 +51,7 @@ export namespace lysa {
             size_t instanceSize,
             size_t instanceCount,
             vireo::BufferType bufferType,
-            const std::wstring& name);
+            const std::string& name);
     };
 
     class DeviceMemoryArray : public MemoryArray {
@@ -62,7 +62,7 @@ export namespace lysa {
             size_t instanceCount,
             size_t stagingInstanceCount,
             vireo::BufferType,
-            const std::wstring& name);
+            const std::string& name);
 
         void write(const MemoryBlock& destination, const void* source) override;
 
@@ -87,7 +87,7 @@ export namespace lysa {
             size_t instanceSize,
             size_t instanceCount,
             vireo::BufferType,
-            const std::wstring& name);
+            const std::string& name);
 
         void write(const MemoryBlock& destination, const void* source) override;
     };

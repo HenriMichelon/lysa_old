@@ -16,7 +16,7 @@ namespace lysa {
 
     StaticBody::StaticBody(const std::shared_ptr<Shape>& shape,
                            const collision_layer layer,
-                           const std::wstring& name):
+                           const std::string& name):
         PhysicsBody(shape,
                     layer,
                     JPH::EActivation::DontActivate,
@@ -26,7 +26,7 @@ namespace lysa {
     }
 
     StaticBody::StaticBody(const collision_layer layer,
-                           const std::wstring& name):
+                           const std::string& name):
         PhysicsBody(layer,
                     JPH::EActivation::DontActivate,
                     JPH::EMotionType::Static,
@@ -34,7 +34,7 @@ namespace lysa {
                     STATIC_BODY) {
     }
 
-    StaticBody::StaticBody(const std::wstring& name):
+    StaticBody::StaticBody(const std::string& name):
         PhysicsBody(0,
                     JPH::EActivation::DontActivate,
                     JPH::EMotionType::Static,

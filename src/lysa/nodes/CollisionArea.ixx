@@ -31,12 +31,12 @@ export namespace lysa {
          */
         CollisionArea(const std::shared_ptr<Shape>& shape,
                       collision_layer layer,
-                      const std::wstring& name = TypeNames[COLLISION_AREA]);
+                      const std::string& name = TypeNames[COLLISION_AREA]);
 
         /**
          * Creates a CollisionArea without a collision shape
          */
-        explicit CollisionArea(const std::wstring& name = TypeNames[COLLISION_AREA]);
+        explicit CollisionArea(const std::string& name = TypeNames[COLLISION_AREA]);
 
         /**
          * Sets the collision shape of the area

@@ -24,32 +24,32 @@ namespace lysa {
             config.maxVertexInstances,
             config.maxVertexInstances,
             vireo::BufferType::VERTEX,
-            L"Vertex Array"},
+            "Vertex Array"},
         indexArray {
             vireo,
             sizeof(uint32),
             config.maxIndexInstances,
             config.maxIndexInstances,
             vireo::BufferType::INDEX,
-            L"Index Array"},
+            "Index Array"},
         materialArray {
             vireo,
             sizeof(MaterialData),
             config.maxMaterialInstances,
             config.maxMaterialInstances,
             vireo::BufferType::DEVICE_STORAGE,
-            L"Material Array"},
+            "Material Array"},
         meshSurfaceArray {
             vireo,
             sizeof(MeshSurfaceData),
             config.maxMeshSurfaceInstances,
             config.maxMeshSurfaceInstances,
             vireo::BufferType::DEVICE_STORAGE,
-            L"MeshSurface Array"},
+            "MeshSurface Array"},
         samplers{vireo},
         textures{MAX_TEXTURES} {
         if (descriptorLayout == nullptr) {
-            descriptorLayout = vireo.createDescriptorLayout(L"Resources");
+            descriptorLayout = vireo.createDescriptorLayout("Resources");
             descriptorLayout->add(BINDING_MATERIAL, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_SURFACES, vireo::DescriptorType::DEVICE_STORAGE);
             descriptorLayout->add(BINDING_TEXTURE, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
@@ -65,11 +65,11 @@ namespace lysa {
         blankImage = vireo.createImage(
             vireo::ImageFormat::R8G8B8A8_SRGB,
             1, 1,1, 1,
-            L"Blank Image");
+            "Blank Image");
         blankCubeMap = vireo.createImage(
             vireo::ImageFormat::R8G8B8A8_SRGB,
             1, 1,1, 6,
-            L"Blank CubeMap");
+            "Blank CubeMap");
         const auto commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
         const auto commandList = commandAllocator->createCommandList();
         commandList->begin();
@@ -99,7 +99,7 @@ namespace lysa {
             textures[i] = blankImage;
         }
 
-        descriptorSet = vireo.createDescriptorSet(descriptorLayout, L"Resources");
+        descriptorSet = vireo.createDescriptorSet(descriptorLayout, "Resources");
         descriptorSet->update(BINDING_MATERIAL, materialArray.getBuffer());
         descriptorSet->update(BINDING_SURFACES, meshSurfaceArray.getBuffer());
         descriptorSet->update(BINDING_TEXTURE, textures);

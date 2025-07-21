@@ -13,7 +13,7 @@ import lysa.resources.mesh;
 
 namespace lysa {
 
-    MeshInstance::MeshInstance(const std::shared_ptr<Mesh>& mesh, const std::wstring &name):
+    MeshInstance::MeshInstance(const std::shared_ptr<Mesh>& mesh, const std::string &name):
         Node{name, MESH_INSTANCE},
         mesh{mesh} {
     }

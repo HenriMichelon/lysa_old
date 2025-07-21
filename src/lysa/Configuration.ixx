@@ -65,9 +65,9 @@ export namespace lysa {
 
     struct ApplicationConfiguration {
         //! Directory to search for resources for the app:// URI
-        std::filesystem::path  appDir{L"."};
+        std::filesystem::path  appDir{"."};
         //! Directory to search for compiled shaders inside app://
-        std::wstring           shaderDir{L"shaders"};
+        std::string           shaderDir{"shaders"};
         PhysicsConfiguration   physicsConfig{};
         //! Where to log a message using Logger
         int                    loggingMode{LOGGING_MODE_NONE};
@@ -152,7 +152,7 @@ export namespace lysa {
      */
     struct WindowConfiguration {
         //! Window title bar
-        std::wstring            title{};
+        std::string            title{};
         //! State of the display Window
         WindowMode              mode{WindowMode::WINDOWED};
         //! Start up X position (top-left corner)

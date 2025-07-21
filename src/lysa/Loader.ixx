@@ -21,7 +21,7 @@ export namespace lysa {
          * @param usecache put loaded resources in the global resources cache
          */
         template<typename T = Node>
-        static std::shared_ptr<T> load(const std::wstring& filepath, bool usecache = false) {
+        static std::shared_ptr<T> load(const std::string& filepath, bool usecache = false) {
             if (usecache) {
                 auto lock = std::lock_guard(resourcesMutex);
                 if (resources.contains(filepath)) {
@@ -35,7 +35,7 @@ export namespace lysa {
         }
 
         template<typename T = Node>
-        static std::shared_ptr<T> findFirst(const std::wstring& nodename) {
+        static std::shared_ptr<T> findFirst(const std::string& nodename) {
             for (const auto& cachedResources : resources) {
                 const auto& tree = cachedResources.second;
                 auto node = tree->findFirstChild<T>(nodename);
@@ -68,14 +68,14 @@ export namespace lysa {
         };
 
     private:
-        static inline std::map<std::wstring, std::shared_ptr<Node>> resources;
+        static inline std::map<std::string, std::shared_ptr<Node>> resources;
         static std::mutex resourcesMutex;
 
-        static void load(const std::shared_ptr<Node>&rootNode, const std::wstring& filepath, bool usecache);
+        static void load(const std::shared_ptr<Node>&rootNode, const std::string& filepath, bool usecache);
 
-        static void loadScene(const std::shared_ptr<Node>&rootNode, const std::wstring &filepath);
+        static void loadScene(const std::shared_ptr<Node>&rootNode, const std::string &filepath);
 
-        static std::vector<SceneNode> loadSceneDescriptionFromJSON(const std::wstring &filepath);
+        static std::vector<SceneNode> loadSceneDescriptionFromJSON(const std::string &filepath);
 
         static void addNode(Node* parent,
                             std::map<std::string, std::shared_ptr<Node>>& nodeTree,

@@ -20,12 +20,12 @@ export namespace lysa {
          * Creates an AnimationLibrary
          * @param name resource name.
          */
-        AnimationLibrary(const std::wstring &name = L"AnimationLibrary") : Resource{name} {}
+        AnimationLibrary(const std::string &name = "AnimationLibrary") : Resource{name} {}
 
         /**
          * Adds the \ref Animation to the library, accessible by the key name.
          */
-        void add(const std::wstring& keyName, const std::shared_ptr<Animation>& animation) {
+        void add(const std::string& keyName, const std::shared_ptr<Animation>& animation) {
             if (animations.empty()) {
                 defaultAnimation = keyName;
             }
@@ -35,12 +35,12 @@ export namespace lysa {
         /**
          * Returns the \ref Animation with the key name.
          */
-        auto get(const std::wstring& keyName) const { return animations.at(keyName); }
+        auto get(const std::string& keyName) const { return animations.at(keyName); }
 
         /**
          * Returns `true` if the library stores an \ref Animation with name as the key.
          */
-        auto has(const std::wstring& keyName) const { return animations.contains(keyName); }
+        auto has(const std::string& keyName) const { return animations.contains(keyName); }
 
         /**
          * Returns the name of the default animation
@@ -48,8 +48,8 @@ export namespace lysa {
         const auto& getDefault() const { return defaultAnimation; }
 
     private:
-        std::wstring defaultAnimation;
-        std::map<std::wstring, std::shared_ptr<Animation>> animations;
+        std::string defaultAnimation;
+        std::map<std::string, std::shared_ptr<Animation>> animations;
     };
 
 }

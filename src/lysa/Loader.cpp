@@ -18,15 +18,15 @@ namespace lysa {
 
     std::mutex Loader::resourcesMutex;
 
-    void Loader::load(const std::shared_ptr<Node>&rootNode, const std::wstring& filepath, const bool usecache) {
-        if (filepath.ends_with(L".json")) {
+    void Loader::load(const std::shared_ptr<Node>&rootNode, const std::string& filepath, const bool usecache) {
+        if (filepath.ends_with(".json")) {
             loadScene(rootNode, filepath);
             return;
         }
-        if (filepath.ends_with(L".assets")) {
+        if (filepath.ends_with(".assets")) {
             AssetsPack::load(*rootNode, filepath);
         } else {
-            throw Exception("Loader : unsupported file format for ", lysa::to_string(filepath));
+            throw Exception("Loader : unsupported file format for ", filepath);
         }
         if (usecache) {
             auto lock = std::lock_guard(resourcesMutex);
@@ -52,15 +52,15 @@ namespace lysa {
         if (nodeDesc.isResource) {
             if (nodeDesc.resourceType == "resource") {
                 // the model is in a glTF/ZScene file
-                node = load(lysa::to_wstring(nodeDesc.resource), true);
-                node->setName(lysa::to_wstring(nodeDesc.id));
+                node = load(nodeDesc.resource, true);
+                node->setName(nodeDesc.id);
             } else if (nodeDesc.resourceType == "mesh") {
                 // the model is part of another, already loaded, model
                 if (nodeTree.contains(nodeDesc.resource)) {
                     // get the parent resource
                     const auto &resource = nodeTree[nodeDesc.resource];
                     // get the mesh node via the relative path
-                    node = resource->getChildByPath(lysa::to_wstring(nodeDesc.resourcePath));
+                    node = resource->getChildByPath(nodeDesc.resourcePath);
                     if (node == nullptr) {
                         resource->printTree();
                         throw Exception(log_name, "Mesh with path ", nodeDesc.resourcePath, " not found");
@@ -71,11 +71,11 @@ namespace lysa {
             }
         } else {
             if (nodeDesc.clazz.empty() || nodeDesc.isCustom) {
-                node = make_shared<Node>(lysa::to_wstring(nodeDesc.id));
+                node = std::make_shared<Node>(nodeDesc.id);
             } else {
                 // The node class is a registered class
                 node = TypeRegistry::makeShared<Node>(nodeDesc.clazz);
-                node->setName(lysa::to_wstring(nodeDesc.id));
+                node->setName(nodeDesc.id);
             }
             node->setParent(parent);
             auto parentNode = node;
@@ -87,7 +87,7 @@ namespace lysa {
                         // child not found in current resources, try cached resources
                         static const std::regex pattern(R"(\.mesh)");
                         const std::string name{regex_replace(nodeDesc.child->id, pattern, "")};
-                        child = findFirst(lysa::to_wstring(name));
+                        child = findFirst(name);
                     }
                     if (child == nullptr) {
                         throw Exception(log_name, "Child node ", nodeDesc.child->id, " not found");
@@ -138,7 +138,7 @@ namespace lysa {
         nodeTree[nodeDesc.id] = node;
     }
 
-    void Loader::loadScene(const std::shared_ptr<Node>&rootNode, const std::wstring &filepath) {
+    void Loader::loadScene(const std::shared_ptr<Node>&rootNode, const std::string &filepath) {
         // const auto tStart = chrono::high_resolution_clock::now();
         std::map<std::string, std::shared_ptr<Node>> nodeTree;
         std::map<std::string, SceneNode>        sceneTree;
@@ -176,14 +176,14 @@ namespace lysa {
         }
     }
 
-    std::vector<Loader::SceneNode> Loader::loadSceneDescriptionFromJSON(const std::wstring &filepath) {
+    std::vector<Loader::SceneNode> Loader::loadSceneDescriptionFromJSON(const std::string &filepath) {
         std::vector<SceneNode> scene{};
         try {
             auto jsonData = nlohmann::ordered_json::parse(VirtualFS::openReadStream(filepath)); // parsing using ordered_json to preserver fields order
             if (jsonData.contains("includes")) {
                 const std::vector<std::string> includes = jsonData["includes"];
                 for (const auto &include : includes) {
-                    std::vector<SceneNode> includeNodes = loadSceneDescriptionFromJSON(std::to_wstring(include));
+                    std::vector<SceneNode> includeNodes = loadSceneDescriptionFromJSON(include);
                     for(auto& node : includeNodes) {
                         node.isIncluded = true;
                     }
@@ -193,7 +193,7 @@ namespace lysa {
             std::vector<SceneNode> nodes = jsonData["nodes"];
             scene.append_range(nodes);
         } catch (nlohmann::json::parse_error) {
-            throw Exception("Error loading scene from JSON file ", lysa::to_string(filepath));
+            throw Exception("Error loading scene from JSON file ", filepath);
         }
         return scene;
     }

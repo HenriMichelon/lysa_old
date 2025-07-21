@@ -23,7 +23,7 @@ export namespace lysa {
          * @param nodeName Node name
          */
         DirectionalLight(const float4& color = {1.0f, 1.0f, 1.0f, 1.0f},
-                                  const std::wstring &nodeName = TypeNames[DIRECTIONAL_LIGHT]);
+                                  const std::string &nodeName = TypeNames[DIRECTIONAL_LIGHT]);
 
         ~DirectionalLight() override = default;
 

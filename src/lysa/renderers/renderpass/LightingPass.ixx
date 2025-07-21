@@ -36,9 +36,9 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring VERTEX_SHADER{L"quad.vert"};
-        const std::wstring FRAGMENT_SHADER{L"glighting.frag"};
-        const std::wstring FRAGMENT_SHADER_BLOOM{L"glighting_bloom.frag"};
+        const std::string VERTEX_SHADER{"quad.vert"};
+        const std::string FRAGMENT_SHADER{"glighting.frag"};
+        const std::string FRAGMENT_SHADER_BLOOM{"glighting_bloom.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{0};
         static constexpr vireo::DescriptorIndex BINDING_NORMAL_BUFFER{1};

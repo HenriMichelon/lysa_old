@@ -18,7 +18,7 @@ export namespace lysa {
      */
     class Image : public Resource {
     public:
-        Image(const std::shared_ptr<vireo::Image>& image, const std::wstring & name);
+        Image(const std::shared_ptr<vireo::Image>& image, const std::string & name);
 
         /**
          * Returns the width in pixels
@@ -39,16 +39,16 @@ export namespace lysa {
 
         auto getIndex() const { return index; }
 
-        void save(const std::wstring& filepath) const;
+        void save(const std::string& filepath) const;
 
-        static void save(const std::wstring& filepath, const std::shared_ptr<vireo::Image>& image);
+        static void save(const std::string& filepath, const std::shared_ptr<vireo::Image>& image);
 
         /**
         * Load a bitmap from file.<br>
         * Support JPEG and PNG formats
         */
         static std::shared_ptr<Image> load(
-            const std::wstring &filepath,
+            const std::string &filepath,
             vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB);
 
         /**
@@ -59,7 +59,7 @@ export namespace lysa {
             const void* data,
             uint32 width, uint32 height,
             vireo::ImageFormat imageFormat = vireo::ImageFormat::R8G8B8A8_SRGB,
-            const std::wstring& name = L"Image");
+            const std::string& name = "Image");
 
         ~Image() override = default;
 

@@ -17,7 +17,7 @@ namespace lysa {
     LightingPass::LightingPass(
         const RenderingConfiguration& config,
         const GBufferPass& gBufferPass):
-        Renderpass{config, L"Deferred Lighting"},
+        Renderpass{config, "Deferred Lighting"},
         gBufferPass{gBufferPass} {
         const auto& vireo = Application::getVireo();
 
@@ -128,7 +128,7 @@ namespace lysa {
                     renderingConfig.colorRenderTargets[1].clearValue,
                     1,
                     vireo::MSAA::NONE,
-                    L"Brightness");
+                    "Brightness");
             } else {
                 frame.brightnessBuffer = vireo.createRenderTarget(
                     pipelineConfig.colorRenderFormats[0],

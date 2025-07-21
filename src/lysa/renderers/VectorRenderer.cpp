@@ -14,8 +14,8 @@ namespace lysa {
     VectorRenderer::VectorRenderer(
         const bool depthTestEnable,
         const RenderingConfiguration& renderingConfiguration,
-        const std::wstring& name,
-        const std::wstring& shadersName,
+        const std::string& name,
+        const std::string& shadersName,
         const bool filledTriangles,
         const bool enableAlphaBlending,
         const bool useCamera,
@@ -66,9 +66,9 @@ namespace lysa {
         pipelineConfig.vertexInputLayout = vireo.createVertexLayout(sizeof(Vertex), vertexAttributes);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + shadersName + L".vert" + ext, tempBuffer);
+        VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + shadersName + ".vert" + ext, tempBuffer);
         pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" + shadersName + L".frag" + ext, tempBuffer);
+        VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + shadersName + ".frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
            { descriptorLayout, Application::getResources().getSamplers().getDescriptorLayout() },
@@ -76,12 +76,12 @@ namespace lysa {
            name);
         pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::LINE_LIST;
-        pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name + L" lines");
+        pipelineLines = vireo.createGraphicPipeline(pipelineConfig, name + " lines");
         pipelineConfig.polygonMode = filledTriangles ?
             vireo::PolygonMode::FILL :
             vireo::PolygonMode::WIREFRAME;
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::TRIANGLE_LIST;
-        pipelineTriangles = vireo.createGraphicPipeline(pipelineConfig, name + L" triangles");
+        pipelineTriangles = vireo.createGraphicPipeline(pipelineConfig, name + " triangles");
     }
 
     void VectorRenderer::drawLine(const float3& from, const float3& to, const float4& color) {
@@ -117,9 +117,9 @@ namespace lysa {
                 oldBuffers.push_back(vertexBuffer);
                 // Allocate new buffers to change size
                 vertexCount = linesVertices.size() + triangleVertices.size();
-                stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, name + L" vertices staging");
+                stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, name + " vertices staging");
                 stagingBuffer->map();
-                vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, name + L" vertices");
+                vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, name + " vertices");
                 // commandList.barrier(*vertexBuffer, vireo::ResourceState::UNDEFINED, vireo::ResourceState::COPY_DST);
             }
             if (vertexBufferDirty) {

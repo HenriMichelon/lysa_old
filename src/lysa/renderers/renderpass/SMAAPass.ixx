@@ -31,9 +31,9 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring EDGE_DETECT_FRAGMENT_SHADER{L"smaa_edge_detect.frag"};
-        const std::wstring BLEND_WEIGHT_FRAGMENT_SHADER{L"smaa_blend_weight.frag"};
-        const std::wstring BLEND_FRAGMENT_SHADER{L"smaa_neighborhood_blend.frag"};
+        const std::string EDGE_DETECT_FRAGMENT_SHADER{"smaa_edge_detect.frag"};
+        const std::string BLEND_WEIGHT_FRAGMENT_SHADER{"smaa_blend_weight.frag"};
+        const std::string BLEND_FRAGMENT_SHADER{"smaa_neighborhood_blend.frag"};
 
         struct Data {
             float edgeThreshold;

@@ -22,7 +22,7 @@ import lysa.resources.resource;
 
 namespace lysa {
 
-    void AssetsPack::load(Node& rootNode, const std::wstring &filename) {
+    void AssetsPack::load(Node& rootNode, const std::string &filename) {
         auto stream = VirtualFS::openReadStream(filename);
         return load(rootNode, stream);
     }
@@ -136,7 +136,7 @@ namespace lysa {
         auto animationPlayers = std::map<uint32, std::shared_ptr<AnimationPlayer>>{};
         for (auto animationIndex = 0; animationIndex < header.animationsCount; animationIndex++) {
             auto anim = std::make_shared<Animation>(animationHeaders[animationIndex].tracksCount,
-                std::to_wstring(animationHeaders[animationIndex].name));
+                animationHeaders[animationIndex].name);
             for (auto trackIndex = 0; trackIndex < animationHeaders[animationIndex].tracksCount; trackIndex++) {
                 auto animationPlayer = std::shared_ptr<AnimationPlayer>{};
                 auto& trackInfo = tracksInfos[animationIndex][trackIndex];
@@ -145,7 +145,7 @@ namespace lysa {
                     animationPlayer = animationPlayers[nodeIndex];
                 } else {
                     animationPlayer = std::make_shared<AnimationPlayer>(); // node association is made later
-                    animationPlayer->add(L"", std::make_shared<AnimationLibrary>());
+                    animationPlayer->add("", std::make_shared<AnimationLibrary>());
                     animationPlayers[nodeIndex] = animationPlayer;
                 }
                 animationPlayer->getLibrary()->add(anim->getName(), anim);
@@ -204,7 +204,7 @@ namespace lysa {
         std::map<unique_id, int> materialsTexCoords;
         for (auto materialIndex = 0; materialIndex < header.materialsCount; ++materialIndex) {
             auto& header = materialHeaders.at(materialIndex);
-            auto material = std::make_shared<StandardMaterial>(std::to_wstring(header.name));
+            auto material = std::make_shared<StandardMaterial>(header.name);
             material->setBypassUpload(true);
             auto textureInfo = [&](const TextureInfo& info) {
                 auto texInfo = StandardMaterial::TextureInfo {
@@ -237,7 +237,7 @@ namespace lysa {
         std::vector<std::shared_ptr<Mesh>> meshes{header.meshesCount};
         for (auto meshIndex = 0; meshIndex < header.meshesCount; ++meshIndex) {
             auto& header   = meshesHeaders[meshIndex];
-            auto  mesh     = std::make_shared<Mesh>(std::to_wstring(header.name));
+            auto  mesh     = std::make_shared<Mesh>(header.name);
             auto &meshVertices = mesh->getVertices();
             auto &meshIndices  = mesh->getIndices();
             // print(header);
@@ -323,7 +323,7 @@ namespace lysa {
         std::vector<std::shared_ptr<Node>> nodes{(header.nodesCount)};
         for (auto nodeIndex = 0; nodeIndex < header.nodesCount; ++nodeIndex) {
             std::shared_ptr<Node> newNode;
-            std::wstring          name{std::to_wstring(nodeHeaders[nodeIndex].name)};
+            std::string name{nodeHeaders[nodeIndex].name};
             // find if the node has a mesh, and if it does hook it to the mesh pointer and allocate it with the
             // MeshInstance class
             if (nodeHeaders[nodeIndex].meshIndex != -1) {
@@ -395,7 +395,7 @@ namespace lysa {
                 const auto& imageHeader = imageHeaders[texture.imageIndex];
                 // INFO("Loading image ", imageHeader.name, " ", imageHeader.width, "x", imageHeader.height, " ", imageHeader.format);
                 // print(imageHeader);
-                const auto name = std::to_wstring(imageHeader.name);
+                const auto& name = imageHeader.name;
                 const auto image = vireo.createImage(
                     static_cast<vireo::ImageFormat>(imageHeader.format),
                     imageHeader.width,

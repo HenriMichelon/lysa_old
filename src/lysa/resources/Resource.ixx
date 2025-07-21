@@ -17,7 +17,7 @@ export namespace lysa {
     class Resource : public Object  {
     public:
 
-        Resource(const std::wstring& name);
+        Resource(const std::string& name);
 
         /**
          * Returns the unique id of the resource
@@ -43,7 +43,7 @@ export namespace lysa {
     private:
         unique_id          id;
         static unique_id   currentId;
-        const std::wstring name;
+        const std::string name;
     };
 
 }

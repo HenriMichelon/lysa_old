@@ -23,7 +23,7 @@ export namespace lysa {
          */
         struct Playback {
             //! The animation name
-            std::wstring animationName;
+            std::string animationName;
         };
         //! Signal emitted when an animation began playing
         static inline const Signal::signal on_playback_start  = "on_playback_start";
@@ -35,7 +35,7 @@ export namespace lysa {
          * Creates an AnimationLibrary
          * @param name resource name.
          */
-        AnimationPlayer(const std::wstring &name = TypeNames[ANIMATION_PLAYER]): Node{name, ANIMATION_PLAYER} {}
+        AnimationPlayer(const std::string &name = TypeNames[ANIMATION_PLAYER]): Node{name, ANIMATION_PLAYER} {}
 
         /**
          * Returns the current library name
@@ -50,17 +50,17 @@ export namespace lysa {
         /**
          * Sets the current library name
          */
-        void setCurrentLibrary(const std::wstring &name);
+        void setCurrentLibrary(const std::string &name);
 
         /**
          * Sets the current animation name (does not start the animation, only useful with auto-starting)
          */
-        void setCurrentAnimation(const std::wstring &name);
+        void setCurrentAnimation(const std::string &name);
 
         /**
          * Adds a library accessible by the name.
          */
-        auto add(const std::wstring& name, const std::shared_ptr<AnimationLibrary>& library) { libraries[name] = library; }
+        auto add(const std::string& name, const std::shared_ptr<AnimationLibrary>& library) { libraries[name] = library; }
 
         /**
          * Returns the current animation, if any
@@ -75,7 +75,7 @@ export namespace lysa {
         /**
          * Starts an animation by its name
          */
-        void play(const std::wstring &name = L"");
+        void play(const std::string &name = "");
 
         /**
          *
@@ -86,7 +86,7 @@ export namespace lysa {
         /**
          * Starts an animation by its name, playing it backwards
          */
-        void playBackwards(const std::wstring &name = L"");
+        void playBackwards(const std::string &name = "");
 
         /**
          * Stops the currently playing animation
@@ -130,11 +130,11 @@ export namespace lysa {
         float3 initialScale{1.0f};
         std::chrono::time_point<std::chrono::steady_clock> startTime;
         Node* target{nullptr};
-        std::wstring currentLibrary;
-        std::wstring currentAnimation;
+        std::string currentLibrary;
+        std::string currentAnimation;
         std::vector<float> currentTracksState;
         std::vector<float> lastTracksState;
-        std::map<std::wstring, std::shared_ptr<AnimationLibrary>> libraries;
+        std::map<std::string, std::shared_ptr<AnimationLibrary>> libraries;
 
         void apply(const Animation::TrackKeyValue&) const;
     };

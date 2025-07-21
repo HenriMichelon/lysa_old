@@ -22,7 +22,7 @@ namespace lysa {
     AABBShape::AABBShape(
         const Node &node,
         const PhysicsMaterial* material,
-        const std::wstring &resName ):
+        const std::string &resName ):
         Shape{material, resName} {
         const auto& meshInstance = node.findFirstChild<MeshInstance>();
         if (meshInstance) {
@@ -33,18 +33,18 @@ namespace lysa {
                 JPH::cDefaultConvexRadius,
                 reinterpret_cast<JPH::PhysicsMaterial*>(this->material));
         } else {
-            throw Exception("AABBShape : Node ", lysa::to_string(node.getName()), "does not have a MeshInstance child");
+            throw Exception("AABBShape : Node ", node.getName(), "does not have a MeshInstance child");
         }
     }
 
     BoxShape::BoxShape(
         const float3& extends,
         PhysicsMaterial* material,
-        const std::wstring &resName):
+        const std::string &resName):
         Shape{material, resName}, extends
         {extends} {
         if (extends.x <= 0.2 || extends.y <= 0.2 || extends.z <= 0.2) {
-            throw Exception("Invalid extends for BoxShape", lysa::to_string(resName), " : extends must be greater than 0.2");
+            throw Exception("Invalid extends for BoxShape", resName, " : extends must be greater than 0.2");
         }
         shapeSettings = new JPH::BoxShapeSettings(
             JPH::Vec3(extends.x / 2, extends.y / 2, extends.z / 2),
@@ -64,7 +64,7 @@ namespace lysa {
     SphereShape::SphereShape(
         const float radius,
         const PhysicsMaterial* material,
-        const std::wstring &resName):
+        const std::string &resName):
         Shape{material, resName},
         radius{radius} {
         shapeSettings = new JPH::SphereShapeSettings(

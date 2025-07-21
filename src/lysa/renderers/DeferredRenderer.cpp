@@ -13,7 +13,7 @@ import lysa.log;
 namespace lysa {
     DeferredRenderer::DeferredRenderer(
         const RenderingConfiguration& config,
-        const std::wstring& name) :
+        const std::string& name) :
         Renderer{config, true, name},
         ssaoBlurData{.kernelSize = config.ssaoBlurKernelSize},
         gBufferPass{config},
@@ -22,11 +22,11 @@ namespace lysa {
             ssaoPass = std::make_unique<SSAOPass>(config, gBufferPass);
             ssaoBlurPass = std::make_unique<PostProcessing>(
                   config,
-                  L"ssao_blur",
+                  "ssao_blur",
                   ssaoPass->getSSAOBufferFormat(),
                   &ssaoBlurData,
                   sizeof(ssaoBlurData),
-                  L"SSAO Blur");
+                  "SSAO Blur");
         }
     }
 

@@ -90,9 +90,9 @@ export namespace lysa {
         Mesh(const std::vector<Vertex>& vertices,
              const std::vector<uint32>& indices,
              const std::vector<std::shared_ptr<MeshSurface>>&surfaces,
-             const std::wstring& name = L"Mesh");
+             const std::string& name = "Mesh");
 
-        Mesh(const std::wstring& name = L"Mesh");
+        Mesh(const std::string& name = "Mesh");
 
          /**
          * Returns the material for a given surface

@@ -32,7 +32,7 @@ export namespace lysa {
         MeshShape(
             const std::shared_ptr<Node> &node,
             const PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"MeshShape");
+            const std::string &resName = "MeshShape");
 
 #ifdef PHYSIC_ENGINE_JOLT
         JPH::ShapeSettings* getShapeSettings() override;

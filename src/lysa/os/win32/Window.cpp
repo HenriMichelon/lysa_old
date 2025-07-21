@@ -99,7 +99,7 @@ namespace lysa {
         const auto hwnd = CreateWindowEx(
             exStyle,
             windowClass.lpszClassName,
-            config.title.c_str(),
+            std::to_wstring(config.title).c_str(),
             style,
             x, y,
             w, h,

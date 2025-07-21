@@ -17,7 +17,7 @@ namespace lysa {
     SSAOPass::SSAOPass(
         const RenderingConfiguration& config,
         const GBufferPass& gBufferPass):
-        Renderpass{config, L"SSAO"},
+        Renderpass{config, "SSAO"},
         gBufferPass{gBufferPass},
         params{ .radius = config.ssaoRadius, .bias = config.ssaoBias, .power = config.ssaoStrength, .sampleCount = config.ssaoSampleCount }{
         const auto& vireo = Application::getVireo();
@@ -92,7 +92,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[0].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"SSAO Color");
+                "SSAO Color");
             commandList->barrier(
                 frame.ssaoColorBuffer,
                 vireo::ResourceState::UNDEFINED,
@@ -100,8 +100,8 @@ namespace lysa {
         }
 
         if (paramsBuffer == nullptr) {
-            noiseTexture = vireo.createImage(vireo::ImageFormat::R32G32B32A32_SFLOAT, 4, 4, 1, 1, L"SSAO Noise");
-            paramsBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Params), 1, L"SSAO Params");
+            noiseTexture = vireo.createImage(vireo::ImageFormat::R32G32B32A32_SFLOAT, 4, 4, 1, 1, "SSAO Noise");
+            paramsBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Params), 1, "SSAO Params");
             paramsBuffer->map();
 
             // https://learnopengl.com/Advanced-Lighting/SSAO

@@ -16,18 +16,18 @@ import lysa.renderers.renderpass.shadow_map_pass;
 namespace lysa {
 
     void Scene::createDescriptorLayouts() {
-        sceneDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Scene");
+        sceneDescriptorLayout = Application::getVireo().createDescriptorLayout("Scene");
         sceneDescriptorLayout->add(BINDING_SCENE, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_MODELS, vireo::DescriptorType::DEVICE_STORAGE);
         sceneDescriptorLayout->add(BINDING_LIGHTS, vireo::DescriptorType::UNIFORM);
         sceneDescriptorLayout->add(BINDING_SHADOW_MAPS, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS * 6);
         sceneDescriptorLayout->build();
 
-        sceneDescriptorLayoutOptional1 = Application::getVireo().createDescriptorLayout(L"Scene op1");
+        sceneDescriptorLayoutOptional1 = Application::getVireo().createDescriptorLayout("Scene op1");
         sceneDescriptorLayoutOptional1->add(BINDING_SHADOW_MAP_TRANSPARENCY_COLOR, vireo::DescriptorType::SAMPLED_IMAGE, MAX_SHADOW_MAPS * 6);
         sceneDescriptorLayoutOptional1->build();
 
-        pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout(L"Pipeline");
+        pipelineDescriptorLayout = Application::getVireo().createDescriptorLayout("Pipeline");
         pipelineDescriptorLayout->add(BINDING_INSTANCES, vireo::DescriptorType::DEVICE_STORAGE);
         pipelineDescriptorLayout->build();
     }
@@ -49,17 +49,17 @@ namespace lysa {
             vireo::BufferType::UNIFORM,
             sizeof(LightData),
             1,
-            L"Scene Lights")},
+            "Scene Lights")},
         meshInstancesDataArray{Application::getVireo(),
             sizeof(MeshInstanceData),
             config.maxModelsPerScene,
             config.maxModelsPerScene,
             vireo::BufferType::DEVICE_STORAGE,
-            L"meshInstances Data"},
+            "meshInstances Data"},
         sceneUniformBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::UNIFORM,
             sizeof(SceneData), 1,
-            L"Scene Data")},
+            "Scene Data")},
         scissors{scissors},
         viewport{viewport},
         framesInFlight{framesInFlight},
@@ -72,13 +72,13 @@ namespace lysa {
             shadowTransparencyColorMaps[i] = Application::getResources().getBlankImage();
         }
 
-        descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, L"Scene");
+        descriptorSet = Application::getVireo().createDescriptorSet(sceneDescriptorLayout, "Scene");
         descriptorSet->update(BINDING_SCENE, sceneUniformBuffer);
         descriptorSet->update(BINDING_MODELS, meshInstancesDataArray.getBuffer());
         descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
         descriptorSet->update(BINDING_SHADOW_MAPS, shadowMaps);
 
-        descriptorSetOpt1 = Application::getVireo().createDescriptorSet(sceneDescriptorLayoutOptional1, L"Scene Opt1");
+        descriptorSetOpt1 = Application::getVireo().createDescriptorSet(sceneDescriptorLayoutOptional1, "Scene Opt1");
         descriptorSetOpt1->update(BINDING_SHADOW_MAP_TRANSPARENCY_COLOR, shadowTransparencyColorMaps);
 
         sceneUniformBuffer->map();
@@ -192,7 +192,7 @@ namespace lysa {
                 lightsBuffer = Application::getVireo().createBuffer(
                     vireo::BufferType::UNIFORM,
                     sizeof(LightData) * lightsBufferCount, 1,
-                    L"Scene Lights");
+                    "Scene Lights");
                 lightsBuffer->map();
                 descriptorSet->update(BINDING_LIGHTS, lightsBuffer);
             }
@@ -480,25 +480,25 @@ namespace lysa {
             config.maxMeshSurfacePerPipeline,
             config.maxMeshSurfacePerPipeline,
             vireo::BufferType::DEVICE_STORAGE,
-            L"Pipeline instances array"},
+            "Pipeline instances array"},
         drawCommands(config.maxMeshSurfacePerPipeline),
         drawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::DEVICE_STORAGE,
             sizeof(DrawCommand) * config.maxMeshSurfacePerPipeline,
             1,
-            L"Pipeline draw commands")},
+            "Pipeline draw commands")},
         culledDrawCommandsCountBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
             sizeof(uint32),
             1,
-            L"Pipeline draw commands counter")},
+            "Pipeline draw commands counter")},
         culledDrawCommandsBuffer{Application::getVireo().createBuffer(
             vireo::BufferType::READWRITE_STORAGE,
             sizeof(DrawCommand) * config.maxMeshSurfacePerPipeline,
             1,
-            L"Pipeline culled draw commands")}
+            "Pipeline culled draw commands")}
     {
-        descriptorSet = Application::getVireo().createDescriptorSet(pipelineDescriptorLayout, L"Pipeline");
+        descriptorSet = Application::getVireo().createDescriptorSet(pipelineDescriptorLayout, "Pipeline");
         descriptorSet->update(BINDING_INSTANCES, instancesArray.getBuffer());
     }
 

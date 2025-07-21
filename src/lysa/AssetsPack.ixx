@@ -252,7 +252,7 @@ export namespace lysa {
         /*
          * Load a scene from an assets pack file
          */
-        static void load(Node& rootNode, const std::wstring &filename);
+        static void load(Node& rootNode, const std::string &filename);
 
         /*
          * Load a scene from an assets pack data stream

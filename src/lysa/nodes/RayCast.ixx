@@ -39,13 +39,13 @@ export namespace lysa {
          * @param layer The ray's collision layer
          * @param name The node's name
          */
-        RayCast(const float3& target, collision_layer layer, const std::wstring& name = TypeNames[RAYCAST]);
+        RayCast(const float3& target, collision_layer layer, const std::string& name = TypeNames[RAYCAST]);
 
         /**
          * Creates a RayCast with a [0.0, 0.0, 0.0] target
          * @param name The node's name
          */
-        RayCast(const std::wstring &name = TypeNames[RAYCAST]);
+        RayCast(const std::string &name = TypeNames[RAYCAST]);
 
         /**
          * Returns whether any object is intersecting with the ray's vector (considering the vector length).

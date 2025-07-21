@@ -19,7 +19,7 @@ export namespace lysa {
         /**
          * Creates a Camera
          */
-        Camera(const std::wstring &nodeName = TypeNames[CAMERA]);
+        Camera(const std::string &nodeName = TypeNames[CAMERA]);
 
         /**
          * Returns `true` if the camera is the currently active camera for the current scene.

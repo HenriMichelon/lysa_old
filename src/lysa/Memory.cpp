@@ -17,7 +17,7 @@ namespace lysa {
         const size_t instanceSize,
         const size_t instanceCount,
         const vireo::BufferType bufferType,
-        const std::wstring& name) :
+        const std::string& name) :
         name{name},
         instanceSize{instanceSize} {
         if (bufferType == vireo::BufferType::VERTEX || bufferType == vireo::BufferType::INDEX) {
@@ -54,7 +54,7 @@ namespace lysa {
                 return result;
             }
         }
-        throw Exception{"Out of memory for array " + std::to_string(name)};
+        throw Exception{"Out of memory for array " + name};
     }
 
     void MemoryArray::free(const MemoryBlock& bloc) {
@@ -73,9 +73,9 @@ namespace lysa {
         const size_t instanceCount,
         const size_t stagingInstanceCount,
         const vireo::BufferType bufferType,
-        const std::wstring& name) :
+        const std::string& name) :
         MemoryArray{vireo, instanceSize, instanceCount, bufferType, name},
-        stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, L"Staging " + name)} {
+        stagingBuffer{vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, instanceSize * stagingInstanceCount, 1, "Staging " + name)} {
         assert([&]{ return bufferType == vireo::BufferType::VERTEX ||
             bufferType == vireo::BufferType::INDEX ||
             bufferType == vireo::BufferType::INDIRECT ||
@@ -125,7 +125,7 @@ namespace lysa {
         const size_t instanceSize,
         const size_t instanceCount,
         const vireo::BufferType bufferType,
-        const std::wstring& name) :
+        const std::string& name) :
         MemoryArray{vireo, instanceSize, instanceCount, bufferType, name} {
         assert([&]{ return bufferType == vireo::BufferType::UNIFORM ||
             bufferType == vireo::BufferType::STORAGE ||

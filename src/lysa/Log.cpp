@@ -63,7 +63,7 @@ namespace lysa {
             const auto in_time_t = system_clock::to_time_t(system_clock::now());
             std::tm tm;
             localtime_s(&tm, &in_time_t);
-            std::string item = lysa::to_string(std::format(L"{:02}:{:02}:{:02}", tm.tm_hour, tm.tm_min, tm.tm_sec));
+            std::string item = std::format("{:02}:{:02}:{:02}", tm.tm_hour, tm.tm_min, tm.tm_sec);
             item.append(" ");
             switch (level) {
                 case LogLevel::TRACE:    item.append("TRACE"); break;

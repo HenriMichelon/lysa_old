@@ -26,7 +26,7 @@ namespace lysa {
     DebugRenderer::DebugRenderer(
         const DebugConfig& config,
         const RenderingConfiguration& renderingConfiguration) :
-        VectorRenderer{config.depthTestEnable, renderingConfiguration, L"Debug Renderer"},
+        VectorRenderer{config.depthTestEnable, renderingConfiguration, "Debug Renderer"},
         config{config}{
     }
 

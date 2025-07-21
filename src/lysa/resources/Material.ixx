@@ -100,7 +100,7 @@ export namespace lysa {
         void setBypassUpload(const bool bypass) { bypassUpload = bypass; }
 
     protected:
-        Material(Type type, const std::wstring &name);
+        Material(Type type, const std::string &name);
 
     private:
         const Type      type;
@@ -127,7 +127,7 @@ export namespace lysa {
         /**
          * Creates a StandardMaterial with default parameters
          */
-        StandardMaterial(const std::wstring &name = L"StandardMaterial");
+        StandardMaterial(const std::string &name = "StandardMaterial");
 
         /**
          * Returns the material's base color.
@@ -275,9 +275,9 @@ export namespace lysa {
          * @param vertShaderFileName vertex shader file path, relative to the application directory
          * @param name Resource name
          */
-        ShaderMaterial(const std::wstring &fragShaderFileName,
-                       const std::wstring &vertShaderFileName = L"",
-                       const std::wstring &name               = L"ShaderMaterial");
+        ShaderMaterial(const std::string &fragShaderFileName,
+                       const std::string &vertShaderFileName = "",
+                       const std::string &name               = "ShaderMaterial");
 
         pipeline_id getPipelineId() const override;
 
@@ -304,8 +304,8 @@ export namespace lysa {
         MaterialData getMaterialData() const override;
 
     private:
-        const std::wstring fragFileName;
-        const std::wstring vertFileName;
+        const std::string fragFileName;
+        const std::string vertFileName;
         float4             parameters[SHADER_MATERIAL_MAX_PARAMETERS]{};
     };
 

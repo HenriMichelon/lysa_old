@@ -15,7 +15,7 @@ namespace lysa {
 
     RigidBody::RigidBody(const std::shared_ptr<Shape>& shape,
                          const collision_layer layer,
-                         const std::wstring& name):
+                         const std::string& name):
         PhysicsBody(shape,
                     layer,
                     physx::PxActorType::eRIGID_DYNAMIC,
@@ -23,7 +23,7 @@ namespace lysa {
                     RIGID_BODY) {
     }
 
-    RigidBody::RigidBody(const std::wstring& name):
+    RigidBody::RigidBody(const std::string& name):
         PhysicsBody(0,
                     physx::PxActorType::eRIGID_DYNAMIC,
                     name,

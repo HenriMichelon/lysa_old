@@ -49,14 +49,14 @@ export namespace lysa {
          * Creates an Animation
          * @param name resource name.
          */
-        Animation(const std::wstring &name);
+        Animation(const std::string &name);
 
         /**
          * Creates an Animation
          * @param tracksCount number of tracks to allocate
          * @param name resource name.
          */
-        Animation(uint32 tracksCount, const std::wstring &name);
+        Animation(uint32 tracksCount, const std::string &name);
 
         /**
          * Sets the looping mode

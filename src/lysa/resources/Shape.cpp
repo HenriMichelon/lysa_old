@@ -10,7 +10,7 @@ import lysa.application;
 
 namespace lysa {
 
-    Shape::Shape(const PhysicsMaterial* material, const std::wstring &resName):
+    Shape::Shape(const PhysicsMaterial* material, const std::string &resName):
         Resource{resName}{
         this->material = material ?
             Application::getPhysicsEngine().duplicateMaterial((material)):
@@ -20,6 +20,6 @@ namespace lysa {
     AABBShape::AABBShape(
         const std::shared_ptr<Node> &node,
         const PhysicsMaterial* material,
-        const std::wstring &resName) : AABBShape{*node, material, resName} {}
+        const std::string &resName) : AABBShape{*node, material, resName} {}
 
 }

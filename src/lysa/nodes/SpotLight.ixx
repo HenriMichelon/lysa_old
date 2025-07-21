@@ -20,7 +20,7 @@ export namespace lysa {
         /**
          * Creates a SpotLight with default parameters
          */
-        SpotLight(const std::wstring &name = TypeNames[SPOT_LIGHT]);
+        SpotLight(const std::string &name = TypeNames[SPOT_LIGHT]);
 
         /**
         * Create a SpotLight.
@@ -34,7 +34,7 @@ export namespace lysa {
                   float outerCutOffDegrees,
                   float range,
                   const float4& color = {1.0f, 1.0f, 1.0f, 1.0f},
-                  const std::wstring &nodeName= TypeNames[SPOT_LIGHT]);
+                  const std::string &nodeName= TypeNames[SPOT_LIGHT]);
 
         ~SpotLight() override = default;
 

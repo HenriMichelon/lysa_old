@@ -11,7 +11,7 @@ import lysa.application;
 
 namespace lysa {
 
-    Material::Material(const Type type, const std::wstring &name):
+    Material::Material(const Type type, const std::string &name):
         Resource{name}, type{type} {
     }
 
@@ -75,7 +75,7 @@ namespace lysa {
         return data;
     }
 
-    StandardMaterial::StandardMaterial(const std::wstring &name):
+    StandardMaterial::StandardMaterial(const std::string &name):
         Material(STANDARD, name) {
     }
 
@@ -154,9 +154,9 @@ namespace lysa {
         upload();
     }
 
-    ShaderMaterial::ShaderMaterial(const std::wstring &fragShaderFileName,
-                                   const std::wstring &vertShaderFileName,
-                                   const std::wstring &name):
+    ShaderMaterial::ShaderMaterial(const std::string &fragShaderFileName,
+                                   const std::string &vertShaderFileName,
+                                   const std::string &name):
         Material{SHADER, name},
         fragFileName{fragShaderFileName},
         vertFileName{vertShaderFileName} {

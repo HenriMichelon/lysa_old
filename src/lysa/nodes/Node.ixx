@@ -44,25 +44,25 @@ export namespace lysa {
         };
 
         static constexpr auto TypeNames = std::array {
-            L"AnimationPlayer",
-            L"Camera",
-            L"Character",
-            L"CollisionArea",
-            L"CollisionObject",
-            L"DirectionalLight",
-            L"Environment",
-            L"KinematicBody",
-            L"Light",
-            L"MeshInstance",
-            L"Node",
-            L"OmniLight",
-            L"PhysicsBody",
-            L"RayCast",
-            L"RigidBody",
-            L"Skybox",
-            L"SpotLight",
-            L"StaticBody",
-            L"Viewport"
+            "AnimationPlayer",
+            "Camera",
+            "Character",
+            "CollisionArea",
+            "CollisionObject",
+            "DirectionalLight",
+            "Environment",
+            "KinematicBody",
+            "Light",
+            "MeshInstance",
+            "Node",
+            "OmniLight",
+            "PhysicsBody",
+            "RayCast",
+            "RigidBody",
+            "Skybox",
+            "SpotLight",
+            "StaticBody",
+            "Viewport"
         };
 
         /**
@@ -73,7 +73,7 @@ export namespace lysa {
         /**
          * Creates a new node at (0.0, 0.0, 0.0) without a parent
          */
-        Node(const std::wstring &name = TypeNames[NODE], Type type = NODE);
+        Node(const std::string &name = TypeNames[NODE], Type type = NODE);
 
         /**
           * Returns the unique id of the node
@@ -323,7 +323,7 @@ export namespace lysa {
         * Returns the child node by is name. Not recursive
         */
         template <typename T = Node>
-        std::shared_ptr<T> getChild(const std::wstring& name) const {
+        std::shared_ptr<T> getChild(const std::string& name) const {
             const auto it = std::find_if(children.begin(),
                                          children.end(),
                                          [name](const std::shared_ptr<Node>& elem) {
@@ -336,7 +336,7 @@ export namespace lysa {
         * Returns the child node by its relative path (does not start with '/')
         */
         template <typename T = Node>
-        std::shared_ptr<T> getChildByPath(const std::wstring& path) const {
+        std::shared_ptr<T> getChildByPath(const std::string& path) const {
             const size_t pos = path.find('/');
             if (pos != std::string::npos) {
                 const auto child = getChild<Node>(path.substr(0, pos));
@@ -352,7 +352,7 @@ export namespace lysa {
         * Finds the first child by is name.
         */
         template<typename T = Node>
-        std::shared_ptr<T> findFirstChild(const std::wstring& name) const {
+        std::shared_ptr<T> findFirstChild(const std::string& name) const {
             for (const auto &node : children) {
                 if (node->name == name) {
                     return dynamic_pointer_cast<T>(node);
@@ -405,7 +405,7 @@ export namespace lysa {
          * Finds all children by name
          */
         template <typename T = Node>
-        std::list<std::shared_ptr<T>> findAllChildren(const std::wstring& name, const bool recursive = true) const {
+        std::list<std::shared_ptr<T>> findAllChildren(const std::string& name, const bool recursive = true) const {
             std::list<std::shared_ptr<T>> result;
             for (const auto &node : children) {
                 if (node->name == name) {
@@ -422,7 +422,7 @@ export namespace lysa {
          * Finds all children by group
          */
         template <typename T = Node>
-        std::list<std::shared_ptr<T>> findAllChildrenByGroup(const std::wstring& groupName, const bool recursive = true) const {
+        std::list<std::shared_ptr<T>> findAllChildrenByGroup(const std::string& groupName, const bool recursive = true) const {
             std::list<std::shared_ptr<T>> result;
             for (const auto &node : children) {
                 if (isInGroup(groupName)) {
@@ -443,17 +443,17 @@ export namespace lysa {
         /**
         * Returns a list of group names that the node has been added to.
         */
-        const std::list<std::wstring>& getGroups() const { return groups; }
+        const std::list<std::string>& getGroups() const { return groups; }
 
         /**
          * Adds the node to the group. Groups can be helpful to organize a subset of nodes, for example "enemies" or "stairs".
          */
-        void addToGroup(const std::wstring &group) { groups.push_back(group); }
+        void addToGroup(const std::string &group) { groups.push_back(group); }
 
         /**
          * Removes the node from the given group. Does nothing if the node is not in the group
          */
-        void removeFromGroup(const std::wstring &group) { groups.remove(group); }
+        void removeFromGroup(const std::string &group) { groups.remove(group); }
 
         /**
          * Returns the visibility of the node.
@@ -469,7 +469,7 @@ export namespace lysa {
         /**
          * Returns true if this node has been added to the given group
          */
-        auto isInGroup(const std::wstring& group) const { return std::ranges::find(groups, group) != groups.end(); }
+        auto isInGroup(const std::string& group) const { return std::ranges::find(groups, group) != groups.end(); }
 
         /**
          * Changes the node's processing behavior.
@@ -494,12 +494,12 @@ export namespace lysa {
         /**
          * Returns the node name
          */
-        const std::wstring &getName() const { return name; }
+        const std::string &getName() const { return name; }
 
         /**
          * Returns the node path
          */
-        std::wstring getPath() const;
+        std::string getPath() const;
 
         /**
         * Sets a property by its name and value.
@@ -560,7 +560,7 @@ export namespace lysa {
         /**
          * Sets the node name (purely informative)
          */
-        void setName(const std::wstring &nodeName) { name = nodeName; }
+        void setName(const std::string &nodeName) { name = nodeName; }
 
         /**
          * Creates a Tween to tweens a property of the node between an `initial` value
@@ -621,7 +621,7 @@ export namespace lysa {
         static unique_id currentId;
         unique_id        id;
         Type             type;
-        std::wstring     name;
+        std::string     name;
         Viewport*        viewport{nullptr};
         Node*            parent{nullptr};
         bool             visible{true};
@@ -629,7 +629,7 @@ export namespace lysa {
         ProcessMode      processMode{ProcessMode::INHERIT};
 
         std::list<std::shared_ptr<Tween>> tweens;
-        std::list<std::wstring>           groups;
+        std::list<std::string>           groups;
         std::list<std::shared_ptr<Node>>  children;
 
         void lockViewportUpdates();

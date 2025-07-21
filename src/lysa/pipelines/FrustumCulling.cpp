@@ -45,7 +45,7 @@ namespace lysa {
             DEBUG_NAME);
         auto tempBuffer = std::vector<char>{};
         const auto& ext = vireo.getShaderFileExtension();
-        VirtualFS::loadBinaryData(L"app://" + Application::getConfiguration().shaderDir + L"/" +
+        VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" +
             (isForScene ? SHADER_SCENE : SHADER_SHADOWMAP)
             + ext, tempBuffer);
         const auto shader = vireo.createShaderModule(tempBuffer);

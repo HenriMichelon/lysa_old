@@ -95,9 +95,9 @@ export namespace lysa {
     protected:
         uint32 shadowMapSize{512};
 
-        Light(const std::wstring &nodeName = TypeNames[LIGHT], Type type = LIGHT);
+        Light(const std::string &nodeName = TypeNames[LIGHT], Type type = LIGHT);
 
-        Light(const float4& color, const std::wstring &nodeName = TypeNames[LIGHT], Type type = LIGHT);
+        Light(const float4& color, const std::string &nodeName = TypeNames[LIGHT], Type type = LIGHT);
 
     private:
         const LightType lightType{LIGHT_UNKNOWN};

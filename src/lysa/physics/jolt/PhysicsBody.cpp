@@ -21,7 +21,7 @@ namespace lysa {
                              const collision_layer layer,
                              const JPH::EActivation activationMode,
                              const JPH::EMotionType motionType,
-                             const std::wstring& name,
+                             const std::string& name,
                              const Type type):
         CollisionObject{shape, layer, name, type},
         motionType{motionType} {
@@ -32,7 +32,7 @@ namespace lysa {
     PhysicsBody::PhysicsBody(const collision_layer layer,
                              const JPH::EActivation activationMode,
                              const JPH::EMotionType motionType,
-                             const std::wstring& name,
+                             const std::string& name,
                              const Type type):
         CollisionObject{layer, name, type},
         motionType{motionType} {

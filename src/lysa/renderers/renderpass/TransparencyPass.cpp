@@ -16,7 +16,7 @@ namespace lysa {
 
     TransparencyPass::TransparencyPass(
         const RenderingConfiguration& config):
-        Renderpass{config, L"Deferred Transparency"} {
+        Renderpass{config, "Deferred Transparency"} {
         const auto& vireo = Application::getVireo();
 
         oitPipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
@@ -46,7 +46,7 @@ namespace lysa {
             {}, name);
         compositePipelineConfig.vertexShader = loadShader(VERTEX_SHADER_COMPOSITE);
         compositePipelineConfig.fragmentShader = loadShader(FRAGMENT_SHADER_COMPOSITE);
-        compositePipeline = vireo.createGraphicPipeline(compositePipelineConfig, L"Transparency OIT Composite");
+        compositePipeline = vireo.createGraphicPipeline(compositePipelineConfig, "Transparency OIT Composite");
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
@@ -58,11 +58,11 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!oitPipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
-                std::wstring fragShaderName = FRAGMENT_SHADER_OIT;
+                std::string fragShaderName = FRAGMENT_SHADER_OIT;
                 oitPipelineConfig.cullMode = material->getCullMode();
                 oitPipelineConfig.vertexShader = loadShader(VERTEX_SHADER_OIT);
                 oitPipelineConfig.fragmentShader = loadShader(fragShaderName);
-                oitPipelines[pipelineId] = Application::getVireo().createGraphicPipeline(oitPipelineConfig, L"Transparency OIT");
+                oitPipelines[pipelineId] = Application::getVireo().createGraphicPipeline(oitPipelineConfig, "Transparency OIT");
             }
         }
     }

@@ -18,7 +18,7 @@ export namespace lysa {
         /**
          * Creates an OmniLight with default parameters
          */
-        OmniLight(const std::wstring &name = TypeNames[OMNI_LIGHT], Type type = OMNI_LIGHT);
+        OmniLight(const std::string &name = TypeNames[OMNI_LIGHT], Type type = OMNI_LIGHT);
 
         /**
          * Create an OmniLight.
@@ -29,7 +29,7 @@ export namespace lysa {
          */
         OmniLight(float range,
                   const float4& color = {1.0f, 1.0f, 1.0f, 1.0f},
-                  const std::wstring &nodeName =TypeNames[OMNI_LIGHT],
+                  const std::string &nodeName =TypeNames[OMNI_LIGHT],
                   Type type = OMNI_LIGHT);
 
         ~OmniLight() override = default;

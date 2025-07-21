@@ -23,12 +23,12 @@ export namespace lysa {
          */
         explicit KinematicBody(const std::shared_ptr<Shape>& shape,
                                collision_layer layer = 0,
-                               const std::wstring& name  = TypeNames[KINEMATIC_BODY]);
+                               const std::string& name  = TypeNames[KINEMATIC_BODY]);
 
         /**
          * Creates a KinematicBody without a collision shape,
          */
-        explicit KinematicBody(const std::wstring &name = TypeNames[KINEMATIC_BODY]);
+        explicit KinematicBody(const std::string &name = TypeNames[KINEMATIC_BODY]);
 
         ~KinematicBody() override = default;
 

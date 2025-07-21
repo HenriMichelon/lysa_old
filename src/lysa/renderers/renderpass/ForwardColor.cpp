@@ -15,7 +15,7 @@ import lysa.renderers.renderer;
 namespace lysa {
     ForwardColor::ForwardColor(
         const RenderingConfiguration& config):
-        Renderpass{config, L"Forward Color"} {
+        Renderpass{config, "Forward Color"} {
         pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Color
         if (config.bloomEnabled) {
             pipelineConfig.colorRenderFormats.push_back(config.colorRenderingFormat); // Brightness
@@ -46,8 +46,8 @@ namespace lysa {
         for (const auto& [pipelineId, materials] : pipelineIds) {
             if (!pipelines.contains(pipelineId)) {
                 const auto& material = materials.at(0);
-                std::wstring vertShaderName = DEFAULT_VERTEX_SHADER;
-                std::wstring fragShaderName = config.bloomEnabled ? DEFAULT_FRAGMENT_BLOOM_SHADER : DEFAULT_FRAGMENT_SHADER;
+                std::string vertShaderName = DEFAULT_VERTEX_SHADER;
+                std::string fragShaderName = config.bloomEnabled ? DEFAULT_FRAGMENT_BLOOM_SHADER : DEFAULT_FRAGMENT_SHADER;
                 pipelineConfig.cullMode = material->getCullMode();
                 pipelineConfig.vertexShader = loadShader(vertShaderName);
                 pipelineConfig.fragmentShader = loadShader(fragShaderName);
@@ -109,7 +109,7 @@ namespace lysa {
                     renderingConfig.colorRenderTargets[1].clearValue,
                     1,
                     vireo::MSAA::NONE,
-                    L"Brightness");
+                    "Brightness");
             } else {
                 frame.brightnessBuffer = vireo.createRenderTarget(
                     pipelineConfig.colorRenderFormats[0],

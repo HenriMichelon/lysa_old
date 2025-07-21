@@ -49,8 +49,8 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring VERTEX_SHADER{L"default.vert"};
-        const std::wstring FRAGMENT_SHADER{L"gbuffers.frag"};
+        const std::string VERTEX_SHADER{"default.vert"};
+        const std::string FRAGMENT_SHADER{"gbuffers.frag"};
 
         static constexpr int BUFFER_POSITION{0};
         static constexpr int BUFFER_NORMAL{1};

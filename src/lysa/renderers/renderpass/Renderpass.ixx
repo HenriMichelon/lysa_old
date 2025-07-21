@@ -16,7 +16,7 @@ export namespace lysa {
     public:
         Renderpass(
             const RenderingConfiguration& config,
-            const std::wstring& name);
+            const std::string& name);
 
         virtual void resize(const vireo::Extent& extent, const std::shared_ptr<vireo::CommandList>& commandList) { }
 
@@ -27,9 +27,9 @@ export namespace lysa {
         Renderpass& operator=(Renderpass&) = delete;
 
     protected:
-        const std::wstring name;
+        const std::string name;
         const RenderingConfiguration& config;
 
-        std::shared_ptr<vireo::ShaderModule> loadShader(const std::wstring& shaderName) const;
+        std::shared_ptr<vireo::ShaderModule> loadShader(const std::string& shaderName) const;
     };
 }

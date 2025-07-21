@@ -12,7 +12,7 @@ module lysa.global;
 
 namespace lysa {
 
-    std::wstring sanitizeName(const std::wstring &name) {
+    std::string sanitizeName(const std::string &name) {
         auto newName = name;
         std::ranges::replace(newName, '/', '_');
         std::ranges::replace(newName, ':', '_');
@@ -24,15 +24,6 @@ namespace lysa {
         return static_cast<float>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
     }
 
-    std::wstring to_lower(const std::wstring& str) {
-        auto s = str;
-        // https://en.cppreference.com/w/cpp/string/byte/tolower
-        std::ranges::transform(s, s.begin(),
-                  [](const unsigned char c){ return std::tolower(c); }
-                 );
-        return s;
-    }
-
     std::string to_lower(const std::string& str) {
         auto s = str;
         // https://en.cppreference.com/w/cpp/string/byte/tolower
@@ -41,56 +32,65 @@ namespace lysa {
                  );
         return s;
     }
-
+    //
+    // std::string to_lower(const std::string& str) {
+    //     auto s = str;
+    //     // https://en.cppreference.com/w/cpp/string/byte/tolower
+    //     std::ranges::transform(s, s.begin(),
+    //               [](const unsigned char c){ return std::tolower(c); }
+    //              );
+    //     return s;
+    // }
+    //
     std::string to_string(const wchar_t* wstr) {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         return conv.to_bytes(wstr);
     }
-
-    std::string to_string(const std::wstring& wstr) {
-#ifdef _WIN32
-        if (wstr.empty()) return {};
-        const int size_needed = WideCharToMultiByte(
-            CP_UTF8,
-            0,
-            wstr.data(),
-            static_cast<int>(wstr.size()),
-            nullptr, 0, nullptr, nullptr);
-        std::string result(size_needed, 0);
-        WideCharToMultiByte(
-            CP_UTF8,
-            0,
-            wstr.data(),
-            static_cast<int>(wstr.size()),
-            result.data(), size_needed,
-            nullptr, nullptr);
-        return result;
-#else
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-        return conv.to_bytes(wstr);
-#endif
-    }
-
-    std::wstring to_wstring(const std::string &str) {
-#ifdef _WIN32
-        const int size_needed = MultiByteToWideChar(
-            CP_UTF8,
-            0,
-            str.data(),
-            static_cast<int>(str.size()), nullptr, 0);
-        std::wstring result(size_needed, 0);
-        MultiByteToWideChar(
-            CP_UTF8,
-            0,
-            str.data(),
-            static_cast<int>(str.size()),
-            result.data(), size_needed);
-        return result;
-#else
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-        return conv.from_bytes(str);
-#endif
-    }
+//
+//     std::string to_string(const std::string& wstr) {
+// #ifdef _WIN32
+//         if (wstr.empty()) return {};
+//         const int size_needed = WideCharToMultiByte(
+//             CP_UTF8,
+//             0,
+//             wstr.data(),
+//             static_cast<int>(wstr.size()),
+//             nullptr, 0, nullptr, nullptr);
+//         std::string result(size_needed, 0);
+//         WideCharToMultiByte(
+//             CP_UTF8,
+//             0,
+//             wstr.data(),
+//             static_cast<int>(wstr.size()),
+//             result.data(), size_needed,
+//             nullptr, nullptr);
+//         return result;
+// #else
+//         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+//         return conv.to_bytes(wstr);
+// #endif
+//     }
+//
+//     std::string to_wstring(const std::string &str) {
+// #ifdef _WIN32
+//         const int size_needed = MultiByteToWideChar(
+//             CP_UTF8,
+//             0,
+//             str.data(),
+//             static_cast<int>(str.size()), nullptr, 0);
+//         std::string result(size_needed, 0);
+//         MultiByteToWideChar(
+//             CP_UTF8,
+//             0,
+//             str.data(),
+//             static_cast<int>(str.size()),
+//             result.data(), size_needed);
+//         return result;
+// #else
+//         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+//         return conv.from_bytes(str);
+// #endif
+//     }
 
     std::u32string to_utf32(const std::string& utf8) {
         std::u32string result;

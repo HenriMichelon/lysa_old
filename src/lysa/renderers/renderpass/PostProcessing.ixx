@@ -22,7 +22,7 @@ export namespace lysa {
             uint2  imageSize;
         };
 
-        inline static const std::wstring VERTEX_SHADER{L"quad.vert"};
+        inline static const std::string VERTEX_SHADER{"quad.vert"};
 
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
         static constexpr vireo::DescriptorIndex BINDING_DATA{1};
@@ -35,11 +35,11 @@ export namespace lysa {
 
         PostProcessing(
             const RenderingConfiguration& config,
-            const std::wstring& fragShaderName,
+            const std::string& fragShaderName,
             vireo::ImageFormat outputFormat,
             void* data,
             uint32 dataSize,
-            const std::wstring& name);
+            const std::string& name);
 
         void update(uint32 frameIndex) override;
 
@@ -76,7 +76,7 @@ export namespace lysa {
             .colorRenderTargets = {{}}
         };
 
-        const std::wstring fragShaderName;
+        const std::string fragShaderName;
         void* data{nullptr};
         std::shared_ptr<vireo::Buffer> dataUniform{nullptr};
         std::vector<FrameData> framesData;

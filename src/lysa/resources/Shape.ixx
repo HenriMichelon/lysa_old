@@ -31,7 +31,7 @@ export namespace lysa {
      */
     class Shape : public Resource {
     public:
-        Shape(const PhysicsMaterial* material, const std::wstring &resName);
+        Shape(const PhysicsMaterial* material, const std::string &resName);
 
         auto& getMaterial() const { return *material; }
 
@@ -66,7 +66,7 @@ export namespace lysa {
         BoxShape(
             const float3& extends,
             PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"BoxShape");
+            const std::string &resName = "BoxShape");
 
         std::shared_ptr<Resource> duplicate() const override;
 
@@ -88,14 +88,14 @@ export namespace lysa {
         SphereShape(
             float radius,
             const PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"SphereShape");
+            const std::string &resName = "SphereShape");
 
 #ifdef PHYSIC_ENGINE_PHYSX
         std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
 #endif
     private:
         const float radius;
-        // SphereShape(const std::wstring &resName, PhysicsMaterial* material) : Shape(material, resName), radius {0}{}
+        // SphereShape(const std::string &resName, PhysicsMaterial* material) : Shape(material, resName), radius {0}{}
     };
 
     /**
@@ -109,7 +109,7 @@ export namespace lysa {
         AABBShape(
             const std::shared_ptr<Node> &node,
             const PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"AABBShape");
+            const std::string &resName = "AABBShape");
 
         /**
          * Creates an AABBShape for a given node
@@ -117,7 +117,7 @@ export namespace lysa {
         AABBShape(
             const Node &node,
             const PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"AABBShape");
+            const std::string &resName = "AABBShape");
 
 #ifdef PHYSIC_ENGINE_PHYSX
         std::unique_ptr<physx::PxGeometry> getGeometry(const float3& scale) const override;
@@ -126,7 +126,7 @@ export namespace lysa {
         float3 extends;
         AABBShape(
             PhysicsMaterial* material,
-            const std::wstring &resName) :
+            const std::string &resName) :
             Shape{material, resName} {}
     };
 

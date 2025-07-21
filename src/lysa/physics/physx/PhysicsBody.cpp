@@ -20,7 +20,7 @@ namespace lysa {
         const std::shared_ptr<Shape>& shape,
         const collision_layer layer,
         const physx::PxActorType::Enum actorType,
-        const std::wstring& name,
+        const std::string& name,
         const Type type):
         CollisionObject{shape, layer, name, type},
         actorType{actorType} {
@@ -29,7 +29,7 @@ namespace lysa {
     PhysicsBody::PhysicsBody(
         const collision_layer layer,
         const physx::PxActorType::Enum actorType,
-        const std::wstring& name,
+        const std::string& name,
         const Type type):
         CollisionObject{layer, name, type},
         actorType{actorType} {

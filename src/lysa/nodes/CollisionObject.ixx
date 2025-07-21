@@ -91,11 +91,11 @@ export namespace lysa {
 
         CollisionObject(const std::shared_ptr<Shape>&shape,
                         collision_layer layer,
-                        const std::wstring&  name = TypeNames[COLLISION_OBJECT],
+                        const std::string&  name = TypeNames[COLLISION_OBJECT],
                         Type type = COLLISION_OBJECT);
 
         CollisionObject(collision_layer layer,
-                        const std::wstring &name = TypeNames[COLLISION_OBJECT],
+                        const std::string &name = TypeNames[COLLISION_OBJECT],
                         Type type = COLLISION_OBJECT);
 
         virtual void setPositionAndRotation();

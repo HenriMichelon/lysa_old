@@ -35,7 +35,7 @@ export namespace lysa {
         ConvexHullShape(
             const std::shared_ptr<Node> &node,
             const PhysicsMaterial* material = nullptr,
-            const std::wstring &resName = L"ConvexHullShape");
+            const std::string &resName = "ConvexHullShape");
 
         std::shared_ptr<Resource> duplicate()  const override;
 

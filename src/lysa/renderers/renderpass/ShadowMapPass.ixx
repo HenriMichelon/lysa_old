@@ -66,9 +66,9 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring VERTEX_SHADER{L"shadowmap.vert"};
-        const std::wstring FRAGMENT_SHADER{L"shadowmap.frag"};
-        const std::wstring FRAGMENT_SHADER_CUBEMAP{L"shadowmap_cubemap.frag"};
+        const std::string VERTEX_SHADER{"shadowmap.vert"};
+        const std::string FRAGMENT_SHADER{"shadowmap.frag"};
+        const std::string FRAGMENT_SHADER_CUBEMAP{"shadowmap_cubemap.frag"};
 
         static constexpr uint32 SET_RESOURCES{0};
         static constexpr uint32 SET_SCENE{1};

@@ -21,7 +21,7 @@ export namespace lysa {
 
     float getCurrentTimeMilliseconds();
 
-    std::wstring sanitizeName(const std::wstring &name);
+    std::string sanitizeName(const std::string &name);
 
     bool dirExists(const std::string& dirName);
 
@@ -42,7 +42,7 @@ export namespace lysa {
 
     std::string to_string(const wchar_t* wstr);
 
-    std::string to_string(const std::wstring& wstr);
+    // std::string to_string(const std::string& wstr);
 
     /**
      * Helper to log a vec3 (std lib code convention)
@@ -61,11 +61,11 @@ export namespace lysa {
      */
     std::string to_string(const float4& vec);
 
-    std::wstring to_wstring(const std::string& str);
+    // std::string to_wstring(const std::string& str);
 
     std::u32string to_utf32(const std::string& utf8);
 
-    std::wstring to_lower(const std::wstring& str);
+    std::string to_lower(const std::string& str);
 
     std::string to_lower(const std::string& str);
 

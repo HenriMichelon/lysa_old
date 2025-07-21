@@ -23,7 +23,7 @@ export namespace lysa {
          * Creates a Texture
          * @param name Resource name
          */
-        Texture(const std::wstring &name);
+        Texture(const std::string &name);
 
         /**
          * Returns the width in pixels on the texture

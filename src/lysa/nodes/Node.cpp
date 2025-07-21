@@ -23,7 +23,7 @@ namespace lysa {
         type            = node.type;
     }
 
-    Node::Node(const std::wstring &name, const Type type):
+    Node::Node(const std::string &name, const Type type):
         localTransform{float4x4::identity()},
         id{++currentId},
         type{type},
@@ -345,11 +345,11 @@ namespace lysa {
         return mul(float4(global, 1.0f), mul(localTransform, inverse(globalTransform))).xyz;
     }
 
-    std::wstring Node::getPath() const {
+    std::string Node::getPath() const {
         if (parent) {
-            return parent->getPath() + L"/" + getName();
+            return parent->getPath() + "/" + getName();
         }
-        return  L"/" + name;
+        return  "/" + name;
     }
 
     void Node::setProperty(const std::string &property, const std::string &value) {
@@ -361,7 +361,7 @@ namespace lysa {
             // setScale(to_float3(value));
         } else if (property == "groups") {
             for(const auto groupName : split(value, ';')) {
-                addToGroup(std::to_wstring(groupName.data()));
+                addToGroup(groupName.data());
             }
         } else if (property == "process_mode") {
             const auto v = to_lower(value);
@@ -379,7 +379,7 @@ namespace lysa {
         } else if (property == "visible") {
             setVisible(value == "true");
         } else if (property == "name") {
-            setName(std::to_wstring(value));
+            setName(value);
         } else if (property == "cast_shadows") {
             for (const auto &node : children) {
                 node->setProperty(property, value);
@@ -405,7 +405,7 @@ namespace lysa {
         for (int i = 0; i < (tab * 2); i++) {
             sstream << " ";
         }
-        sstream << " " << lysa::to_string(name) << " (" << to_string(TypeNames[type]) << ") #" << getId();
+        sstream << " " << name << " (" << TypeNames[type] << ") #" << getId();
         const auto& pos = getPosition();
         sstream << " (" << pos.x << ", " << pos.y << ", " << pos.z << ")";
         INFO(sstream.str());

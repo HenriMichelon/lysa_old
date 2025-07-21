@@ -10,13 +10,13 @@ import lysa.nodes.node;
 
 namespace lysa {
 
-    OmniLight::OmniLight(const std::wstring &name, const Type type):
+    OmniLight::OmniLight(const std::string &name, const Type type):
         Light{name, type} {
     }
 
     OmniLight::OmniLight(const float range,
                          const float4& color,
-                         const std::wstring& nodeName,
+                         const std::string& nodeName,
                          const Type type):
         Light{color, nodeName, type}, range{range} {
     }

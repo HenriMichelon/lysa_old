@@ -22,8 +22,8 @@ export namespace lysa {
         VectorRenderer(
             bool depthTestEnable,
             const RenderingConfiguration& renderingConfiguration,
-            const std::wstring& name,
-            const std::wstring& shadersName = L"vector",
+            const std::string& name,
+            const std::string& shadersName = "vector",
             bool filledTriangles = false,
             bool enableAlphaBlending = false,
             bool useCamera = true, bool useTextures = false);
@@ -76,7 +76,7 @@ export namespace lysa {
 
     private:
         static constexpr auto MAX_TEXTURES{100};
-        const std::wstring name;
+        const std::string name;
         const bool useCamera;
         const bool useTextures;
         std::shared_ptr<vireo::Image> blankImage;

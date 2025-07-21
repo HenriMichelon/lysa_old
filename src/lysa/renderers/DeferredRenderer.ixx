@@ -23,7 +23,7 @@ export namespace lysa {
     public:
         DeferredRenderer(
             const RenderingConfiguration& config,
-            const std::wstring& name);
+            const std::string& name);
 
         void update(uint32 frameIndex) override;
 

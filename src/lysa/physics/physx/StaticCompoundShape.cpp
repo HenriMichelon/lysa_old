@@ -10,7 +10,7 @@ module lysa.resources.static_compound_shape;
 
 namespace lysa {
 
-    StaticCompoundShape::StaticCompoundShape(const std::vector<SubShape> &subshapes, const std::wstring &resName) :
+    StaticCompoundShape::StaticCompoundShape(const std::vector<SubShape> &subshapes, const std::string &resName) :
         Shape{nullptr, resName} {
         for (const auto &subshape : subshapes) {
             this->subShapes.push_back(subshape);

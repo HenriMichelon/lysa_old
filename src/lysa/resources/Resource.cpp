@@ -12,7 +12,7 @@ namespace lysa {
 
     unique_id Resource::currentId{INVALID_ID};
 
-    Resource::Resource(const std::wstring& name):
+    Resource::Resource(const std::string& name):
         id{++currentId},
         name{sanitizeName(name)} {
     }

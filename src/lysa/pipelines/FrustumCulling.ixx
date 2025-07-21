@@ -43,9 +43,9 @@ export namespace lysa {
         static constexpr vireo::DescriptorIndex BINDING_OUTPUT{4};
         static constexpr vireo::DescriptorIndex BINDING_COUNTER{5};
 
-        const std::wstring DEBUG_NAME{L"FrustumCulling"};
-        const std::wstring SHADER_SCENE{L"frustum_culling.comp"};
-        const std::wstring SHADER_SHADOWMAP{L"frustum_culling_shadowmap.comp"};
+        const std::string DEBUG_NAME{"FrustumCulling"};
+        const std::string SHADER_SCENE{"frustum_culling.comp"};
+        const std::string SHADER_SHADOWMAP{"frustum_culling_shadowmap.comp"};
 
         struct Global {
             uint32 drawCommandsCount;

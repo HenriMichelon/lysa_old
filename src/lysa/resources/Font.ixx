@@ -32,7 +32,7 @@ export namespace lysa {
          * @param size : height in pixels on a base resolution of 1920x1080
          * @param window : target window, default to main window
          */
-        Font(const std::wstring &path, uint32 size, Window* window = nullptr);
+        Font(const std::string &path, uint32 size, Window* window = nullptr);
 
         Font(const Font &font, uint32 size, Window* window = nullptr);
 
@@ -79,7 +79,7 @@ export namespace lysa {
         };
 
         std::unordered_map<char32_t, CachedCharacter> characterCache;
-        const std::wstring path;
+        const std::string path;
         const uint32 size;
         Window* window;
 

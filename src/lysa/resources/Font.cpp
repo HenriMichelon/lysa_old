@@ -92,11 +92,11 @@ namespace lysa {
             static_cast<uint32>(width),
             static_cast<uint32>(height),
             vireo::ImageFormat::B8G8R8A8_SRGB,
-            L"");
+            "");
         if constexpr (isImageCacheEnabled()) {
             imageCache[text] = image;
         }
-        // image->save(L"text.png");
+        // image->save("text.png");
         return image;
     }
 
@@ -121,7 +121,7 @@ namespace lysa {
         return maxHeight;
     }
 
-    Font::Font(const std::wstring &path, const uint32 size, Window* window) :
+    Font::Font(const std::string &path, const uint32 size, Window* window) :
         Resource{path},
         path{path},
         size{size},
@@ -133,7 +133,7 @@ namespace lysa {
         fontBuffer = std::make_unique<std::vector<unsigned char>>((std::istreambuf_iterator(fontFile)),
                                                         std::istreambuf_iterator<char>());
         if (!stbtt_InitFont(&font, fontBuffer->data(), stbtt_GetFontOffsetForIndex(fontBuffer->data(), 0))) {
-            throw Exception("Failed to initialize font", lysa::to_string(path));
+            throw Exception("Failed to initialize font", path);
         }
         auto targetHeight = size * this->window->getExtent().height / VECTOR_SCREEN_SIZE;
         scale = stbtt_ScaleForMappingEmToPixels (&font, targetHeight);

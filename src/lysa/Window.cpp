@@ -34,7 +34,7 @@ namespace lysa {
         framesData.resize(config.renderingConfig.framesInFlight);
         auto& vireo = Application::getVireo();
         for (auto& frame : framesData) {
-            frame.inFlightFence = vireo.createFence(true, L"Present Fence");
+            frame.inFlightFence = vireo.createFence(true, "Present Fence");
             frame.commandAllocator = vireo.createCommandAllocator(vireo::CommandType::GRAPHIC);
             frame.computeCommandList = frame.commandAllocator->createCommandList();
             frame.preRenderCommandList = frame.commandAllocator->createCommandList();
@@ -43,9 +43,9 @@ namespace lysa {
             frame.preRenderSemaphore = vireo.createSemaphore(vireo::SemaphoreType::BINARY);
         }
         if (config.renderingConfig.rendererType == RendererType::FORWARD) {
-            renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, L"Forward Renderer");
+            renderer = std::make_unique<ForwardRenderer>(config.renderingConfig, "Forward Renderer");
         } else {
-            renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, L"Deferrer Renderer");
+            renderer = std::make_unique<DeferredRenderer>(config.renderingConfig, "Deferrer Renderer");
         }
         const auto& frame = framesData[0];
         frame.commandAllocator->reset();
@@ -235,7 +235,7 @@ namespace lysa {
     }
 
     void Window::addPostprocessing(
-        const std::wstring& fragShaderName,
+        const std::string& fragShaderName,
         const vireo::ImageFormat outputFormat,
         void* data, const uint32 dataSize) const {
         waitIdle();
@@ -245,7 +245,7 @@ namespace lysa {
             data, dataSize);
     }
 
-    void Window::removePostprocessing(const std::wstring& fragShaderName) const {
+    void Window::removePostprocessing(const std::string& fragShaderName) const {
         waitIdle();
         renderer->removePostprocessing(fragShaderName);
     }

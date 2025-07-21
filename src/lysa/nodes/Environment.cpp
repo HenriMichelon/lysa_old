@@ -10,7 +10,7 @@ namespace lysa {
 
     Environment::Environment(
             const float4    colorAndIntensity,
-            const std::wstring &nodeName):
+            const std::string &nodeName):
         Node{nodeName, ENVIRONMENT},
         ambientColorIntensity{colorAndIntensity} {
     }

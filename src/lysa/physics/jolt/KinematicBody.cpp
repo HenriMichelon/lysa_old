@@ -16,7 +16,7 @@ namespace lysa {
 
     KinematicBody::KinematicBody(const std::shared_ptr<Shape>& shape,
                                  const collision_layer  layer,
-                                 const std::wstring& name):
+                                 const std::string& name):
         PhysicsBody(shape,
                     layer,
                     JPH::EActivation::Activate,
@@ -25,7 +25,7 @@ namespace lysa {
                     KINEMATIC_BODY) {
     }
 
-    KinematicBody::KinematicBody(const std::wstring& name):
+    KinematicBody::KinematicBody(const std::string& name):
        PhysicsBody(0,
                    JPH::EActivation::Activate,
                    JPH::EMotionType::Kinematic,

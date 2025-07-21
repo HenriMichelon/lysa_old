@@ -22,19 +22,19 @@ export namespace lysa {
          */
         StaticBody(const std::shared_ptr<Shape>& shape,
                    collision_layer layer,
-                   const std::wstring& name = TypeNames[STATIC_BODY]);
+                   const std::string& name = TypeNames[STATIC_BODY]);
 
         /**
          * Creates a StaticBody without a collision shape`
          * belonging to the `layer` layers
          */
         explicit StaticBody(collision_layer layer,
-                            const std::wstring &name = TypeNames[STATIC_BODY]);
+                            const std::string &name = TypeNames[STATIC_BODY]);
 
         /**
         * Creates a StaticBody without a collision shape`
         */
-        explicit StaticBody(const std::wstring &name = TypeNames[STATIC_BODY]);
+        explicit StaticBody(const std::string &name = TypeNames[STATIC_BODY]);
 
         ~StaticBody() override = default;
 

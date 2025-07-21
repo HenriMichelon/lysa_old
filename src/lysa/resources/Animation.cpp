@@ -79,9 +79,9 @@ namespace lysa {
         return value;
     }
 
-    Animation::Animation(const std::wstring &name): Resource{name} {}
+    Animation::Animation(const std::string &name): Resource{name} {}
 
-    Animation::Animation(const uint32 tracksCount, const std::wstring &name): Resource {name} {
+    Animation::Animation(const uint32 tracksCount, const std::string &name): Resource {name} {
         tracks.resize(tracksCount);
     }
 

@@ -29,9 +29,9 @@ namespace lysa {
     Application::Application(ApplicationConfiguration& config) :
         config{config},
         vireo{vireo::Vireo::create(config.backend)},
-        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, L"Main graphic Queue")},
-        computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, L"Main compute Queue")},
-        transferQueue{vireo->createSubmitQueue(vireo::CommandType::TRANSFER, L"Main transfer Queue")},
+        graphicQueue{vireo->createSubmitQueue(vireo::CommandType::GRAPHIC, "Main graphic Queue")},
+        computeQueue{vireo->createSubmitQueue(vireo::CommandType::COMPUTE, "Main compute Queue")},
+        transferQueue{vireo->createSubmitQueue(vireo::CommandType::TRANSFER, "Main transfer Queue")},
         resources{*vireo, config.resourcesConfig, *graphicQueue},
         asyncQueue{vireo, transferQueue, graphicQueue},
         physicsEngine{PhysicsEngine::create(config.physicsConfig)} {

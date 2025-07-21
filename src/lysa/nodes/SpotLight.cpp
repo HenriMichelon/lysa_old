@@ -10,7 +10,7 @@ import lysa.nodes.node;
 
 namespace lysa {
 
-    SpotLight::SpotLight(const std::wstring &name):
+    SpotLight::SpotLight(const std::string &name):
         OmniLight{name, SPOT_LIGHT} {
     }
 
@@ -18,7 +18,7 @@ namespace lysa {
                          const float outerCutOffDegrees,
                          const float range,
                          const float4& color,
-                         const std::wstring &nodeName):
+                         const std::string &nodeName):
         OmniLight{range, color, nodeName, SPOT_LIGHT},
         fov{radians(outerCutOffDegrees)},
         cutOff{std::cos(radians(cutOffDegrees))},

@@ -56,7 +56,7 @@ export namespace lysa {
         explicit Character(float height,
                            float radius,
                            collision_layer layer,
-                           const std::wstring &name = TypeNames[CHARACTER]);
+                           const std::string &name = TypeNames[CHARACTER]);
 
         /**
          * Sets a new capsule shape, recreates the virtualCharacter in the physic system

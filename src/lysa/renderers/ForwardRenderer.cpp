@@ -12,7 +12,7 @@ import lysa.global;
 namespace lysa {
     ForwardRenderer::ForwardRenderer(
         const RenderingConfiguration& config,
-        const std::wstring& name) :
+        const std::string& name) :
         Renderer{config, false, name},
         forwardColorPass{config} {
     }

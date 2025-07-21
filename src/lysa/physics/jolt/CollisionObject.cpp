@@ -21,7 +21,7 @@ namespace lysa {
     CollisionObject::CollisionObject(
         const std::shared_ptr<Shape>& shape,
         const uint32 layer,
-        const std::wstring& name,
+        const std::string& name,
         const Type type):
         Node{name, type},
         collisionLayer{layer},
@@ -30,7 +30,7 @@ namespace lysa {
 
     CollisionObject::CollisionObject(
         const uint32 layer,
-        const std::wstring& name,
+        const std::string& name,
         const Type type):
         Node{name, type},
         collisionLayer{layer} {

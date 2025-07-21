@@ -16,7 +16,7 @@ import lysa.renderers.renderer;
 namespace lysa {
     GBufferPass::GBufferPass(
         const RenderingConfiguration& config):
-        Renderpass{config, L"GBuffer"} {
+        Renderpass{config, "GBuffer"} {
 
         pipelineConfig.depthStencilImageFormat = config.depthStencilFormat;
         pipelineConfig.backStencilOpState = pipelineConfig.frontStencilOpState;
@@ -92,7 +92,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_POSITION].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"Position");
+                "Position");
             frame.normalBuffer = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[BUFFER_NORMAL],
                 extent.width,extent.height,
@@ -100,7 +100,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_NORMAL].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"Normal");
+                "Normal");
             frame.albedoBuffer = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[BUFFER_ALBEDO],
                 extent.width,extent.height,
@@ -108,7 +108,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_ALBEDO].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"Albedo");
+                "Albedo");
             frame.emissiveBuffer = vireo.createRenderTarget(
                 pipelineConfig.colorRenderFormats[BUFFER_EMISSIVE],
                 extent.width,extent.height,
@@ -116,7 +116,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[BUFFER_EMISSIVE].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"Emissive");
+                "Emissive");
             commandList->barrier(
                 {
                     frame.positionBuffer,

@@ -11,7 +11,7 @@ module lysa.resources.static_compound_shape;
 
 namespace lysa {
 
-    StaticCompoundShape::StaticCompoundShape(const std::vector<SubShape> &subshapes, const std::wstring &resName) :
+    StaticCompoundShape::StaticCompoundShape(const std::vector<SubShape> &subshapes, const std::string &resName) :
         Shape{nullptr, resName} {
         const auto settings = new JPH::StaticCompoundShapeSettings();
         for (const auto &subshape : subshapes) {

@@ -17,12 +17,12 @@ namespace lysa {
 
     CollisionArea::CollisionArea(const std::shared_ptr<Shape>& shape,
                                  const uint32 layer,
-                                 const std::wstring& name):
+                                 const std::string& name):
         CollisionObject{shape, layer, name, COLLISION_AREA} {
         setShape(shape);
     }
 
-    CollisionArea::CollisionArea(const std::wstring &name):
+    CollisionArea::CollisionArea(const std::string &name):
         CollisionObject{ 0, name, COLLISION_AREA} {
     }
 
@@ -43,10 +43,10 @@ namespace lysa {
             // we must have at least a class name
             if (parts.size() > 0) {
                 if (parts.at(0) == "BoxShape") {
-                    if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for ", lysa::to_string(getName())); }
+                    if (parts.size() < 2) { throw Exception("Missing parameter for BoxShape for ", getName()); }
                     setShape(make_shared<BoxShape>(to_float3(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "SphereShape") {
-                    if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for ", lysa::to_string(getName())); }
+                    if (parts.size() < 2) { throw Exception("Missing parameter for SphereShape for ", getName()); }
                     setShape(make_shared<SphereShape>(std::stof(parts[1].data()), nullptr, getName()));
                 } else if (parts.at(0) == "MeshShape") {
                     setShape(std::make_shared<MeshShape>(getSharedPtr()));
@@ -63,7 +63,7 @@ namespace lysa {
                     }
                     setShape(std::make_shared<StaticCompoundShape>(subShapes));
                 } else {
-                    throw Exception("CollisionArea : missing or invalid shape for ", lysa::to_string(getName()));
+                    throw Exception("CollisionArea : missing or invalid shape for ", getName());
                 }
             }
         }

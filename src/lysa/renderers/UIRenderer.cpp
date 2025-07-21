@@ -15,8 +15,8 @@ namespace lysa {
         VectorRenderer{
             false,
             renderingConfiguration,
-            L"UI Renderer",
-            L"vector_ui",
+            "UI Renderer",
+            "vector_ui",
             true, true,
         false, true} {
     }

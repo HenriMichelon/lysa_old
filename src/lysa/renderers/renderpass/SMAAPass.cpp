@@ -16,7 +16,7 @@ namespace lysa {
 
     SMAAPass::SMAAPass(
         const RenderingConfiguration& config):
-        Renderpass{config, L"SMAA"},
+        Renderpass{config, "SMAA"},
         data{ .edgeThreshold = config.smaaEdgeThreshold, .blendMaxSteps = config.smaaBlendMaxSteps } {
         const auto& vireo = Application::getVireo();
 
@@ -28,12 +28,12 @@ namespace lysa {
         descriptorLayout->add(PostProcessing::BINDING_TEXTURES, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
         descriptorLayout->build();
 
-        dataBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Data), 1, name + L" Data");
+        dataBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(Data), 1, name + " Data");
         dataBuffer->map();
         dataBuffer->write(&data);
         dataBuffer->unmap();
 
-        paramsBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessing::PostProcessingParams), 1, name + L" Params");
+        paramsBuffer = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessing::PostProcessingParams), 1, name + " Params");
         paramsBuffer->map();
 
         pipelineConfig.resources = vireo.createPipelineResources({
@@ -133,7 +133,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[0].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"SMAA Edge detect");
+                "SMAA Edge detect");
             frame.blendWeightBuffer = vireo.createRenderTarget(
                 vireo::ImageFormat::R16G16_SFLOAT,
                 extent.width,extent.height,
@@ -141,7 +141,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[0].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"SMAA Blend weight");
+                "SMAA Blend weight");
             frame.colorBuffer = vireo.createRenderTarget(
                 config.swapChainFormat,
                 extent.width,extent.height,
@@ -149,7 +149,7 @@ namespace lysa {
                 renderingConfig.colorRenderTargets[0].clearValue,
                 1,
                 vireo::MSAA::NONE,
-                L"SMAA Color");
+                "SMAA Color");
             commandList->barrier(
                 { frame.edgeDetectBuffer, frame.blendWeightBuffer },
                 vireo::ResourceState::UNDEFINED,

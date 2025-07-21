@@ -33,10 +33,10 @@ export namespace lysa {
             uint32 frameIndex);
 
     private:
-        const std::wstring VERTEX_SHADER_OIT{L"default.vert"};
-        const std::wstring FRAGMENT_SHADER_OIT{L"transparency_oit.frag"};
-        const std::wstring VERTEX_SHADER_COMPOSITE{L"quad.vert"};
-        const std::wstring FRAGMENT_SHADER_COMPOSITE{L"transparency_oit_composite.frag"};
+        const std::string VERTEX_SHADER_OIT{"default.vert"};
+        const std::string FRAGMENT_SHADER_OIT{"transparency_oit.frag"};
+        const std::string VERTEX_SHADER_COMPOSITE{"quad.vert"};
+        const std::string FRAGMENT_SHADER_COMPOSITE{"transparency_oit_composite.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_ACCUM_BUFFER{0};
         static constexpr vireo::DescriptorIndex BINDING_REVEALAGE_BUFFER{1};

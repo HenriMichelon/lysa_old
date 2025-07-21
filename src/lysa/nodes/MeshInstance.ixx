@@ -30,7 +30,7 @@ export namespace lysa {
         /**
          * Creates a MeshInstance with the given Mesh
          */
-        MeshInstance(const std::shared_ptr<Mesh>& mesh, const std::wstring &name = TypeNames[MESH_INSTANCE]);
+        MeshInstance(const std::shared_ptr<Mesh>& mesh, const std::string &name = TypeNames[MESH_INSTANCE]);
 
         /**
          * Returns the associated Mesh

@@ -38,8 +38,8 @@ export namespace lysa {
         }
 
     private:
-        const std::wstring VERTEX_SHADER{L"quad.vert"};
-        const std::wstring FRAGMENT_SHADER{L"ssao.frag"};
+        const std::string VERTEX_SHADER{"quad.vert"};
+        const std::string FRAGMENT_SHADER{"ssao.frag"};
 
         static constexpr vireo::DescriptorIndex BINDING_PARAMS{0};
         static constexpr vireo::DescriptorIndex BINDING_POSITION_BUFFER{1};

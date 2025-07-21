@@ -13,11 +13,11 @@ import lysa.virtual_fs;
 namespace lysa {
     PostProcessing::PostProcessing(
         const RenderingConfiguration& config,
-        const std::wstring& fragShaderName,
+        const std::string& fragShaderName,
         const vireo::ImageFormat outputFormat,
         void* data,
         const uint32 dataSize,
-        const std::wstring& name):
+        const std::string& name):
         Renderpass{config, name},
         fragShaderName{fragShaderName},
         data{data},
@@ -30,7 +30,7 @@ namespace lysa {
         descriptorLayout->add(BINDING_PARAMS, vireo::DescriptorType::UNIFORM);
         if (data) {
             descriptorLayout->add(BINDING_DATA, vireo::DescriptorType::UNIFORM);
-            dataUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + L" Data");
+            dataUniform = Application::getVireo().createBuffer(vireo::BufferType::UNIFORM, dataSize, 1, name + " Data");
             dataUniform->map();
         }
         descriptorLayout->add(BINDING_TEXTURES, vireo::DescriptorType::SAMPLED_IMAGE, TEXTURES_COUNT);
@@ -44,12 +44,12 @@ namespace lysa {
             {},
             name);
         pipelineConfig.vertexShader = loadShader(VERTEX_SHADER);
-        pipelineConfig.fragmentShader = loadShader(fragShaderName + L".frag");
+        pipelineConfig.fragmentShader = loadShader(fragShaderName + ".frag");
         pipeline = vireo.createGraphicPipeline(pipelineConfig, name);
 
         framesData.resize(config.framesInFlight);
         for (auto& frame : framesData) {
-            frame.paramsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + L" Params");
+            frame.paramsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(PostProcessingParams), 1, name + " Params");
             frame.paramsUniform->map();
             frame.params.applyBloom = config.bloomEnabled ? 1u : 0u;
             frame.descriptorSet = vireo.createDescriptorSet(descriptorLayout, name);

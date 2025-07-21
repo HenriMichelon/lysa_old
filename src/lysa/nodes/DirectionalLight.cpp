@@ -11,7 +11,7 @@ import lysa.nodes.node;
 namespace lysa {
 
     DirectionalLight::DirectionalLight(const float4& color,
-                                       const std::wstring &nodeName):
+                                       const std::string &nodeName):
         Light{color, nodeName, DIRECTIONAL_LIGHT} {
         shadowMapSize = 1024;
     }

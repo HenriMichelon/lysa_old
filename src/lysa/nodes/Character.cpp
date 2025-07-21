@@ -11,7 +11,7 @@ namespace lysa {
     Character::Character(const float height,
                          const float radius,
                          const collision_layer layer,
-                         const std::wstring& name):
+                         const std::string& name):
         CollisionObject(layer,
                         name,
                         CHARACTER),

@@ -23,7 +23,7 @@ namespace lysa {
         const RenderingConfiguration& config,
         const std::shared_ptr<Light>& light,
         const DeviceMemoryArray& meshInstancesDataArray):
-        Renderpass{config, L"ShadowMapPass"},
+        Renderpass{config, "ShadowMapPass"},
         light{light},
         meshInstancesDataArray{meshInstancesDataArray},
         sceneConfig{sceneConfig},

@@ -14,14 +14,14 @@ namespace lysa {
     MeshShape::MeshShape(
         const std::shared_ptr<Node> &node,
         const PhysicsMaterial* material,
-        const std::wstring &resName ):
+        const std::string &resName ):
         Shape{material, resName} {
         meshInstance = std::dynamic_pointer_cast<MeshInstance>(node);
         if (meshInstance == nullptr) {
             meshInstance = node->findFirstChild<MeshInstance>();
         }
         if (meshInstance == nullptr) {
-            throw Exception("MeshShape : Node ", lysa::to_string(node->getName()), "does not have a MeshInstance child");
+            throw Exception("MeshShape : Node ", node->getName(), " does not have a MeshInstance child");
         }
     }
 

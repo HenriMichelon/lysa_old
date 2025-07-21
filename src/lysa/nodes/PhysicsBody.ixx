@@ -47,12 +47,12 @@ export namespace lysa {
                     collision_layer layer,
                     JPH::EActivation activationMode,
                     JPH::EMotionType motionType,
-                    const std::wstring& name= TypeNames[PHYSICS_BODY],
+                    const std::string& name= TypeNames[PHYSICS_BODY],
                     Type type = PHYSICS_BODY);
         PhysicsBody(collision_layer layer,
                     JPH::EActivation activationMode,
                     JPH::EMotionType motionType,
-                    const std::wstring& name = TypeNames[PHYSICS_BODY],
+                    const std::string& name = TypeNames[PHYSICS_BODY],
                     Type type = PHYSICS_BODY);
 #endif
 #ifdef PHYSIC_ENGINE_PHYSX
@@ -60,11 +60,11 @@ export namespace lysa {
         PhysicsBody(const std::shared_ptr<Shape>& shape,
                     collision_layer layer,
                     physx::PxActorType::Enum actorType,
-                    const std::wstring& name = TypeNames[PHYSICS_BODY],
+                    const std::string& name = TypeNames[PHYSICS_BODY],
                     Type type = PHYSICS_BODY);
         PhysicsBody(collision_layer layer,
                     physx::PxActorType::Enum actorType,
-                    const std::wstring& name = TypeNames[PHYSICS_BODY],
+                    const std::string& name = TypeNames[PHYSICS_BODY],
                     Type type = PHYSICS_BODY);
         void createShape() override;
 #endif

@@ -55,11 +55,11 @@ export namespace lysa {
         void waitIdle() const;
 
         void addPostprocessing(
-            const std::wstring& fragShaderName,
+            const std::string& fragShaderName,
             vireo::ImageFormat outputFormat,
             void* data = nullptr, uint32 dataSize = 0) const;
 
-        void removePostprocessing(const std::wstring& fragShaderName) const;
+        void removePostprocessing(const std::string& fragShaderName) const;
 
         void show() const;
 

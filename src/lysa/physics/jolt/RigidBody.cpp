@@ -19,7 +19,7 @@ namespace lysa {
 
     RigidBody::RigidBody(const std::shared_ptr<Shape>& shape,
                          const collision_layer layer,
-                         const std::wstring& name):
+                         const std::string& name):
         PhysicsBody(shape,
                     layer,
                     JPH::EActivation::Activate,
@@ -28,7 +28,7 @@ namespace lysa {
                     RIGID_BODY) {
     }
 
-    RigidBody::RigidBody(const std::wstring& name):
+    RigidBody::RigidBody(const std::string& name):
         PhysicsBody(0,
                     JPH::EActivation::Activate,
                     JPH::EMotionType::Dynamic,

@@ -13,7 +13,7 @@ namespace lysa {
     Renderer::Renderer(
         const RenderingConfiguration& config,
         const bool withStencil,
-        const std::wstring& name) :
+        const std::string& name) :
         config{config},
         name{name},
         withStencil{withStencil},
@@ -26,11 +26,11 @@ namespace lysa {
         if (config.bloomEnabled) {
             bloomBlurPass = std::make_unique<PostProcessing>(
                 config,
-                L"bloom_blur",
+                "bloom_blur",
                 config.colorRenderingFormat,
                 &bloomBlurData,
                 sizeof(bloomBlurData),
-                L"Bloom blur");
+                "Bloom blur");
         }
         const auto needToneMapping =
             config.colorRenderingFormat == vireo::ImageFormat::R16G16B16A16_UNORM ||
@@ -41,15 +41,15 @@ namespace lysa {
             config.colorRenderingFormat == vireo::ImageFormat::R8G8B8A8_SNORM;
         if (needToneMapping) {
             addPostprocessing(
-                config.toneMappingType == ToneMappingType::REINHARD ? L"reinhard" :
-                config.toneMappingType == ToneMappingType::ACES ? L"aces" :
-                L"gamma_correction",
+                config.toneMappingType == ToneMappingType::REINHARD ? "reinhard" :
+                config.toneMappingType == ToneMappingType::ACES ? "aces" :
+                "gamma_correction",
                 config.swapChainFormat,
                 &gammaCorrectionData,
                 sizeof(gammaCorrectionData));
         } else if (needGammaCorrection) {
             addPostprocessing(
-                L"gamma_correction",
+                "gamma_correction",
                 config.swapChainFormat,
                 &gammaCorrectionData,
                 sizeof(gammaCorrectionData));
@@ -57,7 +57,7 @@ namespace lysa {
         switch (config.antiAliasingType) {
             case AntiAliasingType::FXAA:
                 addPostprocessing(
-                    L"fxaa",
+                    "fxaa",
                     config.swapChainFormat,
                     &fxaaData,
                     sizeof(fxaaData));
@@ -241,7 +241,7 @@ namespace lysa {
                 { .depthStencil = { .depth = 1.0f, .stencil = 0 } },
                 1,
                 config.msaa,
-                name + L" DepthStencil");
+                name + " DepthStencil");
             const auto depthStage =
                config.depthStencilFormat == vireo::ImageFormat::D32_SFLOAT_S8_UINT ||
                config.depthStencilFormat == vireo::ImageFormat::D24_UNORM_S8_UINT   ?
@@ -287,7 +287,7 @@ namespace lysa {
     }
 
     void Renderer::addPostprocessing(
-        const std::wstring& fragShaderName,
+        const std::string& fragShaderName,
         const vireo::ImageFormat outputFormat,
         void* data,
         const uint32 dataSize) {
@@ -302,7 +302,7 @@ namespace lysa {
         postProcessingPasses.push_back(postProcessingPass);
     }
 
-    void Renderer::removePostprocessing(const std::wstring& fragShaderName) {
+    void Renderer::removePostprocessing(const std::string& fragShaderName) {
         std::erase_if(postProcessingPasses, [&fragShaderName](const std::shared_ptr<PostProcessing>& item) {
             return item->getFragShaderName() == fragShaderName;
         });
