@@ -7,6 +7,7 @@
 module lysa.ui.text;
 
 import lysa.ui.window;
+import lysa.ui.window_manager;
 
 namespace lysa::ui {
 
@@ -33,13 +34,17 @@ namespace lysa::ui {
         refresh();
     }
 
-    void Text::getSize(float &width, float &height) { getFont().getSize(text, width, height); }
+    void Text::getSize(float &width, float &height) {
+        getFont().getSize(text, width, height);
+    }
 
     void Text::_setSize(const float width, const float height) {
+        if (!window) { return; }
         if (width == 0 && height == 0 && rect.width == 0 && rect.height == 0) {
             float w, h;
             getSize(w, h);
-            _setSize(w, h);
+            const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
+            _setSize(w / ratio, h);
         } else {
             Widget::_setSize(width, height);
         }
@@ -58,7 +63,9 @@ namespace lysa::ui {
         if (all(textColor == float4{0.0f})) {
             textColor = static_cast<Window *>(window)->getDefaultTextColor();
         }
+        const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
         getSize(rect.width, rect.height);
+        rect.width /= ratio;
         Widget::eventCreate();
     }
 

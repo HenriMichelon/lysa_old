@@ -30,6 +30,7 @@ namespace lysa {
             config.renderingConfig.presentMode,
             config.renderingConfig.framesInFlight)},
         uiRenderer{config.renderingConfig},
+        windowManager{*this, uiRenderer,config.defaultFontName, config.defaultFontSize},
         rootNode{rootNode} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
@@ -88,11 +89,20 @@ namespace lysa {
         return viewport;
     }
 
-    void Window::input(InputEvent &inputEvent) const {
+    void Window::input(InputEvent &inputEvent) {
         if (stopped) { return; }
+        if (windowManager.onInput(inputEvent)) return;
         for (const auto& viewport : viewports) {
             viewport->input(inputEvent);
         }
+    }
+
+    std::shared_ptr<ui::Window> Window::add(const std::shared_ptr<ui::Window> &window) {
+        return windowManager.add(window);
+    }
+
+    void Window::remove(const std::shared_ptr<ui::Window> &window) {
+        windowManager.remove(window);
     }
 
     void Window::updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const {
@@ -111,6 +121,8 @@ namespace lysa {
             }
         }
         renderer->update(frameIndex);
+        // Register UI drawing commands
+        windowManager.drawFrame();
     }
 
     void Window::physicsProcess(const float delta) const {

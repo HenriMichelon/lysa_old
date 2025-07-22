@@ -209,8 +209,11 @@ namespace lysa::ui {
         }
     }
 
-    void StyleClassic::drawBox(const Widget &widget, const StyleClassicResource &resources, UIRenderer &renderer,
-                               const bool pushable) const {
+    void StyleClassic::drawBox(
+        const Widget &widget,
+        const StyleClassicResource &resources,
+        UIRenderer &renderer,
+        const bool pushable) const {
         if ((widget.getWidth() < 4) || (widget.getHeight() < 4)) {
             return;
         }
@@ -299,6 +302,7 @@ namespace lysa::ui {
         renderer.setPenColor(float4{widget.getTextColor().r, widget.getTextColor().g, widget.getTextColor().b, widget.getTransparency()});
         auto rect = widget.getRect();
         widget.getSize(rect.width, rect.height);
+        rect.width /= renderer.getAspectRatio();
         renderer.drawText(widget.getText(), widget.getFont(), rect, widget.getRect().width, widget.getRect().height);
     }
 

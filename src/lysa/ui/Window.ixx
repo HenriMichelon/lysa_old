@@ -212,7 +212,7 @@ export namespace lysa::ui {
 
         auto& getDefaultTextColor() const { return defaultTextColor; }
 
-        auto setDefaultTextColor(const float4& color) { return defaultTextColor = color; }
+        void setDefaultTextColor(const float4& color) { defaultTextColor = color; }
 
         void refresh() const;
 
@@ -256,8 +256,8 @@ export namespace lysa::ui {
         Rect rect;
         float minWidth{2.0f};
         float minHeight{2.0f};
-        float maxWidth;
-        float maxHeight;
+        float maxWidth{VECTOR_SCREEN_SIZE};
+        float maxHeight{VECTOR_SCREEN_SIZE};
         std::shared_ptr<Style> layout{nullptr};
         std::shared_ptr<Widget> widget{nullptr};
         Widget* focusedWidget{nullptr};

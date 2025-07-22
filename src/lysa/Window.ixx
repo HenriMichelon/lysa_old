@@ -22,6 +22,8 @@ import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.ui;
+import lysa.ui.window;
+import lysa.ui.window_manager;
 
 export namespace lysa {
     /**
@@ -92,6 +94,23 @@ export namespace lysa {
          */
         void setMousePosition(const float2& position) const;
 
+        /**
+       * Adds a GUI Window to the Window manager for display
+       * @param window    The window to display must not be yet added to the window manager
+       */
+        std::shared_ptr<ui::Window> add(const std::shared_ptr<ui::Window> &window);
+
+        /**
+         * Removes the Window from the Window manager
+         * @param window    The window to remove must be added to the window manager before
+         */
+        void remove(const std::shared_ptr<ui::Window> &window);
+
+        /**
+          * Returns the default font loaded at startup
+          */
+        auto& getDefaultFont() const { return windowManager.getDefaultFont(); }
+
         const auto& getConfiguration() const { return config; }
 
         void updatePipelines(const std::unordered_map<pipeline_id, std::vector<std::shared_ptr<Material>>>& pipelineIds) const;
@@ -126,8 +145,10 @@ export namespace lysa {
         // Scene renderer
         std::unique_ptr<Renderer> renderer;
         std::vector<std::shared_ptr<Viewport>> viewports;
-        UIRenderer uiRenderer;
         std::shared_ptr<Node> rootNode;
+
+        UIRenderer uiRenderer;
+        ui::WindowManager windowManager;
 
         void* createWindow();
 
@@ -144,8 +165,8 @@ export namespace lysa {
 
         bool mainWindow{false};
 
-        // Propagate input event to the UI Window manager and to the current scene tree
-        void input(InputEvent &inputEvent) const;
+        // Propagate the input event to the UI Window manager and to the current scene tree
+        void input(InputEvent &inputEvent);
 
         void resize();
 

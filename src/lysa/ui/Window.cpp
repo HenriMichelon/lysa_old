@@ -24,11 +24,9 @@ namespace lysa::ui {
     }
 
     void Window::attach(WindowManager* windowManager) {
-        assert([&]{ return windowManager == nullptr;} , "ui::Window must not be already attached to a manager");
+        assert([&]{ return this->windowManager == nullptr;} , "ui::Window must not be already attached to a manager");
         this->windowManager = windowManager;
         const UIRenderer& renderer = windowManager->getRenderer();
-        maxWidth = renderer.getExtent().x;
-        maxHeight = renderer.getExtent().y;
     }
 
     void Window::detach() {

@@ -11,7 +11,9 @@ import lysa.ui.window_manager;
 
 namespace lysa::ui {
 
-    Image::Image(const std::shared_ptr<lysa::Image> &image, const bool autoSize) : Widget{IMAGE}, autoSize{autoSize} {
+    Image::Image(const std::shared_ptr<lysa::Image> &image, const bool autoSize) :
+        Widget{IMAGE},
+        autoSize{autoSize} {
         setImage(image);
     }
 
@@ -19,7 +21,7 @@ namespace lysa::ui {
         if (autoSize) { return; }
         if (width == 0 && height == 0 && rect.width == 0 && rect.height == 0) {
             const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
-            Widget::_setSize(std::round(width / ratio), std::round(height / 1.0f));
+            Widget::_setSize(std::round(width / ratio), height);
         }
         else {
             Widget::_setSize(width, height);
@@ -27,8 +29,17 @@ namespace lysa::ui {
     }
 
     void Image::autoResize() {
-        const auto ratio =window->getWindowManager().getRenderer().getAspectRatio();
-        Widget::_setSize(std::round(image->getWidth() / ratio), std::round(image->getHeight() / 1.0f));
+        if (window) {
+            const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
+            Widget::_setSize(std::round(image->getWidth() / ratio), static_cast<float>(image->getHeight()));
+        }
+    }
+
+    void Image::eventCreate() {
+        if (image && autoSize) {
+            autoResize();
+        }
+        Widget::eventCreate();
     }
 
     void Image::setColor(const float4 &color) {

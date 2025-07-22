@@ -26,7 +26,7 @@ export namespace lysa {
 
         auto getAspectRatio() const { return vectorRatio; }
 
-        auto getExtent() const { return vectorExtent; }
+        // auto getExtent() const { return vectorExtent; }
 
         // Draw a 1-fragment width line
         void drawLine(const float2& start, const float2& end);
@@ -88,7 +88,7 @@ export namespace lysa {
         // Global transparency for the next drawing commands. Value is subtracted from the vertex alpha
         float transparency{0.0f};
 
-        float2 vectorExtent{};
+        // float2 vectorExtent{};
         float vectorRatio{};
     };
 }

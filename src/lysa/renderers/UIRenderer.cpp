@@ -22,8 +22,8 @@ namespace lysa {
     }
 
     void UIRenderer::drawLine(const float2& start, const float2& end) {
-        const auto scaledStart = (start + translate) / vectorExtent;
-        const auto scaledEnd = (end + translate) / vectorExtent;
+        const auto scaledStart = (start + translate) / VECTOR_SCREEN_SIZE;
+        const auto scaledEnd = (end + translate) / VECTOR_SCREEN_SIZE;
         const auto alpha = std::max(0.0f, static_cast<float>(penColor.a - transparency));
         const auto color = float4{penColor.rgb, alpha};
         linesVertices.push_back( {{scaledStart, 0.0f}, {}, color, {}, -1 });
@@ -56,8 +56,8 @@ namespace lysa {
             const float w, const float h,
             const float clipWidth, const float clipHeight,
             const std::shared_ptr<Image> &texture) {
-        const auto pos  = (float2{x, y} + translate) / vectorExtent;
-        const float2 size = float2{w, h} / vectorExtent;
+        const auto pos  = (float2{x, y} + translate) / VECTOR_SCREEN_SIZE;
+        const float2 size = float2{w, h} / VECTOR_SCREEN_SIZE;
         const auto color = float4{penColor.rgb, std::max(0.0f, static_cast<float>(penColor.a - transparency))};
         /*
          * v1 ---- v3
@@ -106,7 +106,7 @@ namespace lysa {
     }
 
     void UIRenderer::resize(const vireo::Extent& extent) {
-        vectorExtent = {(extent.width * VECTOR_SCREEN_SIZE) / extent.height, VECTOR_SCREEN_SIZE};
-        vectorRatio = vectorExtent.x / vectorExtent.y;
+        // vectorExtent = {extent.width * VECTOR_SCREEN_SIZE / extent.height, VECTOR_SCREEN_SIZE};
+        vectorRatio = static_cast<float>(extent.width) / extent.height;
     }
 }

@@ -321,7 +321,7 @@ namespace lysa::ui {
 
         virtual Rect _getDefaultRect() { return defaultRect; }
 
-        virtual void _init(Widget &, AlignmentType, const std::string &, bool);
+        virtual void _init(Widget &child, AlignmentType alignment, const std::string &res, bool overlap);
 
     private:
         bool pushed{false};

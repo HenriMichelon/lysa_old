@@ -259,6 +259,7 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/ui/Image.cpp
         ${ENGINE_SRC_DIR}/ui/Line.cpp
         ${ENGINE_SRC_DIR}/ui/ScrollBar.cpp
+        ${ENGINE_SRC_DIR}/ui/Style.cpp
         ${ENGINE_SRC_DIR}/ui/StyleClassic.cpp
         ${ENGINE_SRC_DIR}/ui/StyleClassicResource.cpp
         ${ENGINE_SRC_DIR}/ui/Text.cpp
@@ -427,11 +428,11 @@ if (PHYSIC_ENGINE_PHYSX)
     target_link_directories(${LYSA_TARGET} PUBLIC ${PHYSX_LIBRARIES})
     target_link_libraries(${LYSA_TARGET}
         PhysX_static_64
+        PhysXCharacterKinematic_static_64
         PhysXCommon_static_64
         PhysXCooking_static_64
         PhysXExtensions_static_64
         PhysXFoundation_static_64
         PhysXPvdSDK_static_64
-        PhysXCharacterKinematic_static_64
     )
 endif()

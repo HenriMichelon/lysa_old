@@ -39,5 +39,6 @@ export namespace lysa::ui {
 
         void autoResize();
 
+        void eventCreate() override;
     };
 }

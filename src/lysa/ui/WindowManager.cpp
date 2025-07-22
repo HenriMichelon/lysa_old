@@ -16,6 +16,7 @@ import lysa.resources.font;
 import lysa.input;
 import lysa.input_event;
 import lysa.types;
+import lysa.window;
 import lysa.ui.rect;
 import lysa.ui.window;
 import lysa.renderers.ui;
@@ -29,7 +30,7 @@ namespace lysa::ui {
         const uint32 defaultFontSize):
         renderingWindow{renderingWindow},
         uiRenderer{renderer} {
-        defaultFont = make_shared<Font>(defaultFontName, defaultFontSize);
+        defaultFont = std::make_shared<Font>(defaultFontName, defaultFontSize, &renderingWindow);
     }
 
     WindowManager::~WindowManager() {
@@ -121,8 +122,8 @@ namespace lysa::ui {
             }
 #endif
             auto &mouseEvent = dynamic_cast<InputEventMouse&>(inputEvent);
-            const auto scaleX = uiRenderer.getExtent().x / renderingWindow.getExtent().width;
-            const auto scaleY = uiRenderer.getExtent().y / renderingWindow.getExtent().height;
+            const auto scaleX = VECTOR_SCREEN_SIZE / renderingWindow.getExtent().width;
+            const auto scaleY = VECTOR_SCREEN_SIZE / renderingWindow.getExtent().height;
             const auto x = mouseEvent.getX() * scaleX;
             const auto y = mouseEvent.getY() * scaleY;
 
