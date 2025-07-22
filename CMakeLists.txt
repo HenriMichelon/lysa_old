@@ -259,8 +259,11 @@ add_library(${LYSA_TARGET} STATIC
         ${ENGINE_SRC_DIR}/ui/Image.cpp
         ${ENGINE_SRC_DIR}/ui/Line.cpp
         ${ENGINE_SRC_DIR}/ui/ScrollBar.cpp
+        ${ENGINE_SRC_DIR}/ui/StyleClassicResource.cpp
         ${ENGINE_SRC_DIR}/ui/Text.cpp
+        ${ENGINE_SRC_DIR}/ui/TextEdit.cpp
         ${ENGINE_SRC_DIR}/ui/ToggleButton.cpp
+        ${ENGINE_SRC_DIR}/ui/TreeView.cpp
         ${ENGINE_SRC_DIR}/ui/ValueSelect.cpp
 
         ${OS_SRC}
@@ -368,8 +371,11 @@ target_sources(${LYSA_TARGET}
         ${ENGINE_SRC_DIR}/ui/Resource.ixx
         ${ENGINE_SRC_DIR}/ui/ScrollBar.ixx
         ${ENGINE_SRC_DIR}/ui/Style.ixx
+        ${ENGINE_SRC_DIR}/ui/StyleClassicResource.ixx
         ${ENGINE_SRC_DIR}/ui/Text.ixx
+        ${ENGINE_SRC_DIR}/ui/TextEdit.ixx
         ${ENGINE_SRC_DIR}/ui/ToggleButton.ixx
+        ${ENGINE_SRC_DIR}/ui/TreeView.ixx
         ${ENGINE_SRC_DIR}/ui/ValueSelect.ixx
         ${ENGINE_SRC_DIR}/ui/Widget.ixx
         ${ENGINE_SRC_DIR}/ui/Window.ixx
