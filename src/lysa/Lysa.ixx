@@ -83,6 +83,7 @@ export import lysa.ui.rect;
 export import lysa.ui.resource;
 export import lysa.ui.scroll_bar;
 export import lysa.ui.style;
+export import lysa.ui.style_classic;
 export import lysa.ui.style_classic_resource;
 export import lysa.ui.text;
 export import lysa.ui.text_edit;

@@ -24,6 +24,10 @@ export namespace lysa {
 
         void resize(const vireo::Extent& extent);
 
+        auto getAspectRatio() const { return vectorRatio; }
+
+        auto getExtent() const { return vectorExtent; }
+
         // Draw a 1-fragment width line
         void drawLine(const float2& start, const float2& end);
 

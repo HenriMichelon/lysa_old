@@ -293,6 +293,7 @@ namespace lysa::ui {
         virtual void _setSize(float width, float height);
 
     protected:
+        friend class Window;
         const Type type;
         Rect rect;
         Rect defaultRect;
@@ -312,7 +313,7 @@ namespace lysa::ui {
         AlignmentType alignment{NONE};
         std::shared_ptr<Resource> resource;
         std::list<std::shared_ptr<Widget>> children;
-        void* window{nullptr};
+        Window* window{nullptr};
         void* style{nullptr};
         bool mouseMoveOnFocus{false};
 

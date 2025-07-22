@@ -6,7 +6,8 @@
 */
 module lysa.ui.image;
 
-import lysa.window;
+import lysa.ui.window;
+import lysa.ui.window_manager;
 
 namespace lysa::ui {
 
@@ -17,7 +18,7 @@ namespace lysa::ui {
     void Image::_setSize(const float width, const float height) {
         if (autoSize) { return; }
         if (width == 0 && height == 0 && rect.width == 0 && rect.height == 0) {
-            const auto ratio = static_cast<Window*>(window)->getAspectRatio();
+            const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
             Widget::_setSize(std::round(width / ratio), std::round(height / 1.0f));
         }
         else {
@@ -26,7 +27,7 @@ namespace lysa::ui {
     }
 
     void Image::autoResize() {
-        const auto &ratio = static_cast<Window*>(window)->getAspectRatio();
+        const auto ratio =window->getWindowManager().getRenderer().getAspectRatio();
         Widget::_setSize(std::round(image->getWidth() / ratio), std::round(image->getHeight() / 1.0f));
     }
 

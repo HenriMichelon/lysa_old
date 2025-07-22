@@ -11,6 +11,7 @@ import lysa.enums;
 import lysa.input_event;
 import lysa.object;
 import lysa.types;
+import lysa.window;
 import lysa.renderers.ui;
 import lysa.resources.font;
 import lysa.ui.window;
@@ -20,7 +21,7 @@ export namespace lysa::ui {
     /**
      * Manage all the UI windows
      */
-    class Manager: public Object {
+    class WindowManager: public Object {
     public:
         /**
          * Adds a UI Window to the list of managed windows
@@ -38,11 +39,11 @@ export namespace lysa::ui {
         auto& getDefaultFont() const { return *defaultFont; }
 
         /**
-         * Forces a redraw of all the UI at the start of the next frame
+         * Forces a redrawing of all the UI at the start of the next frame
          */
         void refresh() { needRedraw = true; }
 
-        UIRenderer& getRenderer() const { return *vectorRenderer; }
+        UIRenderer& getRenderer() { return uiRenderer; }
 
         float getResizeDelta() const { return resizeDelta; }
 
@@ -54,8 +55,9 @@ export namespace lysa::ui {
 
     private:
         const float resizeDelta{5.0f};
+        UIRenderer& uiRenderer;
+        lysa::Window& renderingWindow;
         std::shared_ptr<Font> defaultFont;
-        std::shared_ptr<UIRenderer>& vectorRenderer;
         std::list<std::shared_ptr<Window>> windows;
         std::mutex windowsMutex;
         std::vector<std::shared_ptr<Window>> removedWindows{};
@@ -68,8 +70,8 @@ export namespace lysa::ui {
         MouseCursor currentCursor{MouseCursor::ARROW};
 
     public:
-        Manager(std::shared_ptr<UIRenderer>&, const std::string& defaultFont, uint32 defaultFontSize);
-        ~Manager() override;
+        WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, uint32 defaultFontSize);
+        ~WindowManager() override;
     };
 
 }

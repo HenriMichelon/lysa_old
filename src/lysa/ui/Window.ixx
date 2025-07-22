@@ -7,6 +7,7 @@
 export module lysa.ui.window;
 
 import lysa.constants;
+import lysa.enums;
 import lysa.object;
 import lysa.math;
 import lysa.types;
@@ -109,7 +110,7 @@ export namespace lysa::ui {
         void setPos(float x, float y);
 
         /** Sets the position of the Window, bottom-left */
-        void setPos(float2 pos);
+        void setPos(const float2& pos);
 
         /** Sets the X position of the Window, bottom-left */
         void setX(float x);
@@ -165,8 +166,8 @@ export namespace lysa::ui {
         /** Event called when a mouse button was released inside the Window */
         virtual bool onMouseUp(MouseButton button, float x, float y) { return false; }
 
-        /** Event called when mouse is moved above the Window client area */
-        virtual bool onMouseMove(uint32_t buttonsState, float x, float y) { return false; }
+        /** Event called when the mouse is moved above the Window client area */
+        virtual bool onMouseMove(uint32 buttonsState, float x, float y) { return false; }
 
         /** Event called when the Window got the keyboard focus */
         virtual void onGotFocus() { }
@@ -227,21 +228,29 @@ export namespace lysa::ui {
 
         void eventHide();
 
-        bool eventKeybDown(Key);
+        bool eventKeyDown(Key);
 
-        bool eventKeybUp(Key);
+        bool eventKeyUp(Key);
 
         bool eventMouseDown(MouseButton, float, float);
 
         bool eventMouseUp(MouseButton, float, float);
 
-        bool eventMouseMove(uint32_t, float, float);
+        bool eventMouseMove(uint32, float, float);
 
         void eventGotFocus();
 
         void eventLostFocus();
 
         void draw() const;
+
+        friend class WindowManager;
+
+        void attach(WindowManager* windowManager);
+
+        void detach();
+
+        WindowManager& getWindowManager() const { return *windowManager; }
 
     private:
         Rect rect;
@@ -255,7 +264,7 @@ export namespace lysa::ui {
         float transparency{1.0};
         float4 defaultTextColor{0.0f, 0.0f, 0.0f, 1.0f};
         uint32 resizeableBorders{RESIZEABLE_NONE};
-        void* windowManager{nullptr};
+        WindowManager* windowManager{nullptr};
         bool visibilityChanged{false};
         bool visible{true};
         bool visibilityChange{false};
