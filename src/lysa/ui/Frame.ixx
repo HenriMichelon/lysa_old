@@ -23,15 +23,15 @@ export namespace lysa::ui {
         auto& getTitle() const { return title; }
 
         // Change the title of the widget
-        void setTitle(const std::string& T);
+        void setTitle(const std::string& title);
 
-        void setTitleColor(const float4& c) { textColor = c; }
+        void setTitleColor(const float4& color) { textColor = color; }
 
         auto getTitleColor() const { return textColor; }
 
     private:
         std::string title{};
-        float4 textColor{1.0f};
+        float4 textColor{0.0f};
     };
 
 }

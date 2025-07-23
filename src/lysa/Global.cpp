@@ -131,19 +131,19 @@ namespace lysa {
     }
 
     std::string to_string(const float3& vec) {
-        return "{" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "}";
+        return std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z);
     }
 
     std::string to_string(const float2& vec) {
-        return "{" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "}";
+        return std::to_string(vec.x) + "," + std::to_string(vec.y);
     }
 
    std::string to_string(const float4& vec) {
-        return "{" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + std::to_string(vec.w) + "}";
+        return std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w);
     }
 
     std::string to_string(const quaternion& vec) {
-        return "{" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + "}";
+        return std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w);
     }
 
 }

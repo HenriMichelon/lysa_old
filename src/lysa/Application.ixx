@@ -27,6 +27,7 @@ export namespace lysa {
         Application(ApplicationConfiguration& config);
 
         virtual void onReady() {}
+
         virtual void onQuit() {}
 
         void addWindow(const std::shared_ptr<Window>& window);
@@ -50,6 +51,11 @@ export namespace lysa {
         static auto& getResources() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return instance->resources;
+        }
+
+        static auto& quit() {
+            assert([&]{ return instance != nullptr;}, "Global Application instance not set");
+            return instance->exit = true;
         }
 
         static auto& getGraphicQueue() {
@@ -115,7 +121,7 @@ export namespace lysa {
         Resources resources;
         AsyncQueue asyncQueue;
         std::list<std::shared_ptr<Window>> windows;
-        bool quit{false};
+        bool exit{false};
         std::shared_ptr<Log> log;
         std::list<std::function<void()>> deferredCalls;
         std::mutex deferredCallsMutex;

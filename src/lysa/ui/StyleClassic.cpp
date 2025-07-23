@@ -13,13 +13,11 @@ import lysa.ui.image;
 namespace lysa::ui {
 
     void StyleClassic::updateOptions() {
-        focus        = extractColor("color_focus", 0.1f, 0.1f, 0.1f);
-        fgUp         = extractColor("color_foreground_up", 0.45,0.63,0.76, .5f);
-        fgDown       = extractColor("color_foreground_down", 0.76f, 0.85f, 0.76f, 0.5f);
-        shadowDark   = float4{float3{0.0}, 1.0}; //extractColor("color_shadow_dark", 0.3,0.3,0.3, fgUp.a);
-        shadowBright   = extractColor("color_shadow_bright", 0.9,0.9,0.9, fgUp.a);
-        // shadowDark   = float4{clamp(vec3{background} / 2.0f, {0.0f}, {1.0f}), background.a};
-        // shadowBright = float4{clamp(vec3{background} * 2.0f, {0.0f}, {1.0f}), background.a};
+        focus = extractColor("color_focus", 0.1f, 0.1f, 0.1f);
+        fgUp = extractColor("color_foreground_up", 0.45,0.63,0.76, 1.0f);
+        fgDown = extractColor("color_foreground_down", 0.55f, 0.76f, 0.76f, 1.0f);
+        shadowDark = extractColor("color_shadow_dark", 0.0f,0.0f,0.0f, 1.0f);
+        shadowBright = extractColor("color_shadow_bright", 0.9f,0.9f,0.9f, 1.0f);
         /*XXXX
         if (texture != nullptr) { delete texture; }
         if (Option("texture").Len() > 0) {
@@ -117,7 +115,7 @@ namespace lysa::ui {
         widget._setSize(res->width, res->height);
         switch (widget.getType()) {
         case Widget::SCROLLBAR:
-            static_cast<ScrollBar &>(widget).setResources(",,LOWERED", ",,RAISED");
+            static_cast<ScrollBar &>(widget).setResources(",,LOWERED", ",,FLAT," + to_string(fgDown));
             break;
         case Widget::TREEVIEW:
             static_cast<TreeView &>(widget).setResources(",,LOWERED", "18,18,RAISED", "");
@@ -199,9 +197,9 @@ namespace lysa::ui {
         return float4{R, G, B, A};
     }
 
-    void StyleClassic::drawPanel(const Panel &widget, StyleClassicResource &, UIRenderer &renderer) const {
+    void StyleClassic::drawPanel(const Panel &widget, StyleClassicResource &resources, UIRenderer &renderer) const {
         if (widget.isDrawBackground()) {
-            auto c = fgUp;
+            auto c = resources.customColor ? resources.color : fgUp;
             c.a    = widget.getTransparency();
             renderer.setPenColor(c);
             renderer.drawFilledRect(widget.getRect(), widget.getRect().width, widget.getRect().height);
@@ -227,11 +225,11 @@ namespace lysa::ui {
                 fd.a  -= 1.0f-widget.getTransparency();
                 renderer.setPenColor(fd);
             } else {
-                auto fu= fgUp;
+                auto fu= resources.customColor ? resources.color : fgUp;
                 fu.a  -= 1.0f-widget.getTransparency();
                 renderer.setPenColor(fu);
             }
-            renderer.drawFilledRect(widget.getRect(), w, h);
+            renderer.drawFilledRect(x+1, y+1, w-2, h-2, w-2, h-2, nullptr);
         }
         if (resources.style != StyleClassicResource::FLAT) {
             auto sb = shadowBright;
@@ -240,10 +238,10 @@ namespace lysa::ui {
             sd.a    = widget.getTransparency();
             switch (resources.style) {
             case StyleClassicResource::LOWERED:
-                renderer.setPenColor(sb);
+                renderer.setPenColor(sd);
                 break;
             case StyleClassicResource::RAISED:
-                renderer.setPenColor(sd);
+                renderer.setPenColor(sb);
                 break;
             default:
                 break;
@@ -252,10 +250,10 @@ namespace lysa::ui {
             renderer.drawLine({x, y}, {x, y + h}); // left
             switch (resources.style) {
             case StyleClassicResource::RAISED:
-                renderer.setPenColor(sb);
+                renderer.setPenColor(sd);
                 break;
             case StyleClassicResource::LOWERED:
-                renderer.setPenColor(sd);
+                renderer.setPenColor(sb);
                 break;
             default:
                 break;
@@ -298,8 +296,10 @@ namespace lysa::ui {
         drawBox(widget, resources, renderer, true);
     }
 
-    void StyleClassic::drawText(Text &widget, StyleClassicResource &resources, UIRenderer &renderer) const {
-        renderer.setPenColor(float4{widget.getTextColor().r, widget.getTextColor().g, widget.getTextColor().b, widget.getTransparency()});
+    void StyleClassic::drawText(Text &widget, const StyleClassicResource &resources, UIRenderer &renderer) const {
+        renderer.setPenColor(
+            resources.customColor ? resources.color :
+            float4{widget.getTextColor().r, widget.getTextColor().g, widget.getTextColor().b, widget.getTransparency()});
         auto rect = widget.getRect();
         widget.getSize(rect.width, rect.height);
         rect.width /= renderer.getAspectRatio();
@@ -311,22 +311,22 @@ namespace lysa::ui {
             return;
         }
         constexpr int32 LEFTOFFSET = 8;
-        float             l          = widget.getRect().x;
-        float             b          = widget.getRect().y;
-        float             w          = widget.getRect().width;
-        float             h          = widget.getRect().height;
-        float4              c1;
-        float4              c2;
-        auto              sb = shadowBright;
-        sb.a                 = widget.getTransparency();
-        auto sd              = shadowDark;
-        sd.a                 = widget.getTransparency();
+        float l = widget.getRect().x;
+        float b =  widget.getRect().y;
+        float w = widget.getRect().width;
+        float h = widget.getRect().height;
+        float4 c1;
+        float4 c2;
+        auto sb = shadowBright;
+        sb.a = widget.getTransparency();
+        auto sd = shadowDark;
+        sd.a = widget.getTransparency();
         switch (resources.style) {
-        case StyleClassicResource::LOWERED:
+        case StyleClassicResource::RAISED:
             c1 = sb;
             c2 = sd;
             break;
-        case StyleClassicResource::RAISED:
+        case StyleClassicResource::LOWERED:
             c1 = sd;
             c2 = sb;
             break;
@@ -337,23 +337,31 @@ namespace lysa::ui {
         }
         float fh, fw;
         widget.getFont().getSize(widget.getTitle(), fw, fh);
-        // const auto &ratio = app().getVectorRatio();
-        // fw                = roundf(fw / ratio.x);
-        // fh                = roundf(fh / ratio.y);
+        fw /= renderer.getAspectRatio();
         renderer.setPenColor(c2);
         if ((!widget.getTitle().empty()) && (widget.getWidth() >= (fw + LEFTOFFSET)) && (widget.getHeight() >= fh)) {
-            renderer.drawLine({l, b + h}, {l + LEFTOFFSET, b + h});
-            renderer.drawLine({l + fw + LEFTOFFSET + 1, b + h}, {l + w, b + h});
+            renderer.drawLine(
+                {l, b},
+                {l + LEFTOFFSET, b});
+            renderer.drawLine(
+                {l + fw + LEFTOFFSET + 1, b},
+                {l + w, b});
             renderer.setPenColor(float4{widget.getTitleColor().r, widget.getTitleColor().g, widget.getTitleColor().b, widget.getTransparency()});
-            renderer.drawText(widget.getTitle(), widget.getFont(), l + LEFTOFFSET, (b + h) - (fh / 2), fw, fh, fw, fh);
+            renderer.drawText(
+                widget.getTitle(),
+                widget.getFont(),
+                l + LEFTOFFSET,
+                b - (fh / 2),
+                fw, fh,
+                fw, fh);
             renderer.setPenColor(c2);
         } else {
             renderer.drawLine({l + w, b + h}, {l, b + h});
         }
-        renderer.drawLine({l + w, b}, {l + w, b + h});
-        renderer.setPenColor(c1);
-        renderer.drawLine({l, b}, {l + w, b});
         renderer.drawLine({l, b}, {l, b + h});
+        renderer.setPenColor(c1);
+        renderer.drawLine({l + w, b}, {l + w, b + h});
+        renderer.drawLine({l, b + h}, {l + w, b + h});
     }
 
 

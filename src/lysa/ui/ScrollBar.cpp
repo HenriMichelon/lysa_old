@@ -18,13 +18,13 @@ namespace lysa::ui {
         type{type} {
     }
 
-    void ScrollBar::setResources(const std::string& RAREA, const std::string& RCAGE) {
+    void ScrollBar::setResources(const std::string& area, const std::string& cage) {
         if (liftArea == nullptr) {
             liftArea = std::make_shared<Box>();
             liftCage = std::make_shared<Box>();
             mouseMoveOnFocus = true;
-            add(liftArea, FILL, RAREA);
-            add(liftCage, NONE, RCAGE);
+            add(liftArea, FILL, area);
+            add(liftCage, NONE, cage);
             liftArea->connect(Event::OnMouseDown,
                 [this](auto p) { this->onLiftAreaDown(static_cast<const EventMouseButton *>(p)); });
             liftCage->connect(Event::OnMouseDown,

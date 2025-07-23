@@ -60,7 +60,7 @@ export namespace lysa::ui {
 
         void drawToggleButton(ToggleButton &, StyleClassicResource &, UIRenderer &) const;
 
-        void drawText(Text &, StyleClassicResource &, UIRenderer &) const;
+        void drawText(Text &, const StyleClassicResource &, UIRenderer &) const;
 
         void drawFrame(Frame &, StyleClassicResource &, UIRenderer &) const;
 

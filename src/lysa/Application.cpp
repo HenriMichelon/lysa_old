@@ -83,7 +83,7 @@ namespace lysa {
     void Application::removeWindow(Window* window) {
         graphicQueue->waitIdle();
         if (window->mainWindow) {
-            quit = true;
+            exit = true;
         }
         windows.remove_if([window](const std::shared_ptr<Window>& w) {
             return w.get() == window;

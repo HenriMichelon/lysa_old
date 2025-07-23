@@ -16,7 +16,7 @@ namespace lysa {
         std::vector<double> frameTimes;
         auto lastTimeReport = steady_clock::now();
         auto msg = MSG{};
-        while (!quit) {
+        while (!exit) {
             auto startTime = steady_clock::now();
             drawFrame();
 
