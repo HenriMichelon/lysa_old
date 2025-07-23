@@ -14,8 +14,8 @@ namespace lysa::ui {
 
     void StyleClassic::updateOptions() {
         focus = extractColor("color_focus", 0.1f, 0.1f, 0.1f);
-        fgUp = extractColor("color_foreground_up", 0.45,0.63,0.76, 1.0f);
-        fgDown = extractColor("color_foreground_down", 0.55f, 0.76f, 0.76f, 1.0f);
+        fgUp = extractColor("color_foreground_up", 0.45,0.63,0.76, 0.5f);
+        fgDown = extractColor("color_foreground_down", 0.55f, 0.76f, 0.76f, 0.5f);
         shadowDark = extractColor("color_shadow_dark", 0.0f,0.0f,0.0f, 1.0f);
         shadowBright = extractColor("color_shadow_bright", 0.9f,0.9f,0.9f, 1.0f);
         /*XXXX
@@ -229,7 +229,7 @@ namespace lysa::ui {
                 fu.a  -= 1.0f-widget.getTransparency();
                 renderer.setPenColor(fu);
             }
-            renderer.drawFilledRect(x+1, y+1, w-2, h-2, w-2, h-2, nullptr);
+            renderer.drawFilledRect(x, y, w, h, w, h, nullptr);
         }
         if (resources.style != StyleClassicResource::FLAT) {
             auto sb = shadowBright;
