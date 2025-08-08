@@ -5,7 +5,7 @@
 # https://opensource.org/licenses/MIT
 #
 ########################################################################################################################
-message(NOTICE "Fetching Jolt Physics from https://github.com/jrouwe/JoltPhysics ...")
+message(NOTICE "Fetching Jolt Physics..")
 # https://github.com/jrouwe/JoltPhysicsHelloWorld/blob/main/Build/CMakeLists.txt
 # When turning this option on, the library will be compiled using doubles for positions. This allows for much bigger worlds.
 set(DOUBLE_PRECISION OFF)
