@@ -23,7 +23,6 @@ set(PHYSIC_ENGINE_JOLT ON)
 set(PHYSIC_ENGINE_PHYSX OFF)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -34,7 +33,7 @@ if(WIN32)
     if(MSVC)
         set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
     endif()
-    add_compile_definitions(WIN32_LEAN_AND_MEAN UNICODE _UNICODE)
+    add_compile_definitions(UNICODE _UNICODE)
 endif ()
 
 #######################################################
@@ -416,9 +415,11 @@ add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
     "<intrin.h>"
 )
+set_property(TARGET ${LYSA_TARGET} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 #######################################################
 if(WIN32)
+    target_compile_definitions(${LYSA_TARGET} PRIVATE WIN32_LEAN_AND_MEAN)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)
     endif ()
