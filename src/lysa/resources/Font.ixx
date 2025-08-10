@@ -10,6 +10,7 @@ export module lysa.resources.font;
 import std;
 import lysa.resources.image;
 import lysa.resources.resource;
+import lysa.math;
 import lysa.types;
 
 export namespace lysa {
@@ -25,34 +26,51 @@ export namespace lysa {
         /**
          * Creates a font resource
          * @param path : font file path, relative to the application working directory
-         * @param size : height in pixels on a base resolution of 1920x1080
-         * @param window : target window, default to the main window
          */
-        Font(const std::string &path, uint32 size, Window* window = nullptr);
-
-        Font(const Font &font, uint32 size, Window* window = nullptr);
+        Font(const std::string &path);
 
         ~Font() override;
 
         /**
          * Returns the size (in pixels) for a string.
          */
-        void getSize(const std::string &text, float &width, float &height);
+        void getSize(const std::string &text, float scale, float &width, float &height);
 
         /**
-         * Returns the font path. Useful to create another Font resource with a different size
-         */
-        const auto& getFontName() const { return path; }
-
-        /**
-         * Returns the font height in pixels (NOT scaled size, but the size given to the Font constructor)
+         * Returns the font size in the atlas
          */
         auto getFontSize() const { return size; }
 
+        //Relative to the font size
+        auto getLineHeight() const { return lineHeight; }
+
+        auto getGlyphInfo(uint32 codepoint) const { return glyphs.at(codepoint); }
+
+        auto getAtlas() const { return atlas; }
+
+        struct GlyphBounds {
+            float left{0.0f};
+            float bottom{0.0f};
+            float right{0.0f};
+            float top{0.0f};
+        };
+
     private:
-        const std::string path;
-        const uint32 size;
-        Window* window;
+        struct GlyphInfo {
+            uint32 codepoint{0};
+            float advance{0.0f};
+            GlyphBounds planeBounds{};
+            float2 uv0{0.0f};
+            float2 uv1{0.0f};
+        };
+
+        uint32 size;
+        float ascender;
+        float descender;
+        float lineHeight;
+        uint32 pixelRange;
+        std::shared_ptr<Image> atlas;
+        std::unordered_map<uint32, GlyphInfo> glyphs;
 
     };
 

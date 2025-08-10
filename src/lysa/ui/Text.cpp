@@ -11,7 +11,10 @@ import lysa.ui.window_manager;
 
 namespace lysa::ui {
 
-    Text::Text(const std::string& text) : Widget(TEXT), text(std::move(text)) {
+    Text::Text(const std::string& text, float scale) :
+        Widget{TEXT},
+        text{std::move(text)},
+        scale{scale} {
         allowChildren  = false;
         drawBackground = false;
     }
@@ -29,13 +32,26 @@ namespace lysa::ui {
         }
     }
 
+    void Text::setScale(const float scale) {
+        this->scale = scale;
+        if (parent) {
+            parent->refresh();
+        }
+        float w, h;
+        getSize(w, h);
+        _setSize(w, h);
+        if (!parent) {
+            refresh();
+        }
+    }
+
     void Text::setTextColor(const float4 &c) {
         textColor = c;
         refresh();
     }
 
     void Text::getSize(float &width, float &height) {
-        getFont().getSize(text, width, height);
+        getFont().getSize(text, scale, width, height);
     }
 
     void Text::_setSize(const float width, const float height) {

@@ -49,21 +49,11 @@ export namespace lysa {
             float clipHeight,
             const std::shared_ptr<Image> &texture);
 
-        // Draw a rectangle filled with a text
         void drawText(
             const std::string& text,
             Font& font,
-            const ui::Rect& rect,
-            float clipWidth,
-            float clipHeight);
-
-        // Draw a rectangle filled with a text
-        void drawText(
-            const std::string& text,
-            Font& font,
-            float x, float y,
-            float w, float  h,
-            float clipWidth, float clipHeight);
+            float fontScale,
+            float x, float y);
 
         // Change the color of the fragments for the next drawing commands
         auto setPenColor(const float4& color) { penColor = color; }

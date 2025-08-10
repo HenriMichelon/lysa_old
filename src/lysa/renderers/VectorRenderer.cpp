@@ -17,6 +17,7 @@ namespace lysa {
         const RenderingConfiguration& renderingConfiguration,
         const std::string& name,
         const std::string& shadersName,
+        const std::string& glyphShadersName,
         const bool filledTriangles,
         const bool enableAlphaBlending,
         const bool useCamera,
@@ -83,6 +84,13 @@ namespace lysa {
             vireo::PolygonMode::WIREFRAME;
         pipelineConfig.primitiveTopology = vireo::PrimitiveTopology::TRIANGLE_LIST;
         pipelineTriangles = vireo.createGraphicPipeline(pipelineConfig, name + " triangles");
+
+        VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + glyphShadersName + ".vert" + ext, tempBuffer);
+        pipelineConfig.vertexShader = vireo.createShaderModule(tempBuffer);
+        VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + glyphShadersName + ".frag" + ext, tempBuffer);
+        pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
+        pipelineConfig.polygonMode = vireo::PolygonMode::FILL;
+        pipelineGlyphs = vireo.createGraphicPipeline(pipelineConfig, name + " glyphs");
     }
 
     void VectorRenderer::drawLine(const float3& from, const float3& to, const float4& color) {
@@ -98,9 +106,41 @@ namespace lysa {
         vertexBufferDirty = true;
     }
 
+    void VectorRenderer::drawText(
+        const std::string& text,
+        Font& font,
+        const float fontScale,
+        const float3& position) {
+        auto textureIndex = addTexture(font.getAtlas());
+        auto x = position.x;
+        auto y = position.y;
+        for (const auto c : text) {
+            auto glyphInfo = font.getGlyphInfo(c);
+            /*
+            * v1 ---- v3
+            * |  \     |
+            * |    \   |
+            * v0 ---- v2
+            */
+            const float3 v0 = { x + fontScale * glyphInfo.planeBounds.left,  y + fontScale * glyphInfo.planeBounds.bottom, position.z };
+            const float3 v1 = { x + fontScale * glyphInfo.planeBounds.left,  y + fontScale * glyphInfo.planeBounds.top, position.z };
+            const float3 v2 = { x + fontScale * glyphInfo.planeBounds.right, y + fontScale * glyphInfo.planeBounds.bottom, position.z };
+            const float3 v3 = { x + fontScale * glyphInfo.planeBounds.right, y + fontScale * glyphInfo.planeBounds.top, position.z };
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
+            break;
+        }
+        vertexBufferDirty = true;
+    }
+
     void VectorRenderer::restart() {
         linesVertices.clear();
         triangleVertices.clear();
+        glyphVertices.clear();
     }
 
     void VectorRenderer::update(
@@ -109,15 +149,16 @@ namespace lysa {
         // Destroy the previous buffer when we are sure they aren't used by another frame
         oldBuffers.clear();
         const auto& vireo = Application::getVireo();
-        if (!linesVertices.empty() || !triangleVertices.empty()) {
+        if (!linesVertices.empty() || !triangleVertices.empty() || !glyphVertices.empty()) {
             // Resize the buffers only if needed by recreating them
-            if ((vertexBuffer == nullptr) || (vertexCount != (linesVertices.size() + triangleVertices.size()))) {
+            if ((vertexBuffer == nullptr) ||
+                (vertexCount != (linesVertices.size() + triangleVertices.size() + glyphVertices.size()))) {
                 // Put the current buffers in the recycle bin since they are currently used
                 // and can't be destroyed now
                 oldBuffers.push_back(stagingBuffer);
                 oldBuffers.push_back(vertexBuffer);
                 // Allocate new buffers to change size
-                vertexCount = linesVertices.size() + triangleVertices.size();
+                vertexCount = linesVertices.size() + triangleVertices.size() + glyphVertices.size();
                 stagingBuffer = vireo.createBuffer(vireo::BufferType::BUFFER_UPLOAD, sizeof(Vertex), vertexCount, name + " vertices staging");
                 stagingBuffer->map();
                 vertexBuffer = vireo.createBuffer(vireo::BufferType::VERTEX, sizeof(Vertex), vertexCount, name + " vertices");
@@ -129,7 +170,16 @@ namespace lysa {
                     stagingBuffer->write(linesVertices.data(), linesVertices.size() * sizeof(Vertex));
                 }
                 if (!triangleVertices.empty()) {
-                    stagingBuffer->write(triangleVertices.data(), triangleVertices.size() * sizeof(Vertex), linesVertices.size() * sizeof(Vertex));
+                    stagingBuffer->write(
+                        triangleVertices.data(),
+                        triangleVertices.size() * sizeof(Vertex),
+                        linesVertices.size() * sizeof(Vertex));
+                }
+                if (!glyphVertices.empty()) {
+                    stagingBuffer->write(
+                        glyphVertices.data(),
+                        glyphVertices.size() * sizeof(Vertex),
+                        (linesVertices.size() + triangleVertices.size()) * sizeof(Vertex));
                 }
                 commandList.copy(stagingBuffer, vertexBuffer);
                 commandList.barrier(*vertexBuffer, vireo::ResourceState::COPY_DST, vireo::ResourceState::VERTEX_INPUT);
@@ -182,6 +232,11 @@ namespace lysa {
             commandList.bindPipeline(pipelineTriangles);
             commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
+        }
+        if (!glyphVertices.empty()) {
+            commandList.bindPipeline(pipelineGlyphs);
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
+            commandList.draw(glyphVertices.size(), 1, linesVertices.size() + triangleVertices.size(), 0);
         }
         commandList.endRendering();
         commandList.barrier(

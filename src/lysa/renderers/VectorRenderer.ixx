@@ -13,6 +13,7 @@ import lysa.configuration;
 import lysa.math;
 import lysa.scene;
 import lysa.types;
+import lysa.resources.font;
 import lysa.resources.image;
 
 export namespace lysa {
@@ -24,6 +25,7 @@ export namespace lysa {
             const RenderingConfiguration& renderingConfiguration,
             const std::string& name,
             const std::string& shadersName = "vector",
+            const std::string& glyphShadersName = "glyph",
             bool filledTriangles = false,
             bool enableAlphaBlending = false,
             bool useCamera = true, bool useTextures = false);
@@ -31,6 +33,12 @@ export namespace lysa {
         void drawLine(const float3& from, const float3& to, const float4& color);
 
         void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
+
+        void drawText(
+            const std::string& text,
+            Font& font,
+            float fontScale,
+            const float3& position);
 
         void restart();
 
@@ -71,6 +79,8 @@ export namespace lysa {
         std::vector<Vertex> linesVertices;
         // All the vertices for triangles
         std::vector<Vertex> triangleVertices;
+        // All the vertices for the texts
+        std::vector<Vertex> glyphVertices;
 
         int32 addTexture(const std::shared_ptr<Image> &texture);
 
@@ -129,6 +139,7 @@ export namespace lysa {
 
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;
         std::shared_ptr<vireo::GraphicPipeline>  pipelineTriangles;
+        std::shared_ptr<vireo::GraphicPipeline>  pipelineGlyphs;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
     };
 }

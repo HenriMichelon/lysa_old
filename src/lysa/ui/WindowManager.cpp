@@ -30,7 +30,7 @@ namespace lysa::ui {
         const uint32 defaultFontSize):
         renderingWindow{renderingWindow},
         uiRenderer{renderer} {
-        defaultFont = std::make_shared<Font>(defaultFontName, defaultFontSize, &renderingWindow);
+        defaultFont = std::make_shared<Font>(defaultFontName);
     }
 
     WindowManager::~WindowManager() {
