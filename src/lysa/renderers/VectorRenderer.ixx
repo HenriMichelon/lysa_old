@@ -40,6 +40,7 @@ export namespace lysa {
             Font& font,
             float fontScale,
             const float3& position,
+            const quaternion& rotation,
             const float4& innerColor);
 
         void restart();

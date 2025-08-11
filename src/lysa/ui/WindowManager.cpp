@@ -27,9 +27,10 @@ namespace lysa::ui {
         lysa::Window& renderingWindow,
         UIRenderer& renderer,
         const std::string& defaultFontName,
-        const uint32 defaultFontSize):
+        const float defaultFontScale):
         renderingWindow{renderingWindow},
-        uiRenderer{renderer} {
+        uiRenderer{renderer},
+        fontScale{defaultFontScale} {
         defaultFont = std::make_shared<Font>(defaultFontName);
     }
 

@@ -70,9 +70,10 @@ export namespace lysa {
             bool resizingWindow{false};
             bool resizingWindowOriginBorder{false};
             MouseCursor currentCursor{MouseCursor::ARROW};
+            float fontScale;
 
         public:
-            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, uint32 defaultFontSize);
+            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, float defaultFontScale);
             ~WindowManager() override;
         };
     }

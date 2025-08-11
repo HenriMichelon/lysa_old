@@ -171,8 +171,8 @@ export namespace lysa {
         int32                   monitor{0};
         //! Default font name, the file must exist in the path
         std::string             defaultFontName{""};
-        //! Default font size. See the Font class for the details.
-        uint32                  defaultFontSize{40};
+        //! Default font scale. See the Font class for the details.
+        float                   defaultFontScale{0.25f};
         //! Configuration of the main viewport
         ViewportConfiguration   mainViewportConfig{};
         //! Configuration of the various renderers

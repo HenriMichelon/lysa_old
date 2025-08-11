@@ -131,6 +131,7 @@ namespace lysa {
         Font& font,
         const float fontScale,
         const float3& position,
+        const quaternion& rotation,
         const float4& innerColor) {
         assert([&]{ return useTextures; }, "Can't draw text without textures");
         auto textureIndex = addTexture(font.getAtlas());
@@ -143,15 +144,15 @@ namespace lysa {
         hb_shape(font.getHarfBuzzFont(), hb_buffer, nullptr, 0);
         unsigned int glyph_count;
         hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buffer, &glyph_count);
-        hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(hb_buffer, &glyph_count);
+        //hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(hb_buffer, &glyph_count);
+        const auto rm = float4x4{rotation};
 
         for (unsigned int i = 0; i < glyph_count; i++) {
             auto glyphInfo = font.getGlyphInfo(glyph_info[i].codepoint);
-            INFO(glyph_info[i].codepoint);
             auto plane = Font::GlyphBounds{};
-            plane.left = fontScale * (glyphInfo.planeBounds.left );
-            plane.right = fontScale * (glyphInfo.planeBounds.right );
-            plane.top = fontScale * (glyphInfo.planeBounds.top );
+            plane.left = fontScale * (glyphInfo.planeBounds.left);
+            plane.right = fontScale * (glyphInfo.planeBounds.right);
+            plane.top = fontScale * (glyphInfo.planeBounds.top);
             plane.bottom = fontScale * (glyphInfo.planeBounds.bottom);
             /*
             * v1 ---- v3
@@ -159,10 +160,10 @@ namespace lysa {
             * |    \   |
             * v0 ---- v2
             */
-            const float3 v0 = { pos.x + plane.left,  pos.y + plane.bottom, 0.0f };
-            const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
-            const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
-            const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
+            const float3 v0 = mul({ pos.x + plane.left,  pos.y + plane.bottom, pos.z, 1.0f }, rm).xyz;
+            const float3 v1 = mul({ pos.x + plane.left,  pos.y + plane.top, pos.z, 1.0f }, rm).xyz;
+            const float3 v2 = mul({ pos.x + plane.right, pos.y + plane.bottom, pos.z, 1.0f }, rm).xyz;
+            const float3 v3 = mul({ pos.x + plane.right, pos.y + plane.top, pos.z, 1.0f }, rm).xyz;
             glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
@@ -310,7 +311,7 @@ namespace lysa {
                 fontsParams[index] = font.getFontParams();
                 fontsIndices[font.getId()] = index;
                 fontsParamsUniform->write(
-                    fontsParams.data(),
+                    &fontsParams[index],
                     sizeof(FontParams),
                     sizeof(FontParams) * index);
                 return index;
