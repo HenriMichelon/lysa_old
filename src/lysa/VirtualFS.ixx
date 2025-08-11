@@ -34,7 +34,6 @@ export namespace lysa {
 
         static void destroyImage(std::byte* image);
 
-    private:
         static std::string getPath(const std::string& filepath);
     };
 

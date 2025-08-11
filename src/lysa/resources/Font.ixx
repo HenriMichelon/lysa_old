@@ -5,6 +5,9 @@
  * https://opensource.org/licenses/MIT
 */
 module;
+#include <hb.h>
+#include <hb-ft.h>
+#include FT_FREETYPE_H
 export module lysa.resources.font;
 
 import std;
@@ -43,7 +46,7 @@ export namespace lysa {
         };
 
         struct GlyphInfo {
-            uint32 codepoint{0};
+            uint32 index{0};
             float advance{0.0f};
             GlyphBounds planeBounds{};
             float2 uv0{0.0f};
@@ -71,7 +74,7 @@ export namespace lysa {
         //Relative to the font size
         auto getLineHeight() const { return lineHeight; }
 
-        const GlyphInfo& getGlyphInfo(uint32 codepoint) const;
+        const GlyphInfo& getGlyphInfo(uint32 index) const;
 
         auto getAtlas() const { return atlas; }
 
@@ -101,6 +104,8 @@ export namespace lysa {
             params.threshold = threshold;
         }
 
+        auto getHarfBuzzFont() const { return hbFont; }
+
     private:
         uint32 size;
         float ascender;
@@ -110,6 +115,9 @@ export namespace lysa {
         std::shared_ptr<Image> atlas;
         std::unordered_map<uint32, GlyphInfo> glyphs;
 
+        static FT_Library ftLibrary;
+        FT_Face ftFace{nullptr};
+        hb_font_t* hbFont{nullptr};
     };
 
 }
