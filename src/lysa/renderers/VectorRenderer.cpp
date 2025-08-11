@@ -33,19 +33,12 @@ namespace lysa {
         if (useCamera) {
             globalUniformIndex = 0;
             texturesIndex = 1;
-            fontUniformsIndex = 2;
             descriptorLayout->add(globalUniformIndex, vireo::DescriptorType::UNIFORM);
         } else {
             texturesIndex = 0;
-            fontUniformsIndex = 1;
         }
-        if (useTextures) {
-            fontsParams.resize(MAX_FONTS);
-            descriptorLayout->add(fontUniformsIndex, vireo::DescriptorType::UNIFORM, fontsParams.size());
-            fontsParamsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(FontParams), fontsParams.size(), name + " fonts params");
-            fontsParamsUniform->map();
-            fontsParamsUniform->write(fontsParams.data());
 
+        if (useTextures) {
             textures.resize(MAX_TEXTURES);
             descriptorLayout->add(texturesIndex, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
             blankImage = Application::getResources().getBlankImage();
@@ -54,6 +47,16 @@ namespace lysa {
             }
         }
         descriptorLayout->build();
+
+        fontsParams.resize(MAX_FONTS);
+        fontDescriptorLayout = vireo.createDescriptorLayout(name + " fonts");
+        fontDescriptorLayout->add(FONT_PARAMS_BINDING, vireo::DescriptorType::UNIFORM);
+        fontDescriptorLayout->build();
+        fontDescriptorSet = vireo.createDescriptorSet(fontDescriptorLayout);
+        fontsParamsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(FontParams) * fontsParams.size(), 1, name + " fonts params");
+        fontsParamsUniform->map();
+        fontsParamsUniform->write(fontsParams.data());
+        fontDescriptorSet->update(FONT_PARAMS_BINDING, fontsParamsUniform);
 
         framesData.resize(config.framesInFlight);
         for (auto& frameData : framesData) {
@@ -64,7 +67,6 @@ namespace lysa {
                 frameData.descriptorSet->update(globalUniformIndex, frameData.globalUniform);
             }
             if (useTextures) {
-                frameData.descriptorSet->update(fontUniformsIndex, fontsParamsUniform);
                 frameData.descriptorSet->update(texturesIndex, textures);
             }
         }
@@ -83,7 +85,11 @@ namespace lysa {
         VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + shadersName + ".frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.resources = Application::getVireo().createPipelineResources(
-           { descriptorLayout, Application::getResources().getSamplers().getDescriptorLayout() },
+           {
+               descriptorLayout,
+               Application::getResources().getSamplers().getDescriptorLayout(),
+                fontDescriptorLayout
+           },
            {},
            name);
         pipelineConfig.polygonMode = vireo::PolygonMode::WIREFRAME;
@@ -143,12 +149,12 @@ namespace lysa {
             const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
             const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
             const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
-            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
             break;
         }
         vertexBufferDirty = true;
@@ -242,17 +248,17 @@ namespace lysa {
         commandList.beginRendering(renderingConfig);
         if (!linesVertices.empty()) {
             commandList.bindPipeline(pipelineLines);
-            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
             commandList.draw(linesVertices.size(), 1, 0, 0);
         }
         if (!triangleVertices.empty()) {
             commandList.bindPipeline(pipelineTriangles);
-            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
         }
         if (!glyphVertices.empty()) {
             commandList.bindPipeline(pipelineGlyphs);
-            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet()});
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
             commandList.draw(glyphVertices.size(), 1, linesVertices.size() + triangleVertices.size(), 0);
         }
         commandList.endRendering();
@@ -291,9 +297,6 @@ namespace lysa {
                     fontsParams.data(),
                     sizeof(FontParams),
                     fontsParamsUniform->getInstanceSizeAligned() * index);
-                // for (const auto& frameData : framesData) {
-                    // frameData.descriptorSet->update(fontUniformsIndex, fontsParamsUniform);
-                // }
                 return index;
             }
         }

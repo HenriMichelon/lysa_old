@@ -38,3 +38,7 @@ struct FontParams {
     float outlineBlur;
     float gamma;
 };
+
+struct Fonts {
+    FontParams[10] font;
+}

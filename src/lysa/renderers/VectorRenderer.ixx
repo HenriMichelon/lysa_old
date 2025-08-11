@@ -92,13 +92,16 @@ export namespace lysa {
     private:
         static constexpr auto MAX_TEXTURES{100};
         static constexpr auto MAX_FONTS{10};
+
+        static constexpr vireo::DescriptorIndex FONT_PARAMS_BINDING{0};
+        static constexpr vireo::DescriptorIndex FONT_PARAMS_SET{2};
+
         const std::string name;
         const bool useCamera;
         const bool useTextures;
         std::shared_ptr<vireo::Image> blankImage;
 
         vireo::DescriptorIndex globalUniformIndex;
-        vireo::DescriptorIndex fontUniformsIndex;
         vireo::DescriptorIndex texturesIndex;
 
         struct GlobalUniform {
@@ -147,6 +150,8 @@ export namespace lysa {
 
         std::vector<FontParams> fontsParams{};
         std::shared_ptr<vireo::Buffer> fontsParamsUniform;
+        std::shared_ptr<vireo::DescriptorSet> fontDescriptorSet;
+        std::shared_ptr<vireo::DescriptorLayout> fontDescriptorLayout;
         std::map<unique_id, int32> fontsIndices{};
 
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;
