@@ -163,7 +163,7 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             renderer->preRender(*frame.preRenderCommandList, scene, frameIndex);
-            viewport->updateDebug(*frame.preRenderCommandList, frameIndex);
+            viewport->update(*frame.preRenderCommandList, frameIndex);
         }
         uiRenderer.update(*frame.preRenderCommandList, frameIndex);
         frame.preRenderCommandList->end();
@@ -193,7 +193,7 @@ namespace lysa {
 
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            viewport->drawDebug(
+            viewport->draw(
                 *commandList,
                 scene,
                 colorAttachment,

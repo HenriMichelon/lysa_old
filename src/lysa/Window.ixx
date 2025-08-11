@@ -22,6 +22,7 @@ import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.ui;
+import lysa.renderers.vector;
 import lysa.ui.window;
 import lysa.ui.window_manager;
 

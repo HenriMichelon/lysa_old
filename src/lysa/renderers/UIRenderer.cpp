@@ -14,12 +14,14 @@ namespace lysa {
         const RenderingConfiguration& renderingConfiguration) :
         VectorRenderer{
             false,
+            true,
+            true,
             renderingConfiguration,
             "UI Renderer",
             "vector_ui",
             "glyph_ui",
-            true, true,
-        false, true} {
+            true,
+            false} {
     }
 
     void UIRenderer::drawLine(const float2& start, const float2& end) {

@@ -148,6 +148,7 @@ export namespace lysa {
         SceneConfiguration sceneConfig{};
         //! Debug configuration for this viewport
         DebugConfig        debugConfig{};
+        bool               useVectorRenderer{false};
     };
 
     /**

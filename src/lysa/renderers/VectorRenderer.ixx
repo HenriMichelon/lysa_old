@@ -22,13 +22,14 @@ export namespace lysa {
     public:
         VectorRenderer(
             bool depthTestEnable,
+            bool enableAlphaBlending,
+            bool useTextures,
             const RenderingConfiguration& renderingConfiguration,
-            const std::string& name,
+            const std::string& name = "VectorRenderer",
             const std::string& shadersName = "vector",
             const std::string& glyphShadersName = "glyph",
             bool filledTriangles = false,
-            bool enableAlphaBlending = false,
-            bool useCamera = true, bool useTextures = false);
+            bool useCamera = true);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
@@ -38,7 +39,8 @@ export namespace lysa {
             const std::string& text,
             Font& font,
             float fontScale,
-            const float3& position);
+            const float3& position,
+            const float4& color);
 
         void restart();
 

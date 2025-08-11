@@ -7,11 +7,14 @@
 #include "vector.inc.slang"
 
 [[vk::binding(0, 0)]] ConstantBuffer<GlobalUniform> global  : register(b0, space0);
+[[vk::binding(1, 0)]] Texture2D textures[] : register(t1, space0);
 
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
     output.position = mul(global.projection, mul(global.view,  float4(input.position, 1.0)));
     output.color = input.color;
+    output.uv = input.uv;
+    output.textureIndex = input.textureIndex;
     return output;
 }
 

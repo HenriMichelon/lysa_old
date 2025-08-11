@@ -16,6 +16,7 @@ import lysa.nodes.camera;
 import lysa.nodes.node;
 import lysa.physics.engine;
 import lysa.renderers.debug;
+import lysa.renderers.vector;
 
 export namespace lysa {
 
@@ -104,13 +105,15 @@ export namespace lysa {
             return debugRenderer;
         }
 
-        void updateDebug(const vireo::CommandList& commandList, uint32 frameIndex) const;
+        auto getVectorRenderer() { return vectorRenderer; }
 
-        void drawDebug(
+        void update(const vireo::CommandList& commandList, uint32 frameIndex) const;
+
+        void draw(
             vireo::CommandList& commandList,
             const Scene& scene,
-            std::shared_ptr<vireo::RenderTarget> colorAttachment,
-            std::shared_ptr<vireo::RenderTarget> depthAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+            const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             uint32 frameIndex) const;
 
         const auto& getConfiguration() const {
@@ -161,6 +164,7 @@ export namespace lysa {
 
         std::unique_ptr<PhysicsScene> physicsScene;
         std::shared_ptr<DebugRenderer> debugRenderer;
+        std::shared_ptr<VectorRenderer> vectorRenderer;
         bool displayDebug{false};
 
         auto& getScene(const uint32 frameIndex) const { return framesData[frameIndex].scene; }

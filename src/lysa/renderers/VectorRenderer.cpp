@@ -14,17 +14,17 @@ namespace lysa {
 
     VectorRenderer::VectorRenderer(
         const bool depthTestEnable,
+        const bool enableAlphaBlending,
+        const bool useTextures,
         const RenderingConfiguration& renderingConfiguration,
         const std::string& name,
         const std::string& shadersName,
         const std::string& glyphShadersName,
         const bool filledTriangles,
-        const bool enableAlphaBlending,
-        const bool useCamera,
-        const bool useTextures) :
+        const bool useCamera) :
         config{renderingConfiguration},
-        useCamera{useCamera},
         useTextures{useTextures},
+        useCamera{useCamera},
         name{name} {
         const auto& vireo = Application::getVireo();
 
@@ -110,22 +110,28 @@ namespace lysa {
         const std::string& text,
         Font& font,
         const float fontScale,
-        const float3& position) {
+        const float3& position,
+        const float4& color) {
+        assert([&]{ return useTextures; }, "Can't draw text without textures");
         auto textureIndex = addTexture(font.getAtlas());
-        auto x = position.x;
-        auto y = position.y;
+        auto pos = position;
         for (const auto c : text) {
             auto glyphInfo = font.getGlyphInfo(c);
+            auto plane = Font::GlyphBounds{};
+            plane.left = fontScale * (glyphInfo.planeBounds.left );
+            plane.right = fontScale * (glyphInfo.planeBounds.right );
+            plane.top = fontScale * (glyphInfo.planeBounds.top );
+            plane.bottom = fontScale * (glyphInfo.planeBounds.bottom);
             /*
             * v1 ---- v3
             * |  \     |
             * |    \   |
             * v0 ---- v2
             */
-            const float3 v0 = { x + fontScale * glyphInfo.planeBounds.left,  y + fontScale * glyphInfo.planeBounds.bottom, position.z };
-            const float3 v1 = { x + fontScale * glyphInfo.planeBounds.left,  y + fontScale * glyphInfo.planeBounds.top, position.z };
-            const float3 v2 = { x + fontScale * glyphInfo.planeBounds.right, y + fontScale * glyphInfo.planeBounds.bottom, position.z };
-            const float3 v3 = { x + fontScale * glyphInfo.planeBounds.right, y + fontScale * glyphInfo.planeBounds.top, position.z };
+            const float3 v0 = { pos.x + plane.left,  pos.y + plane.bottom, 0.0f };
+            const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
+            const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
+            const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
             glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
             glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
             glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
