@@ -106,6 +106,7 @@ namespace lysa {
         VirtualFS::loadBinaryData("app://" + Application::getConfiguration().shaderDir + "/" + glyphShadersName + ".frag" + ext, tempBuffer);
         pipelineConfig.fragmentShader = vireo.createShaderModule(tempBuffer);
         pipelineConfig.polygonMode = vireo::PolygonMode::FILL;
+        pipelineConfig.colorBlendDesc = glyphPipelineConfig.colorBlendDesc;
         pipelineGlyphs = vireo.createGraphicPipeline(pipelineConfig, name + " glyphs");
     }
 

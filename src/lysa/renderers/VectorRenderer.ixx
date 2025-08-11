@@ -40,7 +40,7 @@ export namespace lysa {
             Font& font,
             float fontScale,
             const float3& position,
-            const float4& color);
+            const float4& innerColor);
 
         void restart();
 
@@ -126,6 +126,20 @@ export namespace lysa {
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = {{ }},
             .cullMode = vireo::CullMode::NONE,
+        };
+
+        vireo::GraphicPipelineConfiguration glyphPipelineConfig {
+            .colorBlendDesc = {
+            {
+                    .blendEnable = true,
+                    .srcColorBlendFactor = vireo::BlendFactor::SRC_ALPHA,
+                    .dstColorBlendFactor = vireo::BlendFactor::ONE_MINUS_SRC_ALPHA,
+                    .colorBlendOp = vireo::BlendOp::ADD,
+                    .srcAlphaBlendFactor = vireo::BlendFactor::ONE,
+                    .dstAlphaBlendFactor = vireo::BlendFactor::ONE_MINUS_SRC_ALPHA,
+                    .alphaBlendOp = vireo::BlendOp::ADD,
+                    .colorWriteMask = vireo::ColorWriteMask::ALL,
+                }},
         };
 
         vireo::RenderingConfiguration renderingConfig {

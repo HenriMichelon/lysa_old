@@ -26,7 +26,7 @@ namespace lysa {
 
     Font::Font(const std::string &path):
         Resource{path} {
-        atlas = Image::load(path + ".png", vireo::ImageFormat::R8G8B8A8_SNORM);
+        atlas = Image::load(path + ".png", vireo::ImageFormat::R8G8B8A8_SRGB);
 
         auto json = nlohmann::ordered_json::parse(VirtualFS::openReadStream(path + ".json"));
         const auto& atlas = json["atlas"];

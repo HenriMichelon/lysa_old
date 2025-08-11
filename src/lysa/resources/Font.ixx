@@ -18,6 +18,7 @@ export namespace lysa {
 
     struct FontParams {
         float2 pxRange{FLOAT2ZERO};
+        float4 outlineColor{0.0f, 0.0f, 0.0f, 1.0f};
         float threshold{0.5f};
         float outlineBias{1.0f/4.0f};
         float outlineWidthAbsolute{1.0f/3.0f};
@@ -75,6 +76,30 @@ export namespace lysa {
         auto getAtlas() const { return atlas; }
 
         const auto& getFontParams() const { return params; }
+
+        void setOutlineColor(const float4 &color) {
+            params.outlineColor = color;
+        }
+
+        void setOutlineBias(const float bias) {
+            params.outlineBias = bias;
+        }
+
+        void setOutlineWidthAbsolute(const float width) {
+            params.outlineWidthAbsolute = width;
+        }
+
+        void setOutlineWidthRelative(const float width) {
+            params.outlineWidthRelative = width;
+        }
+
+        void setOutlineBlur(const float blur) {
+            params.outlineBlur = blur;
+        }
+
+        void setOutlineThreshold(const float threshold) {
+            params.threshold = threshold;
+        }
 
     private:
         uint32 size;

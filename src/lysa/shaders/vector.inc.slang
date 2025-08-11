@@ -31,6 +31,7 @@ struct GlobalUniform {
 struct FontParams {
     float2 pxRange;
     float2 pad0;
+    float4 outlineColor;
     float threshold;
     float outlineBias;
     float outlineWidthAbsolute;

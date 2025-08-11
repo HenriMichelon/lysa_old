@@ -35,7 +35,7 @@ float screenPxRange(VertexOutput input, FontParams font) {
 float4 fragmentMain(VertexOutput input) : SV_TARGET {
     FontParams font = fonts.font[input.fontIndex];
     input.uv.y = 1.0 - input.uv.y;
-    float4 distances = textures[input.textureIndex].Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
+    float4 distances  = textures[input.textureIndex].Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
 
     // distances are stored with 1.0 meaning "inside" and 0.0 meaning "outside"
     float d_msdf = median(distances.r, distances.g, distances.b);
@@ -55,14 +55,9 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     float inner_opacity = clamp(inner, 0.0, 1.0);
     float4 inner_color = input.color;
     float outer_opacity = clamp(outer, 0.0, 1.0);
-    float4 outer_color = float4(0, 0, 0, 1); // TODO put in uniform
+    float4 outer_color = font.outlineColor;
 
     if (font.outlineBlur > 0.0) {
-        // NOTE: the smoothstep fails when the two edges are the same, and I wish it
-        // would act like a step function instead of failing.
-        // NOTE: I'm using d_sdf here because I want the shadows to be rounded
-        // even when outlines are sharp. But I don't yet have implemented a way
-        // to see the sharp outline with a rounded shadow.
         float blur_start = font.outlineWidthRelative + font.outlineWidthAbsolute / width;
         outer_color.a = smoothstep(blur_start,
                                    blur_start * (1.0 - font.outlineBlur),

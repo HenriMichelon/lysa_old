@@ -166,6 +166,7 @@ namespace lysa {
             viewport->update(*frame.preRenderCommandList, frameIndex);
         }
         uiRenderer.update(*frame.preRenderCommandList, frameIndex);
+
         frame.preRenderCommandList->end();
         Application::getGraphicQueue()->submit(
             frame.computeSemaphore,
@@ -189,21 +190,23 @@ namespace lysa {
             mainViewport->getViewport(),
             mainViewport->getScissors(),
             swapChain->getCurrentFrameIndex());
-        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
 
+        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
+        const auto depthAttachment = renderer->getDepthRenderTarget(frameIndex);
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             viewport->draw(
                 *commandList,
                 scene,
                 colorAttachment,
-                renderer->getDepthRenderTarget(frameIndex),
+                depthAttachment,
                 frameIndex);
         }
+
         uiRenderer.render(
             *commandList,
             colorAttachment,
-            renderer->getDepthRenderTarget(frameIndex),
+            depthAttachment,
             frameIndex);
 
         commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);
