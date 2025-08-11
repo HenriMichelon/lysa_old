@@ -25,7 +25,7 @@ export namespace lysa {
         float threshold{0.5f};
         float outlineBias{1.0f/4.0f};
         float outlineWidthAbsolute{1.0f/3.0f};
-        float outlineWidthRelative{1.0f/5.0f};
+        float outlineWidthRelative{1.0f/10.0f};
         float outlineBlur{0.5f};
         float gamma{1.0f};
     };
