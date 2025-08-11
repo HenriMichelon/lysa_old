@@ -10,10 +10,21 @@ export module lysa.resources.font;
 import std;
 import lysa.resources.image;
 import lysa.resources.resource;
+import lysa.constants;
 import lysa.math;
 import lysa.types;
 
 export namespace lysa {
+
+    struct FontParams {
+        float2 pxRange{FLOAT2ZERO};
+        float threshold{0.5f};
+        float outlineBias{1.0f/4.0f};
+        float outlineWidthAbsolute{1.0f/3.0f};
+        float outlineWidthRelative{1.0f/20.0f};
+        float outlineBlur{0.0f};
+        float gamma{1.0f};
+    };
 
     /**
      * %A font resource to render text
@@ -48,6 +59,8 @@ export namespace lysa {
 
         auto getAtlas() const { return atlas; }
 
+        const auto& getFontParams() const { return params; }
+
         struct GlyphBounds {
             float left{0.0f};
             float bottom{0.0f};
@@ -68,7 +81,7 @@ export namespace lysa {
         float ascender;
         float descender;
         float lineHeight;
-        uint32 pixelRange;
+        FontParams params;
         std::shared_ptr<Image> atlas;
         std::unordered_map<uint32, GlyphInfo> glyphs;
 

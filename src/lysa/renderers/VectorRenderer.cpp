@@ -7,6 +7,7 @@
 module lysa.renderers.vector;
 
 import lysa.application;
+import lysa.constants;
 import lysa.exception;
 import lysa.virtual_fs;
 
@@ -32,11 +33,19 @@ namespace lysa {
         if (useCamera) {
             globalUniformIndex = 0;
             texturesIndex = 1;
+            fontUniformsIndex = 2;
             descriptorLayout->add(globalUniformIndex, vireo::DescriptorType::UNIFORM);
         } else {
             texturesIndex = 0;
+            fontUniformsIndex = 1;
         }
         if (useTextures) {
+            fontsParams.resize(MAX_FONTS);
+            descriptorLayout->add(fontUniformsIndex, vireo::DescriptorType::UNIFORM, fontsParams.size());
+            fontsParamsUniform = vireo.createBuffer(vireo::BufferType::UNIFORM, sizeof(FontParams), fontsParams.size(), name + " fonts params");
+            fontsParamsUniform->map();
+            fontsParamsUniform->write(fontsParams.data());
+
             textures.resize(MAX_TEXTURES);
             descriptorLayout->add(texturesIndex, vireo::DescriptorType::SAMPLED_IMAGE, textures.size());
             blankImage = Application::getResources().getBlankImage();
@@ -55,6 +64,7 @@ namespace lysa {
                 frameData.descriptorSet->update(globalUniformIndex, frameData.globalUniform);
             }
             if (useTextures) {
+                frameData.descriptorSet->update(fontUniformsIndex, fontsParamsUniform);
                 frameData.descriptorSet->update(texturesIndex, textures);
             }
         }
@@ -94,15 +104,15 @@ namespace lysa {
     }
 
     void VectorRenderer::drawLine(const float3& from, const float3& to, const float4& color) {
-        linesVertices.push_back( {from, {}, color, {}, -1 });
-        linesVertices.push_back( {to, {}, color, {}, -1 });
+        linesVertices.push_back( {from, {}, color});
+        linesVertices.push_back( {to, {}, color });
         vertexBufferDirty = true;
     }
 
     void VectorRenderer::drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color) {
-        triangleVertices.push_back( {v1, {}, color, {}, -1 });
-        triangleVertices.push_back( {v2, {}, color, {}, -1 });
-        triangleVertices.push_back( {v3, {}, color, {}, -1 });
+        triangleVertices.push_back( {v1, {}, color});
+        triangleVertices.push_back( {v2, {}, color});
+        triangleVertices.push_back( {v3, {}, color });
         vertexBufferDirty = true;
     }
 
@@ -114,6 +124,7 @@ namespace lysa {
         const float4& color) {
         assert([&]{ return useTextures; }, "Can't draw text without textures");
         auto textureIndex = addTexture(font.getAtlas());
+        auto fontIndex = addFont(font);
         auto pos = position;
         for (const auto c : text) {
             auto glyphInfo = font.getGlyphInfo(c);
@@ -132,12 +143,12 @@ namespace lysa {
             const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
             const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
             const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
-            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
             break;
         }
         vertexBufferDirty = true;
@@ -266,6 +277,27 @@ namespace lysa {
             }
         }
         throw Exception("Maximum images count reached for the vector renderer");
+    }
+
+    int32 VectorRenderer::addFont(const Font &font) {
+        if (fontsIndices.contains(font.getId())) {
+            return fontsIndices.at(font.getId());
+        }
+        for (int index = 0; index < fontsParams.size(); index++) {
+            if (all(fontsParams[index].pxRange == FLOAT2ZERO)) {
+                fontsParams[index] = font.getFontParams();
+                fontsIndices[font.getId()] = index;
+                fontsParamsUniform->write(
+                    fontsParams.data(),
+                    sizeof(FontParams),
+                    fontsParamsUniform->getInstanceSizeAligned() * index);
+                // for (const auto& frameData : framesData) {
+                    // frameData.descriptorSet->update(fontUniformsIndex, fontsParamsUniform);
+                // }
+                return index;
+            }
+        }
+        throw Exception("Maximum font count reached for the vector renderer");
     }
 
 }

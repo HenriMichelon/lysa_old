@@ -34,7 +34,8 @@ namespace lysa {
         uint32 atlasWidth, atlasHeight;
         atlas["width"].get_to(atlasWidth);
         atlas["height"].get_to(atlasHeight);
-        atlas["distanceRange"].get_to(pixelRange);
+        auto pixelRange = atlas["distanceRange"].get<float>();
+        params.pxRange = { pixelRange / atlasWidth, pixelRange / atlasHeight };
 
         const auto& metrics = json["metrics"];
         metrics["lineHeight"].get_to(lineHeight);

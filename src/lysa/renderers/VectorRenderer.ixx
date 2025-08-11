@@ -71,7 +71,8 @@ export namespace lysa {
             alignas(16) float2 uv;
             alignas(16) float4 color;
             alignas(16) float2 uvClip;
-            alignas(16) int textureIndex;
+            alignas(16) int textureIndex{-1};
+            alignas(16) int fontIndex{-1};
         };
 
         const RenderingConfiguration& config;
@@ -86,14 +87,18 @@ export namespace lysa {
 
         int32 addTexture(const std::shared_ptr<Image> &texture);
 
+        int32 addFont(const Font &font);
+
     private:
         static constexpr auto MAX_TEXTURES{100};
+        static constexpr auto MAX_FONTS{10};
         const std::string name;
         const bool useCamera;
         const bool useTextures;
         std::shared_ptr<vireo::Image> blankImage;
 
         vireo::DescriptorIndex globalUniformIndex;
+        vireo::DescriptorIndex fontUniformsIndex;
         vireo::DescriptorIndex texturesIndex;
 
         struct GlobalUniform {
@@ -112,6 +117,7 @@ export namespace lysa {
             {"COLOR", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)},
             {"CLIP", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uvClip)},
             {"TEXTURE", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, textureIndex)},
+            {"FONT", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, fontIndex)},
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
@@ -138,6 +144,10 @@ export namespace lysa {
         std::vector<std::shared_ptr<vireo::Image>> textures;
         // Indices of each image in the descriptor binding
         std::map<unique_id, int32> texturesIndices{};
+
+        std::vector<FontParams> fontsParams{};
+        std::shared_ptr<vireo::Buffer> fontsParamsUniform;
+        std::map<unique_id, int32> fontsIndices{};
 
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;
         std::shared_ptr<vireo::GraphicPipeline>  pipelineTriangles;
