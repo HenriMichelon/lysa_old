@@ -34,6 +34,21 @@ export namespace lysa {
     public:
         friend class Window;
 
+        struct GlyphBounds {
+            float left{0.0f};
+            float bottom{0.0f};
+            float right{0.0f};
+            float top{0.0f};
+        };
+
+        struct GlyphInfo {
+            uint32 codepoint{0};
+            float advance{0.0f};
+            GlyphBounds planeBounds{};
+            float2 uv0{0.0f};
+            float2 uv1{0.0f};
+        };
+
         /**
          * Creates a font resource
          * @param path : font file path, relative to the application working directory
@@ -55,28 +70,13 @@ export namespace lysa {
         //Relative to the font size
         auto getLineHeight() const { return lineHeight; }
 
-        auto getGlyphInfo(uint32 codepoint) const { return glyphs.at(codepoint); }
+        const GlyphInfo& getGlyphInfo(uint32 codepoint) const;
 
         auto getAtlas() const { return atlas; }
 
         const auto& getFontParams() const { return params; }
 
-        struct GlyphBounds {
-            float left{0.0f};
-            float bottom{0.0f};
-            float right{0.0f};
-            float top{0.0f};
-        };
-
     private:
-        struct GlyphInfo {
-            uint32 codepoint{0};
-            float advance{0.0f};
-            GlyphBounds planeBounds{};
-            float2 uv0{0.0f};
-            float2 uv1{0.0f};
-        };
-
         uint32 size;
         float ascender;
         float descender;

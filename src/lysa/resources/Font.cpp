@@ -65,6 +65,13 @@ namespace lysa {
         INFO("Loaded ", glyphs.size(), " glyphs from ", path);
     }
 
+    const Font::GlyphInfo& Font::getGlyphInfo(uint32 codepoint) const {
+        if (!glyphs.contains(codepoint)) {
+            return glyphs.at(' ');
+        }
+        return glyphs.at(codepoint);
+    }
+
     Font::~Font() {
 
     }

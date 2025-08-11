@@ -155,7 +155,7 @@ namespace lysa {
             glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, color, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, color, {}, textureIndex, fontIndex});
-            break;
+            pos.x += fontScale * glyphInfo.advance;
         }
         vertexBufferDirty = true;
     }
