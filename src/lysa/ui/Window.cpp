@@ -48,9 +48,14 @@ namespace lysa::ui {
         widget->setFreezed(false);
     }
 
-    Font &Window::getDefaultFont() const {
+    Font &Window::getFont() const {
         assert([&]{ return windowManager != nullptr;} , "ui::Window not attached to a manager");
-        return windowManager->getDefaultFont();
+        return windowManager->getFont();
+    }
+
+    float Window::getFontScale() const {
+        assert([&]{ return windowManager != nullptr;} , "ui::Window not attached to a manager");
+        return windowManager->getFontScale();
     }
 
     void Window::setWidget(std::shared_ptr<Widget> child, const std::string &resources, const float padding) {

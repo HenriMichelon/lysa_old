@@ -4,6 +4,8 @@
 * This software is released under the MIT License.
 * https://opensource.org/licenses/MIT
 */
+module;
+#include <hb.h>
 module lysa.renderers.ui;
 
 import lysa.constants;
@@ -92,15 +94,27 @@ namespace lysa {
         const std::string& text,
         Font& font,
         const float fontScale,
-        float x, float y) {
-        const auto pos  = (float2{x, y} + translate) / VECTOR_SCREEN_SIZE;
+        const float x,
+        const float y) {
+        float2 pos  = (float2{x, y} + translate) / VECTOR_SCREEN_SIZE;
         auto textureIndex = addTexture(font.getAtlas());
-        for (const auto c : text) {
-            auto glyphInfo = font.getGlyphInfo(c);
+        auto fontIndex = addFont(font);
+        const auto innerColor = float4{penColor.rgb, std::max(0.0f, static_cast<float>(penColor.a - transparency))};
+
+        hb_buffer_t* hb_buffer = hb_buffer_create();
+        hb_buffer_add_utf8(hb_buffer, text.c_str(), -1, 0, -1);
+        hb_buffer_guess_segment_properties(hb_buffer);
+        hb_shape(font.getHarfBuzzFont(), hb_buffer, nullptr, 0);
+        unsigned int glyph_count;
+        hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buffer, &glyph_count);
+        //hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(hb_buffer, &glyph_count);
+
+        for (unsigned int i = 0; i < glyph_count; i++) {
+            auto glyphInfo = font.getGlyphInfo(glyph_info[i].codepoint);
             auto plane = Font::GlyphBounds{};
-            plane.left = fontScale * (glyphInfo.planeBounds.left );
-            plane.right = fontScale * (glyphInfo.planeBounds.right );
-            plane.top = fontScale * (glyphInfo.planeBounds.top );
+            plane.left = fontScale * (glyphInfo.planeBounds.left);
+            plane.right = fontScale * (glyphInfo.planeBounds.right);
+            plane.top = fontScale * (glyphInfo.planeBounds.top);
             plane.bottom = fontScale * (glyphInfo.planeBounds.bottom);
             /*
             * v1 ---- v3
@@ -112,14 +126,16 @@ namespace lysa {
             const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
             const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
             const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
-            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv1.y}, {}, {}, textureIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv0.y}, {}, {}, textureIndex});
-            break;
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
+            pos.x += fontScale * glyphInfo.advance;
         }
+
+        hb_buffer_destroy(hb_buffer);
         vertexBufferDirty = true;
     }
 

@@ -208,7 +208,9 @@ export namespace lysa::ui {
         /**
          * Returns the default font loaded at startup
          */
-        Font& getDefaultFont() const;
+        Font& getFont() const;
+
+        float getFontScale() const;
 
         auto& getDefaultTextColor() const { return defaultTextColor; }
 

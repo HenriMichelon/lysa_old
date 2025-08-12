@@ -38,7 +38,9 @@ export namespace lysa {
             /**
              * Returns the default font loaded at startup
              */
-            auto& getDefaultFont() const { return *defaultFont; }
+            auto& getFont() const { return *defaultFont; }
+
+            auto getFontScale() const { return fontScale; }
 
             /**
              * Forces a redrawing of all the UI at the start of the next frame

@@ -164,7 +164,7 @@ namespace lysa::ui {
         }
     }
 
-    Font &Widget::getFont() { return (font ? *font : window->getWindowManager().getDefaultFont()); }
+    Font &Widget::getFont() { return (font ? *font : window->getWindowManager().getFont()); }
 
     void Widget::_init(Widget &child, const AlignmentType alignment, const std::string &res, const bool overlap) {
         child.alignment = alignment;

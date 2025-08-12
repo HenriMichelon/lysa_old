@@ -59,6 +59,8 @@ export namespace lysa {
          */
         Font(const std::string &path);
 
+        Font(const Font &font);
+
         ~Font() override;
 
         /**
@@ -107,6 +109,7 @@ export namespace lysa {
         auto getHarfBuzzFont() const { return hbFont; }
 
     private:
+        const std::string path;
         uint32 size;
         float ascender;
         float descender;

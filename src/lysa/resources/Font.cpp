@@ -30,8 +30,28 @@ namespace lysa {
         height = 0;
     }
 
+    Font::Font(const Font &font):
+        Resource{font.path},
+        path{font.path},
+        size{font.size},
+        ascender{font.ascender},
+        descender{font.descender},
+        lineHeight{font.lineHeight},
+        params{font.params},
+        atlas{font.atlas},
+        glyphs{font.glyphs}  {
+        if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".ttf").c_str(), 0, &ftFace)) {
+            if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".otf").c_str(), 0, &ftFace)) {
+                throw Exception("Error loading font ", path);
+            }
+        }
+        FT_Set_Char_Size(ftFace, 0, size * 64, 0, 0);
+        hbFont = hb_ft_font_create(ftFace, nullptr);
+    }
+
     Font::Font(const std::string &path):
-        Resource{path} {
+        Resource{path},
+        path{path} {
         if (!ftLibrary) {
             if (FT_Init_FreeType(&ftLibrary)) {
                 throw Exception("Error initializing FreeType");
