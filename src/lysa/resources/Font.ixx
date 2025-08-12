@@ -66,7 +66,7 @@ export namespace lysa {
         /**
          * Returns the size (in pixels) for a string.
          */
-        void getSize(const std::string &text, float scale, float &width, float &height);
+        void getSize(const std::string &text, float fontScale, float &width, float &height);
 
         /**
          * Returns the font size in the atlas
@@ -75,6 +75,10 @@ export namespace lysa {
 
         //Relative to the font size
         auto getLineHeight() const { return lineHeight; }
+
+        auto getAscender() const { return ascender; }
+
+        auto getDescender() const { return descender; }
 
         const GlyphInfo& getGlyphInfo(uint32 index) const;
 

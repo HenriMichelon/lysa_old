@@ -97,8 +97,9 @@ namespace lysa {
         const float x,
         const float y) {
         float2 pos  = (float2{x, y} + translate) / VECTOR_SCREEN_SIZE;
-        auto textureIndex = addTexture(font.getAtlas());
-        auto fontIndex = addFont(font);
+        const auto scale = fontScale * font.getFontSize() / VECTOR_SCREEN_SIZE;
+        const auto textureIndex = addTexture(font.getAtlas());
+        const auto fontIndex = addFont(font);
         const auto innerColor = float4{penColor.rgb, std::max(0.0f, static_cast<float>(penColor.a - transparency))};
 
         hb_buffer_t* hb_buffer = hb_buffer_create();
@@ -107,15 +108,13 @@ namespace lysa {
         hb_shape(font.getHarfBuzzFont(), hb_buffer, nullptr, 0);
         unsigned int glyph_count;
         hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buffer, &glyph_count);
-        //hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(hb_buffer, &glyph_count);
-
         for (unsigned int i = 0; i < glyph_count; i++) {
             auto glyphInfo = font.getGlyphInfo(glyph_info[i].codepoint);
             auto plane = Font::GlyphBounds{};
-            plane.left = fontScale * (glyphInfo.planeBounds.left);
-            plane.right = fontScale * (glyphInfo.planeBounds.right);
-            plane.top = fontScale * (glyphInfo.planeBounds.top);
-            plane.bottom = fontScale * (glyphInfo.planeBounds.bottom);
+            plane.left = scale * glyphInfo.planeBounds.left ;
+            plane.right = scale * glyphInfo.planeBounds.right;
+            plane.top = scale * glyphInfo.planeBounds.top;
+            plane.bottom = scale * glyphInfo.planeBounds.bottom;
             /*
             * v1 ---- v3
             * |  \     |
@@ -132,9 +131,8 @@ namespace lysa {
             glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
             glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
-            pos.x += fontScale * glyphInfo.advance;
+            pos.x += scale * glyphInfo.advance;
         }
-
         hb_buffer_destroy(hb_buffer);
         vertexBufferDirty = true;
     }

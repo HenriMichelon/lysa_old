@@ -25,9 +25,20 @@ namespace lysa {
 
     FT_Library Font::ftLibrary{nullptr};
 
-    void Font::getSize(const std::string &text, float scale, float &width, float &height) {
+    void Font::getSize(const std::string &text, const float fontScale, float &width, float &height) {
+        const auto scale = fontScale * size;
+        height = fontScale * lineHeight;
         width = 0;
-        height = 0;
+        hb_buffer_t* hb_buffer = hb_buffer_create();
+        hb_buffer_add_utf8(hb_buffer, text.c_str(), -1, 0, -1);
+        hb_buffer_guess_segment_properties(hb_buffer);
+        hb_shape(hbFont, hb_buffer, nullptr, 0);
+        unsigned int glyph_count;
+        hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buffer, &glyph_count);
+        for (unsigned int i = 0; i < glyph_count; i++) {
+            width += glyphs[glyph_info[i].codepoint].advance * scale;
+        }
+        hb_buffer_destroy(hb_buffer);
     }
 
     Font::Font(const Font &font):
@@ -77,9 +88,9 @@ namespace lysa {
         hbFont = hb_ft_font_create(ftFace, nullptr);
 
         const auto& metrics = json["metrics"];
-        metrics["lineHeight"].get_to(lineHeight);
-        metrics["ascender"].get_to(ascender);
-        metrics["descender"].get_to(descender);
+        lineHeight = metrics["lineHeight"].get<float>() * size;
+        ascender = metrics["ascender"].get<float>() * size;
+        descender = metrics["descender"].get<float>() * size;
 
         for (const auto& glyph : json["glyphs"]) {
             auto glyphInfo = GlyphInfo {
