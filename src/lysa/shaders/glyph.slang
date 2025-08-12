@@ -5,6 +5,7 @@
 * https://opensource.org/licenses/MIT
 */
 #include "vector.inc.slang"
+#include "glyph.inc.slang"
 #include "samplers.inc.slang"
 
 [[vk::binding(0, 0)]] ConstantBuffer<GlobalUniform> global  : register(b0, space0);

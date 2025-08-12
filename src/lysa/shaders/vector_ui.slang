@@ -12,7 +12,7 @@
 VertexOutput vertexMain(VertexInput input) {
     VertexOutput output;
     float2 pos = 2 * (input.position.xy - 0.5); // remap to [-1,1]
-    output.position = float4(pos.x, -pos.y, 0, 1);
+    output.position = float4(pos.x, pos.y, 0, 1);
     output.uv = input.uv;
     output.color = input.color;
     output.uvClip = input.uvClip;
