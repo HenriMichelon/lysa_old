@@ -71,7 +71,6 @@ export namespace lysa {
             alignas(16) float3 position;
             alignas(16) float2 uv;
             alignas(16) float4 color;
-            alignas(16) float2 uvClip;
             alignas(16) int textureIndex{-1};
             alignas(16) int fontIndex{-1};
         };
@@ -119,7 +118,6 @@ export namespace lysa {
             {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position)},
             {"TEXCOORD", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uv)},
             {"COLOR", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)},
-            {"CLIP", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uvClip)},
             {"TEXTURE", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, textureIndex)},
             {"FONT", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, fontIndex)},
         };

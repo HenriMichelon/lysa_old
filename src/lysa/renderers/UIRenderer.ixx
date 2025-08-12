@@ -32,22 +32,18 @@ export namespace lysa {
         void drawLine(const float2& start, const float2& end);
 
         // Draw a filled rectangle
-        void drawFilledRect(const ui::Rect &rect, float clipWidth, float clipHeight);
+        void drawFilledRect(const ui::Rect &rect);
 
         // Draw a filled rectangle with an image
         void drawFilledRect(
             const ui::Rect &rect,
-            float clipWidth,
-            float clipHeight,
             const std::shared_ptr<Image> &texture);
 
         // Draw a filled rectangle
         void drawFilledRect(
             float x, float y,
             float w, float h,
-            float clipWidth,
-            float clipHeight,
-            const std::shared_ptr<Image> &texture);
+            const std::shared_ptr<Image> &texture = nullptr);
 
         void drawText(
             const std::string& text,
@@ -67,8 +63,6 @@ export namespace lysa {
     private:
         struct PushConstants {
             int   textureIndex;
-            float clipX;
-            float clipY;
         };
 
         // Fragment color for the next drawing commands

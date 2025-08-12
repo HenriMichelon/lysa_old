@@ -15,7 +15,6 @@ VertexOutput vertexMain(VertexInput input) {
     output.position = float4(pos.x, pos.y, 0, 1);
     output.uv = input.uv;
     output.color = input.color;
-    output.uvClip = input.uvClip;
     output.textureIndex = input.textureIndex;
     return output;
 }
@@ -24,9 +23,6 @@ float4 fragmentMain(VertexOutput input) : SV_TARGET {
     if (input.textureIndex == -1) {
         return input.color;
     } else {
-        if ((input.uv.x > input.uvClip.x) || (input.uv.y < (1.0-input.uvClip.y))) {
-            discard;
-        }
         input.uv.y = 1.0 - input.uv.y;
         float4 color = textures[input.textureIndex].Sample(samplers[SAMPLER_LINEAR_LINEAR_EDGE_LINEAR], input.uv);
         return float4(input.color.rgb * color.rgb, min(color.a, input.color.a));

@@ -63,7 +63,7 @@ namespace lysa::ui {
                 auto &pic = dynamic_cast<const Image &>(widget);
                 if (pic.getImage()) {
                     renderer.setPenColor(pic.getColor());
-                    renderer.drawFilledRect(widget.getRect(), widget.getRect().width, widget.getRect().height, pic.getImage());
+                    renderer.drawFilledRect(widget.getRect(), pic.getImage());
                 }
             }
                 /*case Widget::GRIDCELL:
@@ -202,7 +202,7 @@ namespace lysa::ui {
             auto c = resources.customColor ? resources.color : fgUp;
             c.a    = widget.getTransparency();
             renderer.setPenColor(c);
-            renderer.drawFilledRect(widget.getRect(), widget.getRect().width, widget.getRect().height);
+            renderer.drawFilledRect(widget.getRect());
             // texture->Draw(D, W.Rect());
         }
     }
@@ -229,7 +229,7 @@ namespace lysa::ui {
                 fu.a  -= 1.0f-widget.getTransparency();
                 renderer.setPenColor(fu);
             }
-            renderer.drawFilledRect(x, y, w, h, w, h, nullptr);
+            renderer.drawFilledRect(x, y, w, h, nullptr);
         }
         if (resources.style != StyleClassicResource::FLAT) {
             auto sb = shadowBright;

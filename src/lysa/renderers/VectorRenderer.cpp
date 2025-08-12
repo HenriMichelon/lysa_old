@@ -164,12 +164,12 @@ namespace lysa {
             const float3 v1 = mul({ pos.x + plane.left,  pos.y + plane.top, pos.z, 1.0f }, rm).xyz;
             const float3 v2 = mul({ pos.x + plane.right, pos.y + plane.bottom, pos.z, 1.0f }, rm).xyz;
             const float3 v3 = mul({ pos.x + plane.right, pos.y + plane.top, pos.z, 1.0f }, rm).xyz;
-            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
             pos.x += fontScale * glyphInfo.advance;
         }
 
@@ -263,15 +263,15 @@ namespace lysa {
             vireo::ResourceState::RENDER_TARGET_COLOR);
         commandList.bindVertexBuffer(vertexBuffer);
         commandList.beginRendering(renderingConfig);
-        if (!linesVertices.empty()) {
-            commandList.bindPipeline(pipelineLines);
-            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
-            commandList.draw(linesVertices.size(), 1, 0, 0);
-        }
         if (!triangleVertices.empty()) {
             commandList.bindPipeline(pipelineTriangles);
             commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
             commandList.draw(triangleVertices.size(), 1, linesVertices.size(), 0);
+        }
+        if (!linesVertices.empty()) {
+            commandList.bindPipeline(pipelineLines);
+            commandList.bindDescriptors({frame.descriptorSet, Application::getResources().getSamplers().getDescriptorSet(), fontDescriptorSet});
+            commandList.draw(linesVertices.size(), 1, 0, 0);
         }
         if (!glyphVertices.empty()) {
             commandList.bindPipeline(pipelineGlyphs);

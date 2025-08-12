@@ -8,7 +8,6 @@ struct VertexInput {
     float3 position : POSITION;
     float2 uv       : TEXCOORD;
     float4 color    : COLOR;
-    float2 uvClip   : CLIP;
     int textureIndex: TEXTURE;
     int fontIndex   : FONT;
 };
@@ -17,7 +16,6 @@ struct VertexOutput {
     float4 position : SV_POSITION;
     float2 uv       : TEXCOORD;
     float4 color    : COLOR;
-    nointerpolation float2 uvClip    : CLIP;
     nointerpolation int textureIndex : TEXTURE;
     nointerpolation int fontIndex    : FONT;
 };

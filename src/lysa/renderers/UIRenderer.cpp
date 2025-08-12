@@ -31,35 +31,30 @@ namespace lysa {
         const auto scaledEnd = (end + translate) / VECTOR_SCREEN_SIZE;
         const auto alpha = std::max(0.0f, static_cast<float>(penColor.a - transparency));
         const auto color = float4{penColor.rgb, alpha};
-        linesVertices.push_back( {{scaledStart, 0.0f}, {}, color, {}, -1 });
-        linesVertices.push_back( {{scaledEnd, 0.0f}, {}, color, {}, -1 });
+        linesVertices.push_back( {{scaledStart, 0.0f}, {}, color, -1 });
+        linesVertices.push_back( {{scaledEnd, 0.0f}, {}, color, -1 });
         vertexBufferDirty = true;
     }
 
-    void UIRenderer::drawFilledRect(const ui::Rect &rect, const float clipWidth, const float clipHeight) {
+    void UIRenderer::drawFilledRect(const ui::Rect &rect) {
         drawFilledRect(
             rect.x, rect.y,
             rect.width, rect.height,
-            clipWidth, clipHeight,
             nullptr);
     }
 
     void UIRenderer::drawFilledRect(
            const ui::Rect &rect,
-           const float clipWidth,
-           const float clipHeight,
            const std::shared_ptr<Image> &texture) {
         drawFilledRect(
             rect.x, rect.y,
             rect.width, rect.height,
-            clipWidth, clipHeight,
             texture);
     }
 
     void UIRenderer::drawFilledRect(
             const float x, const float y,
             const float w, const float h,
-            const float clipWidth, const float clipHeight,
             const std::shared_ptr<Image> &texture) {
         const auto pos  = (float2{x, y} + translate) / VECTOR_SCREEN_SIZE;
         const float2 size = float2{w, h} / VECTOR_SCREEN_SIZE;
@@ -74,19 +69,18 @@ namespace lysa {
         const auto v1 = float3{pos.x, pos.y + size.y, 0.0f};
         const auto v2 = float3{pos.x + size.x, pos.y, 0.0f};
         const auto v3 = float3{pos.x + size.x, pos.y + size.y, 0.0f};
-        const auto uvClip = float2{clipWidth / w, clipHeight / h};
 
         auto textureIndex{-1};
         if (texture) {
             textureIndex = addTexture(texture);
         }
 
-        triangleVertices.push_back( {v0, {0.0f, 1.0f}, color, uvClip, textureIndex });
-        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, textureIndex });
-        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip, textureIndex });
-        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, uvClip, textureIndex });
-        triangleVertices.push_back( {v3, {1.0f, 0.0f}, color, uvClip, textureIndex });
-        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, uvClip, textureIndex });
+        triangleVertices.push_back( {v0, {0.0f, 1.0f}, color, textureIndex });
+        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, textureIndex });
+        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, textureIndex });
+        triangleVertices.push_back( {v1, {0.0f, 0.0f}, color, textureIndex });
+        triangleVertices.push_back( {v3, {1.0f, 0.0f}, color, textureIndex });
+        triangleVertices.push_back( {v2, {1.0f, 1.0f}, color, textureIndex });
         vertexBufferDirty = true;
     }
 
@@ -125,12 +119,12 @@ namespace lysa {
             const float3 v1 = { pos.x + plane.left,  pos.y + plane.top, 0.0f };
             const float3 v2 = { pos.x + plane.right, pos.y + plane.bottom, 0.0f };
             const float3 v3 = { pos.x + plane.right, pos.y + plane.top, 0.0f };
-            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, {}, textureIndex, fontIndex});
-            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, {}, textureIndex, fontIndex});
+            glyphVertices.push_back({v0, {glyphInfo.uv0.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v1, {glyphInfo.uv0.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v3, {glyphInfo.uv1.x, glyphInfo.uv0.y}, innerColor, textureIndex, fontIndex});
+            glyphVertices.push_back({v2, {glyphInfo.uv1.x, glyphInfo.uv1.y}, innerColor, textureIndex, fontIndex});
             pos.x += scale * glyphInfo.advance;
         }
         hb_buffer_destroy(hb_buffer);
@@ -138,7 +132,6 @@ namespace lysa {
     }
 
     void UIRenderer::resize(const vireo::Extent& extent) {
-        // vectorExtent = {extent.width * VECTOR_SCREEN_SIZE / extent.height, VECTOR_SCREEN_SIZE};
         vectorRatio = static_cast<float>(extent.width) / extent.height;
     }
 }
