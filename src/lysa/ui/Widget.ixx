@@ -151,10 +151,14 @@ namespace lysa::ui {
         void setAlignment(AlignmentType alignment);
 
         /** Returns the current font of the widget */
-        Font& getFont();
+        std::shared_ptr<Font> getFont() const;
 
         /** Sets the current font of the widget */
         void setFont(const std::shared_ptr<Font>& font);
+
+        float getFontScale() const;
+
+        virtual void setFontScale(float fontScale);
 
         /** Returns true if the widget has keyboard focus */
         bool isFocused() const;
@@ -316,6 +320,7 @@ namespace lysa::ui {
         Window* window{nullptr};
         void* style{nullptr};
         bool mouseMoveOnFocus{false};
+        float fontScale{0.0f};
 
         void allowingFocus(bool allow = true);
 
@@ -329,10 +334,10 @@ namespace lysa::ui {
         bool freeze{true};
         bool enabled{true};
         bool visible{true};
-        std::shared_ptr<Font> font{nullptr};
         void *userData{nullptr};
         int32 groupIndex{0};
         Rect childrenRect;
+        std::shared_ptr<Font> font{nullptr};
 
         Widget *setNextFocus();
     };

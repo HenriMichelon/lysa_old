@@ -16,7 +16,7 @@ export namespace lysa::ui {
      */
     class Text : public Widget {
     public:
-        Text(const std::string& text, float scale = 1.0f);
+        Text(const std::string& text);
 
         const auto& getText() const { return text; }
 
@@ -26,14 +26,12 @@ export namespace lysa::ui {
 
         auto getTextColor() const { return textColor; }
 
-        auto getScale() const { return scale; }
-
-        void setScale(float scale);
+        void setFontScale(float scale) override;
 
         /**
          * Returns the size for the text.
          */
-        void getSize(float &width, float &height);
+        void getSize(float &width, float &height) const;
 
         void _setSize(float width, float height) override;
 
@@ -43,7 +41,6 @@ export namespace lysa::ui {
     private:
         std::string text;
         float4 textColor{0.0f};
-        float scale{1.0f};
 
         void eventCreate() override;
     };

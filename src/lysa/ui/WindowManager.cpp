@@ -126,7 +126,7 @@ namespace lysa::ui {
             const auto scaleX = VECTOR_SCREEN_SIZE / renderingWindow.getExtent().width;
             const auto scaleY = VECTOR_SCREEN_SIZE / renderingWindow.getExtent().height;
             const auto x = mouseEvent.getX() * scaleX;
-            const auto y = VECTOR_SCREEN_SIZE - mouseEvent.getY() * scaleY;
+            const auto y = mouseEvent.getY() * scaleY;
 
             if (inputEvent.getType() == InputEventType::MOUSE_MOTION) {
                 const auto resizeDeltaY = scaleY * resizeDelta;

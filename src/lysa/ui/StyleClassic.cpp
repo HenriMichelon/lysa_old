@@ -164,7 +164,9 @@ namespace lysa::ui {
         case Widget::FRAME: {
             widget.setHBorder(4);
             float w, h;
-            widget.getFont().getSize(static_cast<Frame &>(widget).getTitle(), 1.0f, w, h); // TODO text scale in Frame
+            widget.getFont()->getSize(
+                static_cast<Frame &>(widget).getTitle(),
+                widget.getFontScale(), w, h); // TODO text scale in Frame
             widget.setVBorder(h - 2);
         } break;
             /*case Widget::LINE:
@@ -199,8 +201,8 @@ namespace lysa::ui {
 
     void StyleClassic::drawPanel(const Panel &widget, StyleClassicResource &resources, UIRenderer &renderer) const {
         if (widget.isDrawBackground()) {
-            auto c = resources.customColor ? resources.color : fgUp;
-            c.a    = widget.getTransparency();
+            auto c = resources.customColor ? resources.color : fgDown;
+            c.a = widget.getTransparency();
             renderer.setPenColor(c);
             renderer.drawFilledRect(widget.getRect());
             // texture->Draw(D, W.Rect());
@@ -300,12 +302,12 @@ namespace lysa::ui {
         renderer.setPenColor(
             resources.customColor ? resources.color :
             float4{widget.getTextColor().r, widget.getTextColor().g, widget.getTextColor().b, widget.getTransparency()});
-        // renderer.drawText(
-            // widget.getText(),
-            // widget.getFont(),
-            // widget.getScale(),
-            // widget.getRect().x,
-            // widget.getRect().y);
+        renderer.drawText(
+            widget.getText(),
+            *widget.getFont(),
+            widget.getFontScale(),
+            widget.getRect().x,
+            widget.getRect().y);
     }
 
     void StyleClassic::drawFrame(Frame &widget, StyleClassicResource &resources, UIRenderer &renderer) const {
@@ -338,32 +340,31 @@ namespace lysa::ui {
             break;
         }
         float fh, fw;
-        widget.getFont().getSize(widget.getTitle(), 1.0f, fw, fh); // TODO text scale in Frame
-        fw /= renderer.getAspectRatio();
+        widget.getFont()->getSize(widget.getTitle(), widget.getFontScale(), fw, fh);
+        // fw /= renderer.getAspectRatio();
         renderer.setPenColor(c2);
         if ((!widget.getTitle().empty()) && (widget.getWidth() >= (fw + LEFTOFFSET)) && (widget.getHeight() >= fh)) {
             renderer.drawLine(
-                {l, b},
-                {l + LEFTOFFSET, b});
+                {l, b + h},
+                {l + LEFTOFFSET, b + h});
             renderer.drawLine(
-                {l + fw + LEFTOFFSET + 1, b},
-                {l + w, b});
+                {l + fw + LEFTOFFSET + 1, b + h},
+                {l + w, b + h});
             renderer.setPenColor(float4{widget.getTitleColor().r, widget.getTitleColor().g, widget.getTitleColor().b, widget.getTransparency()});
-            // renderer.drawText(
-            //     widget.getTitle(),
-            //     widget.getFont(),
-            //     l + LEFTOFFSET,
-            //     b - (fh / 2),
-            //     fw, fh,
-            //     fw, fh);
+            renderer.drawText(
+                widget.getTitle(),
+                *widget.getFont(),
+                widget.getFontScale(),
+                l + LEFTOFFSET,
+                 (b + h) - (fh / 2) - widget.getFont()->getDescender()*widget.getFontScale());
             renderer.setPenColor(c2);
         } else {
             renderer.drawLine({l + w, b + h}, {l, b + h});
         }
-        renderer.drawLine({l, b}, {l, b + h});
-        renderer.setPenColor(c1);
         renderer.drawLine({l + w, b}, {l + w, b + h});
-        renderer.drawLine({l, b + h}, {l + w, b + h});
+        renderer.setPenColor(c1);
+        renderer.drawLine({l, b}, {l + w, b});
+        renderer.drawLine({l, b}, {l, b + h});
     }
 
 

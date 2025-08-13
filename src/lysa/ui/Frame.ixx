@@ -17,7 +17,7 @@ export namespace lysa::ui {
     class Frame: public Panel {
     public:
         // Create a Frame widget with an optional title
-        Frame(const std::string& title = ""): Panel{FRAME}, title{title} {}
+        Frame(const std::string& title);
 
         // Return the current title of the widget
         auto& getTitle() const { return title; }

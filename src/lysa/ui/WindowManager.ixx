@@ -38,16 +38,16 @@ export namespace lysa {
             /**
              * Returns the default font loaded at startup
              */
-            auto& getFont() const { return *defaultFont; }
+            auto& getDefaultFont() const { return defaultFont; }
 
-            auto getFontScale() const { return fontScale; }
+            auto getDefaultFontScale() const { return fontScale; }
 
             /**
              * Forces a redrawing of all the UI at the start of the next frame
              */
             void refresh() { needRedraw = true; }
 
-            UIRenderer& getRenderer() { return uiRenderer; }
+            UIRenderer& getRenderer() const { return uiRenderer; }
 
             float getResizeDelta() const { return resizeDelta; }
 

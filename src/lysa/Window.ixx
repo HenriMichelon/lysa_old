@@ -110,9 +110,9 @@ export namespace lysa {
         /**
           * Returns the default font loaded at startup
           */
-        auto& getFont() const { return windowManager.getFont(); }
+        auto& getFont() const { return windowManager.getDefaultFont(); }
 
-        auto getFontScale() const { return windowManager.getFontScale(); }
+        auto getFontScale() const { return windowManager.getDefaultFontScale(); }
 
         const auto& getConfiguration() const { return config; }
 
