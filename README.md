@@ -1,6 +1,6 @@
 # Lysa
 
-A 3D Game Engine.
+A 3D Engine.
 
 ## Some Features
 
