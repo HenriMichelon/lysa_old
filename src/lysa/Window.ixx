@@ -22,6 +22,7 @@ import lysa.nodes.node;
 import lysa.resources.material;
 import lysa.renderers.renderer;
 import lysa.renderers.ui;
+import lysa.renderers.vector;
 import lysa.ui.window;
 import lysa.ui.window_manager;
 
@@ -109,7 +110,9 @@ export namespace lysa {
         /**
           * Returns the default font loaded at startup
           */
-        auto& getDefaultFont() const { return windowManager.getDefaultFont(); }
+        auto& getFont() const { return windowManager.getDefaultFont(); }
+
+        auto getFontScale() const { return windowManager.getDefaultFontScale(); }
 
         const auto& getConfiguration() const { return config; }
 

@@ -44,28 +44,3 @@ set(HB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(HB_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(HB_HAVE_FREETYPE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(harfbuzz)
-
-message(NOTICE "Fetching msdfgen...")
-FetchContent_Declare(
-        msdfgen
-        GIT_REPOSITORY https://github.com/Chlumsky/msdfgen.git
-        GIT_TAG        v1.12.1
-)
-set(MSDFGEN_BUILD_STANDALONE OFF CACHE BOOL "" FORCE)
-set(MSDFGEN_USE_VCPKG OFF CACHE BOOL "" FORCE)
-set(MSDFGEN_USE_SKIA OFF CACHE BOOL "" FORCE)
-set(MSDFGEN_DISABLE_SVG ON CACHE BOOL "" FORCE)
-set(MSDFGEN_DISABLE_PNG ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(msdfgen)
-
-message(NOTICE "Fetching msdf_atlas_gen...")
-FetchContent_Declare(
-        msdf_atlas_gen
-        GIT_REPOSITORY https://github.com/Chlumsky/msdf-atlas-gen.git
-        GIT_TAG        v1.3
-)
-set(MSDF_ATLAS_GEN_STANDALONE OFF CACHE BOOL "" FORCE)
-set(MSDF_ATLAS_USE_VCPKG OFF CACHE BOOL "" FORCE)
-set(MSDF_ATLAS_USE_SKIA OFF CACHE BOOL "" FORCE)
-set(MSDF_ATLAS_MSDFGEN_EXTERNAL ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(msdf_atlas_gen)

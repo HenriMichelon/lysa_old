@@ -5,9 +5,11 @@
  * https://opensource.org/licenses/MIT
 */
 module;
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb_truetype.h>
-#include <stb_image_write.h>
+#include <json.hpp>
+#include <hb.h>
+#include <hb-ft.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 module lysa.resources.font;
 
 import vireo;
@@ -21,182 +23,108 @@ import lysa.window;
 
 namespace lysa {
 
-    void Font::getSize(const std::string &text, float &width, float &height) {
+    FT_Library Font::ftLibrary{nullptr};
+
+    void Font::getSize(const std::string &text, const float fontScale, float &width, float &height) {
+        const auto scale = fontScale * size;
+        height = fontScale * lineHeight;
         width = 0;
-        uint32 max_height = 0;
-        uint32 max_descender = 0;
-        for (const auto wc : text) {
-            auto &cchar = getFromCache(wc);
-            width += static_cast<float>(cchar.advance);
-            auto descender = cchar.height - cchar.yBearing;
-            max_height = std::max(max_height, cchar.height);
-            max_descender = std::max(max_descender, descender);
+        hb_buffer_t* hb_buffer = hb_buffer_create();
+        hb_buffer_add_utf8(hb_buffer, text.c_str(), -1, 0, -1);
+        hb_buffer_guess_segment_properties(hb_buffer);
+        hb_shape(hbFont, hb_buffer, nullptr, 0);
+        unsigned int glyph_count;
+        hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buffer, &glyph_count);
+        for (unsigned int i = 0; i < glyph_count; i++) {
+            width += glyphs[glyph_info[i].codepoint].advance * scale;
         }
-        height = static_cast<float>(max_height + max_descender);
+        hb_buffer_destroy(hb_buffer);
     }
 
-    std::vector<uint32> Font::renderToBitmap(const std::string &text, float &wwidth, float &hheight) {
-        uint32 width = 0;
-        uint32 max_height = 0;
-        uint32 max_descender = 0;
-        const auto utf32 = to_utf32(text);
-        for (const auto wc : utf32) {
-            auto &cchar = getFromCache(wc);
-            width += cchar.advance + cchar.xBearing;
-            const auto descender = cchar.height - cchar.yBearing;
-            max_height = std::max(max_height, cchar.height);
-            max_descender = std::max(max_descender, descender);
-        }
-        const uint32 height = max_height + max_descender;
-
-        auto bitmap = std::vector<uint32>(width * height, 0);
-        int32 x = 0;
-        for (const auto wc : utf32) {
-            const auto &cchar  = getFromCache(wc);
-            const auto offset = height - cchar.yBearing - max_descender;
-            for (int line = 0; line < cchar.height; line++) {
-                const auto dest = bitmap.data() + (x + cchar.xBearing) + ((line + offset) * width);
-                const auto src  = cchar.bitmap->data() + (line * cchar.width);
-                for (int col = 0; col < cchar.width; col++) {
-                    const auto value = src[col];
-                    if (value != 0) { dest[col] = value; }
-                }
-            }
-            x += cchar.advance;
-        }
-        wwidth  = static_cast<float>(width);
-        hheight = static_cast<float>(height);
-        return bitmap;
-    }
-
-    Font::CachedCharacter &Font::getFromCache(const char32_t c) {
-        if (characterCache.contains(c)) {
-            return characterCache[c];
-        }
-        auto &cchar = characterCache[c];
-        render(cchar, c);
-        return cchar;
-    }
-
-    Font::Font(const Font &font, const uint32 size, Window* window) : Font{font.getFontName(), size, window} {
-    }
-
-    std::shared_ptr<Image> Font::renderToImage(const std::string &text) {
-        if constexpr (isImageCacheEnabled()) {
-            if (imageCache.contains(text)) {
-                return imageCache[text];
+    Font::Font(const Font &font):
+        Resource{font.path},
+        path{font.path},
+        size{font.size},
+        ascender{font.ascender},
+        descender{font.descender},
+        lineHeight{font.lineHeight},
+        params{font.params},
+        atlas{font.atlas},
+        glyphs{font.glyphs}  {
+        if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".ttf").c_str(), 0, &ftFace)) {
+            if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".otf").c_str(), 0, &ftFace)) {
+                throw Exception("Error loading font ", path);
             }
         }
-        float width, height;
-        const auto bitmap = renderToBitmap(text, width, height);
-        const auto image = Image::create(
-            bitmap.data(),
-            static_cast<uint32>(width),
-            static_cast<uint32>(height),
-            vireo::ImageFormat::B8G8R8A8_SRGB,
-            "");
-        if constexpr (isImageCacheEnabled()) {
-            imageCache[text] = image;
-        }
-        // image->save("text.png");
-        return image;
+        FT_Set_Char_Size(ftFace, 0, size * 64, 0, 0);
+        hbFont = hb_ft_font_create(ftFace, nullptr);
     }
 
-#ifdef __STB_INCLUDE_STB_TRUETYPE_H__
-
-    float Font::getLineHeight() const {
-        return static_cast<float>(ascent - descent + lineGap);
-    }
-
-    int Font::getMaxHeight(const stbtt_fontinfo* font, const float scale) {
-        static auto letters =
-            "ǾabcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~éèàùôûïÂÄÔÖÛÜç€";
-        int maxHeight = 0;
-        for (int i = 0; letters[i]; ++i) {
-            int x0, y0, x1, y1;
-            stbtt_GetCodepointBitmapBox(font, letters[i], scale, scale, &x0, &y0, &x1, &y1);
-            const auto h = y1 - y0;
-            if (h > maxHeight) {
-                maxHeight = h;
-            }
-        }
-        return maxHeight;
-    }
-
-    Font::Font(const std::string &path, const uint32 size, Window* window) :
+    Font::Font(const std::string &path):
         Resource{path},
-        path{path},
-        size{size},
-        window{window} {
-        if (window == nullptr) {
-            this->window = &Application::getInstance().getMainWindow();
-        }
-        std::ifstream fontFile = VirtualFS::openReadStream(path);
-        fontBuffer = std::make_unique<std::vector<unsigned char>>((std::istreambuf_iterator(fontFile)),
-                                                        std::istreambuf_iterator<char>());
-        if (!stbtt_InitFont(&font, fontBuffer->data(), stbtt_GetFontOffsetForIndex(fontBuffer->data(), 0))) {
-            throw Exception("Failed to initialize font", path);
-        }
-        auto targetHeight = size * this->window->getExtent().height / VECTOR_SCREEN_SIZE;
-        scale = stbtt_ScaleForMappingEmToPixels (&font, targetHeight);
-        stbtt_GetFontVMetrics(&font, &ascent, &descent, &lineGap);
-        height = getMaxHeight(&font, scale);
-        scale = scale * (targetHeight / height);
-        height = static_cast<int>(ceilf((ascent - descent) * scale));
-        //INFO("Font size : ", size , "->", targetHeight, "=", height, "(", scale, ")");
-        ascent  = static_cast<int>(ascent * scale);
-        descent = static_cast<int>(descent * scale);
-    }
-
-    void Font::render(CachedCharacter &cachedCharacter, const char32_t c) const {
-        int advanceWidth, leftSideBearing;
-        stbtt_GetCodepointHMetrics(&font, c, &advanceWidth, &leftSideBearing);
-        cachedCharacter.advance  = static_cast<int32>(advanceWidth * scale);
-        cachedCharacter.xBearing = static_cast<int32>(leftSideBearing * scale);
-        int width, height;
-        const auto srcBitmap = stbtt_GetCodepointBitmap(
-            &font,
-            0, scale,
-            c,
-            &width, &height,
-            nullptr, nullptr);
-        assert(height <= this->height);
-        cachedCharacter.width = width;
-        cachedCharacter.height = height;
-        cachedCharacter.bitmap = std::make_unique<std::vector<uint32>>(
-            cachedCharacter.width *
-            cachedCharacter.height, 0);
-
-        int x1, y1, x2, y2;
-        stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x1, &y1, &x2, &y2);
-        cachedCharacter.yBearing = -y1;
-
-        const auto dstBitmap = cachedCharacter.bitmap->data();
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                const uint8 gray = srcBitmap[y * width + x];
-                if (gray != 0) {
-                    dstBitmap[y * cachedCharacter.width + x] =
-                        (gray << 24) | (gray << 16) | (gray << 8) | gray;
-                } else {
-                    dstBitmap[y * cachedCharacter.width + x] = 0xffff;
-                }
+        path{path} {
+        if (!ftLibrary) {
+            if (FT_Init_FreeType(&ftLibrary)) {
+                throw Exception("Error initializing FreeType");
             }
         }
-        // const std::string t = std::format("f.png", c);
-        // stbi_write_png(t.c_str(),
-        // width,
-        // height,
-        // 4,
-        // dstBitmap,
-        // width * 4);
-        stbtt_FreeBitmap(srcBitmap, nullptr);
+
+        auto json = nlohmann::ordered_json::parse(VirtualFS::openReadStream(path + ".json"));
+        const auto& atlas = json["atlas"];
+        // assert([&]{ return atlas["type"].get<std::string>() == "mtsdf"; }, "Only MTSDF font atlas are supported");
+        atlas["size"].get_to(size);
+        uint32 atlasWidth, atlasHeight;
+        atlas["width"].get_to(atlasWidth);
+        atlas["height"].get_to(atlasHeight);
+        const auto pixelRange = atlas["distanceRange"].get<float>();
+        params.pxRange = { pixelRange / atlasWidth, pixelRange / atlasHeight };
+
+        if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".ttf").c_str(), 0, &ftFace)) {
+            if (FT_New_Face(ftLibrary, VirtualFS::getPath(path + ".otf").c_str(), 0, &ftFace)) {
+                throw Exception("Error loading font ", path);
+            }
+        }
+        FT_Set_Char_Size(ftFace, 0, size * 64, 0, 0);
+        hbFont = hb_ft_font_create(ftFace, nullptr);
+
+        const auto& metrics = json["metrics"];
+        lineHeight = metrics["lineHeight"].get<float>() * size;
+        ascender = metrics["ascender"].get<float>() * size;
+        descender = metrics["descender"].get<float>() * size;
+
+        for (const auto& glyph : json["glyphs"]) {
+            auto glyphInfo = GlyphInfo {
+                .index = glyph["index"].get<uint32>(),
+                .advance = glyph["advance"].get<float>(),
+            };
+            if (glyph.contains("planeBounds") && glyph.contains("atlasBounds")) {
+                glyphInfo.planeBounds.left = glyph["planeBounds"]["left"].get<float>();
+                glyphInfo.planeBounds.right = glyph["planeBounds"]["right"].get<float>();
+                glyphInfo.planeBounds.top = glyph["planeBounds"]["top"].get<float>();
+                glyphInfo.planeBounds.bottom = glyph["planeBounds"]["bottom"].get<float>();
+
+                const auto atlasLeft = glyph["atlasBounds"]["left"].get<float>();
+                const auto atlasRight = glyph["atlasBounds"]["right"].get<float>();
+                const auto atlasTop = glyph["atlasBounds"]["top"].get<float>();
+                const auto atlasBottom = glyph["atlasBounds"]["bottom"].get<float>();
+                glyphInfo.uv0 = { atlasLeft / atlasWidth, atlasTop / atlasHeight };
+                glyphInfo.uv1 = { atlasRight / atlasWidth, atlasBottom / atlasHeight };
+            }
+            glyphs[glyphInfo.index] = glyphInfo;
+        }
+        this->atlas = Image::load(path + ".png", vireo::ImageFormat::R8G8B8A8_SRGB);
+        INFO("Loaded ", glyphs.size(), " glyphs from ", path);
+    }
+
+    const Font::GlyphInfo& Font::getGlyphInfo(const uint32 index) const {
+        if (!glyphs.contains(index)) {
+            return glyphs.at(0);
+        }
+        return glyphs.at(index);
     }
 
     Font::~Font() {
+        hb_font_destroy(hbFont);
+        FT_Done_Face(ftFace);
     }
-
-
-#endif
-
 }

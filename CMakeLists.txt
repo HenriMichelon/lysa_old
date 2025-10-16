@@ -23,7 +23,6 @@ set(PHYSIC_ENGINE_JOLT ON)
 set(PHYSIC_ENGINE_PHYSX OFF)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -34,7 +33,7 @@ if(WIN32)
     if(MSVC)
         set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
     endif()
-    add_compile_definitions(WIN32_LEAN_AND_MEAN UNICODE _UNICODE)
+    add_compile_definitions(UNICODE _UNICODE)
 endif ()
 
 #######################################################
@@ -83,34 +82,36 @@ set(HLSLPP_SRC_DIR ${DEPENDS_SRC_DIR}/${HLSLPP_TARGET})
 # Slang shaders
 file(MAKE_DIRECTORY ${SHADERS_BUILD_DIR})
 set(SHADERS_SOURCE_FILES
-        "${SHADERS_SRC_DIR}/default.vert.slang"
-        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
-        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
-        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
-        "${SHADERS_SRC_DIR}/quad.vert.slang"
+#        "${SHADERS_SRC_DIR}/default.vert.slang"
+#        "${SHADERS_SRC_DIR}/depth_prepass.vert.slang"
+#        "${SHADERS_SRC_DIR}/frustum_culling.comp.slang"
+#        "${SHADERS_SRC_DIR}/frustum_culling_shadowmap.comp.slang"
+#        "${SHADERS_SRC_DIR}/quad.vert.slang"
         "${SHADERS_SRC_DIR}/vector.slang"
         "${SHADERS_SRC_DIR}/vector_ui.slang"
-        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
-        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
-        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
-        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
-        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/smaa_edge_detect.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/smaa_blend_weight.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/smaa_neighborhood_blend.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
-        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
-        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
-        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
-        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
+        "${SHADERS_SRC_DIR}/glyph.slang"
+        "${SHADERS_SRC_DIR}/glyph_ui.slang"
+#        "${SHADERS_SRC_DIR}/deferred/gbuffers.frag.slang"
+#        "${SHADERS_SRC_DIR}/deferred/glighting.frag.slang"
+#        "${SHADERS_SRC_DIR}/deferred/glighting_bloom.frag.slang"
+#        "${SHADERS_SRC_DIR}/deferred/ssao.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/forward.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/forward_bloom.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/transparency_oit.frag.slang"
+#        "${SHADERS_SRC_DIR}/forward/transparency_oit_composite.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/greyscale.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/bloom_blur.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/ssao_blur.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/fxaa.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_edge_detect.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_blend_weight.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/smaa_neighborhood_blend.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/gamma_correction.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/reinhard.frag.slang"
+#        "${SHADERS_SRC_DIR}/postprocess/aces.frag.slang"
+#        "${SHADERS_SRC_DIR}/shadows/shadowmap.vert.slang"
+#        "${SHADERS_SRC_DIR}/shadows/shadowmap.frag.slang"
+#        "${SHADERS_SRC_DIR}/shadows/shadowmap_cubemap.frag.slang"
 )
 add_shaders(${LYSA_TARGET}_shaders ${SHADERS_BUILD_DIR} ${SHADERS_INCLUDE_DIR} ${SHADERS_SOURCE_FILES})
 
@@ -408,17 +409,16 @@ target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET}
         xxhash
         Freetype::Freetype
         harfbuzz
-        msdfgen-core
-        msdfgen-ext
-        msdf-atlas-gen
 )
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
 target_precompile_headers(${LYSA_TARGET} PRIVATE
     "<intrin.h>"
 )
+set_property(TARGET ${LYSA_TARGET} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 #######################################################
 if(WIN32)
+    target_compile_definitions(${LYSA_TARGET} PRIVATE WIN32_LEAN_AND_MEAN)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)
     endif ()

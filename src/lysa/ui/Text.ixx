@@ -26,10 +26,12 @@ export namespace lysa::ui {
 
         auto getTextColor() const { return textColor; }
 
+        void setFontScale(float scale) override;
+
         /**
          * Returns the size for the text.
          */
-        void getSize(float &width, float &height);
+        void getSize(float &width, float &height) const;
 
         void _setSize(float width, float height) override;
 

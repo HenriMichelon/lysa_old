@@ -45,6 +45,11 @@ namespace lysa {
                 window.getConfiguration().renderingConfig);
             displayDebug = config.debugConfig.displayAtStartup;
         }
+        if (config.useVectorRenderer) {
+            vectorRenderer = std::make_unique<VectorRenderer>(
+                true, true, true,
+                window.getConfiguration().renderingConfig);
+        }
     }
 
     void Viewport::resize(const vireo::Extent &extent) {
@@ -70,7 +75,7 @@ namespace lysa {
         }
     }
 
-    void Viewport::updateDebug(const vireo::CommandList& commandList, const uint32 frameIndex)  const {
+    void Viewport::update(const vireo::CommandList& commandList, const uint32 frameIndex)  const {
         if (displayDebug) {
             if (config.debugConfig.drawRayCast) {
                 debugRenderer->drawRayCasts(
@@ -81,21 +86,32 @@ namespace lysa {
             physicsScene->debug(*debugRenderer);
             debugRenderer->update(commandList, frameIndex);
         }
+        if (vectorRenderer) {
+            vectorRenderer->update(commandList, frameIndex);
+        }
     }
 
-    void Viewport::drawDebug(
+    void Viewport::draw(
         vireo::CommandList& commandList,
         const Scene& scene,
-        std::shared_ptr<vireo::RenderTarget> colorAttachment,
-        std::shared_ptr<vireo::RenderTarget> depthAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
+        const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
         const uint32 frameIndex)  const {
         if (displayDebug) {
             debugRenderer->render(
-                    commandList,
-                    scene,
-                    colorAttachment,
-                    depthAttachment,
-                    frameIndex);
+                commandList,
+                scene,
+                colorAttachment,
+                depthAttachment,
+                frameIndex);
+        }
+        if (vectorRenderer) {
+            vectorRenderer->render(
+                commandList,
+                scene,
+                colorAttachment,
+                depthAttachment,
+                frameIndex);
         }
     }
 

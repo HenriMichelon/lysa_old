@@ -11,7 +11,7 @@ import lysa.ui.widget;
 export namespace lysa::ui {
 
     /**
-     * %A rectangular widget with only a background (no borders)
+     * %A rectangular widget with only a background
      */
     class Panel: public Widget {
     public:

@@ -208,11 +208,17 @@ export namespace lysa::ui {
         /**
          * Returns the default font loaded at startup
          */
-        Font& getDefaultFont() const;
+        std::shared_ptr<Font> getFont() const;
 
-        auto& getDefaultTextColor() const { return defaultTextColor; }
+        void setFont(const std::shared_ptr<Font>& font);
 
-        void setDefaultTextColor(const float4& color) { defaultTextColor = color; }
+        float getFontScale() const;
+
+        void setFontScale(float fontScale);
+
+        auto& getTextColor() const { return textColor; }
+
+        void setTextColor(const float4& color) { textColor = color; }
 
         void refresh() const;
 
@@ -262,12 +268,14 @@ export namespace lysa::ui {
         std::shared_ptr<Widget> widget{nullptr};
         Widget* focusedWidget{nullptr};
         float transparency{1.0};
-        float4 defaultTextColor{0.0f, 0.0f, 0.0f, 1.0f};
+        float4 textColor{0.0f, 0.0f, 0.0f, 1.0f};
         uint32 resizeableBorders{RESIZEABLE_NONE};
         WindowManager* windowManager{nullptr};
         bool visibilityChanged{false};
         bool visible{true};
         bool visibilityChange{false};
+        std::shared_ptr<Font> font{nullptr};
+        float fontScale{1.0f};
 
         void unFreeze(const std::shared_ptr<Widget> &);
     };

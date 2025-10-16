@@ -32,38 +32,24 @@ export namespace lysa {
         void drawLine(const float2& start, const float2& end);
 
         // Draw a filled rectangle
-        void drawFilledRect(const ui::Rect &rect, float clipWidth, float clipHeight);
+        void drawFilledRect(const ui::Rect &rect);
 
         // Draw a filled rectangle with an image
         void drawFilledRect(
             const ui::Rect &rect,
-            float clipWidth,
-            float clipHeight,
             const std::shared_ptr<Image> &texture);
 
         // Draw a filled rectangle
         void drawFilledRect(
             float x, float y,
             float w, float h,
-            float clipWidth,
-            float clipHeight,
-            const std::shared_ptr<Image> &texture);
+            const std::shared_ptr<Image> &texture = nullptr);
 
-        // Draw a rectangle filled with a text
         void drawText(
             const std::string& text,
             Font& font,
-            const ui::Rect& rect,
-            float clipWidth,
-            float clipHeight);
-
-        // Draw a rectangle filled with a text
-        void drawText(
-            const std::string& text,
-            Font& font,
-            float x, float y,
-            float w, float  h,
-            float clipWidth, float clipHeight);
+            float fontScale,
+            float x, float y);
 
         // Change the color of the fragments for the next drawing commands
         auto setPenColor(const float4& color) { penColor = color; }
@@ -77,8 +63,6 @@ export namespace lysa {
     private:
         struct PushConstants {
             int   textureIndex;
-            float clipX;
-            float clipY;
         };
 
         // Fragment color for the next drawing commands

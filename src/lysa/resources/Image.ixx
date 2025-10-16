@@ -9,6 +9,7 @@ export module lysa.resources.image;
 import std;
 import vireo;
 import lysa.math;
+import lysa.types;
 import lysa.resources.resource;
 
 export namespace lysa {
@@ -44,8 +45,8 @@ export namespace lysa {
         static void save(const std::string& filepath, const std::shared_ptr<vireo::Image>& image);
 
         /**
-        * Load a bitmap from file.<br>
-        * Support JPEG and PNG formats
+        * Load a bitmap from a file.<br>
+        * Supports JPEG and PNG formats
         */
         static std::shared_ptr<Image> load(
             const std::string &filepath,
@@ -53,7 +54,7 @@ export namespace lysa {
 
         /**
          * Load a bitmap from memory.<br>
-         * Support JPEG & PNG formats.
+         * Supports JPEG & PNG formats.
          */
         static std::shared_ptr<Image> create(
             const void* data,

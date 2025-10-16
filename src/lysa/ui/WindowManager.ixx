@@ -38,14 +38,16 @@ export namespace lysa {
             /**
              * Returns the default font loaded at startup
              */
-            auto& getDefaultFont() const { return *defaultFont; }
+            auto& getDefaultFont() const { return defaultFont; }
+
+            auto getDefaultFontScale() const { return fontScale; }
 
             /**
              * Forces a redrawing of all the UI at the start of the next frame
              */
             void refresh() { needRedraw = true; }
 
-            UIRenderer& getRenderer() { return uiRenderer; }
+            UIRenderer& getRenderer() const { return uiRenderer; }
 
             float getResizeDelta() const { return resizeDelta; }
 
@@ -70,9 +72,10 @@ export namespace lysa {
             bool resizingWindow{false};
             bool resizingWindowOriginBorder{false};
             MouseCursor currentCursor{MouseCursor::ARROW};
+            float fontScale;
 
         public:
-            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, uint32 defaultFontSize);
+            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, float defaultFontScale);
             ~WindowManager() override;
         };
     }

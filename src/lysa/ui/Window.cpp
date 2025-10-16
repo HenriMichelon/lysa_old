@@ -26,7 +26,8 @@ namespace lysa::ui {
     void Window::attach(WindowManager* windowManager) {
         assert([&]{ return this->windowManager == nullptr;} , "ui::Window must not be already attached to a manager");
         this->windowManager = windowManager;
-        const UIRenderer& renderer = windowManager->getRenderer();
+        this->fontScale = windowManager->getDefaultFontScale();
+        this->font = windowManager->getDefaultFont();
     }
 
     void Window::detach() {
@@ -48,9 +49,22 @@ namespace lysa::ui {
         widget->setFreezed(false);
     }
 
-    Font &Window::getDefaultFont() const {
-        assert([&]{ return windowManager != nullptr;} , "ui::Window not attached to a manager");
-        return windowManager->getDefaultFont();
+    void Window::setFont(const std::shared_ptr<Font>& font) {
+        this->font = font;
+        refresh();
+    }
+
+    std::shared_ptr<Font> Window::getFont() const {
+        return font;
+    }
+
+    float Window::getFontScale() const {
+        return fontScale;
+    }
+
+    void Window::setFontScale(const float fontScale) {
+        this->fontScale = fontScale;
+        refresh();
     }
 
     void Window::setWidget(std::shared_ptr<Widget> child, const std::string &resources, const float padding) {

@@ -30,7 +30,7 @@ namespace lysa {
             config.renderingConfig.presentMode,
             config.renderingConfig.framesInFlight)},
         uiRenderer{config.renderingConfig},
-        windowManager{*this, uiRenderer,config.defaultFontName, config.defaultFontSize},
+        windowManager{*this, uiRenderer,config.defaultFontName, config.defaultFontScale},
         rootNode{rootNode} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);
@@ -163,9 +163,10 @@ namespace lysa {
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
             renderer->preRender(*frame.preRenderCommandList, scene, frameIndex);
-            viewport->updateDebug(*frame.preRenderCommandList, frameIndex);
+            viewport->update(*frame.preRenderCommandList, frameIndex);
         }
         uiRenderer.update(*frame.preRenderCommandList, frameIndex);
+
         frame.preRenderCommandList->end();
         Application::getGraphicQueue()->submit(
             frame.computeSemaphore,
@@ -189,21 +190,23 @@ namespace lysa {
             mainViewport->getViewport(),
             mainViewport->getScissors(),
             swapChain->getCurrentFrameIndex());
-        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
 
+        const auto colorAttachment = renderer->getColorAttachment(frameIndex);
+        const auto depthAttachment = renderer->getDepthRenderTarget(frameIndex);
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            viewport->drawDebug(
+            viewport->draw(
                 *commandList,
                 scene,
                 colorAttachment,
-                renderer->getDepthRenderTarget(frameIndex),
+                depthAttachment,
                 frameIndex);
         }
+
         uiRenderer.render(
             *commandList,
             colorAttachment,
-            renderer->getDepthRenderTarget(frameIndex),
+            depthAttachment,
             frameIndex);
 
         commandList->barrier(colorAttachment, vireo::ResourceState::UNDEFINED,vireo::ResourceState::COPY_SRC);

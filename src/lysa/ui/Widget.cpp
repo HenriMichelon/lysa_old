@@ -164,13 +164,14 @@ namespace lysa::ui {
         }
     }
 
-    Font &Widget::getFont() { return (font ? *font : window->getWindowManager().getDefaultFont()); }
+    std::shared_ptr<Font> Widget::getFont() const { return (font ? font : window->getFont()); }
 
     void Widget::_init(Widget &child, const AlignmentType alignment, const std::string &res, const bool overlap) {
         child.alignment = alignment;
         child.overlap   = overlap;
         if (!child.font) {
             child.font = font;
+            child.fontScale = fontScale;
         }
         child.window = window;
         child.style  = style;
@@ -352,7 +353,7 @@ namespace lysa::ui {
                     clientRect.width = 0;
                 }
                 break;
-            case TOP:
+            case BOTTOM:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y;
                 if (!child->overlap) {
@@ -370,7 +371,7 @@ namespace lysa::ui {
                     clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
                 }
                 break;
-            case BOTTOM:
+            case TOP:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 if (!child->overlap) {
@@ -386,7 +387,7 @@ namespace lysa::ui {
                     clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
                 }
                 break;
-            case TOPCENTER:
+            case BOTTOMCENTER:
                 childRect.y = clientRect.y;
                 childRect.x = clientRect.x + (clientRect.width - childRect.width) / 2;
                 if (!child->overlap) {
@@ -394,7 +395,7 @@ namespace lysa::ui {
                     clientRect.height -= childRect.height + 2 * padding;
                 }
                 break;
-            case BOTTOMCENTER:
+            case TOPCENTER:
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 childRect.x = clientRect.x + (clientRect.width - childRect.width) / 2;
                 if (!child->overlap) {
@@ -416,7 +417,7 @@ namespace lysa::ui {
                     clientRect.width = std::max(0.0f, clientRect.width - (childRect.width + 2 * padding) - 1);
                 }
                 break;
-            case TOPLEFT:
+            case BOTTOMLEFT:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y;
                 if (!child->overlap) {
@@ -424,21 +425,21 @@ namespace lysa::ui {
                     clientRect.height -= childRect.height + 2 * padding;
                 }
                 break;
-            case BOTTOMLEFT:
+            case TOPLEFT:
                 childRect.x = clientRect.x;
-                childRect.y = clientRect.y + (clientRect.height - childRect.height);
-                if (!child->overlap) {
-                    clientRect.height = std::max(0.0f, (clientRect.height - (childRect.height + 2 * padding) - 1));
-                }
-                break;
-            case BOTTOMRIGHT:
-                childRect.x = clientRect.x + (clientRect.width - childRect.width);
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 if (!child->overlap) {
                     clientRect.height = std::max(0.0f, (clientRect.height - (childRect.height + 2 * padding) - 1));
                 }
                 break;
             case TOPRIGHT:
+                childRect.x = clientRect.x + (clientRect.width - childRect.width);
+                childRect.y = clientRect.y + (clientRect.height - childRect.height);
+                if (!child->overlap) {
+                    clientRect.height = std::max(0.0f, (clientRect.height - (childRect.height + 2 * padding) - 1));
+                }
+                break;
+            case BOTTOMRIGHT:
                 childRect.y = clientRect.y;
                 childRect.x = clientRect.x + (clientRect.width - childRect.width);
                 if (!child->overlap) {
@@ -446,7 +447,7 @@ namespace lysa::ui {
                     clientRect.y += (childRect.height) + padding;
                 }
                 break;
-            case LEFTTOP:
+            case LEFTBOTTOM:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y;
                 if (!child->overlap) {
@@ -454,44 +455,44 @@ namespace lysa::ui {
                     clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
                 }
                 break;
-            case LEFTBOTTOM:
+            case LEFTTOP:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 if (!child->overlap) {
                     clientRect.x += childRect.width + padding + 1;
-                    clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
-                }
-                break;
-            case RIGHTBOTTOM:
-                childRect.x = clientRect.x + (clientRect.width - childRect.width);
-                childRect.y = clientRect.y + (clientRect.height - childRect.height);
-                if (!child->overlap) {
                     clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
                 }
                 break;
             case RIGHTTOP:
+                childRect.x = clientRect.x + (clientRect.width - childRect.width);
+                childRect.y = clientRect.y + (clientRect.height - childRect.height);
+                if (!child->overlap) {
+                    clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
+                }
+                break;
+            case RIGHTBOTTOM:
                 childRect.y = clientRect.y;
                 childRect.x = clientRect.x + (clientRect.width - childRect.width);
                 if (!child->overlap) {
                     clientRect.width = std::max(0.0f, (clientRect.width - (childRect.width + 2 * padding) - 1));
                 }
                 break;
-            case CORNERTOPLEFT:
+            case CORNERBOTTOMLEFT:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y;
                 if (!child->overlap) {
                     clientRect.y += (childRect.height) + padding;
                 }
                 break;
-            case CORNERBOTTOMLEFT:
+            case CORNERTOPLEFT:
                 childRect.x = clientRect.x;
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 break;
-            case CORNERBOTTOMRIGHT:
+            case CORNERTOPRIGHT:
                 childRect.x = clientRect.x + (clientRect.width - childRect.width);
                 childRect.y = clientRect.y + (clientRect.height - childRect.height);
                 break;
-            case CORNERTOPRIGHT:
+            case CORNERBOTTOMRIGHT:
                 childRect.y = clientRect.y;
                 childRect.x = clientRect.x + (clientRect.width - childRect.width);
                 if (!child->overlap) {
@@ -660,8 +661,18 @@ namespace lysa::ui {
         }
     }
 
-    void Widget::setFont(const std::shared_ptr<Font> &F) {
-        font = F;
+    void Widget::setFont(const std::shared_ptr<Font> &font) {
+        this->font = font;
+        resizeChildren();
+        refresh();
+    }
+
+    float Widget::getFontScale() const {
+        return fontScale > 0.0f ? fontScale : window->getFontScale();
+    }
+
+    void Widget::setFontScale(const float fontScale) {
+        this->fontScale = fontScale;
         resizeChildren();
         refresh();
     }

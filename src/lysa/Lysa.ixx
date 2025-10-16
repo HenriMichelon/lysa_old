@@ -58,6 +58,7 @@ export import lysa.physics.engine;
 
 export import lysa.renderers.renderer;
 export import lysa.renderers.ui;
+export import lysa.renderers.vector;
 
 export import lysa.resources.animation;
 export import lysa.resources.animation_library;

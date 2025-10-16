@@ -11,7 +11,9 @@ import lysa.ui.window_manager;
 
 namespace lysa::ui {
 
-    Text::Text(const std::string& text) : Widget(TEXT), text(std::move(text)) {
+    Text::Text(const std::string& text) :
+        Widget{TEXT},
+        text{std::move(text)} {
         allowChildren  = false;
         drawBackground = false;
     }
@@ -29,13 +31,29 @@ namespace lysa::ui {
         }
     }
 
+    void Text::setFontScale(const float scale) {
+        this->fontScale = scale;
+        if (parent) {
+            parent->refresh();
+        }
+        float w, h;
+        getSize(w, h);
+        _setSize(w, h);
+        if (!parent) {
+            refresh();
+        }
+    }
+
     void Text::setTextColor(const float4 &c) {
         textColor = c;
         refresh();
     }
 
-    void Text::getSize(float &width, float &height) {
-        getFont().getSize(text, width, height);
+    void Text::getSize(float &width, float &height) const {
+        const auto& font = getFont();
+        const auto scale = getFontScale();
+        font->getSize(text, scale, width, height);
+        height -= font->getDescender() * scale;
     }
 
     void Text::_setSize(const float width, const float height) {
@@ -43,8 +61,7 @@ namespace lysa::ui {
         if (width == 0 && height == 0 && rect.width == 0 && rect.height == 0) {
             float w, h;
             getSize(w, h);
-            const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
-            _setSize(w / ratio, h);
+            Widget::_setSize(w, h);
         } else {
             Widget::_setSize(width, height);
         }
@@ -61,11 +78,9 @@ namespace lysa::ui {
 
     void Text::eventCreate() {
         if (all(textColor == float4{0.0f})) {
-            textColor = static_cast<Window *>(window)->getDefaultTextColor();
+            textColor = window->getTextColor();
         }
-        const auto ratio = window->getWindowManager().getRenderer().getAspectRatio();
         getSize(rect.width, rect.height);
-        rect.width /= ratio;
         Widget::eventCreate();
     }
 

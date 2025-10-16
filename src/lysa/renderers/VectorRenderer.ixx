@@ -13,6 +13,7 @@ import lysa.configuration;
 import lysa.math;
 import lysa.scene;
 import lysa.types;
+import lysa.resources.font;
 import lysa.resources.image;
 
 export namespace lysa {
@@ -21,16 +22,26 @@ export namespace lysa {
     public:
         VectorRenderer(
             bool depthTestEnable,
+            bool enableAlphaBlending,
+            bool useTextures,
             const RenderingConfiguration& renderingConfiguration,
-            const std::string& name,
+            const std::string& name = "VectorRenderer",
             const std::string& shadersName = "vector",
+            const std::string& glyphShadersName = "glyph",
             bool filledTriangles = false,
-            bool enableAlphaBlending = false,
-            bool useCamera = true, bool useTextures = false);
+            bool useCamera = true);
 
         void drawLine(const float3& from, const float3& to, const float4& color);
 
         void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
+
+        void drawText(
+            const std::string& text,
+            Font& font,
+            float fontScale,
+            const float3& position,
+            const quaternion& rotation,
+            const float4& innerColor);
 
         void restart();
 
@@ -60,8 +71,8 @@ export namespace lysa {
             alignas(16) float3 position;
             alignas(16) float2 uv;
             alignas(16) float4 color;
-            alignas(16) float2 uvClip;
-            alignas(16) int textureIndex;
+            alignas(16) int textureIndex{-1};
+            alignas(16) int fontIndex{-1};
         };
 
         const RenderingConfiguration& config;
@@ -71,11 +82,20 @@ export namespace lysa {
         std::vector<Vertex> linesVertices;
         // All the vertices for triangles
         std::vector<Vertex> triangleVertices;
+        // All the vertices for the texts
+        std::vector<Vertex> glyphVertices;
 
         int32 addTexture(const std::shared_ptr<Image> &texture);
 
+        int32 addFont(const Font &font);
+
     private:
         static constexpr auto MAX_TEXTURES{100};
+        static constexpr auto MAX_FONTS{10};
+
+        static constexpr vireo::DescriptorIndex FONT_PARAMS_BINDING{0};
+        static constexpr vireo::DescriptorIndex FONT_PARAMS_SET{2};
+
         const std::string name;
         const bool useCamera;
         const bool useTextures;
@@ -98,13 +118,27 @@ export namespace lysa {
             {"POSITION", vireo::AttributeFormat::R32G32B32_FLOAT, offsetof(Vertex, position)},
             {"TEXCOORD", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uv)},
             {"COLOR", vireo::AttributeFormat::R32G32B32A32_FLOAT, offsetof(Vertex, color)},
-            {"CLIP", vireo::AttributeFormat::R32G32_FLOAT, offsetof(Vertex, uvClip)},
             {"TEXTURE", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, textureIndex)},
+            {"FONT", vireo::AttributeFormat::R32_SINT, offsetof(Vertex, fontIndex)},
         };
 
         vireo::GraphicPipelineConfiguration pipelineConfig {
             .colorBlendDesc = {{ }},
             .cullMode = vireo::CullMode::NONE,
+        };
+
+        vireo::GraphicPipelineConfiguration glyphPipelineConfig {
+            .colorBlendDesc = {
+            {
+                    .blendEnable = true,
+                    .srcColorBlendFactor = vireo::BlendFactor::SRC_ALPHA,
+                    .dstColorBlendFactor = vireo::BlendFactor::ONE_MINUS_SRC_ALPHA,
+                    .colorBlendOp = vireo::BlendOp::ADD,
+                    .srcAlphaBlendFactor = vireo::BlendFactor::ONE,
+                    .dstAlphaBlendFactor = vireo::BlendFactor::ONE_MINUS_SRC_ALPHA,
+                    .alphaBlendOp = vireo::BlendOp::ADD,
+                    .colorWriteMask = vireo::ColorWriteMask::ALL,
+                }},
         };
 
         vireo::RenderingConfiguration renderingConfig {
@@ -127,8 +161,15 @@ export namespace lysa {
         // Indices of each image in the descriptor binding
         std::map<unique_id, int32> texturesIndices{};
 
+        std::vector<FontParams> fontsParams{};
+        std::shared_ptr<vireo::Buffer> fontsParamsUniform;
+        std::shared_ptr<vireo::DescriptorSet> fontDescriptorSet;
+        std::shared_ptr<vireo::DescriptorLayout> fontDescriptorLayout;
+        std::map<unique_id, int32> fontsIndices{};
+
         std::shared_ptr<vireo::GraphicPipeline>  pipelineLines;
         std::shared_ptr<vireo::GraphicPipeline>  pipelineTriangles;
+        std::shared_ptr<vireo::GraphicPipeline>  pipelineGlyphs;
         std::shared_ptr<vireo::DescriptorLayout> descriptorLayout;
     };
 }
