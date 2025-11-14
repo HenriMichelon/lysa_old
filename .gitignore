@@ -379,3 +379,4 @@ log.txt
 cmake-build-debug-mingw
 cmake-build-debug-msvc
 cmake-build-debug-llvm
+/docs/html/
