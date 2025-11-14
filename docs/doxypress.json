@@ -196,6 +196,7 @@
             ""
         ],
         "exclude-files": [
+            "../src/lysa/depends"
         ],
         "exclude-patterns": [
             ""

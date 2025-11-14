@@ -23,14 +23,19 @@ import lysa.renderers.debug;
 
 export namespace lysa {
 
-    // Class that determines if two nodes can collide
+    /**
+     * Object layer collision filter for the Jolt backend.
+     * Decides if two object layers are allowed to collide (narrow phase hint).
+     */
     class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilterTable {
     public:
         ObjectLayerPairFilterImpl(const uint32 inNumObjectLayers): ObjectLayerPairFilterTable(inNumObjectLayers) {}
         bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
     };
 
-    // This defines a mapping between objects and broadphase layers.
+    /**
+     * Broad‑phase layer interface mapping all objects to a single broad‑phase layer.
+     */
     class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface {
     public:
         uint32_t GetNumBroadPhaseLayers() const override { return 1;}
@@ -41,12 +46,18 @@ export namespace lysa {
 
     };
 
-    // Class that determines if an object layer can collide with a broadphase layer
+    /**
+     * Filter that determines if an object layer can collide with a broad‑phase layer.
+     * Here everything collides with the single broad‑phase layer.
+     */
     class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter {
     public:
         bool ShouldCollide(JPH::ObjectLayer layers, JPH::BroadPhaseLayer masks) const override { return true; }
     };
 
+    /**
+     * Jolt contact listener used to forward physics events to the engine's Signal system.
+     */
     class ContactListener : public JPH::ContactListener {
     public:
         JPH::ValidateResult	OnContactValidate(const JPH::Body &inBody1,
@@ -70,6 +81,10 @@ export namespace lysa {
                   JPH::ContactSettings &ioSettings) const;
     };
 
+    /**
+     * Jolt implementation of PhysicsScene.
+     * Owns the Jolt PhysicsSystem and provides update/debug helpers.
+     */
     class JoltPhysicsScene : public PhysicsScene {
     public:
         JoltPhysicsScene(
@@ -88,10 +103,13 @@ export namespace lysa {
 
         float3 getGravity() const override;
 
+        /** Returns the body interface for creating/removing bodies. */
         auto& getBodyInterface() { return physicsSystem.GetBodyInterface(); }
 
+        /** Returns the underlying Jolt physics system. */
         auto& getPhysicsSystem() { return physicsSystem; }
 
+        /** Returns the temporary allocator used by the scene. */
         auto& getTempAllocator() const { return tempAllocator; }
 
     private:
@@ -103,6 +121,10 @@ export namespace lysa {
         JPH::BodyManager::DrawSettings bodyDrawSettings{};
     };
 
+    /**
+     * Jolt implementation of PhysicsEngine.
+     * Creates scenes/materials and wires Jolt‑specific collision filtering.
+     */
     class JoltPhysicsEngine : public PhysicsEngine {
     public:
         JoltPhysicsEngine(const LayerCollisionTable& layerCollisionTable);
@@ -117,6 +139,7 @@ export namespace lysa {
 
         void setRestitutionCombineMode(PhysicsMaterial* physicsMaterial, CombineMode combineMode) const override;
 
+        /** Returns the pair filter used to decide if two object layers collide. */
         auto& getObjectLayerPairFilter() { return objectVsObjectLayerFilter; }
 
     private:
