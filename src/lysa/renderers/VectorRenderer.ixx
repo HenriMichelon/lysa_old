@@ -18,8 +18,32 @@ import lysa.resources.image;
 
 export namespace lysa {
 
+    /**
+     * Immediate-style 2D/3D vector renderer used for debug and UI primitives.
+     *  - Accumulate simple geometric primitives (lines, triangles, glyph quads)
+     *    into CPU-side vertex arrays and stream them to the GPU when required.
+     *  - Provide minimal state (colors, textures, fonts) and pipelines to draw
+     *    primitive batches either in screen space or with a camera.
+     *  - Offer helpers to render text using bitmap fonts.
+     *
+     * Notes:
+     *  - Thread-safety: calls are expected from the render thread only.
+     *  - Call restart() between frames to clear accumulated geometry.
+     */
     class VectorRenderer {
     public:
+        /**
+         * Constructs a vector renderer.
+         * @param depthTestEnable    Enable depth test for 3D primitives.
+         * @param enableAlphaBlending Enable alpha blending (for UI/text).
+         * @param useTextures        Allow textured triangles.
+         * @param renderingConfiguration Global rendering config.
+         * @param name               Debug name for pipelines.
+         * @param shadersName        Base shader name for vector primitives.
+         * @param glyphShadersName   Base shader name for glyph rendering.
+         * @param filledTriangles    True to use triangle pipeline; false for wireframe only.
+         * @param useCamera          True to apply Scene view/projection.
+         */
         VectorRenderer(
             bool depthTestEnable,
             bool enableAlphaBlending,
@@ -31,10 +55,21 @@ export namespace lysa {
             bool filledTriangles = false,
             bool useCamera = true);
 
+        /** Adds a colored line segment to the current batch. */
         void drawLine(const float3& from, const float3& to, const float4& color);
 
+        /** Adds a filled triangle to the current batch. */
         void drawTriangle(const float3& v1, const float3& v2, const float3& v3, const float4& color);
 
+        /**
+         * Adds text to the current batch using the provided font.
+         * @param text       UTF-8 string to render.
+         * @param font       Font object providing glyph atlas/metrics.
+         * @param fontScale  Scaling factor applied to glyph metrics.
+         * @param position   Baseline origin for the text in world/screen space.
+         * @param rotation   Orientation for the text in world space.
+         * @param innerColor Color applied to glyphs (vertex alpha can modulate it).
+         */
         void drawText(
             const std::string& text,
             Font& font,
@@ -43,12 +78,22 @@ export namespace lysa {
             const quaternion& rotation,
             const float4& innerColor);
 
+        /** Clears accumulated geometry (call once per frame). */
         void restart();
 
+        /** Uploads dirty vertex buffers and prepares descriptor sets. */
         void update(
             const vireo::CommandList& commandList,
             uint32 frameIndex);
 
+        /**
+         * Renders accumulated primitives using the given Scene (with camera).
+         * @param commandList     Command buffer to record into.
+         * @param scene           Scene providing camera matrices.
+         * @param colorAttachment Target color surface.
+         * @param depthAttachment Target depth surface (may be null if no depth).
+         * @param frameIndex      Index of the current frame in flight.
+         */
         void render(
             vireo::CommandList& commandList,
             const Scene& scene,
@@ -56,6 +101,10 @@ export namespace lysa {
             const std::shared_ptr<vireo::RenderTarget>& depthAttachment,
             uint32 frameIndex);
 
+        /**
+         * Renders accumulated primitives without referencing a Scene camera.
+         * Useful for UI-like overlays in screen space.
+         */
         void render(
             vireo::CommandList& commandList,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
