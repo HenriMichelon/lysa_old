@@ -125,7 +125,7 @@ namespace lysa {
             descriptorSet->update(BINDING_TEXTURE, textures);
             textureUpdated = false;
         }
-        if (samplers.ipUpdated()) {
+        if (samplers.isUpdated()) {
             samplers.update();
         }
     }

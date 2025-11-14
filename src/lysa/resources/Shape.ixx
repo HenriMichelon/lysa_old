@@ -99,7 +99,7 @@ export namespace lysa {
     };
 
     /**
-     * AABB-based collision Shape
+     * AABB-based collision %Shape
      */
     class AABBShape : public Shape {
     public:

@@ -56,19 +56,19 @@ export namespace lysa {
         /**
          * Returns the global Vireo object
         */
-        static const auto& getVireo() {
+        static const vireo::Vireo& getVireo() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return *(instance->vireo);
         }
 
         /** Returns the global resources manager owned by the application. */
-        static auto& getResources() {
+        static Resources& getResources() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return instance->resources;
         }
 
         /** Request the application to exit its main loop at the next opportunity. */
-        static auto& quit() {
+        static bool& quit() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return instance->exit = true;
         }
@@ -86,25 +86,25 @@ export namespace lysa {
         }
 
         /** Returns the singleton application instance. */
-        static auto& getInstance() {
+        static Application& getInstance() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return *instance;
         }
 
         /** Returns the application configuration provided at startup. */
-        static auto& getConfiguration() {
+        static ApplicationConfiguration& getConfiguration() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return instance->config;
         }
 
         /** Returns the physics engine owned by the application. */
-        static auto& getPhysicsEngine() {
+        static PhysicsEngine& getPhysicsEngine() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return *instance->physicsEngine;
         }
 
         /** Returns the asynchronous queue helper used for background GPU work. */
-        static auto& getAsyncQueue() {
+        static AsyncQueue& getAsyncQueue() {
             assert([&]{ return instance != nullptr;}, "Global Application instance not set");
             return instance->asyncQueue;
         }

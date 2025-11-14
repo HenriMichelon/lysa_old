@@ -13,7 +13,7 @@ import lysa.types;
 export namespace lysa {
 
     /**
-     * A lightweight background submission system used by Lysa to build and submit
+     * %A lightweight background submission system used by Lysa to build and submit
      * GPU command lists asynchronously. It owns a worker thread that drains a queue
      * of recorded commands and submits them to the appropriate Vireo submit queue
      * (transfer or graphic), allowing asset uploads and simple GPU work to happen
