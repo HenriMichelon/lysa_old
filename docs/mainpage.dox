@@ -1,0 +1,22 @@
+/*!
+\mainpage Lysa User Documentation
+
+Welcome to the official documentation of Lysa, a hobby GPU-driven 3D engine.
+
+If you are new Lysa, we recommend that you read \ref about "the introduction page" then browse the \ref manual.
+
+The table of contents in the sidebar ou below should let you easily access the documentation for your topic of interest.
+
+[GitHub project page](https://github.com/HenriMichelon/lysa)
+
+Documentation
+---------------------------------------------------------------------------
+- \ref about
+- \ref manual
+
+Tutorials & examples
+---------------------------------------------------------------------------
+
+
+
+*/

@@ -1,0 +1,42 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+    role="img"
+    aria-labelledby="title desc">
+    <title id="title">Lysa Logo</title>
+
+    <!-- Background -->
+    <rect x="0" y="0" width="512" height="512" fill="#000000" />
+
+    <g transform="translate(0,20) scale(1.8)">
+        <!-- Fron -->
+        <path
+        d="M 40 20
+         L 100 20
+         L 100 200
+         L 220 200
+         L 220 260
+         L 40 260
+         Z"
+        fill="#FF8700" />
+
+        <!-- Top -->
+        <path
+        d="M 40 20
+         L 100 20
+         L 150 0
+         L 90 0
+         Z"
+        fill="#FFBB5A" />
+
+        <!-- Side -->
+        <path
+        d="M 220 200
+         L 260 180
+         L 260 240
+         L 220 260
+         Z"
+        fill="#CC5A00" />
+    </g>
+
+</svg>

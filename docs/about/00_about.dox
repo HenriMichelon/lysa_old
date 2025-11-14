@@ -1,0 +1,26 @@
+/*!
+\page about About
+
+Lysa is a gpu-driven 3D Engine written in modern C++ featuring :
+
+- GPU-driven rendering.
+- Vulkan 1.3 & DirectX 12 support.
+- Physics engine with Jolt Physics 5 and NVIDIA PhysX 5 support.
+- Node-based scene tree with a classical OOP approach.
+- Selectable forward and deferred renderers.
+- Support for PBR, Bloom, SSAO, HDR tone-mapping (Reinhard and ACES), SMAA, FXAA.
+- Written in and for modern C++.
+- Math library with Slang-like syntax.
+- Slang shader language support for CMake.
+
+Released under the [MIT license](https://raw.githubusercontent.com/HenriMichelon/lysa/main/LICENSE.txt).
+
+Contact
+---------------------------------------------------------------------------
+For more information, contact the project maintainers at [GitHub project page](https://github.com/HenriMichelon/lysa)
+
+Notes
+---------------------------------------------------------------------------
+This project was created for learning purpose. This engine is not intended to be a full-featured 3D Engine.
+
+*/
