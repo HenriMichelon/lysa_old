@@ -248,7 +248,7 @@ namespace lysa::ui {
             default:
                 break;
             }
-            renderer.drawLine({x, y}, {x + w, y}); // bottom
+            renderer.drawLine({x, y + h}, {x + w, y + h}); // top
             renderer.drawLine({x, y}, {x, y + h}); // left
             switch (resources.style) {
             case StyleClassicResource::RAISED:
@@ -260,8 +260,8 @@ namespace lysa::ui {
             default:
                 break;
             }
+            renderer.drawLine({x, y}, {x + w, y}); // bottom
             renderer.drawLine({x + w, y}, {x + w, y + h}); // right
-            renderer.drawLine({x, y + h}, {x + w, y + h}); // top
         }
     }
 
@@ -298,7 +298,7 @@ namespace lysa::ui {
         drawBox(widget, resources, renderer, true);
     }
 
-    void StyleClassic::drawText(Text &widget, const StyleClassicResource &resources, UIRenderer &renderer) const {
+    void StyleClassic::drawText(const Text &widget, const StyleClassicResource &resources, UIRenderer &renderer) const {
         renderer.setPenColor(
             resources.customColor ? resources.color :
             float4{widget.getTextColor().r, widget.getTextColor().g, widget.getTextColor().b, widget.getTransparency()});
@@ -359,12 +359,12 @@ namespace lysa::ui {
                  (b + h) - (fh / 2) - widget.getFont()->getDescender()*widget.getFontScale());
             renderer.setPenColor(c2);
         } else {
-            renderer.drawLine({l + w, b + h}, {l, b + h});
+            renderer.drawLine({l + w, b + h}, {l, b + h}); // top
         }
-        renderer.drawLine({l + w, b}, {l + w, b + h});
+        renderer.drawLine({l, b}, {l, b + h}); // left
         renderer.setPenColor(c1);
-        renderer.drawLine({l, b}, {l + w, b});
-        renderer.drawLine({l, b}, {l, b + h});
+        renderer.drawLine({l + w, b}, {l + w, b + h}); // right
+        renderer.drawLine({l, b}, {l + w, b}); // bottom
     }
 
 

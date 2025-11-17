@@ -18,6 +18,6 @@ export namespace lysa::ui {
         ToggleButton();
 
     protected:
-        bool eventMouseDown(MouseButton button, float x, float y) override;
+        bool eventMouseUp(MouseButton button, float x, float y) override;
     };
 }

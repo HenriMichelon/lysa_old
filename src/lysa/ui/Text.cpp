@@ -53,7 +53,7 @@ namespace lysa::ui {
         const auto& font = getFont();
         const auto scale = getFontScale();
         font->getSize(text, scale, width, height);
-        height -= font->getDescender() * scale;
+        height += font->getDescender() * scale;
     }
 
     void Text::_setSize(const float width, const float height) {

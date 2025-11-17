@@ -16,9 +16,9 @@ namespace lysa::ui {
         allowFocus = true;
     }
 
-    bool ToggleButton::eventMouseDown(const MouseButton button, const float x, const float y)  {
-        const bool r = CheckWidget::eventMouseDown(button, x, y);
-        if (getRect().contains(x, y)) {
+    bool ToggleButton::eventMouseUp(const MouseButton button, const float x, const float y)  {
+        const bool r = CheckWidget::eventMouseUp(button, x, y);
+        if (!r && getRect().contains(x, y)) {
             auto event = EventClick{};
             emit(Event::OnClick, &event);
             return event.consumed;

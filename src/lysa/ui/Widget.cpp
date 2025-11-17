@@ -309,7 +309,7 @@ namespace lysa::ui {
         }
         if (pushed && moveChildrenOnPush) {
             clientRect.x += 1;
-            clientRect.y += 1;
+            clientRect.y -= 1;
         }
         auto it = children.begin();
         while ((clientRect.width > 0) && (clientRect.height > 0) && (it != children.end())) {
