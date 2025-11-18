@@ -164,15 +164,16 @@ namespace lysa::ui {
         }
     }
 
-    std::shared_ptr<Font> Widget::getFont() const { return (font ? font : window->getFont()); }
+    std::shared_ptr<Font> Widget::getFont() const {
+        assert([&]{ return window != nullptr;} , "Widget must be added to another widget before use");
+        return (font ? font : window->getFont());
+    }
 
     void Widget::_init(Widget &child, const AlignmentType alignment, const std::string &res, const bool overlap) {
         child.alignment = alignment;
         child.overlap   = overlap;
-        if (!child.font) {
-            child.font = font;
-            child.fontScale = fontScale;
-        }
+        if (!child.font) { child.font = font; }
+        if (child.fontScale <= 0.0f) { child.fontScale = fontScale; }
         child.window = window;
         child.style  = style;
         child.parent = this;

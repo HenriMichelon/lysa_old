@@ -28,6 +28,7 @@ namespace lysa::ui {
         this->windowManager = windowManager;
         this->fontScale = windowManager->getDefaultFontScale();
         this->font = windowManager->getDefaultFont();
+        this->textColor = windowManager->getDefaultTextColor();
     }
 
     void Window::detach() {

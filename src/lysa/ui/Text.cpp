@@ -20,33 +20,39 @@ namespace lysa::ui {
 
     void Text::setText(const std::string & text) {
         this->text = text;
-        if (parent) {
-            parent->refresh();
-        }
-        float w, h;
-        getSize(w, h);
-        _setSize(w, h);
-        if (!parent) {
-            refresh();
+        if (window) {
+            if (parent) {
+                parent->refresh();
+            }
+            float w, h;
+            getSize(w, h);
+            _setSize(w, h);
+            if (!parent) {
+                refresh();
+            }
         }
     }
 
     void Text::setFontScale(const float scale) {
         this->fontScale = scale;
-        if (parent) {
-            parent->refresh();
-        }
-        float w, h;
-        getSize(w, h);
-        _setSize(w, h);
-        if (!parent) {
-            refresh();
+        if (window) {
+            if (parent) {
+                parent->refresh();
+            }
+            float w, h;
+            getSize(w, h);
+            _setSize(w, h);
+            if (!parent) {
+                refresh();
+            }
         }
     }
 
     void Text::setTextColor(const float4 &c) {
         textColor = c;
-        refresh();
+        if (window) {
+            refresh();
+        }
     }
 
     void Text::getSize(float &width, float &height) const {

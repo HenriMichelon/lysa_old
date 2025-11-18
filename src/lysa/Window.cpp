@@ -30,7 +30,7 @@ namespace lysa {
             config.renderingConfig.presentMode,
             config.renderingConfig.framesInFlight)},
         uiRenderer{config.renderingConfig},
-        windowManager{*this, uiRenderer,config.defaultFontName, config.defaultFontScale},
+        windowManager{*this, uiRenderer,config.defaultFontName, config.defaultFontScale, config.defaultTextColor},
         rootNode{rootNode} {
         assert([&]{return config.renderingConfig.framesInFlight > 0;}, "Must have at least 1 frame in flight");
         framesData.resize(config.renderingConfig.framesInFlight);

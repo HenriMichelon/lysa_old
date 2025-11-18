@@ -113,7 +113,7 @@ namespace lysa {
             glyphs[glyphInfo.index] = glyphInfo;
         }
         this->atlas = Image::load(path + ".png", vireo::ImageFormat::R8G8B8A8_SRGB);
-        INFO("Loaded ", glyphs.size(), " glyphs from ", path);
+        // INFO("Loaded ", glyphs.size(), " glyphs from ", path);
     }
 
     const Font::GlyphInfo& Font::getGlyphInfo(const uint32 index) const {

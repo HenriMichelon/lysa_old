@@ -173,6 +173,8 @@ export namespace lysa {
         std::string             defaultFontName{""};
         //! Default font scale. See the Font class for the details.
         float                   defaultFontScale{1.0f};
+        //! Default text color.
+        float4                  defaultTextColor{1.0f};
         //! Configuration of the main viewport
         ViewportConfiguration   mainViewportConfig{};
         //! Configuration of the various renderers

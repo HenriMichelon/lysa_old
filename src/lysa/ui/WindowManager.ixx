@@ -9,6 +9,7 @@ export module lysa.ui.window_manager;
 import lysa.constants;
 import lysa.enums;
 import lysa.input_event;
+import lysa.math;
 import lysa.object;
 import lysa.types;
 import lysa.renderers.ui;
@@ -42,6 +43,8 @@ export namespace lysa {
 
             auto getDefaultFontScale() const { return fontScale; }
 
+            auto getDefaultTextColor() const { return textColor; }
+
             /**
              * Forces a redrawing of all the UI at the start of the next frame
              */
@@ -73,9 +76,10 @@ export namespace lysa {
             bool resizingWindowOriginBorder{false};
             MouseCursor currentCursor{MouseCursor::ARROW};
             float fontScale;
+            float4 textColor{1.0f};
 
         public:
-            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, float defaultFontScale);
+            WindowManager(lysa::Window& renderingWindow, UIRenderer&renderer, const std::string& defaultFontName, float defaultFontScale, const float4& defaultTextColor);
             ~WindowManager() override;
         };
     }
