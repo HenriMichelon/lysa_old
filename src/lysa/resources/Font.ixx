@@ -21,12 +21,12 @@ export namespace lysa {
 
     struct FontParams {
         float2 pxRange{FLOAT2ZERO};
-        float4 outlineColor{0.0f, 0.0f, 0.0f, 0.5f};
+        float4 outlineColor{0.0f, 0.0f, 0.0f, 1.0f};
         float threshold{0.5f};
         float outlineBias{1.0f/4.0f};
         float outlineWidthAbsolute{1.0f/16.0f};
         float outlineWidthRelative{1.0f/50.0f};
-        float outlineBlur{0.0f};
+        float outlineBlur{0.1f};
         float gamma{1.0f};
     };
 

@@ -195,7 +195,7 @@ namespace lysa {
         const auto depthAttachment = renderer->getDepthRenderTarget(frameIndex);
         for (const auto& viewport : viewports) {
             auto& scene = *viewport->getScene(frameIndex);
-            viewport->draw(
+            viewport->drawFrame(
                 *commandList,
                 scene,
                 colorAttachment,

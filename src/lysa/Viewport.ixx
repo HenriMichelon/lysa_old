@@ -163,7 +163,7 @@ export namespace lysa {
          * @param depthAttachment Target depth render surface.
          * @param frameIndex      Index of the in‑flight frame.
          */
-        void draw(
+        void drawFrame(
             vireo::CommandList& commandList,
             const Scene& scene,
             const std::shared_ptr<vireo::RenderTarget>& colorAttachment,

@@ -91,7 +91,7 @@ namespace lysa {
         }
     }
 
-    void Viewport::draw(
+    void Viewport::drawFrame(
         vireo::CommandList& commandList,
         const Scene& scene,
         const std::shared_ptr<vireo::RenderTarget>& colorAttachment,
