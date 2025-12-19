@@ -1,5 +1,7 @@
 # Lysa
 
+**This is an old repository with a preliminary version. For a up to date projet see [https://github.com/HenriMichelon/lysa]**
+
 A 3D Engine.
 
 [User documentation](https://henrimichelon.github.io/Lysa/)
