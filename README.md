@@ -1,6 +1,6 @@
 # Lysa
 
-<span style='color: red;'>**This is an old repository with a preliminary version. For an up to date projet see [https://github.com/HenriMichelon/lysa]**</span>
+###<span style='color: red;'>**This is an old repository with a preliminary version. For an up to date projet see [https://github.com/HenriMichelon/lysa_engine]**</span>###
 
 A 3D Engine.
 
