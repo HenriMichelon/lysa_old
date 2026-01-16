@@ -1,11 +1,8 @@
+# <span style='color: red;'>**This is an old repository with a preliminary version. For an up to date projet see [Lysa](https://github.com/LysaEngine)**</span> #
+
 # Lysa
 
-## <span style='color: red;'>**This is an old repository with a preliminary version. For an up to date projet see [Lysa](https://github.com/LysaEngine)**</span> ##
-
 A 3D Engine.
-
-[User documentation](https://henrimichelon.github.io/Lysa/)
-
 ## Some Features
 
 - GPU-driven rendering.
