@@ -90,7 +90,7 @@ export namespace lysa {
         std::shared_ptr<vireo::Buffer> createBuffer(
             const Command& command,
             vireo::BufferType type,
-            size_t instanceSize,
+            std::size_t instanceSize,
             uint32 instanceCount);
 
     private:

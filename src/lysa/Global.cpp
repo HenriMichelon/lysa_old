@@ -40,7 +40,7 @@ namespace lysa {
 
     std::u32string to_utf32(const std::string& utf8) {
         std::u32string result;
-        size_t i = 0;
+        std::size_t i = 0;
         while (i < utf8.size()) {
             uint32 cp = 0;
             unsigned char c = utf8[i];
@@ -67,8 +67,8 @@ namespace lysa {
 
     std::vector<std::string_view> split(const std::string_view str, const char delimiter) {
         std::vector<std::string_view> result;
-        size_t start = 0;
-        size_t end = str.find(delimiter);
+        std::size_t start = 0;
+        std::size_t end = str.find(delimiter);
         while (end != std::string_view::npos) {
             result.push_back(str.substr(start, end - start));
             start = end + 1;

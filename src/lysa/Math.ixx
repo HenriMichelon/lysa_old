@@ -4,9 +4,12 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
+module;
+#include <cmath>
+#include <cstdint>
+#include <x86intrin.h>
 export module lysa.math;
 
-#include <cstdint>
 using int32 = int32_t;
 using uint32 = uint32_t;
 

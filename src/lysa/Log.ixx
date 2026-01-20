@@ -4,8 +4,9 @@
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
 */
-export module lysa.log;
+module;
 #include <cstdio>
+export module lysa.log;
 
 import std;
 import lysa.enums;

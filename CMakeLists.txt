@@ -411,13 +411,13 @@ target_link_libraries(${LYSA_TARGET} ${VIREO_TARGET}
         harfbuzz
 )
 add_dependencies(${LYSA_TARGET} ${VIREO_TARGET})
-target_precompile_headers(${LYSA_TARGET} PRIVATE
-    "<intrin.h>"
-)
 set_property(TARGET ${LYSA_TARGET} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 #######################################################
 if(WIN32)
+    target_precompile_headers(${LYSA_TARGET} PRIVATE
+            "<intrin.h>"
+    )
     target_compile_definitions(${LYSA_TARGET} PRIVATE WIN32_LEAN_AND_MEAN)
     if (DIRECTX_BACKEND)
         target_link_libraries(${LYSA_TARGET} d3d12)

@@ -2,7 +2,7 @@
 
 #if defined(__clang__) || defined(__GNUG__)
 
-	#include <x86intrin.h>
+	// #include <x86intrin.h>
 
 #elif defined(_MSC_VER)
 
